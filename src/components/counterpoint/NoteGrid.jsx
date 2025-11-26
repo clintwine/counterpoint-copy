@@ -480,23 +480,23 @@ export default function NoteGrid({
 
       <div 
         ref={gridRef}
-        className="overflow-x-auto overflow-y-auto max-h-[400px] relative select-none"
+        className="overflow-auto max-h-[400px] relative select-none"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent' }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <div className="flex" ref={containerRef}>
+        <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left */}
-          <div className="sticky left-0 z-20 bg-slate-800 flex-shrink-0">
-            <div className="h-7 border-b border-slate-600" />
+          <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
+            <div className="h-7 border-b border-slate-600 bg-slate-800" />
             {pitches.map((pitch) => (
               <div 
                 key={pitch}
                 className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 ${
                   pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
                 }`}
-                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
+                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.15)' : 'rgb(30, 41, 59)' }}
               >
                 {pitch}
               </div>
@@ -670,22 +670,6 @@ export default function NoteGrid({
                 })}
               </>
             )}
-          </div>
-
-          {/* Pitch labels - fixed column on right */}
-          <div className="sticky right-0 z-20 bg-slate-800 flex-shrink-0">
-            <div className="h-7 border-b border-slate-600" />
-            {pitches.map((pitch) => (
-              <div 
-                key={`right-${pitch}`}
-                className={`h-7 w-14 flex items-center justify-start pl-2 text-xs border-b border-slate-700 border-l border-l-slate-600 ${
-                  pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
-                }`}
-                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
-              >
-                {pitch}
-              </div>
-            ))}
           </div>
         </div>
 
