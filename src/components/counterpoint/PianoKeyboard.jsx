@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Keyboard, Guitar, Volume2 } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
-import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope } from './audioEngine';
+import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope } from './audioEngine';
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -67,11 +67,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   };
 
   const handleEnvelopeChange = (param, value) => {
-    setEnvelope(prev => {
-      const newEnvelope = { ...prev, [param]: value };
-      setEnvelope(newEnvelope); // Update global audio engine
-      return newEnvelope;
-    });
+    const newEnvelope = { ...envelope, [param]: value };
+    setEnvelope(newEnvelope);
+    setGlobalEnvelope(newEnvelope); // Update global audio engine
   };
   
   const whiteKeyWidth = 24;
