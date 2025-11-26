@@ -88,6 +88,7 @@ export default function NoteGrid({
   const [clipboard, setClipboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isScrubbing, setIsScrubbing] = useState(false);
 
   // Generate all pitches for the grid
   const pitches = [];
@@ -97,13 +98,13 @@ export default function NoteGrid({
     });
   });
 
-  // Scroll to keep current beat visible during playback or when seeking
+  // Scroll to keep current beat visible during playback (but not during scrubbing)
   useEffect(() => {
-    if (gridRef.current) {
+    if (gridRef.current && !isScrubbing) {
       if (currentBeat === 0) {
         // Reset scroll to beginning
         gridRef.current.scrollLeft = 0;
-      } else {
+      } else if (isPlaying) {
         const containerWidth = gridRef.current.clientWidth - 56; // subtract pitch label width
         const beatPosition = currentBeat * CELL_WIDTH;
         const currentScroll = gridRef.current.scrollLeft;
@@ -117,7 +118,7 @@ export default function NoteGrid({
         }
       }
     }
-  }, [currentBeat, CELL_WIDTH]);
+  }, [currentBeat, CELL_WIDTH, isPlaying, isScrubbing]);
 
   const getNotesAtBeat = (voiceIndex, beat) => {
     const voice = voices[voiceIndex];
@@ -663,10 +664,11 @@ export default function NoteGrid({
               className="flex h-7 border-b border-slate-600 cursor-ew-resize select-none"
               onMouseDown={(e) => {
                 e.stopPropagation();
-                const gridRect = gridRef.current?.getBoundingClientRect();
-                if (!gridRect) return;
+                setIsScrubbing(true);
                 
                 const updateBeat = (clientX) => {
+                  const gridRect = gridRef.current?.getBoundingClientRect();
+                  if (!gridRect) return;
                   const x = clientX - gridRect.left - 56; // 56 = pitch label width
                   // Snap to nearest beat
                   const beat = Math.max(0, Math.min(totalBeats - 1, Math.round(x / CELL_WIDTH)));
@@ -680,6 +682,7 @@ export default function NoteGrid({
                 };
 
                 const handleMouseUp = () => {
+                  setIsScrubbing(false);
                   document.removeEventListener('mousemove', handleMouseMove);
                   document.removeEventListener('mouseup', handleMouseUp);
                 };
