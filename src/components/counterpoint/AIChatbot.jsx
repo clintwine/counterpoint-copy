@@ -11,7 +11,8 @@ export default function AIChatbot({
   onClose, 
   settings, 
   onApplyMelody,
-  currentNotes 
+  currentNotes,
+  tempo = 80
 }) {
   const [messages, setMessages] = useState([
     { 
