@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Send, Loader2, Sparkles, Music, Play, Square } from 'lucide-react';
+import { X, Send, Loader2, Sparkles, Music, Play, Square, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { initAudio, playNote, stopAllNotes } from './audioEngine';
@@ -11,13 +11,14 @@ export default function AIChatbot({
   onClose, 
   settings, 
   onApplyMelody,
+  onApplyHarmony,
   currentNotes,
   tempo = 80
 }) {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
-      content: "Hi! I'm your AI counterpoint composer. Tell me what kind of melody you'd like - describe the mood, style, or just ask me to create something! For example:\n\n• \"Create a peaceful 8-note melody in C major\"\n• \"Make something dramatic and ascending\"\n• \"Generate a Bach-style cantus firmus\""
+      content: "Hi! I'm your AI counterpoint composer. I can create melodies and harmonizing voices! Try:\n\n• \"Create a peaceful melody\"\n• \"Add a bass line to harmonize\"\n• \"Generate a two-voice counterpoint\"\n• \"Create a tenor part for my melody\""
     }
   ]);
   const [input, setInput] = useState('');
@@ -44,9 +45,116 @@ export default function AIChatbot({
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
+    // Detect if user wants harmony/accompaniment
+    const wantsHarmony = /harmony|harmonize|bass|tenor|accompan|counterpoint|voice|part/i.test(userMessage);
+    const hasExistingMelody = currentNotes.length > 0;
+
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert counterpoint melody composer. The user wants help creating a melody.
+      let response;
+      
+      if (wantsHarmony && hasExistingMelody) {
+        // Generate harmonizing voice
+        response = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are an expert counterpoint composer. Generate a harmonizing voice to accompany the existing melody.
+
+Current settings:
+- Key: ${settings.key} ${settings.mode}
+- Species: ${settings.species || '1st'} species counterpoint
+
+Existing cantus firmus/melody:
+${JSON.stringify(currentNotes, null, 2)}
+
+User request: "${userMessage}"
+
+Generate a harmonizing voice following these counterpoint rules:
+1. Use notes in ${settings.key} ${settings.mode} scale
+2. Create consonant intervals (3rds, 5ths, 6ths, octaves) on strong beats
+3. Avoid parallel 5ths and octaves between voices
+4. Prefer contrary or oblique motion over parallel motion
+5. For bass: use range E2-C4. For tenor: use range C3-G4. For alto: use range F3-D5
+6. Match the rhythm of the cantus firmus (same number of notes)
+7. Start and end on perfect consonances (unison, 5th, or octave)
+8. Create smooth melodic lines with mostly stepwise motion
+
+Determine what type of voice would best harmonize (bass, tenor, or alto) based on the user's request.
+
+Respond with the voice type and the harmonizing notes.`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              description: { type: "string" },
+              voiceType: { type: "string", enum: ["bass", "tenor", "alto", "soprano"] },
+              notes: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    pitch: { type: "string" },
+                    beat: { type: "number" },
+                    duration: { type: "number" }
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else if (wantsHarmony && !hasExistingMelody) {
+        // Generate both melody and harmony
+        response = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are an expert counterpoint composer. Create a complete two-voice contrapuntal composition.
+
+Current settings:
+- Key: ${settings.key} ${settings.mode}
+- Measures: ${settings.measures}
+- Species: ${settings.species || '1st'} species counterpoint
+
+User request: "${userMessage}"
+
+Generate TWO voices following counterpoint rules:
+1. Create a cantus firmus (main melody) in the soprano/upper voice range (C4-G5)
+2. Create a harmonizing bass line (E2-C4)
+3. Use consonant intervals (3rds, 5ths, 6ths, octaves) on strong beats
+4. Avoid parallel 5ths and octaves
+5. Prefer contrary motion
+6. Both voices should have ${settings.measures} notes
+7. Start and end on perfect consonances
+8. Use stepwise motion primarily
+
+Provide both the melody and the harmony.`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              description: { type: "string" },
+              melody: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    pitch: { type: "string" },
+                    beat: { type: "number" },
+                    duration: { type: "number" }
+                  }
+                }
+              },
+              harmony: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    pitch: { type: "string" },
+                    beat: { type: "number" },
+                    duration: { type: "number" }
+                  }
+                }
+              },
+              harmonyVoiceType: { type: "string", enum: ["bass", "tenor", "alto"] }
+            }
+          }
+        });
+      } else {
+        // Generate just a melody
+        response = await base44.integrations.Core.InvokeLLM({
+          prompt: `You are an expert counterpoint melody composer. The user wants help creating a melody.
 
 Current settings:
 - Key: ${settings.key} ${settings.mode}
@@ -67,31 +175,37 @@ Respond with:
 2. The notes in the format specified in the JSON schema
 
 Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            description: { type: "string" },
-            notes: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  pitch: { type: "string" },
-                  beat: { type: "number" },
-                  duration: { type: "number" }
+          response_json_schema: {
+            type: "object",
+            properties: {
+              description: { type: "string" },
+              notes: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    pitch: { type: "string" },
+                    beat: { type: "number" },
+                    duration: { type: "number" }
+                  }
                 }
               }
             }
           }
-        }
-      });
+        });
+      }
 
-      const notes = parseNotesFromResponse(response);
+      // Parse response based on type
+      const notes = response.notes || response.melody;
+      const harmony = response.harmony;
+      const voiceType = response.voiceType || response.harmonyVoiceType;
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: response.description || "Here's a melody I created for you!",
-        notes: notes
+        content: response.description || "Here's what I created for you!",
+        notes: notes,
+        harmony: harmony,
+        voiceType: voiceType
       }]);
     } catch (error) {
       setMessages(prev => [...prev, { 
@@ -108,7 +222,6 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
 
   const handleApplyNotes = (notes) => {
     if (notes && notes.length > 0) {
-      // Ensure notes have proper structure
       const formattedNotes = notes.map((n, i) => ({
         pitch: n.pitch,
         beat: n.beat !== undefined ? n.beat : i,
@@ -118,7 +231,25 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
     }
   };
 
-  const handlePreview = (notes, messageIndex) => {
+  const handleApplyHarmony = (harmony, voiceType) => {
+    if (harmony && harmony.length > 0 && onApplyHarmony) {
+      const formattedNotes = harmony.map((n, i) => ({
+        pitch: n.pitch,
+        beat: n.beat !== undefined ? n.beat : i,
+        duration: n.duration || 1
+      }));
+      onApplyHarmony(formattedNotes, voiceType || 'bass');
+    }
+  };
+
+  const handleApplyBoth = (melody, harmony, voiceType) => {
+    handleApplyNotes(melody);
+    if (harmony) {
+      handleApplyHarmony(harmony, voiceType);
+    }
+  };
+
+  const handlePreview = (notes, messageIndex, harmony = null) => {
     if (previewPlaying === messageIndex) {
       // Stop preview
       stopAllNotes();
@@ -136,6 +267,7 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
     const msPerBeat = (60 / tempo) * 1000;
     const timeouts = [];
 
+    // Play melody
     notes.forEach((note, i) => {
       const timeout = setTimeout(() => {
         const duration = (note.duration || 1) * (60 / tempo) * 0.9;
@@ -144,10 +276,22 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
       timeouts.push(timeout);
     });
 
+    // Play harmony if exists
+    if (harmony && harmony.length > 0) {
+      harmony.forEach((note, i) => {
+        const timeout = setTimeout(() => {
+          const duration = (note.duration || 1) * (60 / tempo) * 0.9;
+          playNote(note.pitch, duration, 0.6, 1, 'organ');
+        }, i * msPerBeat);
+        timeouts.push(timeout);
+      });
+    }
+
     // Stop preview after all notes played
+    const maxLength = Math.max(notes.length, harmony?.length || 0);
     const endTimeout = setTimeout(() => {
       setPreviewPlaying(null);
-    }, notes.length * msPerBeat + 500);
+    }, maxLength * msPerBeat + 500);
     timeouts.push(endTimeout);
 
     previewTimeoutRef.current = timeouts;
@@ -198,48 +342,101 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
                 : 'bg-slate-800 text-white'
             }`}>
               <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              {msg.notes && msg.notes.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-700/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Music className="w-3 h-3 text-amber-400" />
-                    <span className="text-xs text-white/70">{msg.notes.length} notes</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {msg.notes.slice(0, 12).map((n, j) => (
-                      <span key={j} className="text-xs bg-slate-700 px-1.5 py-0.5 rounded">
-                        {n.pitch}
-                      </span>
-                    ))}
-                    {msg.notes.length > 12 && (
-                      <span className="text-xs text-white/50">+{msg.notes.length - 12} more</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
+              {(msg.notes?.length > 0 || msg.harmony?.length > 0) && (
+                <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-3">
+                  {/* Melody section */}
+                  {msg.notes?.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Music className="w-3 h-3 text-amber-400" />
+                        <span className="text-xs text-white/70">Melody • {msg.notes.length} notes</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {msg.notes.slice(0, 8).map((n, j) => (
+                          <span key={j} className="text-xs bg-slate-700 px-1.5 py-0.5 rounded">
+                            {n.pitch}
+                          </span>
+                        ))}
+                        {msg.notes.length > 8 && (
+                          <span className="text-xs text-white/50">+{msg.notes.length - 8}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Harmony section */}
+                  {msg.harmony?.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Layers className="w-3 h-3 text-green-400" />
+                        <span className="text-xs text-white/70 capitalize">{msg.voiceType || 'Harmony'} • {msg.harmony.length} notes</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {msg.harmony.slice(0, 8).map((n, j) => (
+                          <span key={j} className="text-xs bg-green-900/50 px-1.5 py-0.5 rounded text-green-300">
+                            {n.pitch}
+                          </span>
+                        ))}
+                        {msg.harmony.length > 8 && (
+                          <span className="text-xs text-white/50">+{msg.harmony.length - 8}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Action buttons */}
+                  <div className="flex gap-2 flex-wrap">
                     <Button
                       size="sm"
-                      onClick={() => handlePreview(msg.notes, i)}
+                      onClick={() => handlePreview(msg.notes, i, msg.harmony)}
                       variant="outline"
-                      className="flex-1 border-slate-600 text-white text-xs h-7 hover:bg-slate-700"
+                      className="border-slate-600 text-white text-xs h-7 hover:bg-slate-700"
                     >
                       {previewPlaying === i ? (
-                        <>
-                          <Square className="w-3 h-3 mr-1" />
-                          Stop
-                        </>
+                        <><Square className="w-3 h-3 mr-1" />Stop</>
                       ) : (
-                        <>
-                          <Play className="w-3 h-3 mr-1" />
-                          Preview
-                        </>
+                        <><Play className="w-3 h-3 mr-1" />Preview</>
                       )}
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleApplyNotes(msg.notes)}
-                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
-                    >
-                      Apply
-                    </Button>
+                    
+                    {msg.notes?.length > 0 && !msg.harmony && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleApplyNotes(msg.notes)}
+                        className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
+                      >
+                        Apply Melody
+                      </Button>
+                    )}
+                    
+                    {msg.harmony?.length > 0 && !msg.notes && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleApplyHarmony(msg.harmony, msg.voiceType)}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs h-7"
+                      >
+                        Apply {msg.voiceType || 'Harmony'}
+                      </Button>
+                    )}
+                    
+                    {msg.notes?.length > 0 && msg.harmony?.length > 0 && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApplyNotes(msg.notes)}
+                          className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
+                        >
+                          Melody Only
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApplyBoth(msg.notes, msg.harmony, msg.voiceType)}
+                          className="bg-gradient-to-r from-amber-500 to-green-600 hover:opacity-90 text-slate-900 text-xs h-7"
+                        >
+                          Apply Both
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
