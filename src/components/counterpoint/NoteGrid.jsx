@@ -98,13 +98,13 @@ export default function NoteGrid({
     });
   });
 
-  // Scroll to keep current beat visible during playback (but not during scrubbing)
+  // Scroll to keep current beat visible during playback or seeking
   useEffect(() => {
-    if (gridRef.current && !isScrubbing) {
-      if (currentBeat === 0) {
+    if (gridRef.current) {
+      if (currentBeat === 0 && !isScrubbing) {
         // Reset scroll to beginning
         gridRef.current.scrollLeft = 0;
-      } else if (isPlaying) {
+      } else {
         const containerWidth = gridRef.current.clientWidth - 56; // subtract pitch label width
         const beatPosition = currentBeat * CELL_WIDTH;
         const currentScroll = gridRef.current.scrollLeft;
@@ -118,7 +118,7 @@ export default function NoteGrid({
         }
       }
     }
-  }, [currentBeat, CELL_WIDTH, isPlaying, isScrubbing]);
+  }, [currentBeat, CELL_WIDTH, isScrubbing]);
 
   const getNotesAtBeat = (voiceIndex, beat) => {
     const voice = voices[voiceIndex];
