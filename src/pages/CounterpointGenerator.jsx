@@ -68,7 +68,8 @@ export default function CounterpointGenerator() {
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
-  const [pianoInstrument, setPianoInstrument] = useState('organ');
+      const [pianoInstrument, setPianoInstrument] = useState('organ');
+      const [selectedNotes, setSelectedNotes] = useState([]);
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
@@ -222,29 +223,39 @@ export default function CounterpointGenerator() {
   }, [isPlaying, tempo, settings.measures, isLooping, loopStart, loopEnd]);
 
   // Play notes at current beat
-  useEffect(() => {
-    if (isPlaying) {
-      const noteDuration = (60 / tempo) * 0.9;
-      
-      allVoices.forEach((voice, voiceIndex) => {
-        if (!voice.enabled && voiceIndex > 0) return;
-        
-        // Find notes that should be playing at this beat (including notes that started earlier but have duration spanning this beat)
-        const notesAtBeat = voice.notes?.filter(n => {
-          const noteStart = n.beat;
-          const noteEnd = n.beat + (n.duration || 1);
-          return noteStart === currentBeat; // Only trigger on note start
-        }) || [];
-        
-        notesAtBeat.forEach(note => {
-          const volume = (voices[voiceIndex]?.volume || 80) / 100;
-          const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
-          const instrument = voices[voiceIndex]?.instrument || 'organ';
-          playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
-        });
-      });
-    }
-  }, [currentBeat, isPlaying, allVoices, tempo, voices]);
+      useEffect(() => {
+        if (isPlaying) {
+          const noteDuration = (60 / tempo) * 0.9;
+
+          // If there are selected notes, only play those
+          if (selectedNotes.length > 0) {
+            const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
+            notesAtBeat.forEach(note => {
+              const volume = (voices[0]?.volume || 80) / 100;
+              const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+              const instrument = voices[0]?.instrument || 'organ';
+              playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
+            });
+          } else {
+            // Play all voices normally
+            allVoices.forEach((voice, voiceIndex) => {
+              if (!voice.enabled && voiceIndex > 0) return;
+
+              const notesAtBeat = voice.notes?.filter(n => {
+                const noteStart = n.beat;
+                return noteStart === currentBeat;
+              }) || [];
+
+              notesAtBeat.forEach(note => {
+                const volume = (voices[voiceIndex]?.volume || 80) / 100;
+                const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+                const instrument = voices[voiceIndex]?.instrument || 'organ';
+                playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
+              });
+            });
+          }
+        }
+      }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes]);
 
   const handlePlayPause = () => {
     ensureAudio();
@@ -463,22 +474,23 @@ export default function CounterpointGenerator() {
           >
             <NoteGrid
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
-                              currentBeat={currentBeat}
-                              isPlaying={isPlaying}
-                              measures={settings.measures}
-                              cantusFirmus={cantusFirmus}
-                              onNotesUpdate={setCantusFirmus}
-                              onSeek={handleSeek}
-                              activeVoice={activeVoice}
-                              onActiveVoiceChange={setActiveVoice}
-                              onVoiceInstrumentChange={(voiceIndex, instrument) => {
-                                const newVoices = [...voices];
-                                if (newVoices[voiceIndex]) {
-                                  newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
-                                  setVoices(newVoices);
-                                }
-                              }}
-                              onExportMidi={() => {
+                                                currentBeat={currentBeat}
+                                                isPlaying={isPlaying}
+                                                measures={settings.measures}
+                                                cantusFirmus={cantusFirmus}
+                                                onNotesUpdate={setCantusFirmus}
+                                                onSeek={handleSeek}
+                                                activeVoice={activeVoice}
+                                                onActiveVoiceChange={setActiveVoice}
+                                                onSelectionChange={setSelectedNotes}
+                                                onVoiceInstrumentChange={(voiceIndex, instrument) => {
+                                                  const newVoices = [...voices];
+                                                  if (newVoices[voiceIndex]) {
+                                                    newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
+                                                    setVoices(newVoices);
+                                                  }
+                                                }}
+                                                onExportMidi={() => {
                 // Export as MIDI-like JSON (can be converted to MIDI)
                 const midiData = {
                   tempo,
