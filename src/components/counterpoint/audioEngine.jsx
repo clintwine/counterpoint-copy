@@ -24,8 +24,12 @@ export function initAudio() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.3;
+    masterGain.gain.value = 0.4;
     masterGain.connect(audioContext.destination);
+  }
+  // Resume context if suspended (browser autoplay policy)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
   }
   return audioContext;
 }
@@ -88,6 +92,91 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0) {
   return { osc1, osc2, gainNode };
 }
 
+// Play a note that sustains until stopped
+export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0) {
+  if (!audioContext) initAudio();
+  
+  const freq = NOTE_FREQUENCIES[pitch];
+  if (!freq) return null;
+  
+  const now = audioContext.currentTime;
+  
+  // Create oscillators for richer sound
+  const osc1 = audioContext.createOscillator();
+  const osc2 = audioContext.createOscillator();
+  const osc3 = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  const filterNode = audioContext.createBiquadFilter();
+  
+  // Piano-like sound with multiple oscillators
+  osc1.type = 'triangle';
+  osc2.type = 'sine';
+  osc3.type = 'sine';
+  
+  osc1.frequency.value = freq;
+  osc2.frequency.value = freq * 2; // Octave harmonic
+  osc3.frequency.value = freq * 3; // Fifth harmonic
+  
+  // Filter for warmth
+  filterNode.type = 'lowpass';
+  filterNode.frequency.value = 3000;
+  filterNode.Q.value = 0.5;
+  
+  // Attack envelope (sustain level maintained)
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + 0.01);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.6, now + 0.1);
+  
+  // Connect oscillators with different volumes
+  const osc1Gain = audioContext.createGain();
+  osc1Gain.gain.value = 0.5;
+  osc1.connect(osc1Gain);
+  osc1Gain.connect(filterNode);
+  
+  const osc2Gain = audioContext.createGain();
+  osc2Gain.gain.value = 0.25;
+  osc2.connect(osc2Gain);
+  osc2Gain.connect(filterNode);
+  
+  const osc3Gain = audioContext.createGain();
+  osc3Gain.gain.value = 0.1;
+  osc3.connect(osc3Gain);
+  osc3Gain.connect(filterNode);
+  
+  filterNode.connect(gainNode);
+  gainNode.connect(masterGain);
+  
+  osc1.start(now);
+  osc2.start(now);
+  osc3.start(now);
+  
+  return { osc1, osc2, osc3, gainNode, filterNode };
+}
+
+// Stop a sustained note with release envelope
+export function stopNoteSustain(oscillatorObj) {
+  if (!oscillatorObj || !audioContext) return;
+  
+  const { osc1, osc2, osc3, gainNode } = oscillatorObj;
+  const now = audioContext.currentTime;
+  
+  // Release envelope
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  
+  // Stop oscillators after release
+  setTimeout(() => {
+    try {
+      osc1.stop();
+      osc2.stop();
+      if (osc3) osc3.stop();
+    } catch (e) {
+      // Oscillator already stopped
+    }
+  }, 350);
+}
+
 export function playChord(pitches, duration = 0.5, volumes = []) {
   pitches.forEach((pitch, idx) => {
     const vol = volumes[idx] || 0.7;
@@ -99,7 +188,7 @@ export function stopAllNotes() {
   if (audioContext) {
     masterGain.gain.setValueAtTime(0, audioContext.currentTime);
     setTimeout(() => {
-      if (masterGain) masterGain.gain.value = 0.3;
+      if (masterGain) masterGain.gain.value = 0.4;
     }, 100);
   }
 }
