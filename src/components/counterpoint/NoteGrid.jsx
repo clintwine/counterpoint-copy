@@ -721,10 +721,15 @@ export default function NoteGrid({
                       {notesAtPosition.map(({ voiceIndex, note }) => {
                         const duration = note.duration || DEFAULT_DURATION;
                         const noteWidth = duration * CELL_WIDTH - 4;
+                        const noteKey = getNoteKey(note.pitch, note.beat);
+                        const isBeingDragged = selectedNotes.has(noteKey) && dragState?.isDragging;
+                        
+                        // Hide original note while dragging (preview shows instead)
+                        if (isBeingDragged) return null;
                         
                         return (
                           <div
-                                                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
+                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                             onMouseDown={(e) => {
                                 e.stopPropagation();
                                 const rect = e.currentTarget.getBoundingClientRect();
