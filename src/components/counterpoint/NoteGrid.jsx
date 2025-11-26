@@ -544,13 +544,37 @@ export default function NoteGrid({
 
           {/* Grid area */}
           <div className="flex-shrink-0">
-            {/* Beat numbers header - clickable to scrub */}
-            <div className="flex h-7 border-b border-slate-600">
+            {/* Beat numbers header - draggable to scrub */}
+            <div 
+              className="flex h-7 border-b border-slate-600 cursor-ew-resize select-none"
+              onMouseDown={(e) => {
+                const updateBeat = (clientX) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const scrollLeft = gridRef.current?.scrollLeft || 0;
+                  const x = clientX - rect.left + scrollLeft;
+                  const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
+                  onSeek && onSeek(beat);
+                };
+
+                updateBeat(e.clientX);
+
+                const handleMouseMove = (moveEvent) => {
+                  updateBeat(moveEvent.clientX);
+                };
+
+                const handleMouseUp = () => {
+                  document.removeEventListener('mousemove', handleMouseMove);
+                  document.removeEventListener('mouseup', handleMouseUp);
+                };
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+              }}
+            >
               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
-                  onClick={() => onSeek && onSeek(beat)}
-                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/30 ${
+                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none ${
                     beat % beatsPerMeasure === 0 
                       ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
                       : 'border-r-slate-700 text-white/60'
