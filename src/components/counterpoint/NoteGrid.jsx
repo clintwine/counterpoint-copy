@@ -876,19 +876,15 @@ export default function NoteGrid({
               }}
               onMouseDown={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 setIsScrubbing(true);
                 const startX = e.clientX;
-                const startScroll = gridRef.current?.scrollLeft || 0;
                 const startBeat = currentBeat;
 
                 const handleMouseMove = (moveEvent) => {
                   const deltaX = moveEvent.clientX - startX;
-                  // Scroll the container
-                  if (gridRef.current) {
-                    gridRef.current.scrollLeft = Math.max(0, startScroll - deltaX);
-                  }
-                  // Update beat based on new scroll position
-                  const newBeat = Math.max(0, Math.min(totalBeats - 1, Math.round((startBeat * CELL_WIDTH - deltaX) / CELL_WIDTH)));
+                  const beatDelta = Math.round(deltaX / CELL_WIDTH);
+                  const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
                   onSeek && onSeek(newBeat);
                 };
 
