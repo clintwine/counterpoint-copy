@@ -57,10 +57,10 @@ export default function NoteGrid({
     }
   }, [currentBeat, isPlaying]);
 
-  const getNoteAtBeat = (voiceIndex, beat) => {
+  const getNotesAtBeat = (voiceIndex, beat) => {
     const voice = voices[voiceIndex];
-    if (!voice || !voice.notes) return null;
-    return voice.notes.find(n => n.beat === beat);
+    if (!voice || !voice.notes) return [];
+    return voice.notes.filter(n => n.beat === beat);
   };
 
   const getNoteKey = (pitch, beat) => `${pitch}-${beat}`;
@@ -509,14 +509,17 @@ export default function NoteGrid({
                   const noteKey = getNoteKey(pitch, beat);
                   const isSelected = selectedNotes.has(noteKey);
                   
-                  // Check if any voice has a note at this position
-                  const notesAtPosition = voices.map((_, voiceIndex) => {
-                    const note = getNoteAtBeat(voiceIndex, beat);
-                    if (note && note.pitch === pitch) {
-                      return { voiceIndex, note };
-                    }
-                    return null;
-                  }).filter(Boolean);
+                  // Check if any voice has a note at this position (support multiple notes per beat)
+                  const notesAtPosition = [];
+                  voices.forEach((voice, voiceIndex) => {
+                    if (!voice.notes) return;
+                    // Find ALL notes at this beat with this pitch (not just first)
+                    voice.notes.forEach(note => {
+                      if (note.beat === beat && note.pitch === pitch) {
+                        notesAtPosition.push({ voiceIndex, note });
+                      }
+                    });
+                  });
 
                   const isCurrentBeat = currentBeat === beat;
                   const hasNote = notesAtPosition.length > 0;
