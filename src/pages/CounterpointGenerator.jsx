@@ -56,6 +56,9 @@ export default function CounterpointGenerator() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [tempo, setTempo] = useState(80);
+  const [isLooping, setIsLooping] = useState(false);
+  const [loopStart, setLoopStart] = useState(0);
+  const [loopEnd, setLoopEnd] = useState(null);
   
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -192,10 +195,14 @@ export default function CounterpointGenerator() {
     if (isPlaying) {
       const msPerBeat = (60 / tempo) * 1000 / 4; // 16th notes = quarter note / 4
       const totalBeats = settings.measures * 16; // 16 sixteenth notes per measure
+      const effectiveLoopEnd = loopEnd ?? totalBeats;
       
       playbackRef.current = setInterval(() => {
         setCurrentBeat(prev => {
           const next = prev + 1;
+          if (isLooping && next >= effectiveLoopEnd) {
+            return loopStart;
+          }
           if (next >= totalBeats) {
             setIsPlaying(false);
             return 0;
@@ -210,7 +217,7 @@ export default function CounterpointGenerator() {
         clearInterval(playbackRef.current);
       }
     }
-  }, [isPlaying, tempo, settings.measures]);
+  }, [isPlaying, tempo, settings.measures, isLooping, loopStart, loopEnd]);
 
   // Play notes at current beat
   useEffect(() => {
@@ -246,6 +253,10 @@ export default function CounterpointGenerator() {
   };
 
   const handleReset = () => {
+    setCurrentBeat(0);
+  };
+
+  const handleStop = () => {
     setIsPlaying(false);
     setCurrentBeat(0);
     stopAllNotes();
@@ -542,6 +553,12 @@ export default function CounterpointGenerator() {
               totalBeats={settings.measures * 16}
               onSeek={handleSeek}
               onReset={handleReset}
+              onStop={handleStop}
+              loopStart={loopStart}
+              loopEnd={loopEnd}
+              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
+              isLooping={isLooping}
+              onLoopToggle={() => setIsLooping(!isLooping)}
             />
             
             <PianoKeyboard
