@@ -21,6 +21,8 @@ const MODE_OPTIONS = [
   { value: 'lydian', label: 'Lydian' },
   { value: 'mixolydian', label: 'Mixolydian' },
   { value: 'minor', label: 'Minor (Aeolian)' },
+  { value: 'harmonic_minor', label: 'Harmonic Minor' },
+  { value: 'melodic_minor', label: 'Melodic Minor' },
 ];
 
 export default function GenerationSettings({ settings, onUpdate }) {
