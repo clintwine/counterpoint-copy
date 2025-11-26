@@ -34,8 +34,9 @@ export default function PlaybackControls({
             variant="ghost"
             size="icon"
             onClick={onReset}
-            className="text-cream/70 hover:text-cream hover:bg-slate-800"
+            className="text-white hover:text-white hover:bg-slate-700 border border-slate-600"
             title="Go to start"
+            aria-label="Go to start of track"
           >
             <SkipBack className="w-5 h-5" />
           </Button>
@@ -55,18 +56,20 @@ export default function PlaybackControls({
             variant="ghost"
             size="icon"
             onClick={onStop}
-            className="text-cream/70 hover:text-cream hover:bg-slate-800"
+            className="text-white hover:text-white hover:bg-slate-700 border border-slate-600"
             title="Stop and go to start"
+            aria-label="Stop playback and return to start"
           >
-            <Square className="w-4 h-4" />
+            <Square className="w-4 h-4 fill-current" />
           </Button>
           
           <Button
             variant="ghost"
             size="icon"
             onClick={onLoopToggle}
-            className={`${isLooping ? 'text-amber-400 bg-amber-400/20' : 'text-cream/70'} hover:text-cream hover:bg-slate-800`}
+            className={`${isLooping ? 'text-amber-400 bg-amber-500/30 border-amber-500' : 'text-white border-slate-600'} hover:text-white hover:bg-slate-700 border`}
             title="Toggle loop"
+            aria-label={isLooping ? "Disable loop" : "Enable loop"}
           >
             <Repeat className="w-4 h-4" />
           </Button>

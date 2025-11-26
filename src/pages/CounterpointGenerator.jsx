@@ -258,8 +258,8 @@ export default function CounterpointGenerator() {
 
   const handleStop = () => {
     setIsPlaying(false);
-    setCurrentBeat(0);
     stopAllNotes();
+    setCurrentBeat(0);
   };
 
   const handleSeek = (beat) => {
