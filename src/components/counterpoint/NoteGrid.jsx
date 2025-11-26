@@ -316,7 +316,7 @@ export default function NoteGrid({
         const movedNotes = selectedNotesList.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
-          return { pitch: pitches[newPitchIdx], beat: newBeat };
+          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
         const newNotes = [...unselectedNotes, ...movedNotes].sort((a, b) => a.beat - b.beat);
