@@ -82,7 +82,7 @@ export default function NoteGrid({
     }
   }, [selectedNotes, cantusFirmus, onSelectionChange]);
   const [dragState, setDragState] = useState(null);
-  const [resizeState, setResizeState] = useState(null); // For resizing note duration
+  const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
   const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
   const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
   const [clipboard, setClipboard] = useState([]);
@@ -327,11 +327,13 @@ export default function NoteGrid({
       // Handle note duration resize
       const deltaX = e.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
-      const newDuration = Math.max(MIN_DURATION, Math.round((resizeState.startDuration + deltaDuration) * 4) / 4);
 
-      // Update note duration in real-time
+      // Update note durations in real-time (group resize if multiple selected)
       const newNotes = cantusFirmus.map(n => {
-        if (n.pitch === resizeState.note.pitch && n.beat === resizeState.note.beat) {
+        const noteKey = getNoteKey(n.pitch, n.beat);
+        const startDuration = resizeState.startDurations[noteKey];
+        if (startDuration !== undefined) {
+          const newDuration = Math.max(MIN_DURATION, Math.round((startDuration + deltaDuration) * 4) / 4);
           return { ...n, duration: newDuration };
         }
         return n;
@@ -736,10 +738,26 @@ export default function NoteGrid({
 
                                 // Check if clicking on resize handle (right 10px)
                                 if (clickX > rect.width - 10) {
+                                  // Build map of start durations for all selected notes (or just this one)
+                                  const noteKey = getNoteKey(pitch, beat);
+                                  const isSelected = selectedNotes.has(noteKey);
+                                  const startDurations = {};
+
+                                  if (isSelected && selectedNotes.size > 0) {
+                                    // Resize all selected notes
+                                    cantusFirmus.forEach(n => {
+                                      if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                        startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                      }
+                                    });
+                                  } else {
+                                    // Just resize this note
+                                    startDurations[noteKey] = note.duration || DEFAULT_DURATION;
+                                  }
+
                                   setResizeState({
-                                    note: note,
                                     startX: e.clientX,
-                                    startDuration: note.duration || DEFAULT_DURATION
+                                    startDurations
                                   });
                                 } else {
                                   // Normal selection/drag behavior
