@@ -172,8 +172,9 @@ export default function NoteGrid({
   // Play note sound when adding
   const playNoteSound = useCallback((pitch) => {
     initAudio();
-    playNote(pitch, 0.3, 0.6, 0);
-  }, []);
+    const instrument = voices[activeVoice]?.instrument || 'organ';
+    playNote(pitch, 0.3, 0.6, 0, instrument);
+  }, [voices, activeVoice]);
 
   const selectAll = useCallback(() => {
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
