@@ -801,7 +801,7 @@ export default function NoteGrid({
                             <div 
                               className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r"
                             />
-                          </motion.div>
+                            </div>
                         );
                       })}
                     </div>
