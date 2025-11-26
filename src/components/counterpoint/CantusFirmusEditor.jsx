@@ -90,7 +90,7 @@ export default function CantusFirmusEditor({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Music className="w-4 h-4 text-gold" />
-          <h3 className="text-cream font-medium">Cantus Firmus</h3>
+          <h3 className="text-white font-medium">Cantus Firmus</h3>
         </div>
         <div className="flex gap-2">
           <Button
@@ -134,12 +134,12 @@ export default function CantusFirmusEditor({
                   <SelectTrigger 
                     className={`w-16 h-12 text-sm font-medium transition-all ${
                       note 
-                        ? 'bg-gold/20 border-gold/40 text-gold' 
-                        : 'bg-slate-900/50 border-slate-700 text-cream/50'
+                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' 
+                        : 'bg-slate-800/80 border-slate-600 text-white/70'
                     }`}
                   >
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-cream/40">{beat + 1}</span>
+                      <span className="text-[10px] text-white/60">{beat + 1}</span>
                       <SelectValue placeholder="—" />
                     </div>
                   </SelectTrigger>
@@ -160,7 +160,7 @@ export default function CantusFirmusEditor({
         </AnimatePresence>
       </div>
 
-      <p className="text-cream/40 text-xs mt-3">
+      <p className="text-white/70 text-xs mt-3">
         Click each beat to set the note, or use "Generate" for a random melody.
       </p>
     </div>

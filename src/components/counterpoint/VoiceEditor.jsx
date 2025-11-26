@@ -34,9 +34,9 @@ export default function VoiceEditor({ voice, voiceIndex, onUpdate, isCantus = fa
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-3 h-3 rounded-full ${VOICE_COLORS[voiceIndex]}`} />
         <div className="flex-1">
-          <h4 className="text-cream font-medium text-sm">{voice.name}</h4>
+          <h4 className="text-white font-medium text-sm">{voice.name}</h4>
           {isCantus && (
-            <span className="text-[10px] text-gold/70 uppercase tracking-wider">Cantus Firmus</span>
+            <span className="text-[10px] text-amber-400 uppercase tracking-wider font-medium">Cantus Firmus</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function VoiceEditor({ voice, voiceIndex, onUpdate, isCantus = fa
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-cream/60 text-xs mb-1.5 block">Low Range</Label>
+              <Label className="text-white/90 text-xs mb-1.5 block font-medium">Low Range</Label>
               <Select
                 value={voice.lowRange}
                 onValueChange={(value) => handleChange('lowRange', value)}
@@ -70,7 +70,7 @@ export default function VoiceEditor({ voice, voiceIndex, onUpdate, isCantus = fa
               </Select>
             </div>
             <div>
-              <Label className="text-cream/60 text-xs mb-1.5 block">High Range</Label>
+              <Label className="text-white/90 text-xs mb-1.5 block font-medium">High Range</Label>
               <Select
                 value={voice.highRange}
                 onValueChange={(value) => handleChange('highRange', value)}
@@ -91,8 +91,8 @@ export default function VoiceEditor({ voice, voiceIndex, onUpdate, isCantus = fa
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <Label className="text-cream/60 text-xs">Volume</Label>
-              <Volume2 className="w-3 h-3 text-cream/40" />
+              <Label className="text-white/90 text-xs font-medium">Volume</Label>
+              <Volume2 className="w-3 h-3 text-white/60" />
             </div>
             <Slider
               value={[voice.volume || 80]}

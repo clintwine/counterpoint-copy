@@ -57,7 +57,7 @@ export default function PlaybackControls({
         {/* Timeline */}
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <span className="text-cream/60 text-sm font-mono w-10">
+            <span className="text-white text-sm font-mono w-10">
               {formatTime(currentBeat)}
             </span>
             <Slider
@@ -67,7 +67,7 @@ export default function PlaybackControls({
               step={1}
               className="flex-1 [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
             />
-            <span className="text-cream/60 text-sm font-mono w-10">
+            <span className="text-white text-sm font-mono w-10">
               {formatTime(totalBeats - 1)}
             </span>
           </div>
@@ -75,7 +75,7 @@ export default function PlaybackControls({
 
         {/* Tempo */}
         <div className="flex items-center gap-3 min-w-[180px]">
-          <span className="text-cream/60 text-xs uppercase tracking-wider">BPM</span>
+          <span className="text-white/90 text-xs uppercase tracking-wider font-medium">BPM</span>
           <Slider
             value={[tempo]}
             onValueChange={([value]) => onTempoChange(value)}
@@ -84,7 +84,7 @@ export default function PlaybackControls({
             step={1}
             className="flex-1 [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0"
           />
-          <span className="text-cream font-mono text-sm w-8">{tempo}</span>
+          <span className="text-white font-mono text-sm w-8">{tempo}</span>
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
 
   return (
     <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
-      <h3 className="text-cream/70 text-xs uppercase tracking-wider mb-3">Active Notes</h3>
+      <h3 className="text-white/90 text-xs uppercase tracking-wider mb-3 font-medium">Active Notes</h3>
       
       <div className="overflow-x-auto pb-2">
         <div className="relative" style={{ width: octaves.length * octaveWidth, height: 80 }}>

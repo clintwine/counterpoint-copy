@@ -41,7 +41,7 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
   return (
     <div className="bg-slate-900/50 rounded-2xl p-6 backdrop-blur-sm border border-slate-700/50">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-cream/90 font-medium tracking-wide">Score</h3>
+        <h3 className="text-white font-medium tracking-wide">Score</h3>
         <div className="flex gap-4">
           {voices.map((voice, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
                 className="w-3 h-3 rounded-full" 
                 style={{ backgroundColor: NOTE_COLORS[i] }}
               />
-              <span className="text-xs text-cream/60">{voice.name}</span>
+              <span className="text-xs text-white/80">{voice.name}</span>
             </div>
           ))}
         </div>
@@ -66,8 +66,8 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
             {pitches.map((pitch, i) => (
               <div 
                 key={pitch}
-                className={`h-6 w-12 flex items-center justify-end pr-2 text-xs border-b border-slate-800/50 ${
-                  pitch.includes('C') ? 'text-cream/80 font-medium' : 'text-cream/40'
+                className={`h-6 w-12 flex items-center justify-end pr-2 text-xs border-b border-slate-700/50 ${
+                  pitch.includes('C') ? 'text-white font-medium' : 'text-white/60'
                 }`}
               >
                 {pitch}
@@ -84,8 +84,8 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
                   key={beat}
                   className={`w-12 flex items-center justify-center text-xs border-r ${
                     beat % beatsPerMeasure === 0 
-                      ? 'border-slate-600 text-cream/60 font-medium' 
-                      : 'border-slate-800/30 text-cream/30'
+                      ? 'border-slate-500 text-white font-medium' 
+                      : 'border-slate-700/50 text-white/50'
                   }`}
                 >
                   {beat % beatsPerMeasure === 0 ? beat / beatsPerMeasure + 1 : ''}

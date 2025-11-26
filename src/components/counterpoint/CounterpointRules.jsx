@@ -24,7 +24,7 @@ export default function CounterpointRules({ species, violations = [] }) {
   return (
     <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-cream font-medium">Counterpoint Rules</h3>
+        <h3 className="text-white font-medium">Counterpoint Rules</h3>
         <Badge variant="outline" className="bg-gold/10 text-gold border-gold/30 text-xs">
           {species} Species
         </Badge>
@@ -54,12 +54,12 @@ export default function CounterpointRules({ species, violations = [] }) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-cream/90 text-sm font-medium">{rule.name}</span>
+                  <span className="text-white text-sm font-medium">{rule.name}</span>
                   <Badge className={`${category.color} text-[10px] px-1.5 py-0`}>
                     {category.label}
                   </Badge>
                 </div>
-                <p className="text-cream/50 text-xs leading-relaxed">{rule.description}</p>
+                <p className="text-white/70 text-xs leading-relaxed">{rule.description}</p>
                 {violation && (
                   <p className="text-red-400/80 text-xs mt-1 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />

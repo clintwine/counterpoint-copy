@@ -348,8 +348,8 @@ export default function CounterpointGenerator() {
       {/* Custom styles */}
       <style>{`
         :root {
-          --gold: #D4A574;
-          --cream: #F5F0E8;
+          --gold: #E8B885;
+          --cream: #FFFFFF;
         }
         
         .text-cream {
@@ -384,6 +384,88 @@ export default function CounterpointGenerator() {
         
         .scrollbar-track-transparent::-webkit-scrollbar-track {
           background: transparent;
+        }
+        
+        /* Global text visibility fixes */
+        label, .text-cream\/60, .text-cream\/50, .text-cream\/40, .text-cream\/70 {
+          color: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        /* Select triggers and inputs */
+        [data-radix-select-trigger], select, input, textarea {
+          color: white !important;
+          background-color: rgba(30, 41, 59, 0.8) !important;
+          border-color: rgba(100, 116, 139, 0.5) !important;
+        }
+        
+        /* Select content dropdowns */
+        [data-radix-select-content] {
+          background-color: rgb(30, 41, 59) !important;
+          border-color: rgb(71, 85, 105) !important;
+        }
+        
+        [data-radix-select-item] {
+          color: white !important;
+        }
+        
+        [data-radix-select-item]:hover, [data-radix-select-item][data-highlighted] {
+          background-color: rgba(100, 116, 139, 0.3) !important;
+        }
+        
+        /* Slider track visibility */
+        [role="slider"] {
+          background-color: var(--gold) !important;
+          border: none !important;
+        }
+        
+        [data-orientation="horizontal"] > span:first-child {
+          background-color: rgba(100, 116, 139, 0.5) !important;
+        }
+        
+        /* Switch styling */
+        [role="switch"] {
+          background-color: rgba(100, 116, 139, 0.5) !important;
+        }
+        
+        [role="switch"][data-state="checked"] {
+          background-color: var(--gold) !important;
+        }
+        
+        /* Tab triggers */
+        [role="tablist"] {
+          background-color: rgba(30, 41, 59, 0.6) !important;
+        }
+        
+        [role="tab"] {
+          color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        [role="tab"][data-state="active"] {
+          color: rgb(15, 23, 42) !important;
+          background-color: var(--gold) !important;
+        }
+        
+        /* Badges */
+        .badge, [class*="Badge"] {
+          font-weight: 500 !important;
+        }
+        
+        /* Card backgrounds */
+        .bg-slate-800\/40 {
+          background-color: rgba(30, 41, 59, 0.6) !important;
+        }
+        
+        .bg-slate-900\/50 {
+          background-color: rgba(15, 23, 42, 0.7) !important;
+        }
+        
+        /* Border visibility */
+        .border-slate-700\/50 {
+          border-color: rgba(71, 85, 105, 0.6) !important;
+        }
+        
+        .border-slate-700 {
+          border-color: rgb(71, 85, 105) !important;
         }
       `}</style>
     </div>
