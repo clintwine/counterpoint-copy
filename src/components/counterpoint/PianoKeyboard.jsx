@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Keyboard, Guitar, Volume2 } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
-import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope } from './audioEngine';
+import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument } from './audioEngine';
+import WaveEditor from './WaveEditor';
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -39,7 +40,7 @@ const PITCH_TO_KEY = Object.entries(KEY_MAP).reduce((acc, [key, pitch]) => {
   return acc;
 }, {});
 
-const INSTRUMENTS = [
+const DEFAULT_INSTRUMENTS = [
   { value: 'organ', label: 'Organ' },
   { value: 'distortion', label: 'Distortion' },
   { value: 'clean', label: 'Clean' },
@@ -60,6 +61,41 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
   const activeOscillators = useRef({});
   const isDraggingRef = useRef(false);
+  const [showWaveEditor, setShowWaveEditor] = useState(false);
+  const [customInstruments, setCustomInstruments] = useState([]);
+
+  // Combined instruments list
+  const allInstruments = [
+    ...DEFAULT_INSTRUMENTS,
+    ...customInstruments.map((inst, i) => ({ value: `custom_${i}`, label: inst.name, custom: inst }))
+  ];
+
+  const handleSaveInstrument = (inst, index) => {
+    if (index >= 0) {
+      const updated = [...customInstruments];
+      updated[index] = inst;
+      setCustomInstruments(updated);
+    } else {
+      setCustomInstruments([...customInstruments, inst]);
+    }
+  };
+
+  const handleDeleteInstrument = (index) => {
+    setCustomInstruments(customInstruments.filter((_, i) => i !== index));
+    // If current instrument was deleted, switch to organ
+    if (instrument === `custom_${index}`) {
+      onInstrumentChange('organ');
+    }
+  };
+
+  // Get custom instrument config if selected
+  const getCustomConfig = () => {
+    if (instrument.startsWith('custom_')) {
+      const index = parseInt(instrument.split('_')[1]);
+      return customInstruments[index];
+    }
+    return null;
+  };
 
   const handleEffectChange = (effect, value) => {
     setEffects(prev => ({ ...prev, [effect]: value }));
@@ -89,11 +125,19 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (activeOscillators.current[pitch]) return; // Already playing
     
     initAudio();
-    // Use playNoteSustain with envelope settings
-    const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
-    activeOscillators.current[pitch] = oscObj;
+    const customConfig = getCustomConfig();
+    
+    if (customConfig) {
+      // Use custom instrument
+      const oscObj = playNoteWithCustomInstrument(pitch, 2, envelope.sustain, customConfig);
+      activeOscillators.current[pitch] = oscObj;
+    } else {
+      // Use built-in instrument
+      const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
+      activeOscillators.current[pitch] = oscObj;
+    }
     setPressedNotes(prev => new Set([...prev, pitch]));
-  }, [instrument, envelope]);
+  }, [instrument, envelope, customInstruments]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
@@ -351,20 +395,29 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
-              <Guitar className="w-3.5 h-3.5 text-white/60" />
-              <Select value={instrument} onValueChange={onInstrumentChange}>
-                <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {INSTRUMENTS.map(inst => (
-                    <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
-                      {inst.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                              <Guitar className="w-3.5 h-3.5 text-white/60" />
+                              <Select value={instrument} onValueChange={onInstrumentChange}>
+                                <SelectTrigger className="w-28 h-7 bg-slate-700 border-slate-600 text-white text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  {allInstruments.map(inst => (
+                                    <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
+                                      {inst.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowWaveEditor(!showWaveEditor)}
+                              className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
+                            >
+                              <Waves className="w-3.5 h-3.5 mr-1" />
+                              Wave
+                            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -528,6 +581,18 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       <p className="text-white/50 text-[10px] mt-1">
         Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
       </p>
+
+      {/* Wave Editor Panel */}
+      {showWaveEditor && (
+        <div className="mt-3">
+          <WaveEditor
+            customInstruments={customInstruments}
+            onSaveInstrument={handleSaveInstrument}
+            onDeleteInstrument={handleDeleteInstrument}
+            onClose={() => setShowWaveEditor(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
