@@ -323,7 +323,10 @@ export default function NoteGrid({
           paintedNotesRef.current.add(noteKey);
           const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
           onNotesUpdate(newNotes);
-          playNoteSound(cell.pitch);
+          // Play the note with proper duration for feedback
+          initAudio();
+          const instrument = voices[activeVoice]?.instrument || 'organ';
+          playNote(cell.pitch, 0.5, 0.7, 0, instrument);
         }
       }
     }
