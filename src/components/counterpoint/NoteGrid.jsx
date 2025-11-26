@@ -59,13 +59,18 @@ export default function NoteGrid({
     });
   });
 
-  // Scroll to current beat during playback
+  // Scroll to current beat during playback or when beat changes
   useEffect(() => {
-    if (isPlaying && gridRef.current && currentBeat > 4) {
-      const scrollPosition = (currentBeat - 4) * CELL_WIDTH;
-      gridRef.current.scrollLeft = scrollPosition;
+    if (gridRef.current) {
+      if (currentBeat === 0) {
+        // Reset scroll to beginning
+        gridRef.current.scrollLeft = 0;
+      } else if (currentBeat > 4) {
+        const scrollPosition = (currentBeat - 4) * CELL_WIDTH;
+        gridRef.current.scrollLeft = scrollPosition;
+      }
     }
-  }, [currentBeat, isPlaying]);
+  }, [currentBeat, CELL_WIDTH]);
 
   const getNotesAtBeat = (voiceIndex, beat) => {
     const voice = voices[voiceIndex];
