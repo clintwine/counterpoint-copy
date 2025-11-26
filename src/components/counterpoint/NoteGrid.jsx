@@ -637,15 +637,18 @@ export default function NoteGrid({
                   const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
                   const newBeat = note.beat + dragOffset.beatDelta;
                   if (newPitchIdx < 0 || newPitchIdx >= pitches.length || newBeat < 0 || newBeat >= totalBeats) return null;
-                  
+
+                  const duration = note.duration || DEFAULT_DURATION;
+                  const noteWidth = duration * CELL_WIDTH - 4;
+
                   return (
                     <div
                       key={`preview-${note.pitch}-${note.beat}`}
-                      className="absolute rounded flex items-center justify-center shadow-lg pointer-events-none z-10"
+                      className="absolute rounded flex items-center justify-start pl-1 shadow-lg pointer-events-none z-10"
                       style={{
                         left: 56 + newBeat * CELL_WIDTH + 2,
                         top: 28 + newPitchIdx * CELL_HEIGHT + 2,
-                        width: CELL_WIDTH - 4,
+                        width: noteWidth,
                         height: CELL_HEIGHT - 4,
                         backgroundColor: NOTE_COLORS[0],
                         opacity: 0.8
