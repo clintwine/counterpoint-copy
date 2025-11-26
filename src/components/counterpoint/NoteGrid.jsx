@@ -724,10 +724,7 @@ export default function NoteGrid({
                           <motion.div
                             key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                             initial={{ scale: 0 }}
-                            animate={{ 
-                              scale: 1,
-                              opacity: showDragPreview ? 0.4 : 1
-                            }}
+                            animate={{ scale: 1 }}
                             onMouseDown={(e) => {
                                 e.stopPropagation();
                                 const rect = e.currentTarget.getBoundingClientRect();
