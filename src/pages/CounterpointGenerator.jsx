@@ -375,7 +375,7 @@ export default function CounterpointGenerator() {
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(); }} className="space-y-4">
                     <div>
                       <Label className="text-white/80">Project Name</Label>
                       <Input
@@ -383,16 +383,17 @@ export default function CounterpointGenerator() {
                         onChange={(e) => setProjectName(e.target.value)}
                         placeholder="My Counterpoint"
                         className="bg-slate-800 border-slate-700 text-white mt-1"
+                        autoFocus
                       />
                     </div>
                     <Button
-                      onClick={handleSaveProject}
+                      type="submit"
                       disabled={!projectName.trim() || saveProjectMutation.isPending}
                       className="w-full bg-gold text-slate-900 hover:bg-gold/90"
                     >
                       {saveProjectMutation.isPending ? 'Saving...' : (currentProjectId ? 'Update Project' : 'Save Project')}
                     </Button>
-                  </div>
+                  </form>
                 </DialogContent>
               </Dialog>
 
