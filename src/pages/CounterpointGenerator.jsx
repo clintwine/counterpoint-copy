@@ -79,16 +79,21 @@ export default function CounterpointGenerator() {
   const saveProjectMutation = useMutation({
     mutationFn: async (data) => {
       if (currentProjectId) {
-        return base44.entities.CounterpointProject.update(currentProjectId, data);
+        await base44.entities.CounterpointProject.update(currentProjectId, data);
+        return { id: currentProjectId };
       }
-      return base44.entities.CounterpointProject.create(data);
+      const result = await base44.entities.CounterpointProject.create(data);
+      return result;
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
-      if (!currentProjectId && result?.id) {
+      if (result?.id) {
         setCurrentProjectId(result.id);
       }
       setSaveDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Save failed:', error);
     }
   });
 
@@ -524,9 +529,6 @@ export default function CounterpointGenerator() {
                 a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-              }}
-              onExportVideo={() => {
-                alert('Video export coming soon! For now, you can use screen recording software to capture playback.');
               }}
             />
             
