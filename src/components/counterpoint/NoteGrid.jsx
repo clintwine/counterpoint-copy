@@ -777,13 +777,17 @@ export default function NoteGrid({
                                     }
                                   }
 
+                                  // Calculate click offset within the cell for smooth dragging
+                                  const cell = getCellFromPosition(e.clientX, e.clientY);
                                   setDragState({
                                     startPitch: pitch,
                                     startBeat: beat,
                                     startPitchIndex: pitches.indexOf(pitch),
                                     currentPitchIndex: pitches.indexOf(pitch),
                                     currentBeat: beat,
-                                    isDragging: false
+                                    isDragging: false,
+                                    clickOffsetX: e.clientX,
+                                    clickOffsetY: e.clientY
                                   });
                                 }
                               }}
