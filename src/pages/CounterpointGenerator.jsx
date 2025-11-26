@@ -578,6 +578,7 @@ export default function CounterpointGenerator() {
           settings={settings}
           currentNotes={cantusFirmus}
           onApplyMelody={(notes) => setCantusFirmus(notes)}
+          tempo={tempo}
         />
       </AnimatePresence>
 
