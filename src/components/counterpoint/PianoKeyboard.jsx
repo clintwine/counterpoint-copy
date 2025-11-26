@@ -319,7 +319,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   onMouseUp={() => handleMouseUp(note, 0)}
                   onMouseEnter={() => handleMouseEnter(note, 0)}
                   onMouseLeave={() => handleMouseLeave(note, 0)}
-                  className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
+                  className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-0.5"
                   style={{
                     left: whiteKeyIndex * whiteKeyWidth,
                     width: whiteKeyWidth - 1,
@@ -327,6 +327,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                   }}
                 >
+                  {showKeys && getKeyLabel(note, 0) && (
+                    <span className="text-[8px] font-bold text-slate-500 mb-0.5">{getKeyLabel(note, 0)}</span>
+                  )}
                   {note === 'A' && <span className="text-[8px] text-slate-400">A0</span>}
                 </div>
               );
@@ -362,6 +365,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 const isActive = voiceIndex !== -1;
                 const isPressed = isNotePressed(key.note, octave);
                 
+                const keyLabel = getKeyLabel(key.note, octave);
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
@@ -369,7 +373,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     onMouseUp={() => handleMouseUp(key.note, octave)}
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
-                    className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
+                    className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-0.5"
                     style={{
                       left: whiteKeyIndex * whiteKeyWidth,
                       width: whiteKeyWidth - 1,
@@ -377,6 +381,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
                   >
+                    {showKeys && keyLabel && (
+                      <span className="text-[8px] font-bold text-slate-500 mb-0.5">{keyLabel}</span>
+                    )}
                     {key.note === 'C' && <span className="text-[8px] text-slate-400">C{octave}</span>}
                   </div>
                 );
@@ -389,6 +396,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 const isActive = voiceIndex !== -1;
                 const isPressed = isNotePressed(key.note, octave);
                 
+                const blackKeyLabel = getKeyLabel(key.note, octave);
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
@@ -396,14 +404,18 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     onMouseUp={() => handleMouseUp(key.note, octave)}
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
-                    className="absolute top-0 rounded-b z-10 cursor-pointer"
+                    className="absolute top-0 rounded-b z-10 cursor-pointer flex items-end justify-center pb-1"
                     style={{
                       left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
                       width: blackKeyWidth,
                       height: 45,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
                     }}
-                  />
+                  >
+                    {showKeys && blackKeyLabel && (
+                      <span className="text-[7px] font-bold text-white/70">{blackKeyLabel}</span>
+                    )}
+                  </div>
                 );
               });
             }
