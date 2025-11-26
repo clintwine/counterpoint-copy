@@ -519,6 +519,7 @@ export default function CounterpointGenerator() {
               measures={settings.measures}
               cantusFirmus={cantusFirmus}
               onNotesUpdate={setCantusFirmus}
+              onSeek={handleSeek}
               onExportMidi={() => {
                 // Export as MIDI-like JSON (can be converted to MIDI)
                 const midiData = {
