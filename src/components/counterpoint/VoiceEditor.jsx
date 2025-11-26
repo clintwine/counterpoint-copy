@@ -3,7 +3,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Music, Volume2 } from 'lucide-react';
+import { Music, Volume2, Guitar } from 'lucide-react';
+
+const INSTRUMENTS = [
+  { value: 'organ', label: 'Organ' },
+  { value: 'distortion', label: 'Distortion Guitar' },
+  { value: 'clean', label: 'Clean Guitar' },
+  { value: 'bass', label: 'Bass' },
+  { value: 'strings', label: 'Strings' },
+  { value: 'flute', label: 'Flute' },
+  { value: 'synth', label: 'Synth Lead' },
+];
 
 const VOICE_COLORS = {
   0: 'bg-[#D4A574]',
@@ -101,6 +111,28 @@ export default function VoiceEditor({ voice, voiceIndex, onUpdate, isCantus = fa
               step={1}
               className="[&_[role=slider]]:bg-gold [&_[role=slider]]:border-0"
             />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <Label className="text-white/90 text-xs font-medium">Instrument</Label>
+              <Guitar className="w-3 h-3 text-white/60" />
+            </div>
+            <Select
+              value={voice.instrument || 'organ'}
+              onValueChange={(value) => handleChange('instrument', value)}
+            >
+              <SelectTrigger className="bg-slate-900/50 border-slate-700 text-cream h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {INSTRUMENTS.map(inst => (
+                  <SelectItem key={inst.value} value={inst.value} className="text-cream">
+                    {inst.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}
