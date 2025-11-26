@@ -96,6 +96,8 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
   // Handle computer keyboard input
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Don't trigger piano when typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.repeat) return;
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
@@ -105,6 +107,8 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
     };
 
     const handleKeyUp = (e) => {
+      // Don't trigger piano when typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
         e.preventDefault();
