@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, SkipBack, SkipForward, Square, Repeat } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Play, Pause, SkipBack, Square, Repeat, Metronome, Clock } from 'lucide-react';
+import { initAudio, playNote } from './audioEngine';
+
+const TIME_SIGNATURES = [
+  { value: '4/4', label: '4/4', beatsPerMeasure: 16, clicksPerMeasure: 4 },
+  { value: '3/4', label: '3/4', beatsPerMeasure: 12, clicksPerMeasure: 3 },
+  { value: '2/4', label: '2/4', beatsPerMeasure: 8, clicksPerMeasure: 2 },
+  { value: '6/8', label: '6/8', beatsPerMeasure: 12, clicksPerMeasure: 2 },
+  { value: '2/2', label: '2/2', beatsPerMeasure: 8, clicksPerMeasure: 2 },
+];
 
 export default function PlaybackControls({ 
   isPlaying, 
@@ -17,13 +27,53 @@ export default function PlaybackControls({
   loopEnd,
   onLoopChange,
   isLooping,
-  onLoopToggle
+  onLoopToggle,
+  timeSignature = '4/4',
+  onTimeSignatureChange,
+  metronomeEnabled,
+  onMetronomeToggle
 }) {
+  const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
+  const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
+  
   const formatTime = (beat) => {
-    const measure = Math.floor(beat / 16) + 1;
-    const sixteenth = (beat % 16) + 1;
+    const measure = Math.floor(beat / beatsPerMeasure) + 1;
+    const sixteenth = (beat % beatsPerMeasure) + 1;
     return `${measure}:${sixteenth.toString().padStart(2, '0')}`;
   };
+
+  // Scrubbable BPM input
+  const bpmRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, value: 0 });
+
+  const handleBpmMouseDown = (e) => {
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, value: tempo };
+    document.body.style.cursor = 'ew-resize';
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      const delta = e.clientX - dragStartRef.current.x;
+      const newTempo = Math.max(40, Math.min(200, dragStartRef.current.value + Math.round(delta / 3)));
+      onTempoChange(newTempo);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.body.style.cursor = '';
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, onTempoChange]);
 
   return (
     <div className="bg-slate-900/60 rounded-2xl p-5 backdrop-blur-sm border border-slate-700/50">
@@ -96,18 +146,52 @@ export default function PlaybackControls({
           </div>
         </div>
 
-        {/* Tempo */}
-        <div className="flex items-center gap-3 min-w-[180px]">
-          <span className="text-white/90 text-xs uppercase tracking-wider font-medium">BPM</span>
-          <Slider
-            value={[tempo]}
-            onValueChange={([value]) => onTempoChange(value)}
-            min={40}
-            max={200}
-            step={1}
-            className="flex-1 [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0"
-          />
-          <span className="text-white font-mono text-sm w-8">{tempo}</span>
+        {/* Time Signature & Tempo */}
+        <div className="flex items-center gap-4">
+          {/* Time Signature */}
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-white/60" />
+            <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+              <SelectTrigger className="w-16 h-8 bg-slate-800 border-slate-600 text-white text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {TIME_SIGNATURES.map(ts => (
+                  <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
+                    {ts.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Scrubbable BPM */}
+          <div className="flex items-center gap-2">
+            <span className="text-white/60 text-xs uppercase tracking-wider">BPM</span>
+            <div
+              ref={bpmRef}
+              onMouseDown={handleBpmMouseDown}
+              className={`bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 cursor-ew-resize select-none hover:border-amber-500/50 transition-colors ${isDragging ? 'border-amber-500 bg-slate-700' : ''}`}
+              title="Drag left/right to change tempo"
+            >
+              <span className="text-white font-mono text-sm font-medium">{tempo}</span>
+            </div>
+          </div>
+
+          {/* Metronome */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onMetronomeToggle}
+            className={`h-8 px-2 ${metronomeEnabled ? 'text-amber-400 bg-amber-500/20' : 'text-white/60'} hover:text-white`}
+            title="Toggle metronome"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2L8 22h8L12 2z" />
+              <path d="M12 6v10" />
+              <circle cx="12" cy="8" r="1" fill="currentColor" />
+            </svg>
+          </Button>
         </div>
       </div>
     </div>

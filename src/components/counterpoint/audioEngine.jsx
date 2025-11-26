@@ -388,6 +388,28 @@ export function setMasterVolume(volume) {
   }
 }
 
+// Metronome click sound
+export function playMetronomeClick(isDownbeat = false) {
+  if (!audioContext) initAudio();
+  
+  const now = audioContext.currentTime;
+  const osc = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  // Higher pitch for downbeat, lower for other beats
+  osc.frequency.value = isDownbeat ? 1500 : 1000;
+  osc.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.3, now);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  
+  osc.connect(gainNode);
+  gainNode.connect(audioContext.destination); // Direct to output, bypass effects
+  
+  osc.start(now);
+  osc.stop(now + 0.05);
+}
+
 // Create a more sophisticated instrument
 export function createInstrument(type = 'organ') {
   if (!audioContext) initAudio();

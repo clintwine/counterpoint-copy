@@ -27,7 +27,7 @@ import PianoKeyboard from '@/components/counterpoint/PianoKeyboard';
 import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
-import { initAudio, playNote, stopAllNotes } from '@/components/counterpoint/audioEngine';
+import { initAudio, playNote, stopAllNotes, playMetronomeClick } from '@/components/counterpoint/audioEngine';
 
 const DEFAULT_VOICES = [
   { name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
@@ -60,6 +60,7 @@ export default function CounterpointGenerator() {
   const [isLooping, setIsLooping] = useState(false);
   const [loopStart, setLoopStart] = useState(0);
   const [loopEnd, setLoopEnd] = useState(null);
+  const [metronomeEnabled, setMetronomeEnabled] = useState(false);
   
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -271,9 +272,19 @@ export default function CounterpointGenerator() {
                 playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
               });
             });
-          }
-        }
-      }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes]);
+            }
+
+            // Metronome click
+            if (metronomeEnabled) {
+            const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+            const subdivisionSize = beatsPerMeasure / 4; // Quarter note subdivisions
+            if (currentBeat % subdivisionSize === 0) {
+              const isDownbeat = currentBeat % beatsPerMeasure === 0;
+              playMetronomeClick(isDownbeat);
+            }
+            }
+            }
+            }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
 
   const handlePlayPause = () => {
     ensureAudio();
@@ -555,7 +566,7 @@ export default function CounterpointGenerator() {
               tempo={tempo}
               onTempoChange={setTempo}
               currentBeat={currentBeat}
-              totalBeats={settings.measures * 16}
+              totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
               onSeek={handleSeek}
               onReset={handleReset}
               onStop={handleStop}
@@ -564,6 +575,10 @@ export default function CounterpointGenerator() {
               onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
               isLooping={isLooping}
               onLoopToggle={() => setIsLooping(!isLooping)}
+              timeSignature={settings.timeSignature}
+              onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
+              metronomeEnabled={metronomeEnabled}
+              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
             />
             
             <PianoKeyboard
