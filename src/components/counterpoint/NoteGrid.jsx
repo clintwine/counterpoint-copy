@@ -231,13 +231,12 @@ export default function NoteGrid({
   }, [deleteSelected, copySelected, paste, selectAll, undo, redo]);
 
   const getCellFromPosition = (clientX, clientY) => {
-    if (!containerRef.current) return null;
-    const rect = containerRef.current.getBoundingClientRect();
-    const scrollLeft = gridRef.current?.scrollLeft || 0;
-    const scrollTop = gridRef.current?.scrollTop || 0;
+    if (!containerRef.current || !gridRef.current) return null;
+    const gridRect = gridRef.current.getBoundingClientRect();
     
-    const x = clientX - rect.left + scrollLeft - 56; // 56 = pitch label width
-    const y = clientY - rect.top + scrollTop - 28; // 28 = header height
+    // Calculate position relative to the grid viewport
+    const x = clientX - gridRect.left - 56; // 56 = pitch label width
+    const y = clientY - gridRect.top - 28; // 28 = header height (h-7 = 1.75rem = 28px)
     
     const beat = Math.floor(x / CELL_WIDTH);
     const pitchIndex = Math.floor(y / CELL_HEIGHT);
