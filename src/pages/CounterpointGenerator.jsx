@@ -187,11 +187,11 @@ export default function CounterpointGenerator() {
     setIsGenerating(false);
   };
 
-  // Playback logic - 4 beats per measure
+  // Playback logic - 16th notes (16 per measure)
   useEffect(() => {
     if (isPlaying) {
-      const msPerBeat = (60 / tempo) * 1000;
-      const totalBeats = settings.measures * 4; // 4 beats per measure
+      const msPerBeat = (60 / tempo) * 1000 / 4; // 16th notes = quarter note / 4
+      const totalBeats = settings.measures * 16; // 16 sixteenth notes per measure
       
       playbackRef.current = setInterval(() => {
         setCurrentBeat(prev => {
@@ -539,7 +539,7 @@ export default function CounterpointGenerator() {
               tempo={tempo}
               onTempoChange={setTempo}
               currentBeat={currentBeat}
-              totalBeats={settings.measures * 4}
+              totalBeats={settings.measures * 16}
               onSeek={handleSeek}
               onReset={handleReset}
             />

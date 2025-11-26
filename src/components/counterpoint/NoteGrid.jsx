@@ -31,8 +31,8 @@ export default function NoteGrid({
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
-  const beatsPerMeasure = 4;
-  const totalBeats = measures * beatsPerMeasure; // 4 quarter note beats per measure
+  const beatsPerMeasure = 16; // 16th notes per measure
+  const totalBeats = measures * beatsPerMeasure;
 
   const [tool, setTool] = useState('select'); // 'select', 'marquee', 'draw'
   const [selectedNotes, setSelectedNotes] = useState(new Set());
