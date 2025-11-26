@@ -171,10 +171,10 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
                       left: octaveIndex * octaveWidth + keyIndex * whiteKeyWidth,
                       width: whiteKeyWidth - 1,
                       height: 90,
-                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
+                      backgroundColor: isPressed ? '#D4A574' : (isActive && voiceIndex !== -1) ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                       boxShadow: isPressed ? 'inset 0 2px 4px rgba(0,0,0,0.2)' : '0 2px 4px rgba(0,0,0,0.1)',
                     }}
-                    animate={isActive && !isPressed ? { scale: [1, 1.02, 1] } : {}}
+                    animate={(isActive && voiceIndex !== -1) && !isPressed ? { scale: [1, 1.02, 1] } : {}}
                     transition={{ duration: 0.2 }}
                   >
                     {showKeys && keyLabel && (
@@ -209,10 +209,10 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
                       left: octaveIndex * octaveWidth + key.offset * (whiteKeyWidth / 24),
                       width: blackKeyWidth,
                       height: 55,
-                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
+                      backgroundColor: isPressed ? '#D4A574' : (isActive && voiceIndex !== -1) ? VOICE_COLORS[voiceIndex] : '#1E293B',
                       boxShadow: isPressed ? 'inset 0 2px 4px rgba(0,0,0,0.4)' : '0 3px 6px rgba(0,0,0,0.3)',
                     }}
-                    animate={isActive && !isPressed ? { scale: [1, 1.05, 1] } : {}}
+                    animate={(isActive && voiceIndex !== -1) && !isPressed ? { scale: [1, 1.05, 1] } : {}}
                     transition={{ duration: 0.2 }}
                   >
                     {showKeys && keyLabel && (

@@ -230,7 +230,7 @@ export default function CounterpointGenerator() {
               <Button
                 onClick={handleGenerate}
                 disabled={cantusFirmus.length === 0 || isGenerating}
-                className="bg-gradient-to-r from-gold to-amber-600 text-slate-900 hover:from-gold/90 hover:to-amber-600/90"
+                className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-900 font-semibold hover:from-amber-300 hover:to-amber-500 border border-amber-500 shadow-lg shadow-amber-500/20"
               >
                 {isGenerating ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
