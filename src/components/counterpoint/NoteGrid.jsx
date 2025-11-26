@@ -5,16 +5,16 @@ const NOTE_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const OCTAVES = [5, 4, 3, 2];
 
 const NOTE_COLORS = {
-  0: '#D4A574', // Voice 1 - Gold
+  0: '#E8B885', // Voice 1 - Gold
   1: '#7B9E89', // Voice 2 - Sage
   2: '#9B8AA6', // Voice 3 - Lavender
   3: '#A68B7B', // Voice 4 - Warm brown
 };
 
-export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 }) {
+export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8, onNoteClick }) {
   const gridRef = useRef(null);
   const beatsPerMeasure = 4;
-  const totalBeats = measures * beatsPerMeasure;
+  const totalBeats = measures;
 
   // Generate all pitches for the grid
   const pitches = [];
@@ -38,8 +38,14 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
     return voice.notes.find(n => n.beat === beat);
   };
 
+  const handleCellClick = (pitch, beat) => {
+    if (onNoteClick) {
+      onNoteClick(pitch, beat);
+    }
+  };
+
   return (
-    <div className="bg-slate-900/50 rounded-2xl p-6 backdrop-blur-sm border border-slate-700/50">
+    <div className="bg-slate-800 rounded-2xl p-5 border border-slate-600">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-medium tracking-wide">Score</h3>
         <div className="flex gap-4">
@@ -49,7 +55,7 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
                 className="w-3 h-3 rounded-full" 
                 style={{ backgroundColor: NOTE_COLORS[i] }}
               />
-              <span className="text-xs text-white/80">{voice.name}</span>
+              <span className="text-xs text-white/90">{voice.name}</span>
             </div>
           ))}
         </div>
@@ -57,48 +63,50 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
 
       <div 
         ref={gridRef}
-        className="overflow-x-auto overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+        className="overflow-x-auto overflow-y-auto max-h-[400px]"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent' }}
       >
-        <div className="relative min-w-max">
-          {/* Pitch labels */}
-          <div className="sticky left-0 z-10 flex flex-col bg-slate-900/90 backdrop-blur">
-            <div className="h-6" /> {/* Header spacer */}
-            {pitches.map((pitch, i) => (
+        <div className="flex">
+          {/* Pitch labels - fixed column */}
+          <div className="sticky left-0 z-20 bg-slate-800 flex-shrink-0">
+            <div className="h-7 border-b border-slate-600" /> {/* Header spacer */}
+            {pitches.map((pitch) => (
               <div 
                 key={pitch}
-                className={`h-6 w-12 flex items-center justify-end pr-2 text-xs border-b border-slate-700/50 ${
-                  pitch.includes('C') ? 'text-white font-medium' : 'text-white/60'
+                className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 ${
+                  pitch.startsWith('C') ? 'text-amber-400 font-semibold bg-slate-750' : 'text-white/80'
                 }`}
+                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : undefined }}
               >
                 {pitch}
               </div>
             ))}
           </div>
 
-          {/* Grid */}
-          <div className="absolute left-12 top-0">
-            {/* Beat numbers */}
-            <div className="flex h-6">
+          {/* Grid area */}
+          <div className="flex-1">
+            {/* Beat numbers header */}
+            <div className="flex h-7 border-b border-slate-600">
               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
-                  className={`w-12 flex items-center justify-center text-xs border-r ${
+                  className={`w-12 flex-shrink-0 flex items-center justify-center text-xs font-medium border-r ${
                     beat % beatsPerMeasure === 0 
-                      ? 'border-slate-500 text-white font-medium' 
-                      : 'border-slate-700/50 text-white/50'
+                      ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
+                      : 'border-r-slate-700 text-white/60'
                   }`}
                 >
-                  {beat % beatsPerMeasure === 0 ? beat / beatsPerMeasure + 1 : ''}
+                  {beat + 1}
                 </div>
               ))}
             </div>
 
-            {/* Note grid */}
+            {/* Note grid rows */}
             {pitches.map((pitch, pitchIndex) => (
-              <div key={pitch} className="flex h-6">
+              <div key={pitch} className="flex h-7">
                 {Array.from({ length: totalBeats }).map((_, beat) => {
                   const isBarLine = beat % beatsPerMeasure === 0;
-                  const isCLine = pitch.includes('C');
+                  const isCLine = pitch.startsWith('C');
                   
                   // Check if any voice has a note at this position
                   const notesAtPosition = voices.map((_, voiceIndex) => {
@@ -109,24 +117,27 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
                     return null;
                   }).filter(Boolean);
 
+                  const isCurrentBeat = currentBeat === beat;
+
                   return (
                     <div
                       key={beat}
-                      className={`w-12 h-6 border-r border-b relative ${
-                        isBarLine ? 'border-r-slate-600' : 'border-r-slate-800/30'
-                      } ${isCLine ? 'border-b-slate-700' : 'border-b-slate-800/30'} ${
-                        currentBeat === beat ? 'bg-gold/10' : ''
-                      }`}
+                      onClick={() => handleCellClick(pitch, beat)}
+                      className={`w-12 h-7 flex-shrink-0 border-r border-b relative cursor-pointer transition-colors
+                        ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
+                        ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : 'border-b-slate-700'}
+                        ${isCurrentBeat ? 'bg-amber-500/20' : 'hover:bg-slate-700/50'}
+                      `}
                     >
                       {notesAtPosition.map(({ voiceIndex, note }) => (
                         <motion.div
                           key={voiceIndex}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="absolute inset-1 rounded-md flex items-center justify-center"
+                          className="absolute inset-0.5 rounded flex items-center justify-center shadow-md"
                           style={{ 
                             backgroundColor: NOTE_COLORS[voiceIndex],
-                            opacity: currentBeat === beat && isPlaying ? 1 : 0.8
+                            boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined
                           }}
                         >
                           <span className="text-[10px] font-bold text-slate-900">
@@ -142,6 +153,10 @@ export default function NoteGrid({ voices, currentBeat, isPlaying, measures = 8 
           </div>
         </div>
       </div>
+      
+      <p className="text-white/50 text-xs mt-3">
+        Click on grid cells to add/remove notes in the Cantus Firmus
+      </p>
     </div>
   );
 }

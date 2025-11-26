@@ -311,6 +311,23 @@ export default function CounterpointGenerator() {
               currentBeat={currentBeat}
               isPlaying={isPlaying}
               measures={settings.measures}
+              onNoteClick={(pitch, beat) => {
+                // Toggle note in cantus firmus
+                const existingIndex = cantusFirmus.findIndex(n => n.beat === beat);
+                if (existingIndex >= 0) {
+                  // If same pitch, remove it; otherwise replace it
+                  if (cantusFirmus[existingIndex].pitch === pitch) {
+                    setCantusFirmus(cantusFirmus.filter((_, i) => i !== existingIndex));
+                  } else {
+                    const newNotes = [...cantusFirmus];
+                    newNotes[existingIndex] = { beat, pitch };
+                    setCantusFirmus(newNotes);
+                  }
+                } else {
+                  // Add new note
+                  setCantusFirmus([...cantusFirmus, { beat, pitch }].sort((a, b) => a.beat - b.beat));
+                }
+              }}
             />
             
             <PlaybackControls
