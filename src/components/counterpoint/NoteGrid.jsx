@@ -487,7 +487,7 @@ export default function NoteGrid({
         onMouseLeave={handleMouseUp}
       >
         <div className="flex" ref={containerRef}>
-          {/* Pitch labels - fixed column */}
+          {/* Pitch labels - fixed column on left */}
           <div className="sticky left-0 z-20 bg-slate-800 flex-shrink-0">
             <div className="h-7 border-b border-slate-600" />
             {pitches.map((pitch) => (
@@ -496,7 +496,7 @@ export default function NoteGrid({
                 className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 ${
                   pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
                 }`}
-                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : undefined }}
+                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
               >
                 {pitch}
               </div>
@@ -673,6 +673,22 @@ export default function NoteGrid({
           </div>
         </div>
 
+        {/* Pitch labels - fixed column on right */}
+        <div className="sticky right-0 z-20 bg-slate-800 flex-shrink-0">
+          <div className="h-7 border-b border-slate-600" />
+          {pitches.map((pitch) => (
+            <div 
+              key={`right-${pitch}`}
+              className={`h-7 w-14 flex items-center justify-start pl-2 text-xs border-b border-slate-700 border-l border-l-slate-600 ${
+                pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
+              }`}
+              style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
+            >
+              {pitch}
+            </div>
+          ))}
+        </div>
+
         {/* Marquee selection rectangle */}
         {marquee && (
           <div
@@ -685,7 +701,7 @@ export default function NoteGrid({
             }}
           />
         )}
-      </div>
+        </div>
       
       <div className="flex items-center justify-between mt-3">
         <p className="text-white/50 text-xs">
