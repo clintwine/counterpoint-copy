@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, Download, FileVideo, FileAudio } from 'lucide-react';
 import { initAudio, playNote } from './audioEngine';
 
-const NOTE_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const NOTE_NAMES = ['B', 'A', 'G', 'F', 'E', 'D', 'C'];
 const OCTAVES = [5, 4, 3, 2];
 
 const NOTE_COLORS = {
