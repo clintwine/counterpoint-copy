@@ -860,21 +860,28 @@ export default function NoteGrid({
         <div
           className="absolute top-0 bottom-0 z-30 pointer-events-none"
           style={{
-            left: 56 + currentBeat * CELL_WIDTH + CELL_WIDTH / 2,
+            left: 56 + currentBeat * CELL_WIDTH,
             transition: isPlaying ? `left ${(60 / tempo) / 4}s linear` : 'none'
           }}
         >
-          {/* Triangle marker at top */}
+          {/* Triangle marker at top - scales with zoom */}
           <div 
-            className="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0"
+            className="absolute left-1/2 -translate-x-1/2"
             style={{
-              borderLeft: '6px solid transparent',
-              borderRight: '6px solid transparent',
-              borderTop: '8px solid #ef4444'
+              top: -2,
+              borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
+              borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
+              borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
             }}
           />
           {/* Vertical line */}
-          <div className="absolute top-1 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+          <div 
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+            style={{ 
+              top: Math.max(10, 12 * zoom),
+              width: Math.max(2, 3 * zoom)
+            }}
+          />
         </div>
 
         {/* Marquee selection rectangle */}
