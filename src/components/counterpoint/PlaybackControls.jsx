@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Metronome, Clock } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock } from 'lucide-react';
 import { initAudio, playNote } from './audioEngine';
 
 const TIME_SIGNATURES = [
