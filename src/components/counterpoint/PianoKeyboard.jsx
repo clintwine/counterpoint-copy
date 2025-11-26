@@ -57,6 +57,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
+  const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
   const activeOscillators = useRef({});
   const isDraggingRef = useRef(false);
 
@@ -82,17 +83,17 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (activeOscillators.current[pitch]) return; // Already playing
     
     initAudio();
-    // Use playNote with instrument - duration of 10 seconds for sustain effect
-    playNote(pitch, 10, 0.7, 0, instrument);
-    activeOscillators.current[pitch] = true;
+    // Use playNoteSustain with envelope settings
+    const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
+    activeOscillators.current[pitch] = oscObj;
     setPressedNotes(prev => new Set([...prev, pitch]));
-  }, [instrument]);
+  }, [instrument, envelope]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
-      // Only call stopNoteSustain if it's an oscillator object, not just a boolean
+      // Only call stopNoteSustain if it's an oscillator object
       if (typeof activeOscillators.current[pitch] === 'object') {
-        stopNoteSustain(activeOscillators.current[pitch]);
+        stopNoteSustain(activeOscillators.current[pitch], envelope.release);
       }
       delete activeOscillators.current[pitch];
       setPressedNotes(prev => {
@@ -101,7 +102,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         return next;
       });
     }
-  }, []);
+  }, [envelope.release]);
 
   const handleMouseDown = useCallback((e, note, octave) => {
     e.preventDefault();
@@ -202,6 +203,75 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano (88 Keys)</h3>
         <div className="flex items-center gap-4">
+          {/* ADSR Envelope Knobs */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Attack</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.attack * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.attack * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.01"
+                  max="1"
+                  step="0.01"
+                  value={envelope.attack}
+                  onChange={(e) => setEnvelope(prev => ({ ...prev, attack: parseFloat(e.target.value) }))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Sustain</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.sustain * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.sustain * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={envelope.sustain}
+                  onChange={(e) => setEnvelope(prev => ({ ...prev, sustain: parseFloat(e.target.value) }))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Release</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.release * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.release * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.05"
+                  max="2"
+                  step="0.01"
+                  value={envelope.release}
+                  onChange={(e) => setEnvelope(prev => ({ ...prev, release: parseFloat(e.target.value) }))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="w-px h-8 bg-slate-600" />
+
           {/* Effect Knobs */}
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">

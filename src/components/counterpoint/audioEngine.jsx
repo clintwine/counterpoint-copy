@@ -289,88 +289,81 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
 }
 
 // Play a note that sustains until stopped
-export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0) {
+export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument = 'organ', attack = 0.02) {
   if (!audioContext) initAudio();
   
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return null;
   
+  const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = audioContext.currentTime;
   
-  // Create oscillators for richer sound
-  const osc1 = audioContext.createOscillator();
-  const osc2 = audioContext.createOscillator();
-  const osc3 = audioContext.createOscillator();
+  // Create oscillators based on instrument harmonics
+  const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
   
-  // Piano-like sound with multiple oscillators
-  osc1.type = 'triangle';
-  osc2.type = 'sine';
-  osc3.type = 'sine';
+  config.harmonics.forEach((harmGain, idx) => {
+    const osc = audioContext.createOscillator();
+    osc.type = config.waveform;
+    osc.frequency.value = freq * (idx + 1);
+    
+    const oscGain = audioContext.createGain();
+    oscGain.gain.value = harmGain * 0.3;
+    
+    osc.connect(oscGain);
+    oscGain.connect(filterNode);
+    oscillators.push(osc);
+  });
   
-  osc1.frequency.value = freq;
-  osc2.frequency.value = freq * 2; // Octave harmonic
-  osc3.frequency.value = freq * 3; // Fifth harmonic
-  
-  // Filter for warmth
+  // Filter
   filterNode.type = 'lowpass';
-  filterNode.frequency.value = 3000;
-  filterNode.Q.value = 0.5;
+  filterNode.frequency.value = config.filterFreq;
+  filterNode.Q.value = config.filterQ;
   
-  // Attack envelope (sustain level maintained)
+  // Distortion for certain instruments
+  let outputNode = filterNode;
+  if (config.distortion > 0) {
+    const distNode = createDistortion(config.distortion);
+    filterNode.connect(distNode);
+    outputNode = distNode;
+  }
+  
+  // Attack envelope - sustain level maintained until release
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + 0.01);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.6, now + 0.1);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.6, now + attack + 0.1);
   
-  // Connect oscillators with different volumes
-  const osc1Gain = audioContext.createGain();
-  osc1Gain.gain.value = 0.5;
-  osc1.connect(osc1Gain);
-  osc1Gain.connect(filterNode);
-  
-  const osc2Gain = audioContext.createGain();
-  osc2Gain.gain.value = 0.25;
-  osc2.connect(osc2Gain);
-  osc2Gain.connect(filterNode);
-  
-  const osc3Gain = audioContext.createGain();
-  osc3Gain.gain.value = 0.1;
-  osc3.connect(osc3Gain);
-  osc3Gain.connect(filterNode);
-  
-  filterNode.connect(gainNode);
+  outputNode.connect(gainNode);
   gainNode.connect(masterGain);
   
-  osc1.start(now);
-  osc2.start(now);
-  osc3.start(now);
+  oscillators.forEach(osc => osc.start(now));
   
-  return { osc1, osc2, osc3, gainNode, filterNode };
+  return { oscillators, gainNode, filterNode };
 }
 
 // Stop a sustained note with release envelope
-export function stopNoteSustain(oscillatorObj) {
+export function stopNoteSustain(oscillatorObj, release = 0.3) {
   if (!oscillatorObj || !audioContext) return;
   
-  const { osc1, osc2, osc3, gainNode } = oscillatorObj;
+  const { oscillators, gainNode } = oscillatorObj;
   const now = audioContext.currentTime;
   
   // Release envelope
   gainNode.gain.cancelScheduledValues(now);
   gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + release);
   
   // Stop oscillators after release
   setTimeout(() => {
-    try {
-      osc1.stop();
-      osc2.stop();
-      if (osc3) osc3.stop();
-    } catch (e) {
-      // Oscillator already stopped
-    }
-  }, 350);
+    oscillators.forEach(osc => {
+      try {
+        osc.stop();
+      } catch (e) {
+        // Oscillator already stopped
+      }
+    });
+  }, release * 1000 + 50);
 }
 
 export function playChord(pitches, duration = 0.5, volumes = []) {
