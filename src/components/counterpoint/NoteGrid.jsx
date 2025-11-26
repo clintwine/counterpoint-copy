@@ -278,7 +278,10 @@ export default function NoteGrid({
         paintedNotesRef.current.add(noteKey);
         const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
         onNotesUpdate(newNotes);
-        playNoteSound(pitch);
+        // Play the note with proper duration for feedback
+        initAudio();
+        const instrument = voices[activeVoice]?.instrument || 'organ';
+        playNote(pitch, 0.5, 0.7, 0, instrument);
       }
     } else if (tool === 'select') {
       if (hasNote) {
