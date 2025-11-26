@@ -61,6 +61,8 @@ export default function NoteGrid({
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
 
+  const getNoteKey = (pitch, beat) => `${pitch}-${beat}`;
+
   // Notify parent of selection changes
   useEffect(() => {
     if (onSelectionChange) {
@@ -109,8 +111,6 @@ export default function NoteGrid({
     if (!voice || !voice.notes) return [];
     return voice.notes.filter(n => n.beat === beat);
   };
-
-  const getNoteKey = (pitch, beat) => `${pitch}-${beat}`;
 
   const saveToHistory = useCallback((notes) => {
     const newHistory = history.slice(0, historyIndex + 1);
