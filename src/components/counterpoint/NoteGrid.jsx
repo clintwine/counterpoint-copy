@@ -682,7 +682,7 @@ export default function NoteGrid({
                     beat % beatsPerMeasure === 0 
                       ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
                       : 'border-r-slate-700 text-white/60'
-                  } ${currentBeat === beat ? 'bg-amber-500/40' : ''}`}
+                  }`}
                   style={{ width: CELL_WIDTH }}
                 >
                   {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
@@ -722,10 +722,10 @@ export default function NoteGrid({
                       key={beat}
                       onMouseDown={(e) => handleMouseDown(e, pitch, beat)}
                       className={`flex-shrink-0 border-r border-b relative cursor-pointer transition-colors
-                        ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
-                        ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : 'border-b-slate-700'}
-                        ${isCurrentBeat ? 'bg-amber-500/20' : 'hover:bg-slate-700/50'}
-                      `}
+                          ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
+                          ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : 'border-b-slate-700'}
+                          hover:bg-slate-700/50
+                        `}
                       style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
                     >
                       {notesAtPosition.map(({ voiceIndex, note }) => {
@@ -843,6 +843,15 @@ export default function NoteGrid({
             )}
           </div>
         </div>
+
+        {/* Smooth playhead line */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-30 pointer-events-none shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+          style={{
+            left: 56 + currentBeat * CELL_WIDTH + CELL_WIDTH / 2,
+            transition: isPlaying ? 'left 0.05s linear' : 'none'
+          }}
+        />
 
         {/* Marquee selection rectangle */}
         {marquee && (
