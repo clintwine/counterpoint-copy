@@ -451,68 +451,15 @@ export default function CounterpointGenerator() {
           </div>
         </motion.header>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Sidebar - Settings */}
-          <motion.aside 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-1 space-y-4"
-          >
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full bg-slate-800/50 border border-slate-700/50">
-                <TabsTrigger value="compose" className="flex-1 data-[state=active]:bg-gold data-[state=active]:text-slate-900">
-                  <Music2 className="w-4 h-4 mr-1" />
-                  Compose
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1 data-[state=active]:bg-gold data-[state=active]:text-slate-900">
-                  <Settings className="w-4 h-4 mr-1" />
-                  Settings
-                </TabsTrigger>
-              </TabsList>
+        {/* Main Content - Full width now, AI panel is overlay */}
+        <div className="grid grid-cols-1 gap-6">
 
-              <TabsContent value="compose" className="mt-4 space-y-4">
-                <CantusFirmusEditor
-                  notes={cantusFirmus}
-                  onUpdate={setCantusFirmus}
-                  mode={settings.mode}
-                  keySignature={settings.key}
-                  measures={settings.measures}
-                />
-                
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 px-1">
-                    <Layers className="w-4 h-4 text-cream/60" />
-                    <h3 className="text-cream/80 text-sm font-medium">Voices</h3>
-                  </div>
-                  {voices.map((voice, index) => (
-                    <VoiceEditor
-                      key={index}
-                      voice={voice}
-                      voiceIndex={index}
-                      onUpdate={(updated) => updateVoice(index, updated)}
-                      isCantus={index === 0}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="settings" className="mt-4">
-                <GenerationSettings
-                  settings={settings}
-                  onUpdate={setSettings}
-                />
-              </TabsContent>
-            </Tabs>
-          </motion.aside>
-
-          {/* Main Area - Score & Playback */}
+          {/* Main Area - Score & Playback - Full width */}
           <motion.main 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-3 space-y-4"
+            className="space-y-4"
           >
             <NoteGrid
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
@@ -574,56 +521,60 @@ export default function CounterpointGenerator() {
             />
             
             <PianoKeyboard
-                              activeNotes={activeNotes}
-                              octaves={[3, 4, 5]}
-                              instrument={pianoInstrument}
-                              onInstrumentChange={setPianoInstrument}
-                            />
+                activeNotes={activeNotes}
+                instrument={pianoInstrument}
+                onInstrumentChange={setPianoInstrument}
+              />
           </motion.main>
           </div>
           </div>
 
-      {/* AI Chatbot */}
+      {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
-        <AIChatbot
-          isOpen={chatbotOpen}
-          onClose={() => setChatbotOpen(false)}
-          settings={settings}
-          currentNotes={cantusFirmus}
-          onApplyMelody={(notes) => setCantusFirmus(notes)}
-          onApplyHarmony={(notes, voiceType) => {
-            // Map voice type to voice index
-            const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
-            const voiceIndex = voiceMap[voiceType] || 1;
+        {chatbotOpen && (
+          <AIChatbot
+            isOpen={chatbotOpen}
+            onClose={() => setChatbotOpen(false)}
+            settings={settings}
+            onSettingsChange={setSettings}
+            voices={voices}
+            onVoicesChange={setVoices}
+            currentNotes={cantusFirmus}
+            onApplyMelody={(notes) => setCantusFirmus(notes)}
+            onApplyHarmony={(notes, voiceType) => {
+              // Map voice type to voice index
+              const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
+              const voiceIndex = voiceMap[voiceType] || 1;
 
-            // Create or update the generated voice
-            const newVoice = {
-              name: voiceType.charAt(0).toUpperCase() + voiceType.slice(1),
-              notes: notes,
-              enabled: true
-            };
+              // Create or update the generated voice
+              const newVoice = {
+                name: voiceType.charAt(0).toUpperCase() + voiceType.slice(1),
+                notes: notes,
+                enabled: true
+              };
 
-            setGeneratedVoices(prev => {
-              const updated = [...prev];
-              // Find existing voice of same type or add new
-              const existingIdx = updated.findIndex(v => v.name.toLowerCase() === voiceType);
-              if (existingIdx >= 0) {
-                updated[existingIdx] = newVoice;
-              } else {
-                updated.push(newVoice);
+              setGeneratedVoices(prev => {
+                const updated = [...prev];
+                // Find existing voice of same type or add new
+                const existingIdx = updated.findIndex(v => v.name.toLowerCase() === voiceType);
+                if (existingIdx >= 0) {
+                  updated[existingIdx] = newVoice;
+                } else {
+                  updated.push(newVoice);
+                }
+                return updated;
+              });
+
+              // Enable the corresponding voice in settings
+              const newVoices = [...voices];
+              if (newVoices[voiceIndex]) {
+                newVoices[voiceIndex].enabled = true;
               }
-              return updated;
-            });
-
-            // Enable the corresponding voice in settings
-            const newVoices = [...voices];
-            if (newVoices[voiceIndex]) {
-              newVoices[voiceIndex].enabled = true;
-            }
-            setVoices(newVoices);
-          }}
-          tempo={tempo}
-        />
+              setVoices(newVoices);
+            }}
+            tempo={tempo}
+          />
+        )}
       </AnimatePresence>
 
       {/* Custom styles */}

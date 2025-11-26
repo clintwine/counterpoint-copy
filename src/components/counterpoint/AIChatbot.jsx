@@ -2,10 +2,30 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Send, Loader2, Sparkles, Music, Play, Square, Layers, Palette } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Send, Loader2, Sparkles, Music, Play, Square, Layers, Palette, Settings, Music2, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { initAudio, playNote, stopAllNotes } from './audioEngine';
+
+const KEY_OPTIONS = ['C', 'G', 'D', 'F', 'A', 'E', 'Bb'];
+const MODE_OPTIONS = [
+  { value: 'major', label: 'Major' },
+  { value: 'minor', label: 'Minor' },
+  { value: 'dorian', label: 'Dorian' },
+  { value: 'mixolydian', label: 'Mixolydian' },
+];
+
+const SPECIES_OPTIONS = [
+  { value: '1st', label: '1st Species' },
+  { value: '2nd', label: '2nd Species' },
+  { value: '3rd', label: '3rd Species' },
+  { value: '4th', label: '4th Species' },
+  { value: '5th', label: '5th (Florid)' },
+];
 
 const COMPOSER_STYLES = {
   none: { name: 'No Style', description: '' },
@@ -44,7 +64,10 @@ const COMPOSER_STYLES = {
 export default function AIChatbot({ 
   isOpen, 
   onClose, 
-  settings, 
+  settings,
+  onSettingsChange,
+  voices,
+  onVoicesChange,
   onApplyMelody,
   onApplyHarmony,
   currentNotes,
@@ -53,12 +76,14 @@ export default function AIChatbot({
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
-      content: "Hi! I'm your AI counterpoint composer. I can create complex melodies and harmonies in various styles! Try:\n\n• \"Create a Bach-style fugue subject\"\n• \"Compose a dramatic Beethoven melody\"\n• \"Add a walking bass line\"\n• \"Generate a 32-note virtuosic passage\"\n\nSelect a composer style below for authentic period techniques!"
+      content: "Hi! I'm your AI counterpoint composer. I can create melodies and harmonies in various styles!\n\n• \"Create a Bach-style fugue subject\"\n• \"Add a walking bass line\"\n• \"Generate a 32-note passage\"\n\nSelect a composer style below!"
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('none');
+  const [activeTab, setActiveTab] = useState('chat');
+  const [settingsExpanded, setSettingsExpanded] = useState(true);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -428,29 +453,129 @@ Respond with description and notes. Make this sound like REAL MUSIC composed by 
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 300 }}
+      initial={{ opacity: 0, x: -300 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 300 }}
-      className="fixed right-4 top-20 bottom-4 w-96 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
+      exit={{ opacity: 0, x: -300 }}
+      className="fixed left-4 top-20 bottom-4 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-slate-900" />
-          </div>
-          <div>
-            <h3 className="text-white font-medium text-sm">AI Composer</h3>
-            <p className="text-white/50 text-xs">Create melodies with AI</p>
-          </div>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white">
-          <X className="w-5 h-5" />
-        </Button>
+      {/* Tabs */}
+      <div className="p-2 border-b border-slate-700">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full bg-slate-800/50">
+            <TabsTrigger value="chat" className="flex-1 text-xs data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">
+              <Sparkles className="w-3 h-3 mr-1" />
+              AI Chat
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex-1 text-xs data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">
+              <Settings className="w-3 h-3 mr-1" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {activeTab === 'settings' && (
+        <div className="flex-1 overflow-y-auto p-3 space-y-4">
+          {/* Generation Settings */}
+          <div className="space-y-3">
+            <h4 className="text-white/80 text-xs font-medium uppercase tracking-wider">Generation</h4>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-white/70 text-xs mb-1 block">Key</Label>
+                <Select value={settings.key} onValueChange={(v) => onSettingsChange?.({...settings, key: v})}>
+                  <SelectTrigger className="h-8 bg-slate-800 border-slate-700 text-white text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {KEY_OPTIONS.map(k => (
+                      <SelectItem key={k} value={k} className="text-white text-xs">{k}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-white/70 text-xs mb-1 block">Mode</Label>
+                <Select value={settings.mode} onValueChange={(v) => onSettingsChange?.({...settings, mode: v})}>
+                  <SelectTrigger className="h-8 bg-slate-800 border-slate-700 text-white text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {MODE_OPTIONS.map(m => (
+                      <SelectItem key={m.value} value={m.value} className="text-white text-xs">{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-white/70 text-xs mb-1 block">Species</Label>
+              <Select value={settings.species} onValueChange={(v) => onSettingsChange?.({...settings, species: v})}>
+                <SelectTrigger className="h-8 bg-slate-800 border-slate-700 text-white text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {SPECIES_OPTIONS.map(s => (
+                    <SelectItem key={s.value} value={s.value} className="text-white text-xs">{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-1">
+                <Label className="text-white/70 text-xs">Measures</Label>
+                <span className="text-white text-xs">{settings.measures}</span>
+              </div>
+              <Slider
+                value={[settings.measures]}
+                onValueChange={([v]) => onSettingsChange?.({...settings, measures: v})}
+                min={4}
+                max={64}
+                step={4}
+                className="[&_[role=slider]]:bg-amber-400"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label className="text-white/70 text-xs">Strict Rules</Label>
+              <Switch
+                checked={settings.strictRules}
+                onCheckedChange={(v) => onSettingsChange?.({...settings, strictRules: v})}
+                className="data-[state=checked]:bg-amber-500"
+              />
+            </div>
+          </div>
+
+          {/* Voices */}
+          <div className="space-y-2">
+            <h4 className="text-white/80 text-xs font-medium uppercase tracking-wider">Voices</h4>
+            {voices?.map((voice, i) => (
+              <div key={i} className="flex items-center justify-between bg-slate-800/50 rounded-lg p-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ['#E8B885', '#7B9E89', '#9B8AA6', '#A68B7B'][i] }} />
+                  <span className="text-white text-xs">{voice.name}</span>
+                </div>
+                <Switch
+                  checked={voice.enabled}
+                  onCheckedChange={(v) => {
+                    const newVoices = [...voices];
+                    newVoices[i] = {...voice, enabled: v};
+                    onVoicesChange?.(newVoices);
+                  }}
+                  className="data-[state=checked]:bg-amber-500 scale-75"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'chat' && (
+        <>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
@@ -570,45 +695,53 @@ Respond with description and notes. Make this sound like REAL MUSIC composed by 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Style selector and Input */}
-      <div className="p-4 border-t border-slate-700 space-y-3">
-        <div className="flex items-center gap-2">
-          <Palette className="w-4 h-4 text-white/60" />
-          <Select value={selectedStyle} onValueChange={setSelectedStyle}>
-            <SelectTrigger className="flex-1 bg-slate-800 border-slate-700 text-white h-8 text-xs">
-              <SelectValue placeholder="Select style..." />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700">
-              {Object.entries(COMPOSER_STYLES).map(([key, style]) => (
-                <SelectItem key={key} value={key} className="text-white text-xs">
-                  {style.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="e.g., Create a 24-note dramatic melody..."
-            className="bg-slate-800 border-slate-700 text-white placeholder:text-white/40"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-900"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
-        {selectedStyle !== 'none' && (
-          <p className="text-xs text-amber-400/70">
-            Style: {COMPOSER_STYLES[selectedStyle].name}
-          </p>
-        )}
-      </div>
-      </motion.div>
-      );
+          {/* Style selector and Input */}
+          <div className="p-3 border-t border-slate-700 space-y-2">
+            <div className="flex items-center gap-2">
+              <Palette className="w-3 h-3 text-white/60" />
+              <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+                <SelectTrigger className="flex-1 bg-slate-800 border-slate-700 text-white h-7 text-xs">
+                  <SelectValue placeholder="Style..." />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {Object.entries(COMPOSER_STYLES).map(([key, style]) => (
+                    <SelectItem key={key} value={key} className="text-white text-xs">
+                      {style.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Describe what to create..."
+                className="bg-slate-800 border-slate-700 text-white placeholder:text-white/40 h-8 text-xs"
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                size="sm"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-900 h-8 w-8 p-0"
+              >
+                <Send className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Close button */}
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={onClose} 
+        className="absolute top-2 right-2 text-white/60 hover:text-white h-6 w-6"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </motion.div>
+  );
 }

@@ -48,13 +48,17 @@ const INSTRUMENTS = [
   { value: 'synth', label: 'Synth' },
 ];
 
-export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], instrument = 'organ', onInstrumentChange }) {
+// Full 88-key piano: A0 to C8
+const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
+
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange }) {
+  const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const activeOscillators = useRef({});
   
-  const whiteKeyWidth = 28;
-  const blackKeyWidth = 18;
+  const whiteKeyWidth = 24;
+  const blackKeyWidth = 14;
   const octaveWidth = whiteKeyWidth * 7;
 
   const isNoteActive = (note, octave) => {
@@ -165,10 +169,14 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], i
     return PITCH_TO_KEY[pitch] || '';
   };
 
+  // Calculate total width for 88 keys (52 white keys)
+  const totalWhiteKeys = 52;
+  const totalWidth = totalWhiteKeys * whiteKeyWidth;
+
   return (
-    <div className="bg-slate-800/60 rounded-xl p-4 border border-slate-600">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano</h3>
+    <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-600">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano (88 Keys)</h3>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <Guitar className="w-3.5 h-3.5 text-white/60" />
@@ -192,92 +200,143 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], i
             className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
           >
             <Keyboard className="w-3.5 h-3.5 mr-1" />
-            {showKeys ? 'Hide' : 'Show'} Keys
+            Keys
           </Button>
         </div>
       </div>
       
-      <div className="overflow-x-auto pb-2">
-        <div className="relative" style={{ width: octaves.length * octaveWidth, height: 100 }}>
-          {octaves.map((octave, octaveIndex) => (
-            <React.Fragment key={octave}>
-              {/* White keys */}
-              {OCTAVE_NOTES.filter(n => !n.isBlack).map((key, keyIndex) => {
-                const voiceIndex = isNoteActive(key.note, octave);
-                const isActive = voiceIndex !== -1;
-                const isPressed = isNotePressed(key.note, octave);
-                const keyLabel = getKeyLabel(key.note, octave);
-                
-                return (
-                  <motion.div
-                    key={`${octave}-${key.note}`}
-                    onMouseDown={() => handleMouseDown(key.note, octave)}
-                    onMouseUp={() => handleMouseUp(key.note, octave)}
-                    onMouseLeave={() => handleMouseLeave(key.note, octave)}
-                    className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-1"
-                    style={{
-                      left: octaveIndex * octaveWidth + keyIndex * whiteKeyWidth,
-                      width: whiteKeyWidth - 1,
-                      height: 90,
-                      backgroundColor: isPressed ? '#D4A574' : (isActive && voiceIndex !== -1) ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
-                      boxShadow: isPressed ? 'inset 0 2px 4px rgba(0,0,0,0.2)' : '0 2px 4px rgba(0,0,0,0.1)',
-                    }}
-                    animate={(isActive && voiceIndex !== -1) && !isPressed ? { scale: [1, 1.02, 1] } : {}}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {showKeys && keyLabel && (
-                      <span className="text-[9px] font-bold text-slate-500 mb-0.5">
-                        {keyLabel}
-                      </span>
-                    )}
-                    {key.note === 'C' && (
-                      <span className="text-[9px] text-slate-400 font-medium">
-                        C{octave}
-                      </span>
-                    )}
-                  </motion.div>
-                );
-              })}
+      <div className="overflow-x-auto pb-1">
+        <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
+            {/* Generate all 88 keys - A0 to C8 */}
+          {(() => {
+            const keys = [];
+            let whiteKeyIndex = 0;
+            
+            // A0, A#0, B0 (partial first octave)
+            ['A', 'B'].forEach((note) => {
+              const voiceIndex = isNoteActive(note, 0);
+              const isActive = voiceIndex !== -1;
+              const isPressed = isNotePressed(note, 0);
+              keys.push(
+                <div
+                  key={`0-${note}`}
+                  onMouseDown={() => handleMouseDown(note, 0)}
+                  onMouseUp={() => handleMouseUp(note, 0)}
+                  onMouseLeave={() => handleMouseLeave(note, 0)}
+                  className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
+                  style={{
+                    left: whiteKeyIndex * whiteKeyWidth,
+                    width: whiteKeyWidth - 1,
+                    height: 70,
+                    backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
+                  }}
+                >
+                  {note === 'A' && <span className="text-[8px] text-slate-400">A0</span>}
+                </div>
+              );
+              whiteKeyIndex++;
+            });
+            
+            // A#0 black key
+            const a0SharpActive = isNoteActive('A#', 0);
+            const a0SharpPressed = isNotePressed('A#', 0);
+            keys.push(
+              <div
+                key="0-A#"
+                onMouseDown={() => handleMouseDown('A#', 0)}
+                onMouseUp={() => handleMouseUp('A#', 0)}
+                onMouseLeave={() => handleMouseLeave('A#', 0)}
+                className="absolute top-0 rounded-b z-10 cursor-pointer"
+                style={{
+                  left: whiteKeyWidth - blackKeyWidth / 2,
+                  width: blackKeyWidth,
+                  height: 45,
+                  backgroundColor: a0SharpPressed ? '#D4A574' : a0SharpActive !== -1 ? VOICE_COLORS[a0SharpActive] : '#1E293B',
+                }}
+              />
+            );
+            
+            // Full octaves 1-7
+            for (let octave = 1; octave <= 7; octave++) {
+              const octaveStartWhite = whiteKeyIndex;
               
-              {/* Black keys */}
-              {OCTAVE_NOTES.filter(n => n.isBlack).map((key) => {
+              OCTAVE_NOTES.filter(n => !n.isBlack).forEach((key) => {
                 const voiceIndex = isNoteActive(key.note, octave);
                 const isActive = voiceIndex !== -1;
                 const isPressed = isNotePressed(key.note, octave);
-                const keyLabel = getKeyLabel(key.note, octave);
                 
-                return (
-                  <motion.div
+                keys.push(
+                  <div
                     key={`${octave}-${key.note}`}
                     onMouseDown={() => handleMouseDown(key.note, octave)}
                     onMouseUp={() => handleMouseUp(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
-                    className="absolute top-0 rounded-b z-10 cursor-pointer select-none flex items-end justify-center pb-1"
+                    className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
                     style={{
-                      left: octaveIndex * octaveWidth + key.offset * (whiteKeyWidth / 24),
-                      width: blackKeyWidth,
-                      height: 55,
-                      backgroundColor: isPressed ? '#D4A574' : (isActive && voiceIndex !== -1) ? VOICE_COLORS[voiceIndex] : '#1E293B',
-                      boxShadow: isPressed ? 'inset 0 2px 4px rgba(0,0,0,0.4)' : '0 3px 6px rgba(0,0,0,0.3)',
+                      left: whiteKeyIndex * whiteKeyWidth,
+                      width: whiteKeyWidth - 1,
+                      height: 70,
+                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
-                    animate={(isActive && voiceIndex !== -1) && !isPressed ? { scale: [1, 1.05, 1] } : {}}
-                    transition={{ duration: 0.2 }}
                   >
-                    {showKeys && keyLabel && (
-                      <span className="text-[8px] font-bold text-white/70">
-                        {keyLabel}
-                      </span>
-                    )}
-                  </motion.div>
+                    {key.note === 'C' && <span className="text-[8px] text-slate-400">C{octave}</span>}
+                  </div>
                 );
-              })}
-            </React.Fragment>
-          ))}
+                whiteKeyIndex++;
+              });
+              
+              // Black keys for this octave
+              OCTAVE_NOTES.filter(n => n.isBlack).forEach((key) => {
+                const voiceIndex = isNoteActive(key.note, octave);
+                const isActive = voiceIndex !== -1;
+                const isPressed = isNotePressed(key.note, octave);
+                
+                keys.push(
+                  <div
+                    key={`${octave}-${key.note}`}
+                    onMouseDown={() => handleMouseDown(key.note, octave)}
+                    onMouseUp={() => handleMouseUp(key.note, octave)}
+                    onMouseLeave={() => handleMouseLeave(key.note, octave)}
+                    className="absolute top-0 rounded-b z-10 cursor-pointer"
+                    style={{
+                      left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
+                      width: blackKeyWidth,
+                      height: 45,
+                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
+                    }}
+                  />
+                );
+              });
+            }
+            
+            // C8 (final key)
+            const c8Active = isNoteActive('C', 8);
+            const c8Pressed = isNotePressed('C', 8);
+            keys.push(
+              <div
+                key="8-C"
+                onMouseDown={() => handleMouseDown('C', 8)}
+                onMouseUp={() => handleMouseUp('C', 8)}
+                onMouseLeave={() => handleMouseLeave('C', 8)}
+                className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
+                style={{
+                  left: whiteKeyIndex * whiteKeyWidth,
+                  width: whiteKeyWidth - 1,
+                  height: 70,
+                  backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5',
+                }}
+              >
+                <span className="text-[8px] text-slate-400">C8</span>
+              </div>
+            );
+            
+            return keys;
+          })()}
         </div>
       </div>
       
-      <p className="text-white/50 text-[10px] mt-2">
-        Click and hold keys or use your computer keyboard to play
+      <p className="text-white/50 text-[10px] mt-1">
+        Click keys or use keyboard (Z-M, Q-P rows)
       </p>
     </div>
   );
