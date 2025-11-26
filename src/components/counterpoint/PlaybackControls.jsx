@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Square, Repeat } from 'lucide-react';
 
 export default function PlaybackControls({ 
   isPlaying, 
@@ -11,12 +11,18 @@ export default function PlaybackControls({
   currentBeat,
   totalBeats,
   onSeek,
-  onReset
+  onReset,
+  onStop,
+  loopStart,
+  loopEnd,
+  onLoopChange,
+  isLooping,
+  onLoopToggle
 }) {
   const formatTime = (beat) => {
-    const measure = Math.floor(beat / 4) + 1;
-    const beatInMeasure = (beat % 4) + 1;
-    return `${measure}:${beatInMeasure}`;
+    const measure = Math.floor(beat / 16) + 1;
+    const sixteenth = (beat % 16) + 1;
+    return `${measure}:${sixteenth.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -29,6 +35,7 @@ export default function PlaybackControls({
             size="icon"
             onClick={onReset}
             className="text-cream/70 hover:text-cream hover:bg-slate-800"
+            title="Go to start"
           >
             <SkipBack className="w-5 h-5" />
           </Button>
@@ -47,10 +54,21 @@ export default function PlaybackControls({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onSeek(Math.min(currentBeat + 4, totalBeats - 1))}
+            onClick={onStop}
             className="text-cream/70 hover:text-cream hover:bg-slate-800"
+            title="Stop and go to start"
           >
-            <SkipForward className="w-5 h-5" />
+            <Square className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onLoopToggle}
+            className={`${isLooping ? 'text-amber-400 bg-amber-400/20' : 'text-cream/70'} hover:text-cream hover:bg-slate-800`}
+            title="Toggle loop"
+          >
+            <Repeat className="w-4 h-4" />
           </Button>
         </div>
 
