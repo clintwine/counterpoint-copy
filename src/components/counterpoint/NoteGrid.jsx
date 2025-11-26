@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, Download, FileVideo, FileAudio } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio } from 'lucide-react';
 import { initAudio, playNote } from './audioEngine';
 
 const NOTE_NAMES = ['B', 'A', 'G', 'F', 'E', 'D', 'C'];
@@ -27,8 +27,7 @@ export default function NoteGrid({
   onNoteClick,
   onNotesUpdate,
   cantusFirmus = [],
-  onExportMidi,
-  onExportVideo
+  onExportMidi
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -451,17 +450,6 @@ export default function NoteGrid({
           >
             <FileAudio className="w-4 h-4" />
             <span className="ml-1 text-xs hidden sm:inline">MIDI</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onExportVideo}
-            disabled={cantusFirmus.length === 0}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Export Video"
-          >
-            <FileVideo className="w-4 h-4" />
-            <span className="ml-1 text-xs hidden sm:inline">Video</span>
           </Button>
         </div>
         
