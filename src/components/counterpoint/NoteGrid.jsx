@@ -662,11 +662,12 @@ export default function NoteGrid({
             <div 
               className="flex h-7 border-b border-slate-600 cursor-ew-resize select-none"
               onMouseDown={(e) => {
-                const headerRect = e.currentTarget.getBoundingClientRect();
+                e.stopPropagation();
+                const gridRect = gridRef.current?.getBoundingClientRect();
+                if (!gridRect) return;
                 
                 const updateBeat = (clientX) => {
-                  const scrollLeft = gridRef.current?.scrollLeft || 0;
-                  const x = clientX - headerRect.left + scrollLeft;
+                  const x = clientX - gridRect.left - 56; // 56 = pitch label width
                   // Snap to nearest beat
                   const beat = Math.max(0, Math.min(totalBeats - 1, Math.round(x / CELL_WIDTH)));
                   onSeek && onSeek(beat);
