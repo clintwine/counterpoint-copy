@@ -582,10 +582,11 @@ export default function NoteGrid({
             <div 
               className="flex h-7 border-b border-slate-600 cursor-ew-resize select-none"
               onMouseDown={(e) => {
+                const headerRect = e.currentTarget.getBoundingClientRect();
+                
                 const updateBeat = (clientX) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
                   const scrollLeft = gridRef.current?.scrollLeft || 0;
-                  const x = clientX - rect.left + scrollLeft;
+                  const x = clientX - headerRect.left + scrollLeft;
                   const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
                   onSeek && onSeek(beat);
                 };
