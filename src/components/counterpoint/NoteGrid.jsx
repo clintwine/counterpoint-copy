@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
 const NOTE_NAMES = ['B', 'A', 'G', 'F', 'E', 'D', 'C'];
@@ -14,8 +15,11 @@ const NOTE_COLORS = {
   3: '#A68B7B', // Voice 4 - Warm brown
 };
 
-const CELL_WIDTH = 48;
+const BASE_CELL_WIDTH = 48;
 const CELL_HEIGHT = 28;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2;
+const ZOOM_STEP = 0.1;
 const MIN_DURATION = 0.25; // Quarter of a beat
 const DEFAULT_DURATION = 1; // One beat
 
@@ -34,6 +38,9 @@ export default function NoteGrid({
   const containerRef = useRef(null);
   const beatsPerMeasure = 16; // 16th notes per measure
   const totalBeats = measures * beatsPerMeasure;
+
+  const [zoom, setZoom] = useState(1);
+  const CELL_WIDTH = BASE_CELL_WIDTH * zoom;
 
   const [tool, setTool] = useState('select'); // 'select', 'marquee', 'draw'
   const [selectedNotes, setSelectedNotes] = useState(new Set());
@@ -452,7 +459,45 @@ export default function NoteGrid({
             <FileAudio className="w-4 h-4" />
             <span className="ml-1 text-xs hidden sm:inline">MIDI</span>
           </Button>
-        </div>
+
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+
+          {/* Zoom controls */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
+              disabled={zoom <= MIN_ZOOM}
+              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+              title="Zoom out"
+              aria-label="Zoom out timeline"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <Slider
+              value={[zoom]}
+              onValueChange={([value]) => setZoom(value)}
+              min={MIN_ZOOM}
+              max={MAX_ZOOM}
+              step={ZOOM_STEP}
+              className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+              aria-label="Timeline zoom level"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
+              disabled={zoom >= MAX_ZOOM}
+              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+              title="Zoom in"
+              aria-label="Zoom in timeline"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+            <span className="text-white/60 text-xs w-10 text-center">{Math.round(zoom * 100)}%</span>
+          </div>
+          </div>
         
         <div className="flex gap-4">
           {voices.map((voice, i) => (
