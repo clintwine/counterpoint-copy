@@ -219,43 +219,8 @@ export default function NoteGrid({
       }
     } else if (tool === 'select') {
       if (hasNote) {
-        // Check if clicking on right edge for resize
-        const rect = e.currentTarget.getBoundingClientRect();
-        const noteWidth = (existingNote.duration || DEFAULT_DURATION) * CELL_WIDTH;
-        const clickX = e.clientX - rect.left;
-        
-        if (clickX > noteWidth - 10 && clickX <= noteWidth) {
-          // Start resizing
-          setResizeState({
-            note: existingNote,
-            startX: e.clientX,
-            startDuration: existingNote.duration || DEFAULT_DURATION
-          });
-          return;
-        }
-        
-        // Start dragging
-        const isSelected = selectedNotes.has(noteKey);
-        if (!isSelected && !e.shiftKey) {
-          setSelectedNotes(new Set([noteKey]));
-        } else if (e.shiftKey) {
-          const newSelected = new Set(selectedNotes);
-          if (newSelected.has(noteKey)) {
-            newSelected.delete(noteKey);
-          } else {
-            newSelected.add(noteKey);
-          }
-          setSelectedNotes(newSelected);
-        }
-        
-        setDragState({
-          startPitch: pitch,
-          startBeat: beat,
-          startPitchIndex: pitches.indexOf(pitch),
-          currentPitchIndex: pitches.indexOf(pitch),
-          currentBeat: beat,
-          isDragging: false
-        });
+        // Note click is handled by the note element itself
+        return;
       } else {
         // Click on empty cell - deselect or add note
         if (!e.shiftKey) {
@@ -599,6 +564,43 @@ export default function NoteGrid({
                               scale: 1,
                               opacity: showDragPreview ? 0.4 : 1
                             }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const clickX = e.clientX - rect.left;
+                              
+                              // Check if clicking on resize handle (right 10px)
+                              if (clickX > rect.width - 10) {
+                                setResizeState({
+                                  note: note,
+                                  startX: e.clientX,
+                                  startDuration: note.duration || DEFAULT_DURATION
+                                });
+                              } else {
+                                // Normal selection/drag behavior
+                                const noteKey = getNoteKey(pitch, beat);
+                                if (!e.shiftKey) {
+                                  setSelectedNotes(new Set([noteKey]));
+                                } else {
+                                  const newSelected = new Set(selectedNotes);
+                                  if (newSelected.has(noteKey)) {
+                                    newSelected.delete(noteKey);
+                                  } else {
+                                    newSelected.add(noteKey);
+                                  }
+                                  setSelectedNotes(newSelected);
+                                }
+                                
+                                setDragState({
+                                  startPitch: pitch,
+                                  startBeat: beat,
+                                  startPitchIndex: pitches.indexOf(pitch),
+                                  currentPitchIndex: pitches.indexOf(pitch),
+                                  currentBeat: beat,
+                                  isDragging: false
+                                });
+                              }
+                            }}
                             className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
                               isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
                             }`}
@@ -607,17 +609,16 @@ export default function NoteGrid({
                               minWidth: 20,
                               backgroundColor: NOTE_COLORS[voiceIndex],
                               boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined,
-                              cursor: 'grab',
+                              cursor: resizeState ? 'ew-resize' : 'grab',
                               zIndex: 5
                             }}
                           >
-                            <span className="text-[10px] font-bold text-slate-900">
+                            <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
                               {note.pitch.replace(/\d/, '')}
                             </span>
                             {/* Resize handle */}
                             <div 
-                              className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/30 rounded-r"
-                              style={{ cursor: 'ew-resize' }}
+                              className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r"
                             />
                           </motion.div>
                         );
