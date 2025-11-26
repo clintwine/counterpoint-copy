@@ -250,7 +250,7 @@ export default function NoteGrid({
       const deltaX = e.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
       const newDuration = Math.max(MIN_DURATION, Math.round((resizeState.startDuration + deltaDuration) * 4) / 4);
-      
+
       // Update note duration in real-time
       const newNotes = cantusFirmus.map(n => {
         if (n.pitch === resizeState.note.pitch && n.beat === resizeState.note.beat) {
@@ -264,9 +264,17 @@ export default function NoteGrid({
     } else if (dragState && selectedNotes.size > 0) {
       const cell = getCellFromPosition(e.clientX, e.clientY);
       if (cell) {
+        const prevPitchIndex = dragState.currentPitchIndex;
+        const newPitchIndex = cell.pitchIndex;
+
+        // Play note sound when pitch changes during drag
+        if (dragState.isDragging && newPitchIndex !== prevPitchIndex) {
+          playNoteSound(pitches[newPitchIndex]);
+        }
+
         setDragState(prev => ({
           ...prev,
-          currentPitchIndex: cell.pitchIndex,
+          currentPitchIndex: newPitchIndex,
           currentBeat: cell.beat,
           isDragging: true
         }));

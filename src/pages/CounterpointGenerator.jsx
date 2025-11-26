@@ -215,14 +215,21 @@ export default function CounterpointGenerator() {
       allVoices.forEach((voice, voiceIndex) => {
         if (!voice.enabled && voiceIndex > 0) return;
         
-        const notesAtBeat = voice.notes?.filter(n => Math.floor(n.beat) === currentBeat) || [];
+        // Find notes that should be playing at this beat (including notes that started earlier but have duration spanning this beat)
+        const notesAtBeat = voice.notes?.filter(n => {
+          const noteStart = n.beat;
+          const noteEnd = n.beat + (n.duration || 1);
+          return noteStart === currentBeat; // Only trigger on note start
+        }) || [];
+        
         notesAtBeat.forEach(note => {
           const volume = (voices[voiceIndex]?.volume || 80) / 100;
-          playNote(note.pitch, noteDuration, volume * 0.7, voiceIndex);
+          const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+          playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex);
         });
       });
     }
-  }, [currentBeat, isPlaying]);
+  }, [currentBeat, isPlaying, allVoices, tempo, voices]);
 
   const handlePlayPause = () => {
     ensureAudio();
