@@ -452,7 +452,7 @@ export default function NoteGrid({
   const dragOffset = getDragOffset();
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-5 border border-slate-600">
+    <div className="bg-slate-800 rounded-2xl p-5 border border-slate-600 w-full">
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-1">
