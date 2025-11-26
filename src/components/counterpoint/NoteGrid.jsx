@@ -235,9 +235,11 @@ export default function NoteGrid({
     if (!containerRef.current || !gridRef.current) return null;
     const gridRect = gridRef.current.getBoundingClientRect();
     
-    // Calculate position relative to the grid viewport
-    const x = clientX - gridRect.left - 56; // 56 = pitch label width
-    const y = clientY - gridRect.top - 28; // 28 = header height (h-7 = 1.75rem = 28px)
+    // Calculate position relative to the grid viewport, accounting for scroll
+    const scrollLeft = gridRef.current.scrollLeft;
+    const scrollTop = gridRef.current.scrollTop;
+    const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
+    const y = clientY - gridRect.top - 28 + scrollTop; // 28 = header height (h-7 = 1.75rem = 28px)
     
     const beat = Math.floor(x / CELL_WIDTH);
     const pitchIndex = Math.floor(y / CELL_HEIGHT);
