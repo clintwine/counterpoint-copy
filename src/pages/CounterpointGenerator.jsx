@@ -284,7 +284,7 @@ export default function CounterpointGenerator() {
             }
             }
             }
-            }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
+            }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature, cantusFirmus]);
 
   const handlePlayPause = () => {
     ensureAudio();
