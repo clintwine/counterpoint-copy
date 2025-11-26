@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Pause, SkipBack, Square, Repeat, Clock } from 'lucide-react';
-import { initAudio, playNote } from './audioEngine';
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16, clicksPerMeasure: 4 },
