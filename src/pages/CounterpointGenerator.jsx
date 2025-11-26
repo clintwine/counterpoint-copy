@@ -44,6 +44,7 @@ const DEFAULT_SETTINGS = {
   numVoices: 2,
   strictRules: true,
   showViolations: true,
+  timeSignature: '4/4',
 };
 
 export default function CounterpointGenerator() {
@@ -193,11 +194,18 @@ export default function CounterpointGenerator() {
     setIsGenerating(false);
   };
 
-  // Playback logic - 16th notes (16 per measure)
+  // Get beats per measure based on time signature
+  const getBeatsPerMeasure = (timeSig) => {
+    const map = { '4/4': 16, '3/4': 12, '2/4': 8, '6/8': 12, '2/2': 8 };
+    return map[timeSig] || 16;
+  };
+
+  // Playback logic - based on time signature
   useEffect(() => {
     if (isPlaying) {
+      const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const msPerBeat = (60 / tempo) * 1000 / 4; // 16th notes = quarter note / 4
-      const totalBeats = settings.measures * 16; // 16 sixteenth notes per measure
+      const totalBeats = settings.measures * beatsPerMeasure;
       
       // If selected notes exist, determine loop bounds from selection
       let selectionStart = 0;
@@ -230,7 +238,7 @@ export default function CounterpointGenerator() {
         clearInterval(playbackRef.current);
       }
     }
-  }, [isPlaying, tempo, settings.measures, isLooping, loopStart, loopEnd, selectedNotes]);
+  }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd, selectedNotes]);
 
   // Play notes at current beat
       useEffect(() => {
@@ -507,6 +515,8 @@ export default function CounterpointGenerator() {
                                                 onActiveVoiceChange={setActiveVoice}
                                                 onSelectionChange={setSelectedNotes}
                                                 tempo={tempo}
+                                                timeSignature={settings.timeSignature}
+                                                onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
                                                 onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                                   const newVoices = [...voices];
                                                   if (newVoices[voiceIndex]) {
