@@ -88,7 +88,10 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], i
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
-      stopNoteSustain(activeOscillators.current[pitch]);
+      // Only call stopNoteSustain if it's an oscillator object, not just a boolean
+      if (typeof activeOscillators.current[pitch] === 'object') {
+        stopNoteSustain(activeOscillators.current[pitch]);
+      }
       delete activeOscillators.current[pitch];
       setPressedNotes(prev => {
         const next = new Set(prev);
@@ -150,7 +153,9 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], i
   useEffect(() => {
     return () => {
       Object.values(activeOscillators.current).forEach(osc => {
-        stopNoteSustain(osc);
+        if (typeof osc === 'object') {
+          stopNoteSustain(osc);
+        }
       });
     };
   }, []);
