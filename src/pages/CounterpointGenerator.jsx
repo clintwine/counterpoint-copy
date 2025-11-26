@@ -225,7 +225,8 @@ export default function CounterpointGenerator() {
         notesAtBeat.forEach(note => {
           const volume = (voices[voiceIndex]?.volume || 80) / 100;
           const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
-          playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex);
+          const instrument = voices[voiceIndex]?.instrument || 'organ';
+          playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
         });
       });
     }

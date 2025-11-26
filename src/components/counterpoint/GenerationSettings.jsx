@@ -109,8 +109,8 @@ export default function GenerationSettings({ settings, onUpdate }) {
             value={[settings.measures]}
             onValueChange={([value]) => handleChange('measures', value)}
             min={4}
-            max={16}
-            step={1}
+            max={128}
+            step={4}
             className="[&_[role=slider]]:bg-gold [&_[role=slider]]:border-0"
           />
         </div>
