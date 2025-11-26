@@ -659,38 +659,8 @@ export default function NoteGrid({
 
           {/* Grid area */}
           <div className="flex-shrink-0">
-            {/* Beat numbers header - draggable to scrub */}
-            <div 
-              className="flex h-7 border-b border-slate-600 cursor-ew-resize select-none"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                setIsScrubbing(true);
-                
-                const updateBeat = (clientX) => {
-                  const gridRect = gridRef.current?.getBoundingClientRect();
-                  if (!gridRect) return;
-                  const x = clientX - gridRect.left - 56; // 56 = pitch label width
-                  // Snap to nearest beat
-                  const beat = Math.max(0, Math.min(totalBeats - 1, Math.round(x / CELL_WIDTH)));
-                  onSeek && onSeek(beat);
-                };
-
-                updateBeat(e.clientX);
-
-                const handleMouseMove = (moveEvent) => {
-                  updateBeat(moveEvent.clientX);
-                };
-
-                const handleMouseUp = () => {
-                  setIsScrubbing(false);
-                  document.removeEventListener('mousemove', handleMouseMove);
-                  document.removeEventListener('mouseup', handleMouseUp);
-                };
-
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-              }}
-            >
+            {/* Beat numbers header */}
+            <div className="flex h-7 border-b border-slate-600 select-none">
               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
@@ -860,33 +830,59 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead with top marker */}
-        <div
-          className="absolute top-0 bottom-0 z-30 pointer-events-none"
-          style={{
-            left: 56 + currentBeat * CELL_WIDTH,
-            transition: isPlaying ? `left ${(60 / tempo) / 4}s linear` : 'none'
-          }}
-        >
-          {/* Triangle marker at top - scales with zoom */}
-          <div 
-            className="absolute left-1/2 -translate-x-1/2"
-            style={{
-              top: -2,
-              borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
-              borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
-              borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
-            }}
-          />
-          {/* Vertical line */}
-          <div 
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
-            style={{ 
-              top: Math.max(10, 12 * zoom),
-              width: Math.max(2, 3 * zoom)
-            }}
-          />
-        </div>
+        {/* Playhead with top marker - draggable */}
+            <div
+              className="absolute top-0 bottom-0 z-30 cursor-ew-resize"
+              style={{
+                left: 56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom),
+                width: Math.max(16, 20 * zoom),
+                transition: isPlaying ? `left ${(60 / tempo) / 4}s linear` : 'none'
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setIsScrubbing(true);
+
+                const updateBeat = (clientX) => {
+                  const gridRect = gridRef.current?.getBoundingClientRect();
+                  if (!gridRect) return;
+                  const x = clientX - gridRect.left - 56;
+                  const beat = Math.max(0, Math.min(totalBeats - 1, Math.round(x / CELL_WIDTH)));
+                  onSeek && onSeek(beat);
+                };
+
+                const handleMouseMove = (moveEvent) => {
+                  updateBeat(moveEvent.clientX);
+                };
+
+                const handleMouseUp = () => {
+                  setIsScrubbing(false);
+                  document.removeEventListener('mousemove', handleMouseMove);
+                  document.removeEventListener('mouseup', handleMouseUp);
+                };
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+              }}
+            >
+              {/* Triangle marker at top - scales with zoom */}
+              <div 
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{
+                  top: -2,
+                  borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
+                  borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
+                  borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
+                }}
+              />
+              {/* Vertical line */}
+              <div 
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                style={{ 
+                  top: Math.max(10, 12 * zoom),
+                  width: Math.max(2, 3 * zoom)
+                }}
+              />
+            </div>
 
         {/* Marquee selection rectangle */}
         {marquee && (
