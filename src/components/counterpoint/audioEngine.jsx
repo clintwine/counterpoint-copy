@@ -16,6 +16,13 @@ let effectLevels = {
   chorus: 0
 };
 
+// Global envelope settings
+let envelopeSettings = {
+  attack: 0.02,
+  sustain: 0.7,
+  release: 0.3
+};
+
 const NOTE_FREQUENCIES = {};
 const A4 = 440;
 const A4_MIDI = 69;
@@ -152,6 +159,14 @@ export function getEffectLevels() {
   return { ...effectLevels };
 }
 
+export function setEnvelope(envelope) {
+  envelopeSettings = { ...envelopeSettings, ...envelope };
+}
+
+export function getEnvelope() {
+  return { ...envelopeSettings };
+}
+
 export function getAudioContext() {
   return audioContext;
 }
@@ -240,6 +255,11 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = audioContext.currentTime;
   
+  // Use global envelope settings
+  const attack = envelopeSettings.attack;
+  const sustainLevel = envelopeSettings.sustain;
+  const release = envelopeSettings.release;
+  
   // Create oscillators based on harmonics
   const oscillators = [];
   const gainNode = audioContext.createGain();
@@ -271,18 +291,20 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
     outputNode = distNode;
   }
   
-  // Envelope
+  // Envelope using global settings
+  const totalDuration = duration + release;
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.6, now + config.attack);
-  gainNode.gain.exponentialRampToValueAtTime(volume * 0.3, now + duration * 0.3);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
+  gainNode.gain.linearRampToValueAtTime(volume * sustainLevel * 0.6, now + attack + 0.05);
+  gainNode.gain.setValueAtTime(volume * sustainLevel * 0.6, now + duration - release);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
   
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
   
   oscillators.forEach(osc => {
     osc.start(now);
-    osc.stop(now + duration);
+    osc.stop(now + totalDuration);
   });
   
   return { oscillators, gainNode };
