@@ -344,23 +344,29 @@ export default function NoteGrid({
     } else if (marquee) {
       setMarquee(prev => ({ ...prev, endX: e.clientX, endY: e.clientY }));
     } else if (dragState && selectedNotes.size > 0) {
-      const cell = getCellFromPosition(e.clientX, e.clientY);
-      if (cell) {
-        const prevPitchIndex = dragState.currentPitchIndex;
-        const newPitchIndex = cell.pitchIndex;
+      // Calculate delta from original click position for smooth dragging
+      const deltaX = e.clientX - dragState.clickOffsetX;
+      const deltaY = e.clientY - dragState.clickOffsetY;
+      
+      const beatDelta = Math.round(deltaX / CELL_WIDTH);
+      const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
+      
+      const newPitchIndex = dragState.startPitchIndex + pitchDelta;
+      const newBeat = dragState.startBeat + beatDelta;
+      
+      const prevPitchIndex = dragState.currentPitchIndex;
 
-        // Play note sound when pitch changes during drag
-        if (dragState.isDragging && newPitchIndex !== prevPitchIndex) {
-          playNoteSound(pitches[newPitchIndex]);
-        }
-
-        setDragState(prev => ({
-          ...prev,
-          currentPitchIndex: newPitchIndex,
-          currentBeat: cell.beat,
-          isDragging: true
-        }));
+      // Play note sound when pitch changes during drag
+      if (dragState.isDragging && newPitchIndex !== prevPitchIndex && newPitchIndex >= 0 && newPitchIndex < pitches.length) {
+        playNoteSound(pitches[newPitchIndex]);
       }
+
+      setDragState(prev => ({
+        ...prev,
+        currentPitchIndex: newPitchIndex,
+        currentBeat: newBeat,
+        isDragging: true
+      }));
     }
   };
 
