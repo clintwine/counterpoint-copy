@@ -7,16 +7,13 @@ import {
   RefreshCw, 
   Music2, 
   Settings, 
-  BookOpen,
-  Layers,
-  Volume2
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
 import VoiceEditor from '@/components/counterpoint/VoiceEditor';
 import PlaybackControls from '@/components/counterpoint/PlaybackControls';
-import CounterpointRules from '@/components/counterpoint/CounterpointRules';
 import PianoKeyboard from '@/components/counterpoint/PianoKeyboard';
 import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
@@ -250,13 +247,13 @@ export default function CounterpointGenerator() {
         </motion.header>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Sidebar - Settings */}
           <motion.aside 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-3 space-y-4"
+            className="lg:col-span-1 space-y-4"
           >
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full bg-slate-800/50 border border-slate-700/50">
@@ -310,7 +307,7 @@ export default function CounterpointGenerator() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-6 space-y-4"
+            className="lg:col-span-3 space-y-4"
           >
             <NoteGrid
               voices={allVoices}
@@ -363,21 +360,8 @@ export default function CounterpointGenerator() {
               octaves={[3, 4, 5]}
             />
           </motion.main>
-
-          {/* Right Sidebar - Rules */}
-          <motion.aside 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-3"
-          >
-            <CounterpointRules
-              species={settings.species}
-              violations={settings.showViolations ? violations : []}
-            />
-          </motion.aside>
-        </div>
-      </div>
+          </div>
+          </div>
 
       {/* Custom styles */}
       <style>{`
