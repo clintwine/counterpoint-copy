@@ -10,13 +10,14 @@ import {
   Layers,
   Save,
   FolderOpen,
-  MessageSquare
+  Sparkles
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AIChatbot from '@/components/counterpoint/AIChatbot';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
@@ -62,6 +63,7 @@ export default function CounterpointGenerator() {
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
+  const [chatbotOpen, setChatbotOpen] = useState(false);
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
@@ -381,13 +383,13 @@ export default function CounterpointGenerator() {
                 </DialogContent>
               </Dialog>
 
-              {/* AI Composer Link */}
+              {/* AI Composer */}
               <Button
                 variant="outline"
-                onClick={() => window.open(base44.agents.getWhatsAppConnectURL('counterpoint_composer'), '_blank')}
+                onClick={() => setChatbotOpen(true)}
                 className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
               >
-                <MessageSquare className="w-4 h-4 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2" />
                 AI Composer
               </Button>
 
@@ -538,6 +540,17 @@ export default function CounterpointGenerator() {
           </motion.main>
           </div>
           </div>
+
+      {/* AI Chatbot */}
+      <AnimatePresence>
+        <AIChatbot
+          isOpen={chatbotOpen}
+          onClose={() => setChatbotOpen(false)}
+          settings={settings}
+          currentNotes={cantusFirmus}
+          onApplyMelody={(notes) => setCantusFirmus(notes)}
+        />
+      </AnimatePresence>
 
       {/* Custom styles */}
       <style>{`
