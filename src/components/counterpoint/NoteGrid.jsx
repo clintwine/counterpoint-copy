@@ -561,43 +561,46 @@ export default function NoteGrid({
                               opacity: showDragPreview ? 0.4 : 1
                             }}
                             onMouseDown={(e) => {
-                              e.stopPropagation();
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const clickX = e.clientX - rect.left;
-                              
-                              // Check if clicking on resize handle (right 10px)
-                              if (clickX > rect.width - 10) {
-                                setResizeState({
-                                  note: note,
-                                  startX: e.clientX,
-                                  startDuration: note.duration || DEFAULT_DURATION
-                                });
-                              } else {
-                                // Normal selection/drag behavior
-                                const noteKey = getNoteKey(pitch, beat);
-                                const isAlreadySelected = selectedNotes.has(noteKey);
-                                
-                                if (!isAlreadySelected) {
-                                  // Only change selection if clicking unselected note
-                                  if (!e.shiftKey) {
-                                    setSelectedNotes(new Set([noteKey]));
-                                  } else {
-                                    const newSelected = new Set(selectedNotes);
-                                    newSelected.add(noteKey);
-                                    setSelectedNotes(newSelected);
+                                e.stopPropagation();
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const clickX = e.clientX - rect.left;
+
+                                // Always play the note when clicking it
+                                playNoteSound(pitch);
+
+                                // Check if clicking on resize handle (right 10px)
+                                if (clickX > rect.width - 10) {
+                                  setResizeState({
+                                    note: note,
+                                    startX: e.clientX,
+                                    startDuration: note.duration || DEFAULT_DURATION
+                                  });
+                                } else {
+                                  // Normal selection/drag behavior
+                                  const noteKey = getNoteKey(pitch, beat);
+                                  const isAlreadySelected = selectedNotes.has(noteKey);
+
+                                  if (!isAlreadySelected) {
+                                    // Only change selection if clicking unselected note
+                                    if (!e.shiftKey) {
+                                      setSelectedNotes(new Set([noteKey]));
+                                    } else {
+                                      const newSelected = new Set(selectedNotes);
+                                      newSelected.add(noteKey);
+                                      setSelectedNotes(newSelected);
+                                    }
                                   }
+
+                                  setDragState({
+                                    startPitch: pitch,
+                                    startBeat: beat,
+                                    startPitchIndex: pitches.indexOf(pitch),
+                                    currentPitchIndex: pitches.indexOf(pitch),
+                                    currentBeat: beat,
+                                    isDragging: false
+                                  });
                                 }
-                                
-                                setDragState({
-                                  startPitch: pitch,
-                                  startBeat: beat,
-                                  startPitchIndex: pitches.indexOf(pitch),
-                                  currentPitchIndex: pitches.indexOf(pitch),
-                                  currentBeat: beat,
-                                  isDragging: false
-                                });
-                              }
-                            }}
+                              }}
                             className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
                               isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
                             }`}
