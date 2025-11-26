@@ -229,7 +229,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   max="1"
                   step="0.01"
                   value={envelope.attack}
-                  onChange={(e) => setEnvelope(prev => ({ ...prev, attack: parseFloat(e.target.value) }))}
+                  onChange={(e) => handleEnvelopeChange('attack', parseFloat(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
               </div>
@@ -250,7 +250,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   max="1"
                   step="0.01"
                   value={envelope.sustain}
-                  onChange={(e) => setEnvelope(prev => ({ ...prev, sustain: parseFloat(e.target.value) }))}
+                  onChange={(e) => handleEnvelopeChange('sustain', parseFloat(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
               </div>
@@ -271,7 +271,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   max="2"
                   step="0.01"
                   value={envelope.release}
-                  onChange={(e) => setEnvelope(prev => ({ ...prev, release: parseFloat(e.target.value) }))}
+                  onChange={(e) => handleEnvelopeChange('release', parseFloat(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
               </div>
