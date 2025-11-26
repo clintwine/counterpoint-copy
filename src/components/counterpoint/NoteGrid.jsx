@@ -723,10 +723,8 @@ export default function NoteGrid({
                         const noteWidth = duration * CELL_WIDTH - 4;
                         
                         return (
-                          <motion.div
-                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
+                          <div
+                                                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                             onMouseDown={(e) => {
                                 e.stopPropagation();
                                 const rect = e.currentTarget.getBoundingClientRect();
