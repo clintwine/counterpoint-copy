@@ -198,15 +198,25 @@ export default function CounterpointGenerator() {
     if (isPlaying) {
       const msPerBeat = (60 / tempo) * 1000 / 4; // 16th notes = quarter note / 4
       const totalBeats = settings.measures * 16; // 16 sixteenth notes per measure
-      const effectiveLoopEnd = loopEnd ?? totalBeats;
+      
+      // If selected notes exist, determine loop bounds from selection
+      let selectionStart = 0;
+      let selectionEnd = totalBeats;
+      if (selectedNotes.length > 0) {
+        selectionStart = Math.min(...selectedNotes.map(n => n.beat));
+        selectionEnd = Math.max(...selectedNotes.map(n => n.beat + (n.duration || 1)));
+      }
+      
+      const effectiveLoopEnd = selectedNotes.length > 0 ? selectionEnd : (loopEnd ?? totalBeats);
+      const effectiveLoopStart = selectedNotes.length > 0 ? selectionStart : loopStart;
       
       playbackRef.current = setInterval(() => {
         setCurrentBeat(prev => {
           const next = prev + 1;
-          if (isLooping && next >= effectiveLoopEnd) {
-            return loopStart;
-          }
-          if (next >= totalBeats) {
+          if (next >= effectiveLoopEnd) {
+            if (isLooping || selectedNotes.length > 0) {
+              return effectiveLoopStart;
+            }
             setIsPlaying(false);
             return 0;
           }
@@ -220,7 +230,7 @@ export default function CounterpointGenerator() {
         clearInterval(playbackRef.current);
       }
     }
-  }, [isPlaying, tempo, settings.measures, isLooping, loopStart, loopEnd]);
+  }, [isPlaying, tempo, settings.measures, isLooping, loopStart, loopEnd, selectedNotes]);
 
   // Play notes at current beat
       useEffect(() => {
@@ -261,6 +271,12 @@ export default function CounterpointGenerator() {
     ensureAudio();
     if (isPlaying) {
       stopAllNotes();
+    } else {
+      // If there are selected notes, start from the earliest selected note
+      if (selectedNotes.length > 0) {
+        const minBeat = Math.min(...selectedNotes.map(n => n.beat));
+        setCurrentBeat(minBeat);
+      }
     }
     setIsPlaying(!isPlaying);
   };
