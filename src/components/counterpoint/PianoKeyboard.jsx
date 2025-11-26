@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Keyboard } from 'lucide-react';
-import { initAudio, playNoteSustain, stopNoteSustain } from './audioEngine';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Keyboard, Guitar } from 'lucide-react';
+import { initAudio, playNoteSustain, stopNoteSustain, playNote } from './audioEngine';
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -37,7 +38,17 @@ const PITCH_TO_KEY = Object.entries(KEY_MAP).reduce((acc, [key, pitch]) => {
   return acc;
 }, {});
 
-export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] }) {
+const INSTRUMENTS = [
+  { value: 'organ', label: 'Organ' },
+  { value: 'distortion', label: 'Distortion' },
+  { value: 'clean', label: 'Clean' },
+  { value: 'bass', label: 'Bass' },
+  { value: 'strings', label: 'Strings' },
+  { value: 'flute', label: 'Flute' },
+  { value: 'synth', label: 'Synth' },
+];
+
+export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5], instrument = 'organ', onInstrumentChange }) {
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const activeOscillators = useRef({});
@@ -59,10 +70,21 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
     if (activeOscillators.current[pitch]) return; // Already playing
     
     initAudio();
-    const oscillator = playNoteSustain(pitch, 0.7, 0);
-    activeOscillators.current[pitch] = oscillator;
+    // Use playNote with instrument for better sound variety
+    playNote(pitch, 0.5, 0.7, 0, instrument);
+    activeOscillators.current[pitch] = true; // Mark as playing
     setPressedNotes(prev => new Set([...prev, pitch]));
-  }, []);
+    
+    // Auto-release after duration
+    setTimeout(() => {
+      delete activeOscillators.current[pitch];
+      setPressedNotes(prev => {
+        const next = new Set(prev);
+        next.delete(pitch);
+        return next;
+      });
+    }, 500);
+  }, [instrument]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
@@ -142,15 +164,32 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
     <div className="bg-slate-800/60 rounded-xl p-4 border border-slate-600">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowKeys(!showKeys)}
-          className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
-        >
-          <Keyboard className="w-3.5 h-3.5 mr-1" />
-          {showKeys ? 'Hide' : 'Show'} Keys
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Guitar className="w-3.5 h-3.5 text-white/60" />
+            <Select value={instrument} onValueChange={onInstrumentChange}>
+              <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {INSTRUMENTS.map(inst => (
+                  <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
+                    {inst.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowKeys(!showKeys)}
+            className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
+          >
+            <Keyboard className="w-3.5 h-3.5 mr-1" />
+            {showKeys ? 'Hide' : 'Show'} Keys
+          </Button>
+        </div>
       </div>
       
       <div className="overflow-x-auto pb-2">

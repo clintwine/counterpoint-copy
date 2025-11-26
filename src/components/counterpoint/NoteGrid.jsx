@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
@@ -32,7 +33,9 @@ export default function NoteGrid({
   onNotesUpdate,
   cantusFirmus = [],
   onExportMidi,
-  onSeek
+  onSeek,
+  activeVoice = 0,
+  onActiveVoiceChange
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -473,6 +476,28 @@ export default function NoteGrid({
             <FileAudio className="w-4 h-4" />
             <span className="ml-1 text-xs hidden sm:inline">MIDI</span>
           </Button>
+
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+
+          {/* Voice selector */}
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-white/60" />
+            <Select value={String(activeVoice)} onValueChange={(v) => onActiveVoiceChange?.(parseInt(v))}>
+              <SelectTrigger className="w-36 h-8 bg-slate-700 border-slate-600 text-white text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {voices.map((voice, i) => (
+                  <SelectItem key={i} value={String(i)} className="text-white text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: NOTE_COLORS[i] }} />
+                      {voice.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
