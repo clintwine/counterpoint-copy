@@ -27,7 +27,8 @@ export default function NoteGrid({
   onNoteClick,
   onNotesUpdate,
   cantusFirmus = [],
-  onExportMidi
+  onExportMidi,
+  onSeek
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -493,19 +494,20 @@ export default function NoteGrid({
 
           {/* Grid area */}
           <div className="flex-shrink-0">
-            {/* Beat numbers header */}
+            {/* Beat numbers header - clickable to scrub */}
             <div className="flex h-7 border-b border-slate-600">
               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
-                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r ${
+                  onClick={() => onSeek && onSeek(beat)}
+                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/30 ${
                     beat % beatsPerMeasure === 0 
                       ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
                       : 'border-r-slate-700 text-white/60'
-                  }`}
+                  } ${currentBeat === beat ? 'bg-amber-500/40' : ''}`}
                   style={{ width: CELL_WIDTH }}
                 >
-                  {beat + 1}
+                  {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
                 </div>
               ))}
             </div>
