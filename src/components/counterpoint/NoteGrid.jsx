@@ -849,7 +849,7 @@ export default function NoteGrid({
           className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-30 pointer-events-none shadow-[0_0_8px_rgba(239,68,68,0.6)]"
           style={{
             left: 56 + currentBeat * CELL_WIDTH + CELL_WIDTH / 2,
-            transition: isPlaying ? 'left 0.05s linear' : 'none'
+            transition: isPlaying ? `left ${(60 / 80) / 4}s linear` : 'none'
           }}
         />
 
