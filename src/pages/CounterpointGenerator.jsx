@@ -578,6 +578,37 @@ export default function CounterpointGenerator() {
           settings={settings}
           currentNotes={cantusFirmus}
           onApplyMelody={(notes) => setCantusFirmus(notes)}
+          onApplyHarmony={(notes, voiceType) => {
+            // Map voice type to voice index
+            const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
+            const voiceIndex = voiceMap[voiceType] || 1;
+
+            // Create or update the generated voice
+            const newVoice = {
+              name: voiceType.charAt(0).toUpperCase() + voiceType.slice(1),
+              notes: notes,
+              enabled: true
+            };
+
+            setGeneratedVoices(prev => {
+              const updated = [...prev];
+              // Find existing voice of same type or add new
+              const existingIdx = updated.findIndex(v => v.name.toLowerCase() === voiceType);
+              if (existingIdx >= 0) {
+                updated[existingIdx] = newVoice;
+              } else {
+                updated.push(newVoice);
+              }
+              return updated;
+            });
+
+            // Enable the corresponding voice in settings
+            const newVoices = [...voices];
+            if (newVoices[voiceIndex]) {
+              newVoices[voiceIndex].enabled = true;
+            }
+            setVoices(newVoices);
+          }}
           tempo={tempo}
         />
       </AnimatePresence>
