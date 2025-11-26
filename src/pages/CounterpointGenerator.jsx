@@ -440,7 +440,14 @@ export default function CounterpointGenerator() {
               {/* AI Composer */}
               <Button
                 variant="outline"
-                onClick={() => setChatbotOpen(true)}
+                onClick={async () => {
+                  const isAuth = await base44.auth.isAuthenticated();
+                  if (!isAuth) {
+                    base44.auth.redirectToLogin(window.location.href);
+                    return;
+                  }
+                  setChatbotOpen(true);
+                }}
                 className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
