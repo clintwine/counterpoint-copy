@@ -57,8 +57,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
-  const [isDragging, setIsDragging] = useState(false);
   const activeOscillators = useRef({});
+  const isDraggingRef = useRef(false);
 
   const handleEffectChange = (effect, value) => {
     setEffects(prev => ({ ...prev, [effect]: value }));
@@ -103,35 +103,40 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     }
   }, []);
 
-  const handleMouseDown = useCallback((note, octave) => {
-    setIsDragging(true);
+  const handleMouseDown = useCallback((e, note, octave) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
     const pitch = `${note}${octave}`;
     startNote(pitch);
   }, [startNote]);
 
   const handleMouseUp = useCallback((note, octave) => {
-    setIsDragging(false);
+    isDraggingRef.current = false;
     const pitch = `${note}${octave}`;
     endNote(pitch);
   }, [endNote]);
 
   const handleMouseEnter = useCallback((note, octave) => {
-    if (isDragging) {
+    if (isDraggingRef.current) {
       const pitch = `${note}${octave}`;
       startNote(pitch);
     }
-  }, [isDragging, startNote]);
+  }, [startNote]);
 
   const handleMouseLeave = useCallback((note, octave) => {
-    const pitch = `${note}${octave}`;
-    if (pressedNotes.has(pitch)) {
+    if (isDraggingRef.current) {
+      const pitch = `${note}${octave}`;
       endNote(pitch);
     }
-  }, [endNote, pressedNotes]);
+  }, [endNote]);
 
   const handleGlobalMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+    isDraggingRef.current = false;
+    // Stop all currently playing notes
+    Object.keys(activeOscillators.current).forEach(pitch => {
+      endNote(pitch);
+    });
+  }, [endNote]);
 
   // Handle computer keyboard input
   useEffect(() => {
@@ -310,7 +315,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               keys.push(
                 <div
                   key={`0-${note}`}
-                  onMouseDown={() => handleMouseDown(note, 0)}
+                  onMouseDown={(e) => handleMouseDown(e, note, 0)}
                   onMouseUp={() => handleMouseUp(note, 0)}
                   onMouseEnter={() => handleMouseEnter(note, 0)}
                   onMouseLeave={() => handleMouseLeave(note, 0)}
@@ -334,7 +339,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             keys.push(
               <div
                 key="0-A#"
-                onMouseDown={() => handleMouseDown('A#', 0)}
+                onMouseDown={(e) => handleMouseDown(e, 'A#', 0)}
                 onMouseUp={() => handleMouseUp('A#', 0)}
                 onMouseEnter={() => handleMouseEnter('A#', 0)}
                 onMouseLeave={() => handleMouseLeave('A#', 0)}
@@ -360,7 +365,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
-                    onMouseDown={() => handleMouseDown(key.note, octave)}
+                    onMouseDown={(e) => handleMouseDown(e, key.note, octave)}
                     onMouseUp={() => handleMouseUp(key.note, octave)}
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
@@ -387,7 +392,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
-                    onMouseDown={() => handleMouseDown(key.note, octave)}
+                    onMouseDown={(e) => handleMouseDown(e, key.note, octave)}
                     onMouseUp={() => handleMouseUp(key.note, octave)}
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
@@ -409,7 +414,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             keys.push(
               <div
                 key="8-C"
-                onMouseDown={() => handleMouseDown('C', 8)}
+                onMouseDown={(e) => handleMouseDown(e, 'C', 8)}
                 onMouseUp={() => handleMouseUp('C', 8)}
                 onMouseEnter={() => handleMouseEnter('C', 8)}
                 onMouseLeave={() => handleMouseLeave('C', 8)}
