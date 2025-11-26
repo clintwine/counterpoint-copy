@@ -506,6 +506,7 @@ export default function CounterpointGenerator() {
                                                 activeVoice={activeVoice}
                                                 onActiveVoiceChange={setActiveVoice}
                                                 onSelectionChange={setSelectedNotes}
+                                                tempo={tempo}
                                                 onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                                   const newVoices = [...voices];
                                                   if (newVoices[voiceIndex]) {
