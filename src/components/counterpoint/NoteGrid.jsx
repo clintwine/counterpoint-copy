@@ -504,7 +504,7 @@ export default function NoteGrid({
           </div>
 
           {/* Grid area */}
-          <div className="flex-1">
+          <div className="flex-shrink-0">
             {/* Beat numbers header */}
             <div className="flex h-7 border-b border-slate-600">
               {Array.from({ length: totalBeats }).map((_, beat) => (
@@ -671,22 +671,22 @@ export default function NoteGrid({
               </>
             )}
           </div>
-        </div>
 
-        {/* Pitch labels - fixed column on right */}
-        <div className="sticky right-0 z-20 bg-slate-800 flex-shrink-0">
-          <div className="h-7 border-b border-slate-600" />
-          {pitches.map((pitch) => (
-            <div 
-              key={`right-${pitch}`}
-              className={`h-7 w-14 flex items-center justify-start pl-2 text-xs border-b border-slate-700 border-l border-l-slate-600 ${
-                pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
-              }`}
-              style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
-            >
-              {pitch}
-            </div>
-          ))}
+          {/* Pitch labels - fixed column on right */}
+          <div className="sticky right-0 z-20 bg-slate-800 flex-shrink-0">
+            <div className="h-7 border-b border-slate-600" />
+            {pitches.map((pitch) => (
+              <div 
+                key={`right-${pitch}`}
+                className={`h-7 w-14 flex items-center justify-start pl-2 text-xs border-b border-slate-700 border-l border-l-slate-600 ${
+                  pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
+                }`}
+                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.1)' : 'rgb(30, 41, 59)' }}
+              >
+                {pitch}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Marquee selection rectangle */}
