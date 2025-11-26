@@ -313,6 +313,32 @@ export default function CounterpointGenerator() {
               measures={settings.measures}
               cantusFirmus={cantusFirmus}
               onNotesUpdate={setCantusFirmus}
+              onExportMidi={() => {
+                // Export as MIDI-like JSON (can be converted to MIDI)
+                const midiData = {
+                  tempo,
+                  timeSignature: [4, 4],
+                  tracks: allVoices.map((voice, idx) => ({
+                    name: voice.name,
+                    notes: voice.notes?.map(n => ({
+                      pitch: n.pitch,
+                      startTime: n.beat * (60 / tempo),
+                      duration: 60 / tempo,
+                      velocity: 80
+                    })) || []
+                  }))
+                };
+                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              onExportVideo={() => {
+                alert('Video export coming soon! For now, you can use screen recording software to capture playback.');
+              }}
             />
             
             <PlaybackControls

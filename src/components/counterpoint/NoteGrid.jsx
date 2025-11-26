@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Move } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, Download, FileVideo, FileAudio } from 'lucide-react';
+import { initAudio, playNote } from './audioEngine';
 
 const NOTE_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const OCTAVES = [5, 4, 3, 2];
@@ -23,7 +24,9 @@ export default function NoteGrid({
   measures = 8, 
   onNoteClick,
   onNotesUpdate,
-  cantusFirmus = []
+  cantusFirmus = [],
+  onExportMidi,
+  onExportVideo
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -105,10 +108,9 @@ export default function NoteGrid({
     clipboard.forEach(note => {
       const targetBeat = note.beat + atBeat;
       if (targetBeat < totalBeats) {
-        const existingIdx = newNotes.findIndex(n => n.beat === targetBeat);
-        if (existingIdx >= 0) {
-          newNotes[existingIdx] = { pitch: note.pitch, beat: targetBeat };
-        } else {
+        // Allow multiple notes per beat - just add it
+        const exists = newNotes.some(n => n.beat === targetBeat && n.pitch === note.pitch);
+        if (!exists) {
           newNotes.push({ pitch: note.pitch, beat: targetBeat });
         }
       }
@@ -116,6 +118,12 @@ export default function NoteGrid({
     saveToHistory(newNotes.sort((a, b) => a.beat - b.beat));
     onNotesUpdate(newNotes.sort((a, b) => a.beat - b.beat));
   }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory]);
+
+  // Play note sound when adding
+  const playNoteSound = useCallback((pitch) => {
+    initAudio();
+    playNote(pitch, 0.3, 0.6, 0);
+  }, []);
 
   const selectAll = useCallback(() => {
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
@@ -184,22 +192,17 @@ export default function NoteGrid({
     const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
     
     if (tool === 'draw') {
-      // Draw mode - add/remove note
+      // Draw mode - add/remove note (allows multiple notes per beat)
       if (hasNote) {
         const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
       } else {
-        const existingAtBeat = cantusFirmus.findIndex(n => n.beat === beat);
-        let newNotes;
-        if (existingAtBeat >= 0) {
-          newNotes = [...cantusFirmus];
-          newNotes[existingAtBeat] = { pitch, beat };
-        } else {
-          newNotes = [...cantusFirmus, { pitch, beat }].sort((a, b) => a.beat - b.beat);
-        }
+        // Allow multiple notes per beat - just add the new note
+        const newNotes = [...cantusFirmus, { pitch, beat }].sort((a, b) => a.beat - b.beat);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
+        playNoteSound(pitch);
       }
     } else if (tool === 'select') {
       if (hasNote) {
@@ -355,7 +358,7 @@ export default function NoteGrid({
             className={`h-8 px-2 ${tool === 'draw' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
             title="Draw (B)"
           >
-            <Move className="w-4 h-4" />
+            <Pencil className="w-4 h-4" />
           </Button>
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
@@ -412,6 +415,31 @@ export default function NoteGrid({
             title="Delete (Del)"
           >
             <Trash2 className="w-4 h-4" />
+          </Button>
+          
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onExportMidi}
+            disabled={cantusFirmus.length === 0}
+            className="h-8 px-2 text-white/70 disabled:opacity-30"
+            title="Export MIDI"
+          >
+            <FileAudio className="w-4 h-4" />
+            <span className="ml-1 text-xs hidden sm:inline">MIDI</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onExportVideo}
+            disabled={cantusFirmus.length === 0}
+            className="h-8 px-2 text-white/70 disabled:opacity-30"
+            title="Export Video"
+          >
+            <FileVideo className="w-4 h-4" />
+            <span className="ml-1 text-xs hidden sm:inline">Video</span>
           </Button>
         </div>
         
