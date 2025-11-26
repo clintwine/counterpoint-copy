@@ -57,6 +57,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const activeOscillators = useRef({});
 
   const handleEffectChange = (effect, value) => {
@@ -103,14 +104,23 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   }, []);
 
   const handleMouseDown = useCallback((note, octave) => {
+    setIsDragging(true);
     const pitch = `${note}${octave}`;
     startNote(pitch);
   }, [startNote]);
 
   const handleMouseUp = useCallback((note, octave) => {
+    setIsDragging(false);
     const pitch = `${note}${octave}`;
     endNote(pitch);
   }, [endNote]);
+
+  const handleMouseEnter = useCallback((note, octave) => {
+    if (isDragging) {
+      const pitch = `${note}${octave}`;
+      startNote(pitch);
+    }
+  }, [isDragging, startNote]);
 
   const handleMouseLeave = useCallback((note, octave) => {
     const pitch = `${note}${octave}`;
@@ -118,6 +128,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       endNote(pitch);
     }
   }, [endNote, pressedNotes]);
+
+  const handleGlobalMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   // Handle computer keyboard input
   useEffect(() => {
@@ -149,6 +163,14 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [startNote, endNote]);
+
+  // Global mouse up listener for drag release
+  useEffect(() => {
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [handleGlobalMouseUp]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -290,6 +312,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   key={`0-${note}`}
                   onMouseDown={() => handleMouseDown(note, 0)}
                   onMouseUp={() => handleMouseUp(note, 0)}
+                  onMouseEnter={() => handleMouseEnter(note, 0)}
                   onMouseLeave={() => handleMouseLeave(note, 0)}
                   className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
                   style={{
@@ -313,6 +336,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 key="0-A#"
                 onMouseDown={() => handleMouseDown('A#', 0)}
                 onMouseUp={() => handleMouseUp('A#', 0)}
+                onMouseEnter={() => handleMouseEnter('A#', 0)}
                 onMouseLeave={() => handleMouseLeave('A#', 0)}
                 className="absolute top-0 rounded-b z-10 cursor-pointer"
                 style={{
@@ -338,6 +362,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     key={`${octave}-${key.note}`}
                     onMouseDown={() => handleMouseDown(key.note, octave)}
                     onMouseUp={() => handleMouseUp(key.note, octave)}
+                    onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
                     className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
                     style={{
@@ -364,6 +389,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     key={`${octave}-${key.note}`}
                     onMouseDown={() => handleMouseDown(key.note, octave)}
                     onMouseUp={() => handleMouseUp(key.note, octave)}
+                    onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
                     className="absolute top-0 rounded-b z-10 cursor-pointer"
                     style={{
@@ -385,6 +411,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 key="8-C"
                 onMouseDown={() => handleMouseDown('C', 8)}
                 onMouseUp={() => handleMouseUp('C', 8)}
+                onMouseEnter={() => handleMouseEnter('C', 8)}
                 onMouseLeave={() => handleMouseLeave('C', 8)}
                 className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
                 style={{
