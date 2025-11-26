@@ -84,9 +84,11 @@ export default function PlaybackControls({
             <Slider
               value={[currentBeat]}
               onValueChange={([value]) => onSeek(value)}
+              min={0}
               max={totalBeats - 1}
               step={1}
-              className="flex-1 [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+              className="flex-1 cursor-pointer [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4 [&_[role=slider]]:cursor-grab [&_[role=slider]:active]:cursor-grabbing"
+              aria-label="Playhead position"
             />
             <span className="text-white text-sm font-mono w-10">
               {formatTime(totalBeats - 1)}
