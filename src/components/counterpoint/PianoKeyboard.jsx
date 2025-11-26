@@ -82,11 +82,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (activeOscillators.current[pitch]) return; // Already playing
     
     initAudio();
-    // Use sustained note that plays until mouse release
-    const oscObj = playNoteSustain(pitch, 0.7, 0);
-    activeOscillators.current[pitch] = oscObj;
+    // Use playNote with instrument - duration of 10 seconds for sustain effect
+    playNote(pitch, 10, 0.7, 0, instrument);
+    activeOscillators.current[pitch] = true;
     setPressedNotes(prev => new Set([...prev, pitch]));
-  }, []);
+  }, [instrument]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
