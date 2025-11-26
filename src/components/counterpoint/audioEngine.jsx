@@ -2,6 +2,19 @@
 
 let audioContext = null;
 let masterGain = null;
+let reverbNode = null;
+let reverbGain = null;
+let delayNode = null;
+let delayGain = null;
+let chorusNode = null;
+let chorusGain = null;
+
+// Effect levels (0-1)
+let effectLevels = {
+  reverb: 0.3,
+  delay: 0,
+  chorus: 0
+};
 
 const NOTE_FREQUENCIES = {};
 const A4 = 440;
@@ -20,18 +33,123 @@ function midiToNoteName(midi) {
   return `${note}${octave}`;
 }
 
-export function initAudio() {
+// Create convolver reverb
+async function createReverb() {
+  if (!audioContext) return null;
+  
+  const convolver = audioContext.createConvolver();
+  const sampleRate = audioContext.sampleRate;
+  const length = sampleRate * 2; // 2 second reverb
+  const impulse = audioContext.createBuffer(2, length, sampleRate);
+  
+  for (let channel = 0; channel < 2; channel++) {
+    const channelData = impulse.getChannelData(channel);
+    for (let i = 0; i < length; i++) {
+      channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+    }
+  }
+  
+  convolver.buffer = impulse;
+  return convolver;
+}
+
+// Create delay effect
+function createDelay() {
+  if (!audioContext) return null;
+  
+  const delay = audioContext.createDelay(1);
+  delay.delayTime.value = 0.3;
+  
+  const feedback = audioContext.createGain();
+  feedback.gain.value = 0.4;
+  
+  delay.connect(feedback);
+  feedback.connect(delay);
+  
+  return delay;
+}
+
+// Create chorus effect
+function createChorus() {
+  if (!audioContext) return null;
+  
+  const delay = audioContext.createDelay(0.1);
+  delay.delayTime.value = 0.02;
+  
+  const lfo = audioContext.createOscillator();
+  lfo.frequency.value = 0.5;
+  lfo.type = 'sine';
+  
+  const lfoGain = audioContext.createGain();
+  lfoGain.gain.value = 0.002;
+  
+  lfo.connect(lfoGain);
+  lfoGain.connect(delay.delayTime);
+  lfo.start();
+  
+  return delay;
+}
+
+export async function initAudio() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = audioContext.createGain();
     masterGain.gain.value = 0.4;
+    
+    // Create effect nodes
+    reverbNode = await createReverb();
+    reverbGain = audioContext.createGain();
+    reverbGain.gain.value = effectLevels.reverb;
+    
+    delayNode = createDelay();
+    delayGain = audioContext.createGain();
+    delayGain.gain.value = effectLevels.delay;
+    
+    chorusNode = createChorus();
+    chorusGain = audioContext.createGain();
+    chorusGain.gain.value = effectLevels.chorus;
+    
+    // Connect effects in parallel to master
     masterGain.connect(audioContext.destination);
+    
+    if (reverbNode) {
+      masterGain.connect(reverbNode);
+      reverbNode.connect(reverbGain);
+      reverbGain.connect(audioContext.destination);
+    }
+    
+    if (delayNode) {
+      masterGain.connect(delayNode);
+      delayNode.connect(delayGain);
+      delayGain.connect(audioContext.destination);
+    }
+    
+    if (chorusNode) {
+      masterGain.connect(chorusNode);
+      chorusNode.connect(chorusGain);
+      chorusGain.connect(audioContext.destination);
+    }
   }
   // Resume context if suspended (browser autoplay policy)
   if (audioContext.state === 'suspended') {
     audioContext.resume();
   }
   return audioContext;
+}
+
+export function setEffectLevel(effect, level) {
+  effectLevels[effect] = level;
+  if (effect === 'reverb' && reverbGain) {
+    reverbGain.gain.value = level;
+  } else if (effect === 'delay' && delayGain) {
+    delayGain.gain.value = level;
+  } else if (effect === 'chorus' && chorusGain) {
+    chorusGain.gain.value = level;
+  }
+}
+
+export function getEffectLevels() {
+  return { ...effectLevels };
 }
 
 export function getAudioContext() {

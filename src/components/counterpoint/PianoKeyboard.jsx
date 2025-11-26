@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Keyboard, Guitar } from 'lucide-react';
-import { initAudio, playNoteSustain, stopNoteSustain, playNote } from './audioEngine';
+import { Keyboard, Guitar, Volume2 } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
+import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels } from './audioEngine';
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -55,7 +56,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
+  const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
   const activeOscillators = useRef({});
+
+  const handleEffectChange = (effect, value) => {
+    setEffects(prev => ({ ...prev, [effect]: value }));
+    setEffectLevel(effect, value);
+  };
   
   const whiteKeyWidth = 24;
   const blackKeyWidth = 14;
@@ -74,21 +81,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (activeOscillators.current[pitch]) return; // Already playing
     
     initAudio();
-    // Use playNote with instrument for better sound variety
-    playNote(pitch, 0.5, 0.7, 0, instrument);
-    activeOscillators.current[pitch] = true; // Mark as playing
+    // Use sustained note that plays until mouse release
+    const oscObj = playNoteSustain(pitch, 0.7, 0);
+    activeOscillators.current[pitch] = oscObj;
     setPressedNotes(prev => new Set([...prev, pitch]));
-    
-    // Auto-release after duration
-    setTimeout(() => {
-      delete activeOscillators.current[pitch];
-      setPressedNotes(prev => {
-        const next = new Set(prev);
-        next.delete(pitch);
-        return next;
-      });
-    }, 500);
-  }, [instrument]);
+  }, []);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
@@ -177,31 +174,102 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-600">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano (88 Keys)</h3>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <Guitar className="w-3.5 h-3.5 text-white/60" />
-            <Select value={instrument} onValueChange={onInstrumentChange}>
-              <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {INSTRUMENTS.map(inst => (
-                  <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
-                    {inst.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex items-center gap-4">
+          {/* Effect Knobs */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Reverb</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.reverb * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.reverb * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={effects.reverb}
+                  onChange={(e) => handleEffectChange('reverb', parseFloat(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Delay</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.delay * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.delay * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={effects.delay}
+                  onChange={(e) => handleEffectChange('delay', parseFloat(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Chorus</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.chorus * 270}deg, #334155 0deg)`
+                }}
+              >
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.chorus * 100)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={effects.chorus}
+                  onChange={(e) => handleEffectChange('chorus', parseFloat(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowKeys(!showKeys)}
-            className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
-          >
-            <Keyboard className="w-3.5 h-3.5 mr-1" />
-            Keys
-          </Button>
+
+          <div className="w-px h-8 bg-slate-600" />
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <Guitar className="w-3.5 h-3.5 text-white/60" />
+              <Select value={instrument} onValueChange={onInstrumentChange}>
+                <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {INSTRUMENTS.map(inst => (
+                    <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
+                      {inst.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeys(!showKeys)}
+              className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
+            >
+              <Keyboard className="w-3.5 h-3.5 mr-1" />
+              Keys
+            </Button>
+          </div>
         </div>
       </div>
       
@@ -336,7 +404,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
       
       <p className="text-white/50 text-[10px] mt-1">
-        Click keys or use keyboard (Z-M, Q-P rows)
+        Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
       </p>
     </div>
   );
