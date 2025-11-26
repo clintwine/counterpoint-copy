@@ -16,6 +16,8 @@ const NOTE_COLORS = {
 
 const CELL_WIDTH = 48;
 const CELL_HEIGHT = 28;
+const MIN_DURATION = 0.25; // Quarter of a beat
+const DEFAULT_DURATION = 1; // One beat
 
 export default function NoteGrid({ 
   voices, 
@@ -37,6 +39,7 @@ export default function NoteGrid({
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
   const [dragState, setDragState] = useState(null);
+  const [resizeState, setResizeState] = useState(null); // For resizing note duration
   const [clipboard, setClipboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -187,9 +190,19 @@ export default function NoteGrid({
     return null;
   };
 
+  // Check if clicking on the right edge of a note (for resizing)
+  const isOnNoteEdge = (e, note) => {
+    if (!note) return false;
+    const rect = e.target.getBoundingClientRect();
+    const noteWidth = (note.duration || DEFAULT_DURATION) * CELL_WIDTH;
+    const clickX = e.clientX - rect.left;
+    return clickX > noteWidth - 8;
+  };
+
   const handleMouseDown = (e, pitch, beat) => {
     const noteKey = getNoteKey(pitch, beat);
-    const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
+    const existingNote = cantusFirmus.find(n => n.pitch === pitch && n.beat === beat);
+    const hasNote = !!existingNote;
     
     if (tool === 'draw') {
       // Draw mode - add/remove note (allows multiple notes per beat)
@@ -198,14 +211,29 @@ export default function NoteGrid({
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
       } else {
-        // Allow multiple notes per beat - just add the new note
-        const newNotes = [...cantusFirmus, { pitch, beat }].sort((a, b) => a.beat - b.beat);
+        // Allow multiple notes per beat - just add the new note with default duration
+        const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         playNoteSound(pitch);
       }
     } else if (tool === 'select') {
       if (hasNote) {
+        // Check if clicking on right edge for resize
+        const rect = e.currentTarget.getBoundingClientRect();
+        const noteWidth = (existingNote.duration || DEFAULT_DURATION) * CELL_WIDTH;
+        const clickX = e.clientX - rect.left;
+        
+        if (clickX > noteWidth - 10 && clickX <= noteWidth) {
+          // Start resizing
+          setResizeState({
+            note: existingNote,
+            startX: e.clientX,
+            startDuration: existingNote.duration || DEFAULT_DURATION
+          });
+          return;
+        }
+        
         // Start dragging
         const isSelected = selectedNotes.has(noteKey);
         if (!isSelected && !e.shiftKey) {
@@ -252,7 +280,21 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
-    if (marquee) {
+    if (resizeState) {
+      // Handle note duration resize
+      const deltaX = e.clientX - resizeState.startX;
+      const deltaDuration = deltaX / CELL_WIDTH;
+      const newDuration = Math.max(MIN_DURATION, Math.round((resizeState.startDuration + deltaDuration) * 4) / 4);
+      
+      // Update note duration in real-time
+      const newNotes = cantusFirmus.map(n => {
+        if (n.pitch === resizeState.note.pitch && n.beat === resizeState.note.beat) {
+          return { ...n, duration: newDuration };
+        }
+        return n;
+      });
+      onNotesUpdate(newNotes);
+    } else if (marquee) {
       setMarquee(prev => ({ ...prev, endX: e.clientX, endY: e.clientY }));
     } else if (dragState && selectedNotes.size > 0) {
       const cell = getCellFromPosition(e.clientX, e.clientY);
@@ -268,6 +310,13 @@ export default function NoteGrid({
   };
 
   const handleMouseUp = () => {
+    if (resizeState) {
+      // Save to history after resize
+      saveToHistory(cantusFirmus);
+      setResizeState(null);
+      return;
+    }
+    
     if (marquee) {
       // Calculate selected notes from marquee
       const startCell = getCellFromPosition(marquee.startX, marquee.startY);
@@ -538,27 +587,41 @@ export default function NoteGrid({
                       `}
                       style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
                     >
-                      {notesAtPosition.map(({ voiceIndex, note }) => (
-                        <motion.div
-                          key={voiceIndex}
-                          initial={{ scale: 0 }}
-                          animate={{ 
-                            scale: 1,
-                            opacity: showDragPreview ? 0.4 : 1
-                          }}
-                          className={`absolute inset-0.5 rounded flex items-center justify-center shadow-md ${
-                            isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
-                          }`}
-                          style={{ 
-                            backgroundColor: NOTE_COLORS[voiceIndex],
-                            boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined
-                          }}
-                        >
-                          <span className="text-[10px] font-bold text-slate-900">
-                            {note.pitch.replace(/\d/, '')}
-                          </span>
-                        </motion.div>
-                      ))}
+                      {notesAtPosition.map(({ voiceIndex, note }) => {
+                        const duration = note.duration || DEFAULT_DURATION;
+                        const noteWidth = duration * CELL_WIDTH - 4;
+                        
+                        return (
+                          <motion.div
+                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
+                            initial={{ scale: 0 }}
+                            animate={{ 
+                              scale: 1,
+                              opacity: showDragPreview ? 0.4 : 1
+                            }}
+                            className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
+                              isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
+                            }`}
+                            style={{ 
+                              width: noteWidth,
+                              minWidth: 20,
+                              backgroundColor: NOTE_COLORS[voiceIndex],
+                              boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined,
+                              cursor: 'grab',
+                              zIndex: 5
+                            }}
+                          >
+                            <span className="text-[10px] font-bold text-slate-900">
+                              {note.pitch.replace(/\d/, '')}
+                            </span>
+                            {/* Resize handle */}
+                            <div 
+                              className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white/30 rounded-r"
+                              style={{ cursor: 'ew-resize' }}
+                            />
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   );
                 })}
