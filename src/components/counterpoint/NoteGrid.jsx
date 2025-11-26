@@ -72,6 +72,8 @@ export default function NoteGrid({
   }, [selectedNotes, cantusFirmus, onSelectionChange]);
   const [dragState, setDragState] = useState(null);
   const [resizeState, setResizeState] = useState(null); // For resizing note duration
+  const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
+  const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
   const [clipboard, setClipboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -249,15 +251,18 @@ export default function NoteGrid({
     const hasNote = !!existingNote;
     
     if (tool === 'draw') {
-      // Draw mode - add/remove note (allows multiple notes per beat)
+      // Draw mode - add/remove note with painting support
+      setIsPainting(true);
+      paintedNotesRef.current = new Set();
+      
       if (hasNote) {
         const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
       } else {
-        // Allow multiple notes per beat - just add the new note with default duration
+        // Add the note and track it
+        paintedNotesRef.current.add(noteKey);
         const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
-        saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         playNoteSound(pitch);
       }
@@ -289,6 +294,23 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
+    // Handle painting in draw mode
+    if (isPainting && tool === 'draw') {
+      const cell = getCellFromPosition(e.clientX, e.clientY);
+      if (cell) {
+        const noteKey = getNoteKey(cell.pitch, cell.beat);
+        const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
+        
+        // Only add if not already painted in this stroke and no existing note
+        if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
+          paintedNotesRef.current.add(noteKey);
+          const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+          onNotesUpdate(newNotes);
+          playNoteSound(cell.pitch);
+        }
+      }
+    }
+    
     if (resizeState) {
       // Handle note duration resize
       const deltaX = e.clientX - resizeState.startX;
@@ -327,6 +349,13 @@ export default function NoteGrid({
   };
 
   const handleMouseUp = () => {
+    // Save history after painting stroke
+    if (isPainting && paintedNotesRef.current.size > 0) {
+      saveToHistory(cantusFirmus);
+    }
+    setIsPainting(false);
+    paintedNotesRef.current = new Set();
+    
     if (resizeState) {
       // Save to history after resize
       saveToHistory(cantusFirmus);
