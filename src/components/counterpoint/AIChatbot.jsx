@@ -60,6 +60,7 @@ export default function AIChatbot({
 Current settings:
 - Key: ${settings.key} ${settings.mode}
 - Species: ${settings.species || '1st'} species counterpoint
+- Tempo: ${tempo} BPM
 
 Existing cantus firmus/melody:
 ${JSON.stringify(currentNotes, null, 2)}
@@ -72,9 +73,14 @@ Generate a harmonizing voice following these counterpoint rules:
 3. Avoid parallel 5ths and octaves between voices
 4. Prefer contrary or oblique motion over parallel motion
 5. For bass: use range E2-C4. For tenor: use range C3-G4. For alto: use range F3-D5
-6. Match the rhythm of the cantus firmus (same number of notes)
-7. Start and end on perfect consonances (unison, 5th, or octave)
-8. Create smooth melodic lines with mostly stepwise motion
+6. Start and end on perfect consonances (unison, 5th, or octave)
+7. Create smooth melodic lines with mostly stepwise motion
+
+IMPORTANT - Use varied rhythms for musicality:
+- Use duration values: 0.25 (16th), 0.5 (8th), 1 (quarter), 2 (half), 4 (whole)
+- Mix long held notes with shorter passing notes
+- Create rhythmic interest - don't make all notes the same length
+- Bass lines often use longer notes, while inner voices can be more active
 
 Determine what type of voice would best harmonize (bass, tenor, or alto) based on the user's request.
 
@@ -107,6 +113,7 @@ Current settings:
 - Key: ${settings.key} ${settings.mode}
 - Measures: ${settings.measures}
 - Species: ${settings.species || '1st'} species counterpoint
+- Tempo: ${tempo} BPM
 
 User request: "${userMessage}"
 
@@ -116,11 +123,19 @@ Generate TWO voices following counterpoint rules:
 3. Use consonant intervals (3rds, 5ths, 6ths, octaves) on strong beats
 4. Avoid parallel 5ths and octaves
 5. Prefer contrary motion
-6. Both voices should have ${settings.measures} notes
-7. Start and end on perfect consonances
-8. Use stepwise motion primarily
+6. Start and end on perfect consonances
+7. Use stepwise motion primarily
 
-Provide both the melody and the harmony.`,
+CRITICAL - Create rhythmic variety and musical interest:
+- Use varied durations: 0.25 (16th note), 0.5 (8th), 1 (quarter), 2 (half), 4 (whole)
+- Include some long held notes (duration 2-4) for tension and release
+- Add quick passages with 0.25 or 0.5 duration notes for excitement
+- Don't make every note the same length - that's boring!
+- The melody can be more active, bass often more sustained
+- Create syncopation and rhythmic interplay between voices
+- Total beats should span ${settings.measures * 4} beats (${settings.measures} measures)
+
+Provide both the melody and the harmony with varied, interesting rhythms.`,
           response_json_schema: {
             type: "object",
             properties: {
@@ -158,23 +173,29 @@ Provide both the melody and the harmony.`,
 
 Current settings:
 - Key: ${settings.key} ${settings.mode}
-- Measures/beats: ${settings.measures}
+- Measures: ${settings.measures} (total beats: ${settings.measures * 4})
+- Tempo: ${tempo} BPM
 - Current notes: ${currentNotes.length > 0 ? JSON.stringify(currentNotes) : 'None yet'}
 
 User request: "${userMessage}"
 
 Generate a melody following these rules:
 1. Use notes appropriate for ${settings.key} ${settings.mode} scale
-2. Create ${settings.measures} notes (one per beat)
-3. Start and end on the tonic (${settings.key})
-4. Prefer stepwise motion
-5. Use a good melodic contour
+2. Start and end on the tonic (${settings.key})
+3. Prefer stepwise motion with occasional leaps for interest
+4. Use a good melodic contour (arch shape, ascending, descending, etc.)
+5. Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.
 
-Respond with:
-1. A brief description of the melody you created
-2. The notes in the format specified in the JSON schema
+CRITICAL - Create rhythmic variety:
+- Use varied note durations: 0.25 (16th note - very fast), 0.5 (8th note), 1 (quarter note), 2 (half note - held), 4 (whole note - very long)
+- DON'T make all notes the same duration - that sounds robotic!
+- Include some long held notes (duration 2-4) for expression
+- Add quick runs with 0.25 or 0.5 duration notes
+- Mix it up! Create patterns like: long-short-short, or short-short-short-long
+- The beat values should be cumulative (if note 1 is at beat 0 with duration 2, note 2 starts at beat 2)
+- Total should span approximately ${settings.measures * 4} beats
 
-Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
+Respond with a brief description and the notes with varied, musical rhythms.`,
           response_json_schema: {
             type: "object",
             properties: {
