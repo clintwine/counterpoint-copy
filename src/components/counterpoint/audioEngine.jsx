@@ -231,6 +231,76 @@ const INSTRUMENT_CONFIGS = {
   }
 };
 
+// Custom instruments storage
+let customInstruments = {};
+
+export function registerCustomInstrument(name, config) {
+  customInstruments[name] = config;
+}
+
+export function unregisterCustomInstrument(name) {
+  delete customInstruments[name];
+}
+
+export function getCustomInstruments() {
+  return { ...customInstruments };
+}
+
+// Play note with custom instrument support
+export function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
+  if (!audioContext) initAudio();
+  
+  const freq = NOTE_FREQUENCIES[pitch];
+  if (!freq) return;
+
+  const now = audioContext.currentTime;
+  const { oscillators: oscConfigs, envelope, filter: filterConfig } = customConfig;
+
+  const oscillators = [];
+  const gainNode = audioContext.createGain();
+  const filterNode = audioContext.createBiquadFilter();
+
+  // Create oscillators from custom config
+  oscConfigs.forEach(oscConfig => {
+    const osc = audioContext.createOscillator();
+    osc.type = oscConfig.waveform;
+    osc.frequency.value = freq;
+    osc.detune.value = oscConfig.detune || 0;
+
+    const oscGain = audioContext.createGain();
+    oscGain.gain.value = (oscConfig.gain || 1) * 0.3;
+
+    osc.connect(oscGain);
+    oscGain.connect(filterNode);
+    oscillators.push(osc);
+  });
+
+  // Filter
+  filterNode.type = filterConfig.type || 'lowpass';
+  filterNode.frequency.value = filterConfig.frequency || 2000;
+  filterNode.Q.value = filterConfig.Q || 1;
+
+  // Envelope
+  const { attack, decay, sustain, release } = envelope;
+  const totalDuration = duration + release;
+
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
+  gainNode.gain.linearRampToValueAtTime(volume * sustain * 0.6, now + attack + decay);
+  gainNode.gain.setValueAtTime(volume * sustain * 0.6, now + duration - release);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+
+  filterNode.connect(gainNode);
+  gainNode.connect(masterGain);
+
+  oscillators.forEach(osc => {
+    osc.start(now);
+    osc.stop(now + totalDuration);
+  });
+
+  return { oscillators, gainNode };
+}
+
 function createDistortion(amount) {
   if (!audioContext) return null;
   const distortion = audioContext.createWaveShaper();
