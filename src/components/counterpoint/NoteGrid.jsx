@@ -98,27 +98,27 @@ export default function NoteGrid({
     });
   });
 
-  // Scroll to keep current beat visible during playback or seeking
-  useEffect(() => {
-    if (gridRef.current) {
-      if (currentBeat === 0 && !isScrubbing) {
-        // Reset scroll to beginning
-        gridRef.current.scrollLeft = 0;
-      } else {
-        const containerWidth = gridRef.current.clientWidth - 56; // subtract pitch label width
-        const beatPosition = currentBeat * CELL_WIDTH;
-        const currentScroll = gridRef.current.scrollLeft;
+  // Scroll to keep current beat visible during playback (not while scrubbing)
+      useEffect(() => {
+        if (gridRef.current && isPlaying && !isScrubbing) {
+          if (currentBeat === 0) {
+            // Reset scroll to beginning
+            gridRef.current.scrollLeft = 0;
+          } else {
+            const containerWidth = gridRef.current.clientWidth - 56; // subtract pitch label width
+            const beatPosition = currentBeat * CELL_WIDTH;
+            const currentScroll = gridRef.current.scrollLeft;
 
-        // Keep playhead in the middle third of the visible area
-        const leftThreshold = currentScroll + containerWidth * 0.3;
-        const rightThreshold = currentScroll + containerWidth * 0.7;
+            // Keep playhead in the middle third of the visible area
+            const leftThreshold = currentScroll + containerWidth * 0.3;
+            const rightThreshold = currentScroll + containerWidth * 0.7;
 
-        if (beatPosition > rightThreshold || beatPosition < leftThreshold) {
-          gridRef.current.scrollLeft = Math.max(0, beatPosition - containerWidth * 0.3);
+            if (beatPosition > rightThreshold || beatPosition < leftThreshold) {
+              gridRef.current.scrollLeft = Math.max(0, beatPosition - containerWidth * 0.3);
+            }
+          }
         }
-      }
-    }
-  }, [currentBeat, CELL_WIDTH, isScrubbing]);
+      }, [currentBeat, CELL_WIDTH, isScrubbing, isPlaying]);
 
   const getNotesAtBeat = (voiceIndex, beat) => {
     const voice = voices[voiceIndex];
