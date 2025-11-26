@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers, Guitar, Clock } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers, Guitar } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
@@ -57,8 +57,7 @@ export default function NoteGrid({
   onVoiceInstrumentChange,
   onSelectionChange,
   tempo = 80,
-  timeSignature = '4/4',
-  onTimeSignatureChange
+  timeSignature = '4/4'
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -575,26 +574,6 @@ export default function NoteGrid({
                 {INSTRUMENTS.map(inst => (
                   <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
                     {inst.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Time Signature */}
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-white/60" />
-            <Select 
-              value={timeSignature} 
-              onValueChange={(v) => onTimeSignatureChange?.(v)}
-            >
-              <SelectTrigger className="w-20 h-8 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {TIME_SIGNATURES.map(ts => (
-                  <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
-                    {ts.label}
                   </SelectItem>
                 ))}
               </SelectContent>

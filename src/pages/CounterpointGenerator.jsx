@@ -527,7 +527,6 @@ export default function CounterpointGenerator() {
                                                 onSelectionChange={setSelectedNotes}
                                                 tempo={tempo}
                                                 timeSignature={settings.timeSignature}
-                                                onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
                                                 onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                                   const newVoices = [...voices];
                                                   if (newVoices[voiceIndex]) {
