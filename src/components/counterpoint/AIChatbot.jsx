@@ -161,35 +161,46 @@ Determine the best voice type (bass, tenor, alto) and create a musically sophist
       } else if (wantsHarmony && !hasExistingMelody) {
         // Generate both melody and harmony
         response = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are an expert counterpoint composer. Create a complete two-voice contrapuntal composition.
+          prompt: `You are an expert counterpoint composer and music theorist. Create a complete two-voice contrapuntal composition.
 
 Current settings:
 - Key: ${settings.key} ${settings.mode}
 - Measures: ${settings.measures}
 - Species: ${settings.species || '1st'} species counterpoint
 - Tempo: ${tempo} BPM
+${styleContext}
 
 User request: "${userMessage}"
 
-Generate TWO voices following counterpoint rules:
-1. Create a cantus firmus (main melody) in the soprano/upper voice range (C4-G5)
-2. Create a harmonizing bass line (E2-C4)
-3. Use consonant intervals (3rds, 5ths, 6ths, octaves) on strong beats
-4. Avoid parallel 5ths and octaves
-5. Prefer contrary motion
-6. Start and end on perfect consonances
-7. Use stepwise motion primarily
+Generate TWO sophisticated voices using advanced music theory:
 
-CRITICAL - Create rhythmic variety and musical interest:
-- Use varied durations: 0.25 (16th note), 0.5 (8th), 1 (quarter), 2 (half), 4 (whole)
-- Include some long held notes (duration 2-4) for tension and release
-- Add quick passages with 0.25 or 0.5 duration notes for excitement
-- Don't make every note the same length - that's boring!
-- The melody can be more active, bass often more sustained
-- Create syncopation and rhythmic interplay between voices
-- Total beats should span ${settings.measures * 4} beats (${settings.measures} measures)
+VOICE 1 - MELODY (Soprano, C4-G5):
+- Create AT LEAST ${minNotes} notes - this should be a COMPLETE, DEVELOPED melody
+- Use motivic development: introduce a motif, then vary it (inversion, augmentation, sequence)
+- Include scalar passages, arpeggios, and ornamental figures
+- Build to a climax around 2/3 through, then resolve
+- Use chromatic passing tones for color where appropriate
 
-Provide both the melody and the harmony with varied, interesting rhythms.`,
+VOICE 2 - HARMONY (Bass, E2-C4):
+- Create complementary rhythmic counterpoint
+- When melody is active, bass can sustain; when melody sustains, bass can move
+- Use pedal points for harmonic stability
+- Include walking bass sections and leaps of 4ths/5ths
+
+ADVANCED TECHNIQUES:
+- Suspensions (prepare-suspend-resolve)
+- Sequences (melodic patterns that repeat at different pitch levels)
+- Imitation (one voice echoes another)
+- Contrary motion between voices
+- Cadential formulas (authentic, half, deceptive)
+
+RHYTHM - CRITICAL:
+- Use ALL durations: 0.25, 0.5, 1, 2, 4
+- Create rhythmic variety and interplay
+- Include syncopation and hemiola
+- Total span: ${settings.measures * 4} beats
+
+This should sound like a REAL composition, not a simple exercise!`,
           response_json_schema: {
             type: "object",
             properties: {
@@ -368,31 +379,36 @@ Respond with description and notes. Make this sound like REAL MUSIC composed by 
     const msPerBeat = (60 / tempo) * 1000;
     const timeouts = [];
 
-    // Play melody
-    notes.forEach((note, i) => {
+    // Play melody - use actual beat positions for timing
+    notes.forEach((note) => {
+      const startTime = (note.beat || 0) * msPerBeat;
       const timeout = setTimeout(() => {
         const duration = (note.duration || 1) * (60 / tempo) * 0.9;
         playNote(note.pitch, duration, 0.7, 0, 'organ');
-      }, i * msPerBeat);
+      }, startTime);
       timeouts.push(timeout);
     });
 
-    // Play harmony if exists
+    // Play harmony if exists - use actual beat positions
     if (harmony && harmony.length > 0) {
-      harmony.forEach((note, i) => {
+      harmony.forEach((note) => {
+        const startTime = (note.beat || 0) * msPerBeat;
         const timeout = setTimeout(() => {
           const duration = (note.duration || 1) * (60 / tempo) * 0.9;
           playNote(note.pitch, duration, 0.6, 1, 'organ');
-        }, i * msPerBeat);
+        }, startTime);
         timeouts.push(timeout);
       });
     }
 
-    // Stop preview after all notes played
-    const maxLength = Math.max(notes.length, harmony?.length || 0);
+    // Stop preview after all notes played - calculate based on actual durations
+    const melodyEnd = notes.reduce((max, n) => Math.max(max, (n.beat || 0) + (n.duration || 1)), 0);
+    const harmonyEnd = harmony ? harmony.reduce((max, n) => Math.max(max, (n.beat || 0) + (n.duration || 1)), 0) : 0;
+    const totalDuration = Math.max(melodyEnd, harmonyEnd) * msPerBeat;
+    
     const endTimeout = setTimeout(() => {
       setPreviewPlaying(null);
-    }, maxLength * msPerBeat + 500);
+    }, totalDuration + 500);
     timeouts.push(endTimeout);
 
     previewTimeoutRef.current = timeouts;
