@@ -67,6 +67,8 @@ export default function CounterpointGenerator() {
   const [projectName, setProjectName] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [activeVoice, setActiveVoice] = useState(0);
+  const [pianoInstrument, setPianoInstrument] = useState('organ');
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
@@ -513,14 +515,16 @@ export default function CounterpointGenerator() {
             className="lg:col-span-3 space-y-4"
           >
             <NoteGrid
-              voices={allVoices}
-              currentBeat={currentBeat}
-              isPlaying={isPlaying}
-              measures={settings.measures}
-              cantusFirmus={cantusFirmus}
-              onNotesUpdate={setCantusFirmus}
-              onSeek={handleSeek}
-              onExportMidi={() => {
+                              voices={allVoices}
+                              currentBeat={currentBeat}
+                              isPlaying={isPlaying}
+                              measures={settings.measures}
+                              cantusFirmus={cantusFirmus}
+                              onNotesUpdate={setCantusFirmus}
+                              onSeek={handleSeek}
+                              activeVoice={activeVoice}
+                              onActiveVoiceChange={setActiveVoice}
+                              onExportMidi={() => {
                 // Export as MIDI-like JSON (can be converted to MIDI)
                 const midiData = {
                   tempo,
@@ -563,9 +567,11 @@ export default function CounterpointGenerator() {
             />
             
             <PianoKeyboard
-              activeNotes={activeNotes}
-              octaves={[3, 4, 5]}
-            />
+                              activeNotes={activeNotes}
+                              octaves={[3, 4, 5]}
+                              instrument={pianoInstrument}
+                              onInstrumentChange={setPianoInstrument}
+                            />
           </motion.main>
           </div>
           </div>
