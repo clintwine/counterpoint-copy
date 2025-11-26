@@ -7,8 +7,16 @@ import {
   RefreshCw, 
   Music2, 
   Settings, 
-  Layers
+  Layers,
+  Save,
+  FolderOpen,
+  MessageSquare
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from 'framer-motion';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
@@ -50,9 +58,75 @@ export default function CounterpointGenerator() {
   
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [loadDialogOpen, setLoadDialogOpen] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [currentProjectId, setCurrentProjectId] = useState(null);
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
+  const queryClient = useQueryClient();
+
+  // Fetch saved projects
+  const { data: savedProjects = [] } = useQuery({
+    queryKey: ['counterpoint-projects'],
+    queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
+  });
+
+  // Save project mutation
+  const saveProjectMutation = useMutation({
+    mutationFn: async (data) => {
+      if (currentProjectId) {
+        return base44.entities.CounterpointProject.update(currentProjectId, data);
+      }
+      return base44.entities.CounterpointProject.create(data);
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
+      if (!currentProjectId && result?.id) {
+        setCurrentProjectId(result.id);
+      }
+      setSaveDialogOpen(false);
+    }
+  });
+
+  // Delete project mutation
+  const deleteProjectMutation = useMutation({
+    mutationFn: (id) => base44.entities.CounterpointProject.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
+    }
+  });
+
+  const handleSaveProject = () => {
+    if (!projectName.trim()) return;
+    saveProjectMutation.mutate({
+      name: projectName,
+      settings,
+      cantusFirmus,
+      generatedVoices,
+      voices
+    });
+  };
+
+  const handleLoadProject = (project) => {
+    setSettings(project.settings || DEFAULT_SETTINGS);
+    setCantusFirmus(project.cantusFirmus || []);
+    setGeneratedVoices(project.generatedVoices || []);
+    setVoices(project.voices || DEFAULT_VOICES);
+    setProjectName(project.name);
+    setCurrentProjectId(project.id);
+    setLoadDialogOpen(false);
+  };
+
+  const handleNewProject = () => {
+    setSettings(DEFAULT_SETTINGS);
+    setCantusFirmus([]);
+    setGeneratedVoices([]);
+    setVoices(DEFAULT_VOICES);
+    setProjectName('');
+    setCurrentProjectId(null);
+  };
 
   // Initialize audio on first interaction
   const ensureAudio = useCallback(() => {
@@ -214,7 +288,109 @@ export default function CounterpointGenerator() {
               </p>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex gap-2 flex-wrap">
+              {/* Load Project */}
+              <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
+                  >
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    Load
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900 border-slate-700">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Load Project</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    {savedProjects.length === 0 ? (
+                      <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p>
+                    ) : (
+                      savedProjects.map((project) => (
+                        <div
+                          key={project.id}
+                          className="flex items-center justify-between p-3 bg-slate-800 rounded-lg hover:bg-slate-700 cursor-pointer"
+                          onClick={() => handleLoadProject(project)}
+                        >
+                          <div>
+                            <p className="text-white font-medium">{project.name}</p>
+                            <p className="text-white/50 text-xs">
+                              {project.settings?.key} {project.settings?.mode} • {project.cantusFirmus?.length || 0} notes
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteProjectMutation.mutate(project.id);
+                            }}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleNewProject}
+                    className="w-full border-slate-700 text-white"
+                  >
+                    New Project
+                  </Button>
+                </DialogContent>
+              </Dialog>
+
+              {/* Save Project */}
+              <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900 border-slate-700">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Save Project</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-white/80">Project Name</Label>
+                      <Input
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        placeholder="My Counterpoint"
+                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleSaveProject}
+                      disabled={!projectName.trim() || saveProjectMutation.isPending}
+                      className="w-full bg-gold text-slate-900 hover:bg-gold/90"
+                    >
+                      {saveProjectMutation.isPending ? 'Saving...' : (currentProjectId ? 'Update Project' : 'Save Project')}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* AI Composer Link */}
+              <Button
+                variant="outline"
+                onClick={() => window.open(base44.agents.getWhatsAppConnectURL('counterpoint_composer'), '_blank')}
+                className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                AI Composer
+              </Button>
+
               <Button
                 variant="outline"
                 onClick={handleExport}
