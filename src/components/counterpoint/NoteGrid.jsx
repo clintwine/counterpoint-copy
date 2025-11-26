@@ -46,7 +46,8 @@ export default function NoteGrid({
   onSeek,
   activeVoice = 0,
   onActiveVoiceChange,
-  onVoiceInstrumentChange
+  onVoiceInstrumentChange,
+  onSelectionChange
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -59,6 +60,14 @@ export default function NoteGrid({
   const [tool, setTool] = useState('select'); // 'select', 'marquee', 'draw'
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
+
+  // Notify parent of selection changes
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+      onSelectionChange(selectedNotesList);
+    }
+  }, [selectedNotes, cantusFirmus, onSelectionChange]);
   const [dragState, setDragState] = useState(null);
   const [resizeState, setResizeState] = useState(null); // For resizing note duration
   const [clipboard, setClipboard] = useState([]);
