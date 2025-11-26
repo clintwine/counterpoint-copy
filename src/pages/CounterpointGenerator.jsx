@@ -244,8 +244,6 @@ export default function CounterpointGenerator() {
   // Play notes at current beat
       useEffect(() => {
         if (isPlaying) {
-          const noteDuration = (60 / tempo) * 0.9;
-
           // If there are selected notes, only play those
           if (selectedNotes.length > 0) {
             const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
@@ -256,15 +254,21 @@ export default function CounterpointGenerator() {
               playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
             });
           } else {
-            // Play all voices normally
-            allVoices.forEach((voice, voiceIndex) => {
-              if (!voice.enabled && voiceIndex > 0) return;
+            // Play cantus firmus notes directly from cantusFirmus state
+            const cfNotesAtBeat = cantusFirmus.filter(n => n.beat === currentBeat);
+            cfNotesAtBeat.forEach(note => {
+              const volume = (voices[0]?.volume || 80) / 100;
+              const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+              const instrument = voices[0]?.instrument || 'organ';
+              playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
+            });
 
-              const notesAtBeat = voice.notes?.filter(n => {
-                const noteStart = n.beat;
-                return noteStart === currentBeat;
-              }) || [];
+            // Play generated voices
+            generatedVoices.forEach((voice, idx) => {
+              const voiceIndex = idx + 1;
+              if (!voices[voiceIndex]?.enabled) return;
 
+              const notesAtBeat = voice.notes?.filter(n => n.beat === currentBeat) || [];
               notesAtBeat.forEach(note => {
                 const volume = (voices[voiceIndex]?.volume || 80) / 100;
                 const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
@@ -272,19 +276,19 @@ export default function CounterpointGenerator() {
                 playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
               });
             });
-            }
+          }
 
-            // Metronome click
-            if (metronomeEnabled) {
+          // Metronome click
+          if (metronomeEnabled) {
             const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-            const subdivisionSize = beatsPerMeasure / 4; // Quarter note subdivisions
+            const subdivisionSize = beatsPerMeasure / 4;
             if (currentBeat % subdivisionSize === 0) {
               const isDownbeat = currentBeat % beatsPerMeasure === 0;
               playMetronomeClick(isDownbeat);
             }
-            }
-            }
-            }, [currentBeat, isPlaying, allVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature, cantusFirmus]);
+          }
+        }
+      }, [currentBeat, isPlaying, cantusFirmus, generatedVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
 
   const handlePlayPause = () => {
     ensureAudio();
