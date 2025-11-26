@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { initAudio, playNote } from './audioEngine';
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -18,6 +19,13 @@ const OCTAVE_NOTES = [
 
 const VOICE_COLORS = ['#D4A574', '#7B9E89', '#9B8AA6', '#A68B7B'];
 
+// Keyboard mapping for computer keyboard to piano notes
+const KEY_MAP = {
+  'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4',
+  't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
+  'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5'
+};
+
 export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] }) {
   const whiteKeyWidth = 24;
   const blackKeyWidth = 16;
@@ -28,8 +36,29 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
     return activeNotes.findIndex(n => n.pitch === fullNote);
   };
 
+  const handleKeyClick = useCallback((note, octave) => {
+    initAudio();
+    const pitch = `${note}${octave}`;
+    playNote(pitch, 0.5, 0.8, 0);
+  }, []);
+
+  // Handle computer keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.repeat) return;
+      const pitch = KEY_MAP[e.key.toLowerCase()];
+      if (pitch) {
+        initAudio();
+        playNote(pitch, 0.5, 0.8, 0);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+    <div className="bg-slate-800/60 rounded-xl p-4 border border-slate-600">
       <h3 className="text-white/90 text-xs uppercase tracking-wider mb-3 font-medium">Active Notes</h3>
       
       <div className="overflow-x-auto pb-2">
@@ -42,26 +71,27 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
                 const isActive = voiceIndex !== -1;
                 
                 return (
-                  <motion.div
+                  <motion.button
                     key={`${octave}-${key.note}`}
-                    className={`absolute bottom-0 border border-slate-600 rounded-b transition-colors ${
-                      isActive ? '' : 'bg-cream/95 hover:bg-cream'
-                    }`}
+                    onClick={() => handleKeyClick(key.note, octave)}
+                    className="absolute bottom-0 border border-slate-500 rounded-b transition-colors cursor-pointer focus:outline-none"
                     style={{
                       left: octaveIndex * octaveWidth + keyIndex * whiteKeyWidth,
                       width: whiteKeyWidth - 1,
                       height: 72,
-                      backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : undefined
+                      backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
+                    whileHover={{ backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : '#E5E5E5' }}
+                    whileTap={{ backgroundColor: '#D4A574', scale: 0.98 }}
                     animate={isActive ? { scale: [1, 1.02, 1] } : {}}
                     transition={{ duration: 0.2 }}
                   >
                     {key.note === 'C' && (
-                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-slate-500 font-medium">
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-slate-600 font-medium">
                         {octave}
                       </span>
                     )}
-                  </motion.div>
+                  </motion.button>
                 );
               })}
               
@@ -71,17 +101,18 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
                 const isActive = voiceIndex !== -1;
                 
                 return (
-                  <motion.div
+                  <motion.button
                     key={`${octave}-${key.note}`}
-                    className={`absolute top-0 rounded-b z-10 transition-colors ${
-                      isActive ? '' : 'bg-slate-900 hover:bg-slate-800'
-                    }`}
+                    onClick={() => handleKeyClick(key.note, octave)}
+                    className="absolute top-0 rounded-b z-10 transition-colors cursor-pointer focus:outline-none"
                     style={{
                       left: octaveIndex * octaveWidth + key.offset * (whiteKeyWidth / 24),
                       width: blackKeyWidth,
                       height: 44,
-                      backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : undefined
+                      backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
                     }}
+                    whileHover={{ backgroundColor: isActive ? VOICE_COLORS[voiceIndex] : '#334155' }}
+                    whileTap={{ backgroundColor: '#D4A574', scale: 0.98 }}
                     animate={isActive ? { scale: [1, 1.05, 1] } : {}}
                     transition={{ duration: 0.2 }}
                   />
@@ -91,6 +122,10 @@ export default function PianoKeyboard({ activeNotes = [], octaves = [3, 4, 5] })
           ))}
         </div>
       </div>
+      
+      <p className="text-white/50 text-[10px] mt-2">
+        Click keys or use keyboard (A-L for white keys, W/E/T/Y/U/O/P for black keys)
+      </p>
     </div>
   );
 }
