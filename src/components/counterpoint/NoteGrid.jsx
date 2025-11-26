@@ -579,16 +579,17 @@ export default function NoteGrid({
                               } else {
                                 // Normal selection/drag behavior
                                 const noteKey = getNoteKey(pitch, beat);
-                                if (!e.shiftKey) {
-                                  setSelectedNotes(new Set([noteKey]));
-                                } else {
-                                  const newSelected = new Set(selectedNotes);
-                                  if (newSelected.has(noteKey)) {
-                                    newSelected.delete(noteKey);
+                                const isAlreadySelected = selectedNotes.has(noteKey);
+                                
+                                if (!isAlreadySelected) {
+                                  // Only change selection if clicking unselected note
+                                  if (!e.shiftKey) {
+                                    setSelectedNotes(new Set([noteKey]));
                                   } else {
+                                    const newSelected = new Set(selectedNotes);
                                     newSelected.add(noteKey);
+                                    setSelectedNotes(newSelected);
                                   }
-                                  setSelectedNotes(newSelected);
                                 }
                                 
                                 setDragState({
