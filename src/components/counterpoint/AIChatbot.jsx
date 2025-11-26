@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Send, Loader2, Sparkles, Music } from 'lucide-react';
+import { X, Send, Loader2, Sparkles, Music, Play, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import { initAudio, playNote, stopAllNotes } from './audioEngine';
 
 export default function AIChatbot({ 
   isOpen, 
@@ -101,6 +102,9 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
     }
   };
 
+  const [previewPlaying, setPreviewPlaying] = useState(null);
+  const previewTimeoutRef = useRef(null);
+
   const handleApplyNotes = (notes) => {
     if (notes && notes.length > 0) {
       // Ensure notes have proper structure
@@ -112,6 +116,52 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
       onApplyMelody(formattedNotes);
     }
   };
+
+  const handlePreview = (notes, messageIndex) => {
+    if (previewPlaying === messageIndex) {
+      // Stop preview
+      stopAllNotes();
+      if (previewTimeoutRef.current) {
+        previewTimeoutRef.current.forEach(t => clearTimeout(t));
+      }
+      setPreviewPlaying(null);
+      return;
+    }
+
+    initAudio();
+    stopAllNotes();
+    setPreviewPlaying(messageIndex);
+
+    const tempo = 120; // Preview tempo
+    const msPerBeat = (60 / tempo) * 1000;
+    const timeouts = [];
+
+    notes.forEach((note, i) => {
+      const timeout = setTimeout(() => {
+        const duration = (note.duration || 1) * (60 / tempo) * 0.9;
+        playNote(note.pitch, duration, 0.7, 0, 'organ');
+      }, i * msPerBeat);
+      timeouts.push(timeout);
+    });
+
+    // Stop preview after all notes played
+    const endTimeout = setTimeout(() => {
+      setPreviewPlaying(null);
+    }, notes.length * msPerBeat + 500);
+    timeouts.push(endTimeout);
+
+    previewTimeoutRef.current = timeouts;
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (previewTimeoutRef.current) {
+        previewTimeoutRef.current.forEach(t => clearTimeout(t));
+      }
+      stopAllNotes();
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -164,13 +214,33 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
                       <span className="text-xs text-white/50">+{msg.notes.length - 12} more</span>
                     )}
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleApplyNotes(msg.notes)}
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
-                  >
-                    Apply to Score
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handlePreview(msg.notes, i)}
+                      variant="outline"
+                      className="flex-1 border-slate-600 text-white text-xs h-7 hover:bg-slate-700"
+                    >
+                      {previewPlaying === i ? (
+                        <>
+                          <Square className="w-3 h-3 mr-1" />
+                          Stop
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3 h-3 mr-1" />
+                          Preview
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleApplyNotes(msg.notes)}
+                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
+                    >
+                      Apply
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
