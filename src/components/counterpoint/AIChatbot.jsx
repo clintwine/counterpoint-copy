@@ -133,7 +133,6 @@ Use pitches like C4, D4, E4, F4, G4, A4, B4, C5 etc.`,
     stopAllNotes();
     setPreviewPlaying(messageIndex);
 
-    const tempo = 120; // Preview tempo
     const msPerBeat = (60 / tempo) * 1000;
     const timeouts = [];
 
