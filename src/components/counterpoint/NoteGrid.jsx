@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers, Guitar } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
@@ -24,6 +24,16 @@ const ZOOM_STEP = 0.1;
 const MIN_DURATION = 0.25; // Quarter of a beat
 const DEFAULT_DURATION = 1; // One beat
 
+const INSTRUMENTS = [
+  { value: 'organ', label: 'Organ' },
+  { value: 'distortion', label: 'Distortion' },
+  { value: 'clean', label: 'Clean' },
+  { value: 'bass', label: 'Bass' },
+  { value: 'strings', label: 'Strings' },
+  { value: 'flute', label: 'Flute' },
+  { value: 'synth', label: 'Synth' },
+];
+
 export default function NoteGrid({ 
   voices, 
   currentBeat, 
@@ -35,7 +45,8 @@ export default function NoteGrid({
   onExportMidi,
   onSeek,
   activeVoice = 0,
-  onActiveVoiceChange
+  onActiveVoiceChange,
+  onVoiceInstrumentChange
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -483,7 +494,7 @@ export default function NoteGrid({
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-white/60" />
             <Select value={String(activeVoice)} onValueChange={(v) => onActiveVoiceChange?.(parseInt(v))}>
-              <SelectTrigger className="w-36 h-8 bg-slate-700 border-slate-600 text-white text-xs">
+              <SelectTrigger className="w-32 h-8 bg-slate-700 border-slate-600 text-white text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
@@ -493,6 +504,26 @@ export default function NoteGrid({
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: NOTE_COLORS[i] }} />
                       {voice.name}
                     </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Instrument for active voice */}
+          <div className="flex items-center gap-2">
+            <Guitar className="w-4 h-4 text-white/60" />
+            <Select 
+              value={voices[activeVoice]?.instrument || 'organ'} 
+              onValueChange={(v) => onVoiceInstrumentChange?.(activeVoice, v)}
+            >
+              <SelectTrigger className="w-28 h-8 bg-slate-700 border-slate-600 text-white text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {INSTRUMENTS.map(inst => (
+                  <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
+                    {inst.label}
                   </SelectItem>
                 ))}
               </SelectContent>

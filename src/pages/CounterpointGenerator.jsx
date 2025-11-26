@@ -515,7 +515,7 @@ export default function CounterpointGenerator() {
             className="lg:col-span-3 space-y-4"
           >
             <NoteGrid
-                              voices={allVoices}
+                              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
                               currentBeat={currentBeat}
                               isPlaying={isPlaying}
                               measures={settings.measures}
@@ -524,6 +524,13 @@ export default function CounterpointGenerator() {
                               onSeek={handleSeek}
                               activeVoice={activeVoice}
                               onActiveVoiceChange={setActiveVoice}
+                              onVoiceInstrumentChange={(voiceIndex, instrument) => {
+                                const newVoices = [...voices];
+                                if (newVoices[voiceIndex]) {
+                                  newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
+                                  setVoices(newVoices);
+                                }
+                              }}
                               onExportMidi={() => {
                 // Export as MIDI-like JSON (can be converted to MIDI)
                 const midiData = {
