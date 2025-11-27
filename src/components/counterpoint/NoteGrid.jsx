@@ -596,12 +596,15 @@ export default function NoteGrid({
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        // Get the original notes that were selected at drag start
-        const originalSelectedKeys = dragState.originalSelectedKeys || selectedNotes;
-        const selectedNotesList = cantusFirmus.filter(n => originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
+        // Use the original notes captured at drag start
+        const originalNotes = dragState.originalNotes || [];
         
-        const movedNotes = selectedNotesList.map(note => {
+        // Filter out the original notes from cantusFirmus
+        const originalNoteKeys = new Set(originalNotes.map(n => getNoteKey(n.pitch, n.beat)));
+        const unselectedNotes = cantusFirmus.filter(n => !originalNoteKeys.has(getNoteKey(n.pitch, n.beat)));
+        
+        // Create moved versions of the original notes
+        const movedNotes = originalNotes.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
@@ -968,6 +971,10 @@ export default function NoteGrid({
                                             setSelectedNotes(newSelected);
                                           }
                                         }
+                                        // Capture the actual note objects at drag start
+                                        const currentSelection = selectedNotes.has(nKey) ? selectedNotes : new Set([nKey]);
+                                        const originalNotes = cantusFirmus.filter(n => currentSelection.has(getNoteKey(n.pitch, n.beat)));
+                                        
                                         setDragState({
                                           startPitch: pitch,
                                           startBeat: beat,
@@ -977,7 +984,7 @@ export default function NoteGrid({
                                           isDragging: false,
                                           clickOffsetX: e.clientX,
                                           clickOffsetY: e.clientY,
-                                          originalSelectedKeys: new Set(selectedNotes) // Capture selection at drag start
+                                          originalNotes: originalNotes // Capture actual notes at drag start
                                         });
                                       }
                                     }}
