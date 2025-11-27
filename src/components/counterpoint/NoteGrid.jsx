@@ -531,8 +531,12 @@ export default function NoteGrid({
       setMarquee(prev => ({ ...prev, endX: e.clientX, endY: e.clientY }));
     } else if (dragState && selectedNotes.size > 0) {
       // Calculate delta from original click position for smooth dragging
-      const deltaX = e.clientX - dragState.clickOffsetX;
-      const deltaY = e.clientY - dragState.clickOffsetY;
+      // Account for any auto-scroll that has happened
+      const scrollDeltaX = gridRef.current ? gridRef.current.scrollLeft - (dragState.initialScrollLeft || 0) : 0;
+      const scrollDeltaY = gridRef.current ? gridRef.current.scrollTop - (dragState.initialScrollTop || 0) : 0;
+      
+      const deltaX = e.clientX - dragState.clickOffsetX + scrollDeltaX;
+      const deltaY = e.clientY - dragState.clickOffsetY + scrollDeltaY;
       
       const beatDelta = Math.round(deltaX / CELL_WIDTH);
       const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
