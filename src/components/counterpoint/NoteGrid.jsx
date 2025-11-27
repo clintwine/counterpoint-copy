@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
+import ScoreMinimap from './ScoreMinimap';
 
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
@@ -171,6 +172,7 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
+  const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
 
   // Expose scroll function via ref
   useEffect(() => {
@@ -746,6 +748,7 @@ export default function NoteGrid({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left */}
@@ -1043,9 +1046,28 @@ export default function NoteGrid({
           {tool === 'marquee' && 'Click and drag to select multiple notes'}
           {tool === 'draw' && 'Click to add/remove notes'}
         </p>
-        {selectedNotes.size > 0 && (
-          <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
-        )}
+        <div className="flex items-center gap-3">
+          {selectedNotes.size > 0 && (
+            <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
+          )}
+          <ScoreMinimap
+            notes={cantusFirmus}
+            totalBeats={totalBeats}
+            totalPitches={pitches.length}
+            viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
+            viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
+            viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
+            viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
+            currentBeat={currentBeat}
+            onSeek={(beat) => {
+              onSeek?.(beat);
+              if (gridRef.current) {
+                gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
+              }
+            }}
+            pitches={pitches}
+          />
+        </div>
       </div>
       </div>
       );
