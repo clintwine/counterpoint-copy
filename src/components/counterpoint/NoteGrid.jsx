@@ -591,26 +591,6 @@ export default function NoteGrid({
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          {/* Voice selector */}
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-white/60" />
-            <Select value={String(activeVoice)} onValueChange={(v) => onActiveVoiceChange?.(parseInt(v))}>
-              <SelectTrigger className="w-32 h-8 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {voices.map((voice, i) => (
-                  <SelectItem key={i} value={String(i)} className="text-white text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: NOTE_COLORS[i] }} />
-                      {voice.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Instrument for active voice */}
           <div className="flex items-center gap-2">
             <Guitar className="w-4 h-4 text-white/60" />
@@ -669,18 +649,6 @@ export default function NoteGrid({
             <span className="text-white/60 text-xs w-10 text-center">{Math.round(zoom * 100)}%</span>
           </div>
           </div>
-        
-        <div className="flex gap-4">
-          {voices.map((voice, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: NOTE_COLORS[i] }}
-              />
-              <span className="text-xs text-white/90">{voice.name}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div 
