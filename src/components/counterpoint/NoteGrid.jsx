@@ -609,18 +609,23 @@ export default function NoteGrid({
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        // Use the original notes stored at drag start, not current cantusFirmus
+        // Use the original notes stored at drag start
         const originalSelectedNotes = dragState.originalNotes || [];
-        const originalSelectedKeys = new Set(originalSelectedNotes.map(n => getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
         
+        // Create a set of original note keys to filter them out
+        const originalKeys = new Set(originalSelectedNotes.map(n => `${n.pitch}-${n.beat}`));
+        
+        // Remove original notes from cantusFirmus
+        const withoutOriginals = cantusFirmus.filter(n => !originalKeys.has(`${n.pitch}-${n.beat}`));
+        
+        // Create moved notes
         const movedNotes = originalSelectedNotes.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
-        const newNotes = [...unselectedNotes, ...movedNotes].sort((a, b) => a.beat - b.beat);
+        const newNotes = [...withoutOriginals, ...movedNotes].sort((a, b) => a.beat - b.beat);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         
