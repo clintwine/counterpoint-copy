@@ -565,12 +565,14 @@ export default function NoteGrid({
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
-      const originalKeys = originalDragNotesRef.current.keys;
       const originalNotes = originalDragNotesRef.current.notes;
       
       if ((pitchDelta !== 0 || beatDelta !== 0) && originalNotes.length > 0) {
-        // Remove ALL original dragged notes from the current array
-        const notesWithoutOriginals = cantusFirmus.filter(n => !originalKeys.has(getNoteKey(n.pitch, n.beat)));
+        // Create a set of original note keys from stored notes (not from state)
+        const originalKeysFromStoredNotes = new Set(originalNotes.map(n => getNoteKey(n.pitch, n.beat)));
+        
+        // Remove notes that match the ORIGINAL positions
+        const notesWithoutOriginals = cantusFirmus.filter(n => !originalKeysFromStoredNotes.has(getNoteKey(n.pitch, n.beat)));
         
         // Create moved notes at new positions from the ORIGINAL stored notes
         const movedNotes = originalNotes.map(note => {
