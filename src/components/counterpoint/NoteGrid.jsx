@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Layers, Guitar } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
@@ -55,6 +56,53 @@ const PRESET_LIBRARY = [
 ];
 
 const ALL_INSTRUMENTS = [...DEFAULT_INSTRUMENTS, ...PRESET_LIBRARY];
+
+function InstrumentSelect({ value, onChange, instruments }) {
+  const [open, setOpen] = React.useState(false);
+  const selected = instruments.find(i => i.value === value);
+  
+  return (
+    <div className="flex items-center gap-2">
+      <Guitar className="w-4 h-4 text-white/60" />
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-28 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+          >
+            {selected?.label || 'Select...'}
+            <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-0 bg-slate-800 border-slate-700">
+          <Command className="bg-slate-800">
+            <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
+            <CommandList>
+              <CommandEmpty className="text-white/50 text-xs py-2 text-center">No instrument found.</CommandEmpty>
+              <CommandGroup>
+                {instruments.map(inst => (
+                  <CommandItem
+                    key={inst.value}
+                    value={inst.label}
+                    onSelect={() => {
+                      onChange(inst.value);
+                      setOpen(false);
+                    }}
+                    className="text-white text-xs cursor-pointer"
+                  >
+                    {inst.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
 
 export default function NoteGrid({ 
   voices, 
@@ -592,24 +640,11 @@ export default function NoteGrid({
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
           {/* Instrument for active voice */}
-          <div className="flex items-center gap-2">
-            <Guitar className="w-4 h-4 text-white/60" />
-            <Select 
-              value={voices[activeVoice]?.instrument || 'organ'} 
-              onValueChange={(v) => onVoiceInstrumentChange?.(activeVoice, v)}
-            >
-              <SelectTrigger className="w-28 h-8 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {ALL_INSTRUMENTS.map(inst => (
-                        <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
-                          {inst.label}
-                        </SelectItem>
-                      ))}
-              </SelectContent>
-            </Select>
-          </div>
+                        <InstrumentSelect 
+                          value={voices[activeVoice]?.instrument || 'organ'} 
+                          onChange={(v) => onVoiceInstrumentChange?.(activeVoice, v)}
+                          instruments={ALL_INSTRUMENTS}
+                        />
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
@@ -661,8 +696,8 @@ export default function NoteGrid({
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left */}
-                        <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
-                          <div className="h-7 border-b border-slate-600 bg-slate-800" />
+                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
+                                        <div className="h-7 border-b border-slate-600 bg-slate-800 sticky top-0 z-30" />
                           {pitches.map((pitch) => {
                                             const isSharp = pitch.includes('#');
                                             const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
