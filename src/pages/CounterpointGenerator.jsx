@@ -520,54 +520,6 @@ export default function CounterpointGenerator() {
             transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            <NoteGrid
-                              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
-                                                currentBeat={currentBeat}
-                                                isPlaying={isPlaying}
-                                                measures={settings.measures}
-                                                cantusFirmus={cantusFirmus}
-                                                onNotesUpdate={setCantusFirmus}
-                                                onSeek={handleSeek}
-                                                activeVoice={activeVoice}
-                                                onActiveVoiceChange={setActiveVoice}
-                                                onSelectionChange={setSelectedNotes}
-                                                tempo={tempo}
-                                                timeSignature={settings.timeSignature}
-                                                scrollToBeatRef={scrollToBeatRef}
-                                                                                    pressedPianoNotes={pressedPianoNotes}
-                                                                                    pianoInstrument={pianoInstrument}
-                                                                                    onVoiceInstrumentChange={(voiceIndex, instrument) => {
-                                                  const newVoices = [...voices];
-                                                  if (newVoices[voiceIndex]) {
-                                                    newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
-                                                    setVoices(newVoices);
-                                                  }
-                                                }}
-                                                onExportMidi={() => {
-                // Export as MIDI-like JSON (can be converted to MIDI)
-                const midiData = {
-                  tempo,
-                  timeSignature: [4, 4],
-                  tracks: allVoices.map((voice, idx) => ({
-                    name: voice.name,
-                    notes: voice.notes?.map(n => ({
-                      pitch: n.pitch,
-                      startTime: n.beat * (60 / tempo),
-                      duration: 60 / tempo,
-                      velocity: 80
-                    })) || []
-                  }))
-                };
-                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-            />
-            
             <PlaybackControls
                               isPlaying={isPlaying}
                               onPlayPause={handlePlayPause}
@@ -588,6 +540,53 @@ export default function CounterpointGenerator() {
                               metronomeEnabled={metronomeEnabled}
                               onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
                               onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                            />
+
+                            <NoteGrid
+                              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
+                              currentBeat={currentBeat}
+                              isPlaying={isPlaying}
+                              measures={settings.measures}
+                              cantusFirmus={cantusFirmus}
+                              onNotesUpdate={setCantusFirmus}
+                              onSeek={handleSeek}
+                              activeVoice={activeVoice}
+                              onActiveVoiceChange={setActiveVoice}
+                              onSelectionChange={setSelectedNotes}
+                              tempo={tempo}
+                              timeSignature={settings.timeSignature}
+                              scrollToBeatRef={scrollToBeatRef}
+                              pressedPianoNotes={pressedPianoNotes}
+                              pianoInstrument={pianoInstrument}
+                              onVoiceInstrumentChange={(voiceIndex, instrument) => {
+                                const newVoices = [...voices];
+                                if (newVoices[voiceIndex]) {
+                                  newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
+                                  setVoices(newVoices);
+                                }
+                              }}
+                              onExportMidi={() => {
+                                const midiData = {
+                                  tempo,
+                                  timeSignature: [4, 4],
+                                  tracks: allVoices.map((voice, idx) => ({
+                                    name: voice.name,
+                                    notes: voice.notes?.map(n => ({
+                                      pitch: n.pitch,
+                                      startTime: n.beat * (60 / tempo),
+                                      duration: 60 / tempo,
+                                      velocity: 80
+                                    })) || []
+                                  }))
+                                };
+                                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }}
                             />
             
             <PianoKeyboard
