@@ -596,15 +596,22 @@ export default function NoteGrid({
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        // Use the original notes captured at drag start
-        const originalNotes = dragState.originalNotes || [];
+        // Find notes based on their ORIGINAL positions (before any visual offset)
+        // The selected notes keys still reference original positions
+        const selectedNotesList = [];
+        const unselectedNotes = [];
         
-        // Filter out the original notes from cantusFirmus
-        const originalNoteKeys = new Set(originalNotes.map(n => getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !originalNoteKeys.has(getNoteKey(n.pitch, n.beat)));
+        cantusFirmus.forEach(n => {
+          const key = getNoteKey(n.pitch, n.beat);
+          if (selectedNotes.has(key)) {
+            selectedNotesList.push(n);
+          } else {
+            unselectedNotes.push(n);
+          }
+        });
         
-        // Create moved versions of the original notes
-        const movedNotes = originalNotes.map(note => {
+        // Create moved versions
+        const movedNotes = selectedNotesList.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
@@ -614,7 +621,7 @@ export default function NoteGrid({
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         
-        // Update selection keys
+        // Update selection keys to new positions
         const newSelected = new Set(movedNotes.map(n => getNoteKey(n.pitch, n.beat)));
         setSelectedNotes(newSelected);
       }
@@ -971,10 +978,6 @@ export default function NoteGrid({
                                             setSelectedNotes(newSelected);
                                           }
                                         }
-                                        // Capture the actual note objects at drag start
-                                        const currentSelection = selectedNotes.has(nKey) ? selectedNotes : new Set([nKey]);
-                                        const originalNotes = cantusFirmus.filter(n => currentSelection.has(getNoteKey(n.pitch, n.beat)));
-                                        
                                         setDragState({
                                           startPitch: pitch,
                                           startBeat: beat,
@@ -983,8 +986,7 @@ export default function NoteGrid({
                                           currentBeat: beat,
                                           isDragging: false,
                                           clickOffsetX: e.clientX,
-                                          clickOffsetY: e.clientY,
-                                          originalNotes: originalNotes // Capture actual notes at drag start
+                                          clickOffsetY: e.clientY
                                         });
                                       }
                                     }}
