@@ -520,29 +520,30 @@ export default function CounterpointGenerator() {
             transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            <PlaybackControls
-                              isPlaying={isPlaying}
-                              onPlayPause={handlePlayPause}
-                              tempo={tempo}
-                              onTempoChange={setTempo}
-                              currentBeat={currentBeat}
-                              totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
-                              onSeek={handleSeek}
-                              onReset={handleReset}
-                              onStop={handleStop}
-                              loopStart={loopStart}
-                              loopEnd={loopEnd}
-                              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
-                              isLooping={isLooping}
-                              onLoopToggle={() => setIsLooping(!isLooping)}
-                              timeSignature={settings.timeSignature}
-                              onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
-                              metronomeEnabled={metronomeEnabled}
-                              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-                              onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
-                            />
-
-                            <NoteGrid
+            <NoteGrid
+                              playbackControls={
+                                <PlaybackControls
+                                  isPlaying={isPlaying}
+                                  onPlayPause={handlePlayPause}
+                                  tempo={tempo}
+                                  onTempoChange={setTempo}
+                                  currentBeat={currentBeat}
+                                  totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
+                                  onSeek={handleSeek}
+                                  onReset={handleReset}
+                                  onStop={handleStop}
+                                  loopStart={loopStart}
+                                  loopEnd={loopEnd}
+                                  onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
+                                  isLooping={isLooping}
+                                  onLoopToggle={() => setIsLooping(!isLooping)}
+                                  timeSignature={settings.timeSignature}
+                                  onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
+                                  metronomeEnabled={metronomeEnabled}
+                                  onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+                                  onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                                />
+                              }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
                               currentBeat={currentBeat}
                               isPlaying={isPlaying}

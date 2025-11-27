@@ -122,7 +122,8 @@ export default function NoteGrid({
   timeSignature = '4/4',
   scrollToBeatRef,
   pressedPianoNotes = new Set(),
-  pianoInstrument = 'organ'
+  pianoInstrument = 'organ',
+  playbackControls
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -535,9 +536,12 @@ export default function NoteGrid({
   const dragOffset = getDragOffset();
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-5 border border-slate-600 w-full">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4">
+        <div className="bg-slate-800 rounded-2xl border border-slate-600 w-full overflow-hidden">
+          {/* Playback Controls - embedded at top */}
+          {playbackControls}
+
+          {/* Toolbar */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700">
         <div className="flex items-center gap-1">
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}
@@ -684,11 +688,11 @@ export default function NoteGrid({
             <span className="text-white/60 text-xs w-10 text-center">{Math.round(zoom * 100)}%</span>
           </div>
           </div>
-      </div>
+          </div>
 
-      <div 
-        ref={gridRef}
-        className="overflow-auto max-h-[400px] relative select-none"
+          <div 
+          ref={gridRef}
+          className="overflow-auto max-h-[400px] relative select-none mx-5"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent' }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -984,7 +988,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className="flex items-center justify-between mt-3">
+      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-700">
         <p className="text-white/50 text-xs">
           {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select'}
           {tool === 'marquee' && 'Click and drag to select multiple notes'}
@@ -994,6 +998,6 @@ export default function NoteGrid({
           <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
         )}
       </div>
-    </div>
-  );
+      </div>
+      );
 }

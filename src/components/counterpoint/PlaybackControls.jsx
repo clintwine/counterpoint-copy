@@ -100,141 +100,121 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="bg-slate-900/60 rounded-2xl p-5 backdrop-blur-sm border border-slate-700/50">
-      <div className="flex items-center justify-between gap-6">
-        {/* Transport controls */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onReset}
-            className="text-white hover:text-white hover:bg-slate-700 border border-slate-600"
-            title="Go to start"
-            aria-label="Go to start of track"
-          >
-            <SkipBack className="w-5 h-5" />
-          </Button>
-          
-          <Button
-            onClick={onPlayPause}
-            className="w-14 h-14 rounded-full bg-gold hover:bg-gold/90 text-slate-900"
-          >
-            {isPlaying ? (
-              <Pause className="w-6 h-6" />
-            ) : (
-              <Play className="w-6 h-6 ml-0.5" />
-            )}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onStop}
-            className="text-white hover:text-white hover:bg-slate-700 border border-slate-600"
-            title="Stop and go to start"
-            aria-label="Stop playback and return to start"
-          >
-            <Square className="w-4 h-4 fill-current" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onLoopToggle}
-            className={`${isLooping ? 'text-amber-400 bg-amber-500/30 border-amber-500' : 'text-white border-slate-600'} hover:text-white hover:bg-slate-700 border`}
-            title="Toggle loop"
-            aria-label={isLooping ? "Disable loop" : "Enable loop"}
-          >
-            <Repeat className="w-4 h-4" />
-          </Button>
-        </div>
+    <div className="flex items-center gap-3 px-3 py-2 bg-slate-900/80 border-b border-slate-700">
+      {/* Transport controls - compact DAW style */}
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onReset}
+          className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-slate-700"
+          title="Go to start"
+        >
+          <SkipBack className="w-3.5 h-3.5" />
+        </Button>
+        
+        <Button
+          onClick={onPlayPause}
+          size="sm"
+          className="h-8 w-8 p-0 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-900"
+        >
+          {isPlaying ? (
+            <Pause className="w-4 h-4" />
+          ) : (
+            <Play className="w-4 h-4 ml-0.5" />
+          )}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onStop}
+          className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-slate-700"
+          title="Stop"
+        >
+          <Square className="w-3 h-3 fill-current" />
+        </Button>
+      </div>
 
-        {/* Timeline */}
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <span className="text-white text-sm font-mono w-10">
-              {formatTime(currentBeat)}
-            </span>
-            <Slider
-                                value={[currentBeat]}
-                                onValueChange={([value]) => {
-                                  onSeek(value);
-                                  onScrollToBeat?.(value);
-                                }}
-                                min={0}
-                                max={totalBeats - 1}
-                                step={1}
-                                className="flex-1 cursor-pointer [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4 [&_[role=slider]]:cursor-grab [&_[role=slider]:active]:cursor-grabbing"
-                                aria-label="Playhead position"
-                              />
-            <span className="text-white text-sm font-mono w-10">
-              {formatTime(totalBeats - 1)}
-            </span>
+      <div className="w-px h-5 bg-slate-700" />
+
+      {/* Time display */}
+      <div className="flex items-center gap-1 bg-slate-800 rounded px-2 py-1 font-mono text-xs">
+        <span className="text-amber-400 font-medium">{formatTime(currentBeat)}</span>
+        <span className="text-white/40">/</span>
+        <span className="text-white/60">{formatTime(totalBeats - 1)}</span>
+      </div>
+
+      <div className="w-px h-5 bg-slate-700" />
+
+      {/* Loop toggle */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onLoopToggle}
+        className={`h-7 w-7 p-0 ${isLooping ? 'text-amber-400 bg-amber-500/20' : 'text-white/50 hover:text-white'}`}
+        title="Loop"
+      >
+        <Repeat className="w-3.5 h-3.5" />
+      </Button>
+
+      {/* Metronome */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onMetronomeToggle}
+        className={`h-7 w-7 p-0 ${metronomeEnabled ? 'text-amber-400 bg-amber-500/20' : 'text-white/50 hover:text-white'}`}
+        title="Metronome"
+      >
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2L8 22h8L12 2z" />
+          <path d="M12 6v10" />
+          <circle cx="12" cy="8" r="1" fill="currentColor" />
+        </svg>
+      </Button>
+
+      <div className="w-px h-5 bg-slate-700" />
+
+      {/* Time Signature */}
+      <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+        <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="bg-slate-800 border-slate-700">
+          {TIME_SIGNATURES.map(ts => (
+            <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
+              {ts.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* BPM */}
+      <div className="flex items-center gap-1">
+        {isEditingBpm ? (
+          <input
+            type="number"
+            value={bpmInputValue}
+            onChange={(e) => setBpmInputValue(e.target.value)}
+            onBlur={handleBpmInputBlur}
+            onKeyDown={handleBpmInputKeyDown}
+            autoFocus
+            className="bg-slate-800 border border-amber-500 rounded px-2 py-0.5 text-white font-mono text-xs font-medium w-12 text-center outline-none"
+            min={20}
+            max={455}
+          />
+        ) : (
+          <div
+            ref={bpmRef}
+            onMouseDown={handleBpmMouseDown}
+            onDoubleClick={handleBpmDoubleClick}
+            className={`bg-slate-800 border border-slate-700 rounded px-2 py-0.5 cursor-ew-resize select-none hover:border-slate-600 transition-colors ${isDragging ? 'border-amber-500' : ''}`}
+            title="Drag to change tempo"
+          >
+            <span className="text-white font-mono text-xs font-medium">{tempo}</span>
           </div>
-        </div>
-
-        {/* Time Signature & Tempo */}
-        <div className="flex items-center gap-4">
-          {/* Time Signature */}
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-white/60" />
-            <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-              <SelectTrigger className="w-16 h-8 bg-slate-800 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {TIME_SIGNATURES.map(ts => (
-                  <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
-                    {ts.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Scrubbable BPM */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-white/60 text-xs uppercase tracking-wider">BPM</span>
-                            {isEditingBpm ? (
-                              <input
-                                type="number"
-                                value={bpmInputValue}
-                                onChange={(e) => setBpmInputValue(e.target.value)}
-                                onBlur={handleBpmInputBlur}
-                                onKeyDown={handleBpmInputKeyDown}
-                                autoFocus
-                                className="bg-slate-800 border border-amber-500 rounded-lg px-3 py-1.5 text-white font-mono text-sm font-medium w-16 text-center outline-none"
-                                min={20}
-                                max={455}
-                              />
-                            ) : (
-                              <div
-                                ref={bpmRef}
-                                onMouseDown={handleBpmMouseDown}
-                                onDoubleClick={handleBpmDoubleClick}
-                                className={`bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 cursor-ew-resize select-none hover:border-amber-500/50 transition-colors ${isDragging ? 'border-amber-500 bg-slate-700' : ''}`}
-                                title="Drag left/right to change tempo, double-click to type"
-                              >
-                                <span className="text-white font-mono text-sm font-medium">{tempo}</span>
-                              </div>
-                            )}
-                          </div>
-
-          {/* Metronome */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onMetronomeToggle}
-            className={`h-8 px-2 ${metronomeEnabled ? 'text-amber-400 bg-amber-500/20' : 'text-white/60'} hover:text-white`}
-            title="Toggle metronome"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L8 22h8L12 2z" />
-              <path d="M12 6v10" />
-              <circle cx="12" cy="8" r="1" fill="currentColor" />
-            </svg>
-          </Button>
-        </div>
+        )}
+        <span className="text-white/40 text-[10px] uppercase">bpm</span>
       </div>
     </div>
   );
