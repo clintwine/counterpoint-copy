@@ -981,7 +981,11 @@ export default function NoteGrid({
                                             setSelectedNotes(newSelected);
                                           }
                                         }
-                                        setDragState({
+                                        // Capture selected notes at drag start
+                                      const selectedNotesList = cantusFirmus.filter(n => 
+                                        selectedNotes.has(getNoteKey(n.pitch, n.beat)) || getNoteKey(n.pitch, n.beat) === nKey
+                                      );
+                                      setDragState({
                                           startPitch: pitch,
                                           startBeat: beat,
                                           startPitchIndex: pitches.indexOf(pitch),
@@ -991,7 +995,8 @@ export default function NoteGrid({
                                           clickOffsetX: e.clientX,
                                           clickOffsetY: e.clientY,
                                           initialScrollLeft: gridRef.current?.scrollLeft || 0,
-                                          initialScrollTop: gridRef.current?.scrollTop || 0
+                                          initialScrollTop: gridRef.current?.scrollTop || 0,
+                                          originalNotes: selectedNotesList.map(n => ({ ...n }))
                                         });
                                       }
                                     }}
