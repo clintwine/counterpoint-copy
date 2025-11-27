@@ -986,10 +986,15 @@ export default function NoteGrid({
                                             setSelectedNotes(newSelected);
                                           }
                                         }
-                                        // Capture selected notes at drag start
-                                      const selectedNotesList = cantusFirmus.filter(n => 
-                                        selectedNotes.has(getNoteKey(n.pitch, n.beat)) || getNoteKey(n.pitch, n.beat) === nKey
-                                      );
+                                        // Determine which notes will be dragged
+                                      let notesToDrag;
+                                      if (selectedNotes.has(nKey)) {
+                                        // Dragging an already-selected note - drag all selected
+                                        notesToDrag = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                      } else {
+                                        // Dragging a non-selected note - just drag this one
+                                        notesToDrag = [note];
+                                      }
                                       setDragState({
                                           startPitch: pitch,
                                           startBeat: beat,
@@ -1001,7 +1006,7 @@ export default function NoteGrid({
                                           clickOffsetY: e.clientY,
                                           initialScrollLeft: gridRef.current?.scrollLeft || 0,
                                           initialScrollTop: gridRef.current?.scrollTop || 0,
-                                          originalNotes: selectedNotesList.map(n => ({ ...n }))
+                                          originalNotes: notesToDrag.map(n => ({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION }))
                                         });
                                       }
                                     }}
