@@ -6,6 +6,7 @@ import { Keyboard, Guitar, Volume2, Waves } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument } from './audioEngine';
 import WaveEditor from './WaveEditor';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const OCTAVE_NOTES = [
   { note: 'C', isBlack: false, offset: 0 },
@@ -587,17 +588,20 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
       </p>
 
-      {/* Wave Editor Panel */}
-      {showWaveEditor && (
-        <div className="mt-3">
-          <WaveEditor
-            customInstruments={customInstruments}
-            onSaveInstrument={handleSaveInstrument}
-            onDeleteInstrument={handleDeleteInstrument}
-            onClose={() => setShowWaveEditor(false)}
-          />
-        </div>
-      )}
+      {/* Wave Editor Modal */}
+              <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
+                <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Wave Editor</DialogTitle>
+                  </DialogHeader>
+                  <WaveEditor
+                    customInstruments={customInstruments}
+                    onSaveInstrument={handleSaveInstrument}
+                    onDeleteInstrument={handleDeleteInstrument}
+                    onClose={() => setShowWaveEditor(false)}
+                  />
+                </DialogContent>
+              </Dialog>
     </div>
   );
 }
