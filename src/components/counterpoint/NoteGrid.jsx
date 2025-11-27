@@ -655,40 +655,69 @@ export default function NoteGrid({
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
-              disabled={zoom <= MIN_ZOOM}
-              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
-              title="Zoom out"
-              aria-label="Zoom out timeline"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            <Slider
-              value={[zoom]}
-              onValueChange={([value]) => setZoom(value)}
-              min={MIN_ZOOM}
-              max={MAX_ZOOM}
-              step={ZOOM_STEP}
-              className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
-              aria-label="Timeline zoom level"
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
-              disabled={zoom >= MAX_ZOOM}
-              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
-              title="Zoom in"
-              aria-label="Zoom in timeline"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-            <span className="text-white/60 text-xs w-10 text-center">{Math.round(zoom * 100)}%</span>
-          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50 text-[10px] uppercase">W</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setZoom(z => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
+                            disabled={zoom <= MIN_ZOOM}
+                            className="h-7 w-7 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+                            title="Zoom out width"
+                          >
+                            <ZoomOut className="w-3.5 h-3.5" />
+                          </Button>
+                          <Slider
+                            value={[zoom]}
+                            onValueChange={([value]) => setZoom(value)}
+                            min={MIN_ZOOM}
+                            max={MAX_ZOOM}
+                            step={ZOOM_STEP}
+                            className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setZoom(z => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
+                            disabled={zoom >= MAX_ZOOM}
+                            className="h-7 w-7 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+                            title="Zoom in width"
+                          >
+                            <ZoomIn className="w-3.5 h-3.5" />
+                          </Button>
+
+                          <div className="w-px h-4 bg-slate-600 mx-1" />
+
+                          <span className="text-white/50 text-[10px] uppercase">H</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setZoomY(z => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
+                            disabled={zoomY <= MIN_ZOOM}
+                            className="h-7 w-7 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+                            title="Zoom out height"
+                          >
+                            <ZoomOut className="w-3.5 h-3.5" />
+                          </Button>
+                          <Slider
+                            value={[zoomY]}
+                            onValueChange={([value]) => setZoomY(value)}
+                            min={MIN_ZOOM}
+                            max={MAX_ZOOM}
+                            step={ZOOM_STEP}
+                            className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setZoomY(z => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
+                            disabled={zoomY >= MAX_ZOOM}
+                            className="h-7 w-7 p-0 text-white hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-30"
+                            title="Zoom in height"
+                          >
+                            <ZoomIn className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
           </div>
           </div>
 
