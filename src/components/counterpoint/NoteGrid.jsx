@@ -203,6 +203,7 @@ export default function NoteGrid({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
+  const dragScrollRef = useRef(null); // For auto-scroll during drag
 
   // Expose scroll function via ref
   useEffect(() => {
@@ -436,6 +437,45 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
+    // Auto-scroll when dragging near edges
+    if (dragState && gridRef.current) {
+      const gridRect = gridRef.current.getBoundingClientRect();
+      const edgeThreshold = 60;
+      const scrollSpeed = 15;
+      
+      // Clear any existing scroll interval
+      if (dragScrollRef.current) {
+        clearInterval(dragScrollRef.current);
+        dragScrollRef.current = null;
+      }
+      
+      let scrollX = 0;
+      let scrollY = 0;
+      
+      // Check horizontal edges (accounting for pitch label width)
+      if (e.clientX < gridRect.left + 56 + edgeThreshold) {
+        scrollX = -scrollSpeed;
+      } else if (e.clientX > gridRect.right - edgeThreshold) {
+        scrollX = scrollSpeed;
+      }
+      
+      // Check vertical edges (accounting for header height)
+      if (e.clientY < gridRect.top + 28 + edgeThreshold) {
+        scrollY = -scrollSpeed;
+      } else if (e.clientY > gridRect.bottom - edgeThreshold) {
+        scrollY = scrollSpeed;
+      }
+      
+      if (scrollX !== 0 || scrollY !== 0) {
+        dragScrollRef.current = setInterval(() => {
+          if (gridRef.current) {
+            gridRef.current.scrollLeft += scrollX;
+            gridRef.current.scrollTop += scrollY;
+          }
+        }, 16);
+      }
+    }
+    
         // Handle painting in draw mode (only if paintMode is enabled)
         if (isPainting && tool === 'draw' && paintMode) {
           const cell = getCellFromPosition(e.clientX, e.clientY);
@@ -502,6 +542,12 @@ export default function NoteGrid({
   };
 
   const handleMouseUp = () => {
+    // Clear auto-scroll interval
+    if (dragScrollRef.current) {
+      clearInterval(dragScrollRef.current);
+      dragScrollRef.current = null;
+    }
+    
     // Save history after painting stroke
     if (isPainting && paintedNotesRef.current.size > 0) {
       saveToHistory(cantusFirmus);
