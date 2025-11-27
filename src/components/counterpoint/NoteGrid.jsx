@@ -203,7 +203,6 @@ export default function NoteGrid({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
-  const dragScrollRef = useRef(null); // For auto-scroll during drag
 
   // Expose scroll function via ref
   useEffect(() => {
@@ -437,60 +436,6 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
-    // Auto-scroll when dragging notes near edges
-    if (dragState && dragState.isDragging && gridRef.current) {
-      const gridRect = gridRef.current.getBoundingClientRect();
-      const edgeThreshold = 80;
-      const baseScrollSpeed = 12;
-      
-      // Clear any existing scroll interval
-      if (dragScrollRef.current) {
-        clearInterval(dragScrollRef.current);
-        dragScrollRef.current = null;
-      }
-      
-      let scrollX = 0;
-      let scrollY = 0;
-      
-      // Check horizontal edges - accelerate based on how close to edge
-      const leftEdge = gridRect.left + 56;
-      const rightEdge = gridRect.right;
-      
-      if (e.clientX < leftEdge + edgeThreshold) {
-        const proximity = 1 - Math.max(0, e.clientX - leftEdge) / edgeThreshold;
-        scrollX = -baseScrollSpeed * Math.max(1, proximity * 3);
-      } else if (e.clientX > rightEdge - edgeThreshold) {
-        const proximity = 1 - Math.max(0, rightEdge - e.clientX) / edgeThreshold;
-        scrollX = baseScrollSpeed * Math.max(1, proximity * 3);
-      }
-      
-      // Check vertical edges
-      const topEdge = gridRect.top + 28;
-      const bottomEdge = gridRect.bottom;
-      
-      if (e.clientY < topEdge + edgeThreshold) {
-        const proximity = 1 - Math.max(0, e.clientY - topEdge) / edgeThreshold;
-        scrollY = -baseScrollSpeed * Math.max(1, proximity * 3);
-      } else if (e.clientY > bottomEdge - edgeThreshold) {
-        const proximity = 1 - Math.max(0, bottomEdge - e.clientY) / edgeThreshold;
-        scrollY = baseScrollSpeed * Math.max(1, proximity * 3);
-      }
-      
-      if (scrollX !== 0 || scrollY !== 0) {
-        dragScrollRef.current = setInterval(() => {
-          if (gridRef.current) {
-            gridRef.current.scrollLeft += scrollX;
-            gridRef.current.scrollTop += scrollY;
-            // Update viewport state to trigger re-render of virtualized cells
-            setViewportState({
-              scrollLeft: gridRef.current.scrollLeft,
-              scrollTop: gridRef.current.scrollTop
-            });
-          }
-        }, 16);
-      }
-    }
-
         // Handle painting in draw mode (only if paintMode is enabled)
         if (isPainting && tool === 'draw' && paintMode) {
           const cell = getCellFromPosition(e.clientX, e.clientY);
@@ -531,12 +476,8 @@ export default function NoteGrid({
       setMarquee(prev => ({ ...prev, endX: e.clientX, endY: e.clientY }));
     } else if (dragState && selectedNotes.size > 0) {
       // Calculate delta from original click position for smooth dragging
-      // Account for any auto-scroll that has happened
-      const scrollDeltaX = gridRef.current ? gridRef.current.scrollLeft - (dragState.initialScrollLeft || 0) : 0;
-      const scrollDeltaY = gridRef.current ? gridRef.current.scrollTop - (dragState.initialScrollTop || 0) : 0;
-      
-      const deltaX = e.clientX - dragState.clickOffsetX + scrollDeltaX;
-      const deltaY = e.clientY - dragState.clickOffsetY + scrollDeltaY;
+      const deltaX = e.clientX - dragState.clickOffsetX;
+      const deltaY = e.clientY - dragState.clickOffsetY;
       
       const beatDelta = Math.round(deltaX / CELL_WIDTH);
       const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
@@ -551,26 +492,16 @@ export default function NoteGrid({
         playNoteSound(pitches[newPitchIndex]);
       }
 
-      // Only update if actually dragging (not just clicked)
-      const hasMoved = Math.abs(e.clientX - dragState.clickOffsetX) > 3 || Math.abs(e.clientY - dragState.clickOffsetY) > 3;
-      if (hasMoved || dragState.isDragging) {
-        setDragState(prev => ({
-          ...prev,
-          currentPitchIndex: newPitchIndex,
-          currentBeat: newBeat,
-          isDragging: true
-        }));
-      }
+      setDragState(prev => ({
+        ...prev,
+        currentPitchIndex: newPitchIndex,
+        currentBeat: newBeat,
+        isDragging: true
+      }));
     }
   };
 
   const handleMouseUp = () => {
-    // Clear auto-scroll interval
-    if (dragScrollRef.current) {
-      clearInterval(dragScrollRef.current);
-      dragScrollRef.current = null;
-    }
-    
     // Save history after painting stroke
     if (isPainting && paintedNotesRef.current.size > 0) {
       saveToHistory(cantusFirmus);
@@ -607,28 +538,22 @@ export default function NoteGrid({
         setSelectedNotes(newSelected);
       }
       setMarquee(null);
-    } else if (dragState && dragState.isDragging && dragState.originalNotes && dragState.originalNotes.length > 0) {
-      // Apply drag - use the stored original notes to calculate deltas
+    } else if (dragState && dragState.isDragging && selectedNotes.size > 0) {
+      // Apply drag
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        const originalSelectedNotes = dragState.originalNotes;
+        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const unselectedNotes = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
         
-        // Create a set of original note keys to filter them out
-        const originalKeys = new Set(originalSelectedNotes.map(n => `${n.pitch}-${n.beat}`));
-        
-        // Start fresh - remove ALL original notes from current state
-        const withoutOriginals = cantusFirmus.filter(n => !originalKeys.has(`${n.pitch}-${n.beat}`));
-        
-        // Create moved notes
-        const movedNotes = originalSelectedNotes.map(note => {
+        const movedNotes = selectedNotesList.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
-        const newNotes = [...withoutOriginals, ...movedNotes].sort((a, b) => a.beat - b.beat);
+        const newNotes = [...unselectedNotes, ...movedNotes].sort((a, b) => a.beat - b.beat);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         
@@ -989,16 +914,7 @@ export default function NoteGrid({
                                             setSelectedNotes(newSelected);
                                           }
                                         }
-                                        // Determine which notes will be dragged
-                                      let notesToDrag;
-                                      if (selectedNotes.has(nKey)) {
-                                        // Dragging an already-selected note - drag all selected
-                                        notesToDrag = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                      } else {
-                                        // Dragging a non-selected note - just drag this one
-                                        notesToDrag = [note];
-                                      }
-                                      setDragState({
+                                        setDragState({
                                           startPitch: pitch,
                                           startBeat: beat,
                                           startPitchIndex: pitches.indexOf(pitch),
@@ -1006,10 +922,7 @@ export default function NoteGrid({
                                           currentBeat: beat,
                                           isDragging: false,
                                           clickOffsetX: e.clientX,
-                                          clickOffsetY: e.clientY,
-                                          initialScrollLeft: gridRef.current?.scrollLeft || 0,
-                                          initialScrollTop: gridRef.current?.scrollTop || 0,
-                                          originalNotes: notesToDrag.map(n => ({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION }))
+                                          clickOffsetY: e.clientY
                                         });
                                       }
                                     }}
