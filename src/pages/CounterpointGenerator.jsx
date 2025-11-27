@@ -256,54 +256,57 @@ export default function CounterpointGenerator() {
     }
   }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd, selectedNotes]);
 
+  // Pre-index notes by beat for fast playback lookup
+  const notesAtBeatMap = React.useMemo(() => {
+    const map = new Map();
+    cantusFirmus.forEach(note => {
+      if (!map.has(note.beat)) map.set(note.beat, []);
+      map.get(note.beat).push({ note, voiceIndex: 0 });
+    });
+    generatedVoices.forEach((voice, idx) => {
+      voice.notes?.forEach(note => {
+        if (!map.has(note.beat)) map.set(note.beat, []);
+        map.get(note.beat).push({ note, voiceIndex: idx + 1 });
+      });
+    });
+    return map;
+  }, [cantusFirmus, generatedVoices]);
+
   // Play notes at current beat
-      useEffect(() => {
-        if (isPlaying) {
-          // If there are selected notes, only play those
-          if (selectedNotes.length > 0) {
-            const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
-            notesAtBeat.forEach(note => {
-              const volume = (voices[0]?.volume || 80) / 100;
-              const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
-              const instrument = voices[0]?.instrument || 'organ';
-              playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
-            });
-          } else {
-            // Play cantus firmus notes directly from cantusFirmus state
-            const cfNotesAtBeat = cantusFirmus.filter(n => n.beat === currentBeat);
-            cfNotesAtBeat.forEach(note => {
-              const volume = (voices[0]?.volume || 80) / 100;
-              const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
-              const instrument = voices[0]?.instrument || 'organ';
-              playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
-            });
+  useEffect(() => {
+    if (!isPlaying) return;
+    
+    // If there are selected notes, only play those
+    if (selectedNotes.length > 0) {
+      const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
+      notesAtBeat.forEach(note => {
+        const volume = (voices[0]?.volume || 80) / 100;
+        const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+        const instrument = voices[0]?.instrument || 'organ';
+        playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
+      });
+    } else {
+      // Use pre-indexed map for O(1) lookup
+      const notesAtBeat = notesAtBeatMap.get(currentBeat) || [];
+      notesAtBeat.forEach(({ note, voiceIndex }) => {
+        if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
+        const volume = (voices[voiceIndex]?.volume || 80) / 100;
+        const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
+        const instrument = voices[voiceIndex]?.instrument || 'organ';
+        playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
+      });
+    }
 
-            // Play generated voices
-            generatedVoices.forEach((voice, idx) => {
-              const voiceIndex = idx + 1;
-              if (!voices[voiceIndex]?.enabled) return;
-
-              const notesAtBeat = voice.notes?.filter(n => n.beat === currentBeat) || [];
-              notesAtBeat.forEach(note => {
-                const volume = (voices[voiceIndex]?.volume || 80) / 100;
-                const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
-                const instrument = voices[voiceIndex]?.instrument || 'organ';
-                playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
-              });
-            });
-          }
-
-          // Metronome click
-          if (metronomeEnabled) {
-            const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-            const subdivisionSize = beatsPerMeasure / 4;
-            if (currentBeat % subdivisionSize === 0) {
-              const isDownbeat = currentBeat % beatsPerMeasure === 0;
-              playMetronomeClick(isDownbeat);
-            }
-          }
-        }
-      }, [currentBeat, isPlaying, cantusFirmus, generatedVoices, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
+    // Metronome click
+    if (metronomeEnabled) {
+      const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+      const subdivisionSize = beatsPerMeasure / 4;
+      if (currentBeat % subdivisionSize === 0) {
+        const isDownbeat = currentBeat % beatsPerMeasure === 0;
+        playMetronomeClick(isDownbeat);
+      }
+    }
+  }, [currentBeat, isPlaying, notesAtBeatMap, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
 
   const handlePlayPause = () => {
     ensureAudio();
