@@ -947,11 +947,17 @@ export default function NoteGrid({
                                           }
                                         }
                                         // Store original selected notes for the drag operation
-                                                                              const keysToUse = selectedNotes.has(nKey) ? selectedNotes : new Set([nKey]);
+                                                                              const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
+                                                                              const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
+                                                                                pitch: n.pitch,
+                                                                                beat: n.beat,
+                                                                                duration: n.duration || DEFAULT_DURATION
+                                                                              }));
                                                                               originalDragNotesRef.current = {
-                                                                                keys: new Set(keysToUse),
-                                                                                notes: cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({...n}))
+                                                                                keys: keysToUse,
+                                                                                notes: notesToStore
                                                                               };
+                                                                              console.log('Drag start - storing notes:', notesToStore);
 
                                                                               setDragState({
                                                                                 startPitch: pitch,
