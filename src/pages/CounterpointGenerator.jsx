@@ -76,8 +76,21 @@ export default function CounterpointGenerator() {
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
   
   const playbackRef = useRef(null);
-  const audioInitialized = useRef(false);
-  const queryClient = useQueryClient();
+      const audioInitialized = useRef(false);
+      const queryClient = useQueryClient();
+
+      // Global spacebar handler for play/pause
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          if (e.key === ' ') {
+            e.preventDefault();
+            handlePlayPause();
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [isPlaying]);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
