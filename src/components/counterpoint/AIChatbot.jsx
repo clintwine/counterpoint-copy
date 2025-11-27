@@ -14,8 +14,11 @@ import { initAudio, playNote, stopAllNotes } from './audioEngine';
 const KEY_OPTIONS = ['C', 'G', 'D', 'F', 'A', 'E', 'Bb'];
 const MODE_OPTIONS = [
   { value: 'major', label: 'Major' },
-  { value: 'minor', label: 'Minor' },
+  { value: 'minor', label: 'Natural Minor' },
+  { value: 'harmonic_minor', label: 'Harmonic Minor' },
+  { value: 'melodic_minor', label: 'Melodic Minor' },
   { value: 'dorian', label: 'Dorian' },
+  { value: 'phrygian', label: 'Phrygian' },
   { value: 'mixolydian', label: 'Mixolydian' },
 ];
 
