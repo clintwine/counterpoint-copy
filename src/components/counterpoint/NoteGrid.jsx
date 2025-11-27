@@ -27,7 +27,7 @@ const NOTE_COLORS = {
 };
 
 const BASE_CELL_WIDTH = 48;
-const CELL_HEIGHT = 28;
+const BASE_CELL_HEIGHT = 28;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
@@ -132,7 +132,9 @@ export default function NoteGrid({
   const totalBeats = measures * beatsPerMeasure;
 
   const [zoom, setZoom] = useState(1);
+  const [zoomY, setZoomY] = useState(1);
   const CELL_WIDTH = BASE_CELL_WIDTH * zoom;
+  const CELL_HEIGHT = BASE_CELL_HEIGHT * zoomY;
 
   const [tool, setTool] = useState('select'); // 'select', 'marquee', 'draw'
   const [selectedNotes, setSelectedNotes] = useState(new Set());
