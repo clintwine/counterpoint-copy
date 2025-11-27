@@ -100,8 +100,52 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 bg-slate-900/80 border-b border-slate-700">
-      {/* Transport controls - compact DAW style */}
+    <div className="flex items-center justify-center gap-3 px-3 py-2 bg-slate-900/80 border-b border-slate-700">
+      {/* Time Signature */}
+      <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+        <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="bg-slate-800 border-slate-700">
+          {TIME_SIGNATURES.map(ts => (
+            <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
+              {ts.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* BPM */}
+      <div className="flex items-center gap-1">
+        {isEditingBpm ? (
+          <input
+            type="number"
+            value={bpmInputValue}
+            onChange={(e) => setBpmInputValue(e.target.value)}
+            onBlur={handleBpmInputBlur}
+            onKeyDown={handleBpmInputKeyDown}
+            autoFocus
+            className="bg-slate-800 border border-amber-500 rounded px-2 py-0.5 text-white font-mono text-xs font-medium w-12 text-center outline-none"
+            min={20}
+            max={455}
+          />
+        ) : (
+          <div
+            ref={bpmRef}
+            onMouseDown={handleBpmMouseDown}
+            onDoubleClick={handleBpmDoubleClick}
+            className={`bg-slate-800 border border-slate-700 rounded px-2 py-0.5 cursor-ew-resize select-none hover:border-slate-600 transition-colors ${isDragging ? 'border-amber-500' : ''}`}
+            title="Drag to change tempo"
+          >
+            <span className="text-white font-mono text-xs font-medium">{tempo}</span>
+          </div>
+        )}
+        <span className="text-white/40 text-[10px] uppercase">bpm</span>
+      </div>
+
+      <div className="w-px h-5 bg-slate-700" />
+
+      {/* Transport controls - centered */}
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
@@ -172,50 +216,6 @@ export default function PlaybackControls({
           <circle cx="12" cy="8" r="1" fill="currentColor" />
         </svg>
       </Button>
-
-      <div className="w-px h-5 bg-slate-700" />
-
-      {/* Time Signature */}
-      <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-        <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-slate-700">
-          {TIME_SIGNATURES.map(ts => (
-            <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
-              {ts.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {/* BPM */}
-      <div className="flex items-center gap-1">
-        {isEditingBpm ? (
-          <input
-            type="number"
-            value={bpmInputValue}
-            onChange={(e) => setBpmInputValue(e.target.value)}
-            onBlur={handleBpmInputBlur}
-            onKeyDown={handleBpmInputKeyDown}
-            autoFocus
-            className="bg-slate-800 border border-amber-500 rounded px-2 py-0.5 text-white font-mono text-xs font-medium w-12 text-center outline-none"
-            min={20}
-            max={455}
-          />
-        ) : (
-          <div
-            ref={bpmRef}
-            onMouseDown={handleBpmMouseDown}
-            onDoubleClick={handleBpmDoubleClick}
-            className={`bg-slate-800 border border-slate-700 rounded px-2 py-0.5 cursor-ew-resize select-none hover:border-slate-600 transition-colors ${isDragging ? 'border-amber-500' : ''}`}
-            title="Drag to change tempo"
-          >
-            <span className="text-white font-mono text-xs font-medium">{tempo}</span>
-          </div>
-        )}
-        <span className="text-white/40 text-[10px] uppercase">bpm</span>
-      </div>
     </div>
   );
 }
