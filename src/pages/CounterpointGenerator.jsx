@@ -534,7 +534,8 @@ export default function CounterpointGenerator() {
                                                 tempo={tempo}
                                                 timeSignature={settings.timeSignature}
                                                 scrollToBeatRef={scrollToBeatRef}
-                                                onVoiceInstrumentChange={(voiceIndex, instrument) => {
+                                                                                    pressedPianoNotes={pressedPianoNotes}
+                                                                                    onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                                   const newVoices = [...voices];
                                                   if (newVoices[voiceIndex]) {
                                                     newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
