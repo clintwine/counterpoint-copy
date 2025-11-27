@@ -57,7 +57,8 @@ export default function NoteGrid({
   onVoiceInstrumentChange,
   onSelectionChange,
   tempo = 80,
-  timeSignature = '4/4'
+  timeSignature = '4/4',
+  scrollToBeatRef
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -89,6 +90,19 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
+
+  // Expose scroll function via ref
+  useEffect(() => {
+    if (scrollToBeatRef) {
+      scrollToBeatRef.current = (beat) => {
+        if (gridRef.current) {
+          const containerWidth = gridRef.current.clientWidth - 56;
+          const beatPosition = beat * CELL_WIDTH;
+          gridRef.current.scrollLeft = Math.max(0, beatPosition - containerWidth * 0.3);
+        }
+      };
+    }
+  }, [scrollToBeatRef, CELL_WIDTH]);
 
   // Generate all pitches for the grid
   const pitches = [];
