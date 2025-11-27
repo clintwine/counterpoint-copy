@@ -492,6 +492,27 @@ export default function NoteGrid({
         playNoteSound(pitches[newPitchIndex]);
       }
 
+      // Auto-scroll when dragging near edges
+      if (gridRef.current && dragState.isDragging) {
+        const rect = gridRef.current.getBoundingClientRect();
+        const edgeThreshold = 60;
+        const scrollSpeed = 15;
+        
+        // Horizontal scrolling
+        if (e.clientX > rect.right - edgeThreshold) {
+          gridRef.current.scrollLeft += scrollSpeed;
+        } else if (e.clientX < rect.left + edgeThreshold + 56) {
+          gridRef.current.scrollLeft -= scrollSpeed;
+        }
+        
+        // Vertical scrolling
+        if (e.clientY > rect.bottom - edgeThreshold) {
+          gridRef.current.scrollTop += scrollSpeed;
+        } else if (e.clientY < rect.top + edgeThreshold + 28) {
+          gridRef.current.scrollTop -= scrollSpeed;
+        }
+      }
+
       setDragState(prev => ({
         ...prev,
         currentPitchIndex: newPitchIndex,
@@ -539,25 +560,30 @@ export default function NoteGrid({
       }
       setMarquee(null);
     } else if (dragState && dragState.isDragging && selectedNotes.size > 0) {
-      // Apply drag
+      // Apply drag - remove original notes and add moved notes
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
+        // Get selected notes based on their ORIGINAL positions (stored in selectedNotes keys)
         const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
         
+        // Remove ALL selected notes from the array first
+        const notesWithoutSelected = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        
+        // Create moved notes at new positions
         const movedNotes = selectedNotesList.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
-        const newNotes = [...unselectedNotes, ...movedNotes].sort((a, b) => a.beat - b.beat);
+        // Combine: notes that weren't selected + moved notes
+        const newNotes = [...notesWithoutSelected, ...movedNotes].sort((a, b) => a.beat - b.beat);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
         
-        // Update selection keys
+        // Update selection keys to new positions
         const newSelected = new Set(movedNotes.map(n => getNoteKey(n.pitch, n.beat)));
         setSelectedNotes(newSelected);
       }
