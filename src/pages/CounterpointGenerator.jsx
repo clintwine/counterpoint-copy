@@ -71,8 +71,9 @@ export default function CounterpointGenerator() {
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
       const [pianoInstrument, setPianoInstrument] = useState('organ');
-      const [selectedNotes, setSelectedNotes] = useState([]);
-      const scrollToBeatRef = useRef(null);
+          const [selectedNotes, setSelectedNotes] = useState([]);
+          const scrollToBeatRef = useRef(null);
+          const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
@@ -588,10 +589,11 @@ export default function CounterpointGenerator() {
                             />
             
             <PianoKeyboard
-                activeNotes={activeNotes}
-                instrument={pianoInstrument}
-                onInstrumentChange={setPianoInstrument}
-              />
+                                activeNotes={activeNotes}
+                                instrument={pianoInstrument}
+                                onInstrumentChange={setPianoInstrument}
+                                onPressedNotesChange={setPressedPianoNotes}
+                              />
           </motion.main>
           </div>
           </div>

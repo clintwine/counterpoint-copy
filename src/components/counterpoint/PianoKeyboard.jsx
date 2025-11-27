@@ -53,7 +53,7 @@ const DEFAULT_INSTRUMENTS = [
 // Full 88-key piano: A0 to C8
 const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -136,8 +136,12 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
       activeOscillators.current[pitch] = oscObj;
     }
-    setPressedNotes(prev => new Set([...prev, pitch]));
-  }, [instrument, envelope, customInstruments]);
+    setPressedNotes(prev => {
+      const next = new Set([...prev, pitch]);
+      onPressedNotesChange?.(next);
+      return next;
+    });
+  }, [instrument, envelope, customInstruments, onPressedNotesChange]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
@@ -147,10 +151,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       }
       delete activeOscillators.current[pitch];
       setPressedNotes(prev => {
-        const next = new Set(prev);
-        next.delete(pitch);
-        return next;
-      });
+                const next = new Set(prev);
+                next.delete(pitch);
+                onPressedNotesChange?.(next);
+                return next;
+              });
     }
   }, [envelope.release]);
 

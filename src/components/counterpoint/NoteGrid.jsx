@@ -59,7 +59,8 @@ export default function NoteGrid({
   onSelectionChange,
   tempo = 80,
   timeSignature = '4/4',
-  scrollToBeatRef
+  scrollToBeatRef,
+  pressedPianoNotes = new Set()
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -681,25 +682,26 @@ export default function NoteGrid({
                         <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
                           <div className="h-7 border-b border-slate-600 bg-slate-800" />
                           {pitches.map((pitch) => {
-                            const isSharp = pitch.includes('#');
-                            const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
-                            return (
-                              <div 
-                                key={pitch}
-                                onClick={() => {
-                                  initAudio();
-                                  const instrument = voices[activeVoice]?.instrument || 'organ';
-                                  playNote(pitch, 0.5, 0.7, 0, instrument);
-                                }}
-                                className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors ${
-                                  isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
-                                }`}
-                                style={{ backgroundColor: isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)' }}
-                              >
-                                {pitch}
-                              </div>
-                            );
-                          })}
+                                            const isSharp = pitch.includes('#');
+                                            const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
+                                            const isPianoPressed = pressedPianoNotes.has(pitch);
+                                            return (
+                                              <div 
+                                                key={pitch}
+                                                onClick={() => {
+                                                  initAudio();
+                                                  const instrument = voices[activeVoice]?.instrument || 'organ';
+                                                  playNote(pitch, 0.5, 0.7, 0, instrument);
+                                                }}
+                                                className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors ${
+                                                  isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
+                                                }`}
+                                                style={{ backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)' }}
+                                              >
+                                                {pitch}
+                                              </div>
+                                            );
+                                          })}
                         </div>
 
           {/* Grid area */}
