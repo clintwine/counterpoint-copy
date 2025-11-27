@@ -557,6 +557,12 @@ export default function NoteGrid({
   };
 
   const handleMouseUp = () => {
+    // Clear auto-scroll interval
+    if (dragScrollRef.current) {
+      clearInterval(dragScrollRef.current);
+      dragScrollRef.current = null;
+    }
+    
     // Save history after painting stroke
     if (isPainting && paintedNotesRef.current.size > 0) {
       saveToHistory(cantusFirmus);
