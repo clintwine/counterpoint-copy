@@ -6,8 +6,9 @@ import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 
-const NOTE_NAMES = ['B', 'A', 'G', 'F', 'E', 'D', 'C'];
-const OCTAVES = [5, 4, 3, 2];
+// Full 88-key piano range: A0 to C8
+const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
+const OCTAVES = [8, 7, 6, 5, 4, 3, 2, 1, 0];
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16 },
@@ -104,13 +105,18 @@ export default function NoteGrid({
     }
   }, [scrollToBeatRef, CELL_WIDTH]);
 
-  // Generate all pitches for the grid
+  // Generate all 88 pitches for the grid (C8 down to A0)
   const pitches = [];
-  OCTAVES.forEach(octave => {
-    NOTE_NAMES.forEach(note => {
+  // C8 is the top note
+  pitches.push('C8');
+  // Then octaves 7 down to 1
+  for (let octave = 7; octave >= 1; octave--) {
+    NOTE_NAMES_CHROMATIC.forEach(note => {
       pitches.push(`${note}${octave}`);
     });
-  });
+  }
+  // A0, A#0, B0 at the bottom
+  pitches.push('B0', 'A#0', 'A0');
 
   // Scroll to keep current beat visible during playback (not while scrubbing)
       useEffect(() => {
@@ -672,20 +678,29 @@ export default function NoteGrid({
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left */}
-          <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
-            <div className="h-7 border-b border-slate-600 bg-slate-800" />
-            {pitches.map((pitch) => (
-              <div 
-                key={pitch}
-                className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 ${
-                  pitch.startsWith('C') ? 'text-amber-400 font-semibold' : 'text-white/80'
-                }`}
-                style={{ backgroundColor: pitch.startsWith('C') ? 'rgba(251, 191, 36, 0.15)' : 'rgb(30, 41, 59)' }}
-              >
-                {pitch}
-              </div>
-            ))}
-          </div>
+                        <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
+                          <div className="h-7 border-b border-slate-600 bg-slate-800" />
+                          {pitches.map((pitch) => {
+                            const isSharp = pitch.includes('#');
+                            const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
+                            return (
+                              <div 
+                                key={pitch}
+                                onClick={() => {
+                                  initAudio();
+                                  const instrument = voices[activeVoice]?.instrument || 'organ';
+                                  playNote(pitch, 0.5, 0.7, 0, instrument);
+                                }}
+                                className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors ${
+                                  isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
+                                }`}
+                                style={{ backgroundColor: isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)' }}
+                              >
+                                {pitch}
+                              </div>
+                            );
+                          })}
+                        </div>
 
           {/* Grid area */}
           <div className="flex-shrink-0">
@@ -711,7 +726,8 @@ export default function NoteGrid({
               <div key={pitch} className="flex" style={{ height: CELL_HEIGHT }}>
                 {Array.from({ length: totalBeats }).map((_, beat) => {
                   const isBarLine = beat % beatsPerMeasure === 0;
-                  const isCLine = pitch.startsWith('C');
+                                          const isCLine = pitch.startsWith('C') && !pitch.startsWith('C#');
+                                          const isSharpLine = pitch.includes('#');
                   const noteKey = getNoteKey(pitch, beat);
                   const isSelected = selectedNotes.has(noteKey);
                   
@@ -738,10 +754,10 @@ export default function NoteGrid({
                       key={beat}
                       onMouseDown={(e) => handleMouseDown(e, pitch, beat)}
                       className={`flex-shrink-0 border-r border-b relative cursor-pointer transition-colors
-                          ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
-                          ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : 'border-b-slate-700'}
-                          hover:bg-slate-700/50
-                        `}
+                                                    ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
+                                                    ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
+                                                    hover:bg-slate-700/50
+                                                  `}
                       style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
                     >
                       {notesAtPosition.map(({ voiceIndex, note }) => {
