@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -11,6 +11,16 @@ import ScoreMinimap from './ScoreMinimap';
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
 const OCTAVES = [8, 7, 6, 5, 4, 3, 2, 1, 0];
+
+// Pre-generate all 88 pitches (static)
+const ALL_PITCHES = (() => {
+  const p = ['C8'];
+  for (let octave = 7; octave >= 1; octave--) {
+    NOTE_NAMES_CHROMATIC.forEach(note => p.push(`${note}${octave}`));
+  }
+  p.push('B0', 'A#0', 'A0');
+  return p;
+})();
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16 },
@@ -155,7 +165,26 @@ export default function NoteGrid({
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
 
-  const getNoteKey = (pitch, beat) => `${pitch}-${beat}`;
+  const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
+  
+  // Memoize notes lookup for performance
+  const notesMap = useMemo(() => {
+    const map = new Map();
+    cantusFirmus.forEach(note => {
+      const key = `${note.pitch}-${note.beat}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push({ voiceIndex: 0, note });
+    });
+    voices.forEach((voice, voiceIndex) => {
+      if (!voice.notes) return;
+      voice.notes.forEach(note => {
+        const key = `${note.pitch}-${note.beat}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push({ voiceIndex, note });
+      });
+    });
+    return map;
+  }, [cantusFirmus, voices]);
 
   // Notify parent of selection changes
   useEffect(() => {
@@ -187,18 +216,8 @@ export default function NoteGrid({
     }
   }, [scrollToBeatRef, CELL_WIDTH]);
 
-  // Generate all 88 pitches for the grid (C8 down to A0)
-  const pitches = [];
-  // C8 is the top note
-  pitches.push('C8');
-  // Then octaves 7 down to 1
-  for (let octave = 7; octave >= 1; octave--) {
-    NOTE_NAMES_CHROMATIC.forEach(note => {
-      pitches.push(`${note}${octave}`);
-    });
-  }
-  // A0, A#0, B0 at the bottom
-  pitches.push('B0', 'A#0', 'A0');
+  // Use pre-generated pitches
+      const pitches = ALL_PITCHES;
 
   // Scroll to keep current beat visible during playback (not while scrubbing)
       useEffect(() => {
@@ -805,17 +824,8 @@ export default function NoteGrid({
                   const noteKey = getNoteKey(pitch, beat);
                   const isSelected = selectedNotes.has(noteKey);
                   
-                  // Check if any voice has a note at this position (support multiple notes per beat)
-                  const notesAtPosition = [];
-                  voices.forEach((voice, voiceIndex) => {
-                    if (!voice.notes) return;
-                    // Find ALL notes at this beat with this pitch (not just first)
-                    voice.notes.forEach(note => {
-                      if (note.beat === beat && note.pitch === pitch) {
-                        notesAtPosition.push({ voiceIndex, note });
-                      }
-                    });
-                  });
+                  // Use memoized lookup
+                                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
 
                   const isCurrentBeat = currentBeat === beat;
                   const hasNote = notesAtPosition.length > 0;
