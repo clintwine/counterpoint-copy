@@ -60,7 +60,8 @@ export default function NoteGrid({
   tempo = 80,
   timeSignature = '4/4',
   scrollToBeatRef,
-  pressedPianoNotes = new Set()
+  pressedPianoNotes = new Set(),
+  pianoInstrument = 'organ'
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -689,10 +690,9 @@ export default function NoteGrid({
                                               <div 
                                                 key={pitch}
                                                 onClick={() => {
-                                                  initAudio();
-                                                  const instrument = voices[activeVoice]?.instrument || 'organ';
-                                                  playNote(pitch, 0.5, 0.7, 0, instrument);
-                                                }}
+                                                                        initAudio();
+                                                                        playNote(pitch, 0.5, 0.7, 0, pianoInstrument);
+                                                                      }}
                                                 className={`h-7 w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors ${
                                                   isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
                                                 }`}
