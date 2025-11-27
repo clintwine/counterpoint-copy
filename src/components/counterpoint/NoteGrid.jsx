@@ -881,8 +881,12 @@ export default function NoteGrid({
 
         {/* Playhead with top marker - draggable */}
             <div
-              className="absolute top-0 bottom-0 z-30 cursor-ew-resize"
+              className="absolute top-0 z-30 cursor-ew-resize"
               style={{
+                height: 28 + pitches.length * CELL_HEIGHT,
+              }}
+              style={{
+                height: 28 + pitches.length * CELL_HEIGHT,
                 left: 56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom),
                 width: Math.max(16, 20 * zoom),
                 transition: isPlaying ? `left ${(60 / tempo) / 4}s linear` : 'none'
