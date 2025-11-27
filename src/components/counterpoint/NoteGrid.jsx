@@ -304,13 +304,16 @@ export default function NoteGrid({
       } else if (e.key === 'Escape') {
         setSelectedNotes(new Set());
         setMarquee(null);
-      } else if (e.key === 'v') {
-        setTool('select');
-      } else if (e.key === 'm') {
-        setTool('marquee');
-      } else if (e.key === 'b') {
-        setTool('draw');
-      }
+      } else if (e.key === ' ') {
+                e.preventDefault();
+                // Spacebar is handled by parent for play/pause
+              } else if (e.key === 'v') {
+                setTool('select');
+              } else if (e.key === 'm') {
+                setTool('marquee');
+              } else if (e.key === 'b') {
+                setTool('draw');
+              }
     };
 
     window.addEventListener('keydown', handleKeyDown);
