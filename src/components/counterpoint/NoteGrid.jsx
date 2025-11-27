@@ -437,6 +437,60 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
+    // Auto-scroll when dragging notes near edges
+    if (dragState && dragState.isDragging && gridRef.current) {
+      const gridRect = gridRef.current.getBoundingClientRect();
+      const edgeThreshold = 80;
+      const baseScrollSpeed = 12;
+      
+      // Clear any existing scroll interval
+      if (dragScrollRef.current) {
+        clearInterval(dragScrollRef.current);
+        dragScrollRef.current = null;
+      }
+      
+      let scrollX = 0;
+      let scrollY = 0;
+      
+      // Check horizontal edges - accelerate based on how close to edge
+      const leftEdge = gridRect.left + 56;
+      const rightEdge = gridRect.right;
+      
+      if (e.clientX < leftEdge + edgeThreshold) {
+        const proximity = 1 - Math.max(0, e.clientX - leftEdge) / edgeThreshold;
+        scrollX = -baseScrollSpeed * Math.max(1, proximity * 3);
+      } else if (e.clientX > rightEdge - edgeThreshold) {
+        const proximity = 1 - Math.max(0, rightEdge - e.clientX) / edgeThreshold;
+        scrollX = baseScrollSpeed * Math.max(1, proximity * 3);
+      }
+      
+      // Check vertical edges
+      const topEdge = gridRect.top + 28;
+      const bottomEdge = gridRect.bottom;
+      
+      if (e.clientY < topEdge + edgeThreshold) {
+        const proximity = 1 - Math.max(0, e.clientY - topEdge) / edgeThreshold;
+        scrollY = -baseScrollSpeed * Math.max(1, proximity * 3);
+      } else if (e.clientY > bottomEdge - edgeThreshold) {
+        const proximity = 1 - Math.max(0, bottomEdge - e.clientY) / edgeThreshold;
+        scrollY = baseScrollSpeed * Math.max(1, proximity * 3);
+      }
+      
+      if (scrollX !== 0 || scrollY !== 0) {
+        dragScrollRef.current = setInterval(() => {
+          if (gridRef.current) {
+            gridRef.current.scrollLeft += scrollX;
+            gridRef.current.scrollTop += scrollY;
+            // Update viewport state to trigger re-render of virtualized cells
+            setViewportState({
+              scrollLeft: gridRef.current.scrollLeft,
+              scrollTop: gridRef.current.scrollTop
+            });
+          }
+        }, 16);
+      }
+    }
+
         // Handle painting in draw mode (only if paintMode is enabled)
         if (isPainting && tool === 'draw' && paintMode) {
           const cell = getCellFromPosition(e.clientX, e.clientY);
