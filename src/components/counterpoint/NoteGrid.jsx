@@ -827,136 +827,143 @@ export default function NoteGrid({
               ))}
             </div>
 
-            {/* Note grid rows */}
-            {pitches.map((pitch, pitchIndex) => (
-              <div key={pitch} className="flex" style={{ height: CELL_HEIGHT }}>
-                {Array.from({ length: totalBeats }).map((_, beat) => {
-                  const isBarLine = beat % beatsPerMeasure === 0;
-                                          const isCLine = pitch.startsWith('C') && !pitch.startsWith('C#');
-                                          const isSharpLine = pitch.includes('#');
-                  const noteKey = getNoteKey(pitch, beat);
-                  const isSelected = selectedNotes.has(noteKey);
+            {/* Virtualized Note grid rows - only render visible rows */}
+            {(() => {
+              // Calculate visible range with buffer
+              const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
+              const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + 400) / CELL_HEIGHT) + 5);
+              
+              // Calculate visible beat range
+              const visibleStartBeat = Math.max(0, Math.floor(viewportState.scrollLeft / CELL_WIDTH) - 2);
+              const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + 800) / CELL_WIDTH) + 2);
+              
+              return (
+                <>
+                  {/* Spacer for rows above visible area */}
+                  {visibleStartRow > 0 && (
+                    <div style={{ height: visibleStartRow * CELL_HEIGHT }} />
+                  )}
                   
-                  // Use memoized lookup
-                                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
-
-                  const isCurrentBeat = currentBeat === beat;
-                  const hasNote = notesAtPosition.length > 0;
-
-                  // Calculate if this note should show drag preview
-                  const showDragPreview = isSelected && dragState?.isDragging;
-
-                  return (
-                    <div
-                      key={beat}
-                      onMouseDown={(e) => handleMouseDown(e, pitch, beat)}
-                      className={`flex-shrink-0 border-r border-b relative cursor-pointer transition-colors
-                                                    ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
-                                                    ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
-                                                    hover:bg-slate-700/50
-                                                  `}
-                      style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
-                    >
-                      {notesAtPosition.map(({ voiceIndex, note }) => {
-                        const duration = note.duration || DEFAULT_DURATION;
-                        const noteWidth = duration * CELL_WIDTH - 4;
-                        const noteKey = getNoteKey(note.pitch, note.beat);
-                        const isBeingDragged = selectedNotes.has(noteKey) && dragState?.isDragging;
+                  {pitches.slice(visibleStartRow, visibleEndRow).map((pitch, idx) => {
+                    const pitchIndex = visibleStartRow + idx;
+                    const isCLine = pitch.startsWith('C') && !pitch.startsWith('C#');
+                    const isSharpLine = pitch.includes('#');
+                    
+                    return (
+                      <div key={pitch} className="flex" style={{ height: CELL_HEIGHT }}>
+                        {/* Spacer for beats before visible area */}
+                        {visibleStartBeat > 0 && (
+                          <div style={{ width: visibleStartBeat * CELL_WIDTH, flexShrink: 0 }} />
+                        )}
                         
-                        // Hide original note while dragging (preview shows instead)
-                        if (isBeingDragged) return null;
-                        
-                        return (
-                          <div
-                            key={`${voiceIndex}-${note.beat}-${note.pitch}`}
-                            onMouseDown={(e) => {
-                                e.stopPropagation();
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                const clickX = e.clientX - rect.left;
+                        {Array.from({ length: visibleEndBeat - visibleStartBeat }).map((_, i) => {
+                          const beat = visibleStartBeat + i;
+                          const isBarLine = beat % beatsPerMeasure === 0;
+                          const noteKey = getNoteKey(pitch, beat);
+                          const isSelected = selectedNotes.has(noteKey);
+                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
+                          const isCurrentBeat = currentBeat === beat;
 
-                                // Always play the note when clicking it
-                                playNoteSound(pitch);
+                          return (
+                            <div
+                              key={beat}
+                              onMouseDown={(e) => handleMouseDown(e, pitch, beat)}
+                              className={`flex-shrink-0 border-r border-b relative cursor-pointer
+                                ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
+                                ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
+                                hover:bg-slate-700/50
+                              `}
+                              style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
+                            >
+                              {notesAtPosition.map(({ voiceIndex, note }) => {
+                                const duration = note.duration || DEFAULT_DURATION;
+                                const noteWidth = duration * CELL_WIDTH - 4;
+                                const nKey = getNoteKey(note.pitch, note.beat);
+                                const isBeingDragged = selectedNotes.has(nKey) && dragState?.isDragging;
+                                
+                                if (isBeingDragged) return null;
+                                
+                                return (
+                                  <div
+                                    key={`${voiceIndex}-${note.beat}-${note.pitch}`}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                      const rect = e.currentTarget.getBoundingClientRect();
+                                      const clickX = e.clientX - rect.left;
+                                      playNoteSound(pitch);
 
-                                // Check if clicking on resize handle (right 10px)
-                                if (clickX > rect.width - 10) {
-                                  // Build map of start durations for all selected notes (or just this one)
-                                  const noteKey = getNoteKey(pitch, beat);
-                                  const isSelected = selectedNotes.has(noteKey);
-                                  const startDurations = {};
-
-                                  if (isSelected && selectedNotes.size > 0) {
-                                    // Resize all selected notes
-                                    cantusFirmus.forEach(n => {
-                                      if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                        startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                      if (clickX > rect.width - 10) {
+                                        const startDurations = {};
+                                        if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                          cantusFirmus.forEach(n => {
+                                            if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                              startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                            }
+                                          });
+                                        } else {
+                                          startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                        }
+                                        setResizeState({ startX: e.clientX, startDurations });
+                                      } else {
+                                        if (!selectedNotes.has(nKey)) {
+                                          if (!e.shiftKey) {
+                                            setSelectedNotes(new Set([nKey]));
+                                          } else {
+                                            const newSelected = new Set(selectedNotes);
+                                            newSelected.add(nKey);
+                                            setSelectedNotes(newSelected);
+                                          }
+                                        }
+                                        setDragState({
+                                          startPitch: pitch,
+                                          startBeat: beat,
+                                          startPitchIndex: pitches.indexOf(pitch),
+                                          currentPitchIndex: pitches.indexOf(pitch),
+                                          currentBeat: beat,
+                                          isDragging: false,
+                                          clickOffsetX: e.clientX,
+                                          clickOffsetY: e.clientY
+                                        });
                                       }
-                                    });
-                                  } else {
-                                    // Just resize this note
-                                    startDurations[noteKey] = note.duration || DEFAULT_DURATION;
-                                  }
-
-                                  setResizeState({
-                                    startX: e.clientX,
-                                    startDurations
-                                  });
-                                } else {
-                                  // Normal selection/drag behavior
-                                  const noteKey = getNoteKey(pitch, beat);
-                                  const isAlreadySelected = selectedNotes.has(noteKey);
-
-                                  if (!isAlreadySelected) {
-                                    // Only change selection if clicking unselected note
-                                    if (!e.shiftKey) {
-                                      setSelectedNotes(new Set([noteKey]));
-                                    } else {
-                                      const newSelected = new Set(selectedNotes);
-                                      newSelected.add(noteKey);
-                                      setSelectedNotes(newSelected);
-                                    }
-                                  }
-
-                                  // Calculate click offset within the cell for smooth dragging
-                                  const cell = getCellFromPosition(e.clientX, e.clientY);
-                                  setDragState({
-                                    startPitch: pitch,
-                                    startBeat: beat,
-                                    startPitchIndex: pitches.indexOf(pitch),
-                                    currentPitchIndex: pitches.indexOf(pitch),
-                                    currentBeat: beat,
-                                    isDragging: false,
-                                    clickOffsetX: e.clientX,
-                                    clickOffsetY: e.clientY
-                                  });
-                                }
-                              }}
-                            className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
-                              isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
-                            }`}
-                            style={{ 
-                              width: noteWidth,
-                              minWidth: 20,
-                              backgroundColor: NOTE_COLORS[voiceIndex],
-                              boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined,
-                              cursor: resizeState ? 'ew-resize' : 'grab',
-                              zIndex: 5
-                            }}
-                          >
-                            <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
-                              {note.pitch.replace(/\d/, '')}
-                            </span>
-                            {/* Resize handle */}
-                            <div 
-                              className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+                                    }}
+                                    className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
+                                      selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
+                                    }`}
+                                    style={{ 
+                                      width: noteWidth,
+                                      minWidth: 20,
+                                      backgroundColor: NOTE_COLORS[voiceIndex],
+                                      boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined,
+                                      cursor: resizeState ? 'ew-resize' : 'grab',
+                                      zIndex: 5
+                                    }}
+                                  >
+                                    <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
+                                      {note.pitch.replace(/\d/, '')}
+                                    </span>
+                                    <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                        
+                        {/* Spacer for beats after visible area */}
+                        {visibleEndBeat < totalBeats && (
+                          <div style={{ width: (totalBeats - visibleEndBeat) * CELL_WIDTH, flexShrink: 0 }} />
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Spacer for rows below visible area */}
+                  {visibleEndRow < pitches.length && (
+                    <div style={{ height: (pitches.length - visibleEndRow) * CELL_HEIGHT }} />
+                  )}
+                </>
+              );
+            })()}
 
             {/* Drag preview notes */}
             {dragState?.isDragging && selectedNotes.size > 0 && (
