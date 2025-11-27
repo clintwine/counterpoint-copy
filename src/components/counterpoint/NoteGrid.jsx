@@ -57,7 +57,7 @@ const PRESET_LIBRARY = [
 
 const ALL_INSTRUMENTS = [...DEFAULT_INSTRUMENTS, ...PRESET_LIBRARY];
 
-function InstrumentSelect({ value, onChange, instruments }) {
+function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find(i => i.value === value);
   
@@ -80,7 +80,20 @@ function InstrumentSelect({ value, onChange, instruments }) {
           <Command className="bg-slate-800">
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
             <CommandList>
-              <CommandEmpty className="text-white/50 text-xs py-2 text-center">No instrument found.</CommandEmpty>
+              <CommandEmpty className="text-white/50 text-xs py-2 text-center">
+                No instrument found.
+                {onCreateNew && (
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      onCreateNew();
+                    }}
+                    className="block w-full mt-2 text-amber-400 hover:text-amber-300 underline"
+                  >
+                    Create new instrument
+                  </button>
+                )}
+              </CommandEmpty>
               <CommandGroup>
                 {instruments.map(inst => (
                   <CommandItem

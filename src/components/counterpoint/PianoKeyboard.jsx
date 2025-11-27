@@ -131,7 +131,7 @@ const PRESET_LIBRARY = [
 // Full 88-key piano: A0 to C8
 const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
 
-function InstrumentSelect({ value, onChange, instruments }) {
+function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find(i => i.value === value);
   
@@ -154,7 +154,20 @@ function InstrumentSelect({ value, onChange, instruments }) {
           <Command className="bg-slate-800">
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
             <CommandList>
-              <CommandEmpty className="text-white/50 text-xs py-2 text-center">No instrument found.</CommandEmpty>
+              <CommandEmpty className="text-white/50 text-xs py-2 text-center">
+                No instrument found.
+                {onCreateNew && (
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      onCreateNew();
+                    }}
+                    className="block w-full mt-2 text-amber-400 hover:text-amber-300 underline"
+                  >
+                    Create new instrument
+                  </button>
+                )}
+              </CommandEmpty>
               <CommandGroup>
                 {instruments.map(inst => (
                   <CommandItem
@@ -533,6 +546,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                               value={instrument}
                               onChange={onInstrumentChange}
                               instruments={allInstruments}
+                              onCreateNew={() => setShowWaveEditor(true)}
                             />
                             <Button
                               variant="ghost"
