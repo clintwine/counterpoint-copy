@@ -162,6 +162,7 @@ export default function NoteGrid({
   const CELL_HEIGHT = BASE_CELL_HEIGHT * zoomY;
 
   const [tool, setTool] = useState('select'); // 'select', 'marquee', 'draw'
+    const [paintMode, setPaintMode] = useState(false); // When false, draw tool only adds one note per click
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
 
@@ -435,25 +436,25 @@ export default function NoteGrid({
   };
 
   const handleMouseMove = (e) => {
-    // Handle painting in draw mode
-    if (isPainting && tool === 'draw') {
-      const cell = getCellFromPosition(e.clientX, e.clientY);
-      if (cell) {
-        const noteKey = getNoteKey(cell.pitch, cell.beat);
-        const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
-        
-        // Only add if not already painted in this stroke and no existing note
-        if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
-          paintedNotesRef.current.add(noteKey);
-          const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
-          onNotesUpdate(newNotes);
-          // Play the note with proper duration for feedback
-          initAudio();
-          const instrument = voices[activeVoice]?.instrument || 'organ';
-          playNote(cell.pitch, 0.5, 0.7, 0, instrument);
+        // Handle painting in draw mode (only if paintMode is enabled)
+        if (isPainting && tool === 'draw' && paintMode) {
+          const cell = getCellFromPosition(e.clientX, e.clientY);
+          if (cell) {
+            const noteKey = getNoteKey(cell.pitch, cell.beat);
+            const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
+
+            // Only add if not already painted in this stroke and no existing note
+            if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
+              paintedNotesRef.current.add(noteKey);
+              const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+              onNotesUpdate(newNotes);
+              // Play the note with proper duration for feedback
+              initAudio();
+              const instrument = voices[activeVoice]?.instrument || 'organ';
+              playNote(cell.pitch, 0.5, 0.7, 0, instrument);
+            }
+          }
         }
-      }
-    }
     
     if (resizeState) {
       // Handle note duration resize
@@ -602,14 +603,26 @@ export default function NoteGrid({
             <Square className="w-4 h-4" />
           </Button>
           <Button
-            variant={tool === 'draw' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('draw')}
-            className={`h-8 px-2 ${tool === 'draw' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-            title="Draw (B)"
-          >
-            <Pencil className="w-4 h-4" />
-          </Button>
+                        variant={tool === 'draw' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setTool('draw')}
+                        className={`h-8 px-2 ${tool === 'draw' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
+                        title="Draw (B)"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+
+                      {tool === 'draw' && (
+                        <Button
+                          variant={paintMode ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setPaintMode(!paintMode)}
+                          className={`h-8 px-2 text-xs ${paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+                          title="Paint mode - drag to add multiple notes"
+                        >
+                          Paint
+                        </Button>
+                      )}
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
           
