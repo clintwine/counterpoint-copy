@@ -136,7 +136,8 @@ export default function NoteGrid({
   scrollToBeatRef,
   pressedPianoNotes = new Set(),
   pianoInstrument = 'organ',
-  playbackControls
+  playbackControls,
+  onOpenWaveEditor
 }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -666,6 +667,7 @@ export default function NoteGrid({
                           value={voices[activeVoice]?.instrument || 'organ'} 
                           onChange={(v) => onVoiceInstrumentChange?.(activeVoice, v)}
                           instruments={ALL_INSTRUMENTS}
+                          onCreateNew={onOpenWaveEditor}
                         />
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
