@@ -564,12 +564,15 @@ export default function NoteGrid({
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
+      // Use the original selection keys stored when drag started
+      const originalKeys = dragState.originalSelectedKeys || selectedNotes;
+      
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        // Get selected notes based on their ORIGINAL positions (stored in selectedNotes keys)
-        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        // Get selected notes based on their ORIGINAL positions
+        const selectedNotesList = cantusFirmus.filter(n => originalKeys.has(getNoteKey(n.pitch, n.beat)));
         
         // Remove ALL selected notes from the array first
-        const notesWithoutSelected = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const notesWithoutSelected = cantusFirmus.filter(n => !originalKeys.has(getNoteKey(n.pitch, n.beat)));
         
         // Create moved notes at new positions
         const movedNotes = selectedNotesList.map(note => {
@@ -941,15 +944,16 @@ export default function NoteGrid({
                                           }
                                         }
                                         setDragState({
-                                          startPitch: pitch,
-                                          startBeat: beat,
-                                          startPitchIndex: pitches.indexOf(pitch),
-                                          currentPitchIndex: pitches.indexOf(pitch),
-                                          currentBeat: beat,
-                                          isDragging: false,
-                                          clickOffsetX: e.clientX,
-                                          clickOffsetY: e.clientY
-                                        });
+                                                                                startPitch: pitch,
+                                                                                startBeat: beat,
+                                                                                startPitchIndex: pitches.indexOf(pitch),
+                                                                                currentPitchIndex: pitches.indexOf(pitch),
+                                                                                currentBeat: beat,
+                                                                                isDragging: false,
+                                                                                clickOffsetX: e.clientX,
+                                                                                clickOffsetY: e.clientY,
+                                                                                originalSelectedKeys: new Set(selectedNotes.has(nKey) ? selectedNotes : [nKey])
+                                                                              });
                                       }
                                     }}
                                     className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
