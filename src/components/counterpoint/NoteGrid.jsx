@@ -727,8 +727,8 @@ export default function NoteGrid({
           {/* Grid area */}
           <div className="flex-shrink-0">
             {/* Beat numbers header */}
-            <div className="flex h-7 border-b border-slate-600 select-none">
-              {Array.from({ length: totalBeats }).map((_, beat) => (
+                            <div className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800">
+                              {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
                   className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none ${
