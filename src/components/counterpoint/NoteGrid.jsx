@@ -591,13 +591,15 @@ export default function NoteGrid({
       }
       setMarquee(null);
     } else if (dragState && dragState.isDragging && selectedNotes.size > 0) {
-      // Apply drag
+      // Apply drag - only if there was actual movement
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        // Get the original notes that were selected at drag start
+        const originalSelectedKeys = dragState.originalSelectedKeys || selectedNotes;
+        const selectedNotesList = cantusFirmus.filter(n => originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
+        const unselectedNotes = cantusFirmus.filter(n => !originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
         
         const movedNotes = selectedNotesList.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
@@ -974,7 +976,8 @@ export default function NoteGrid({
                                           currentBeat: beat,
                                           isDragging: false,
                                           clickOffsetX: e.clientX,
-                                          clickOffsetY: e.clientY
+                                          clickOffsetY: e.clientY,
+                                          originalSelectedKeys: new Set(selectedNotes) // Capture selection at drag start
                                         });
                                       }
                                     }}
