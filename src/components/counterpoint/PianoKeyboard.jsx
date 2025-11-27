@@ -590,9 +590,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
-                <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Wave Editor</DialogTitle>
+                <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl p-4">
+                  <DialogHeader className="pb-2">
+                    <DialogTitle className="text-white text-sm">Wave Editor</DialogTitle>
                   </DialogHeader>
                   <WaveEditor
                     customInstruments={customInstruments}
