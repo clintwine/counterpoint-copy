@@ -30,7 +30,8 @@ export default function PlaybackControls({
   timeSignature = '4/4',
   onTimeSignatureChange,
   metronomeEnabled,
-  onMetronomeToggle
+  onMetronomeToggle,
+  onScrollToBeat
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -44,12 +45,36 @@ export default function PlaybackControls({
   // Scrubbable BPM input
   const bpmRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isEditingBpm, setIsEditingBpm] = useState(false);
+  const [bpmInputValue, setBpmInputValue] = useState(String(tempo));
   const dragStartRef = useRef({ x: 0, value: 0 });
 
   const handleBpmMouseDown = (e) => {
+    if (isEditingBpm) return;
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, value: tempo };
     document.body.style.cursor = 'ew-resize';
+  };
+
+  const handleBpmDoubleClick = () => {
+    setBpmInputValue(String(tempo));
+    setIsEditingBpm(true);
+  };
+
+  const handleBpmInputBlur = () => {
+    const val = parseInt(bpmInputValue);
+    if (!isNaN(val)) {
+      onTempoChange(Math.max(20, Math.min(455, val)));
+    }
+    setIsEditingBpm(false);
+  };
+
+  const handleBpmInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleBpmInputBlur();
+    } else if (e.key === 'Escape') {
+      setIsEditingBpm(false);
+    }
   };
 
   useEffect(() => {
@@ -57,7 +82,7 @@ export default function PlaybackControls({
 
     const handleMouseMove = (e) => {
       const delta = e.clientX - dragStartRef.current.x;
-      const newTempo = Math.max(40, Math.min(200, dragStartRef.current.value + Math.round(delta / 3)));
+      const newTempo = Math.max(20, Math.min(455, dragStartRef.current.value + Math.round(delta / 3)));
       onTempoChange(newTempo);
     };
 
@@ -131,14 +156,17 @@ export default function PlaybackControls({
               {formatTime(currentBeat)}
             </span>
             <Slider
-              value={[currentBeat]}
-              onValueChange={([value]) => onSeek(value)}
-              min={0}
-              max={totalBeats - 1}
-              step={1}
-              className="flex-1 cursor-pointer [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4 [&_[role=slider]]:cursor-grab [&_[role=slider]:active]:cursor-grabbing"
-              aria-label="Playhead position"
-            />
+                                value={[currentBeat]}
+                                onValueChange={([value]) => {
+                                  onSeek(value);
+                                  onScrollToBeat?.(value);
+                                }}
+                                min={0}
+                                max={totalBeats - 1}
+                                step={1}
+                                className="flex-1 cursor-pointer [&_[role=slider]]:bg-gold [&_[role=slider]]:border-0 [&_[role=slider]]:w-4 [&_[role=slider]]:h-4 [&_[role=slider]]:cursor-grab [&_[role=slider]:active]:cursor-grabbing"
+                                aria-label="Playhead position"
+                              />
             <span className="text-white text-sm font-mono w-10">
               {formatTime(totalBeats - 1)}
             </span>
@@ -165,17 +193,32 @@ export default function PlaybackControls({
           </div>
 
           {/* Scrubbable BPM */}
-          <div className="flex items-center gap-2">
-            <span className="text-white/60 text-xs uppercase tracking-wider">BPM</span>
-            <div
-              ref={bpmRef}
-              onMouseDown={handleBpmMouseDown}
-              className={`bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 cursor-ew-resize select-none hover:border-amber-500/50 transition-colors ${isDragging ? 'border-amber-500 bg-slate-700' : ''}`}
-              title="Drag left/right to change tempo"
-            >
-              <span className="text-white font-mono text-sm font-medium">{tempo}</span>
-            </div>
-          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/60 text-xs uppercase tracking-wider">BPM</span>
+                            {isEditingBpm ? (
+                              <input
+                                type="number"
+                                value={bpmInputValue}
+                                onChange={(e) => setBpmInputValue(e.target.value)}
+                                onBlur={handleBpmInputBlur}
+                                onKeyDown={handleBpmInputKeyDown}
+                                autoFocus
+                                className="bg-slate-800 border border-amber-500 rounded-lg px-3 py-1.5 text-white font-mono text-sm font-medium w-16 text-center outline-none"
+                                min={20}
+                                max={455}
+                              />
+                            ) : (
+                              <div
+                                ref={bpmRef}
+                                onMouseDown={handleBpmMouseDown}
+                                onDoubleClick={handleBpmDoubleClick}
+                                className={`bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 cursor-ew-resize select-none hover:border-amber-500/50 transition-colors ${isDragging ? 'border-amber-500 bg-slate-700' : ''}`}
+                                title="Drag left/right to change tempo, double-click to type"
+                              >
+                                <span className="text-white font-mono text-sm font-medium">{tempo}</span>
+                              </div>
+                            )}
+                          </div>
 
           {/* Metronome */}
           <Button
