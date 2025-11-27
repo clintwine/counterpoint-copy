@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Keyboard, Guitar, Volume2, Waves } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument } from './audioEngine';
 import WaveEditor from './WaveEditor';
@@ -129,6 +130,53 @@ const PRESET_LIBRARY = [
 
 // Full 88-key piano: A0 to C8
 const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
+
+function InstrumentSelect({ value, onChange, instruments }) {
+  const [open, setOpen] = React.useState(false);
+  const selected = instruments.find(i => i.value === value);
+  
+  return (
+    <div className="flex items-center gap-1.5">
+      <Guitar className="w-3.5 h-3.5 text-white/60" />
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-28 h-7 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+          >
+            {selected?.label || 'Select...'}
+            <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-0 bg-slate-800 border-slate-700">
+          <Command className="bg-slate-800">
+            <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
+            <CommandList>
+              <CommandEmpty className="text-white/50 text-xs py-2 text-center">No instrument found.</CommandEmpty>
+              <CommandGroup>
+                {instruments.map(inst => (
+                  <CommandItem
+                    key={inst.value}
+                    value={inst.label}
+                    onSelect={() => {
+                      onChange(inst.value);
+                      setOpen(false);
+                    }}
+                    className="text-white text-xs cursor-pointer"
+                  >
+                    {inst.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
 
 export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange }) {
   const octaves = FULL_PIANO_OCTAVES;
@@ -481,21 +529,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           <div className="w-px h-8 bg-slate-600" />
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-                              <Guitar className="w-3.5 h-3.5 text-white/60" />
-                              <Select value={instrument} onValueChange={onInstrumentChange}>
-                                <SelectTrigger className="w-28 h-7 bg-slate-700 border-slate-600 text-white text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  {allInstruments.map(inst => (
-                                    <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
-                                      {inst.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+            <InstrumentSelect
+                              value={instrument}
+                              onChange={onInstrumentChange}
+                              instruments={allInstruments}
+                            />
                             <Button
                               variant="ghost"
                               size="sm"
