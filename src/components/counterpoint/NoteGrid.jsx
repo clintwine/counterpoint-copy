@@ -604,15 +604,17 @@ export default function NoteGrid({
       }
       setMarquee(null);
     } else if (dragState && dragState.isDragging && selectedNotes.size > 0) {
-      // Apply drag
+      // Apply drag - use the stored original notes to calculate deltas
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       if (pitchDelta !== 0 || beatDelta !== 0) {
-        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-        const unselectedNotes = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        // Use the original notes stored at drag start, not current cantusFirmus
+        const originalSelectedNotes = dragState.originalNotes || [];
+        const originalSelectedKeys = new Set(originalSelectedNotes.map(n => getNoteKey(n.pitch, n.beat)));
+        const unselectedNotes = cantusFirmus.filter(n => !originalSelectedKeys.has(getNoteKey(n.pitch, n.beat)));
         
-        const movedNotes = selectedNotesList.map(note => {
+        const movedNotes = originalSelectedNotes.map(note => {
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
