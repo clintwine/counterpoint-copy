@@ -471,6 +471,12 @@ export default function NoteGrid({
           if (gridRef.current) {
             gridRef.current.scrollLeft += scrollX;
             gridRef.current.scrollTop += scrollY;
+            // Adjust click offset to compensate for scroll movement
+            setDragState(prev => prev ? {
+              ...prev,
+              clickOffsetX: prev.clickOffsetX - scrollX,
+              clickOffsetY: prev.clickOffsetY - scrollY
+            } : null);
           }
         }, 16);
       }
