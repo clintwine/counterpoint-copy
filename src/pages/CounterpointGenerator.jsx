@@ -72,6 +72,7 @@ export default function CounterpointGenerator() {
   const [activeVoice, setActiveVoice] = useState(0);
       const [pianoInstrument, setPianoInstrument] = useState('organ');
       const [selectedNotes, setSelectedNotes] = useState([]);
+      const scrollToBeatRef = useRef(null);
   
   const playbackRef = useRef(null);
   const audioInitialized = useRef(false);
@@ -531,6 +532,7 @@ export default function CounterpointGenerator() {
                                                 onSelectionChange={setSelectedNotes}
                                                 tempo={tempo}
                                                 timeSignature={settings.timeSignature}
+                                                scrollToBeatRef={scrollToBeatRef}
                                                 onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                                   const newVoices = [...voices];
                                                   if (newVoices[voiceIndex]) {
@@ -564,25 +566,26 @@ export default function CounterpointGenerator() {
             />
             
             <PlaybackControls
-              isPlaying={isPlaying}
-              onPlayPause={handlePlayPause}
-              tempo={tempo}
-              onTempoChange={setTempo}
-              currentBeat={currentBeat}
-              totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
-              onSeek={handleSeek}
-              onReset={handleReset}
-              onStop={handleStop}
-              loopStart={loopStart}
-              loopEnd={loopEnd}
-              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
-              isLooping={isLooping}
-              onLoopToggle={() => setIsLooping(!isLooping)}
-              timeSignature={settings.timeSignature}
-              onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
-              metronomeEnabled={metronomeEnabled}
-              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-            />
+                              isPlaying={isPlaying}
+                              onPlayPause={handlePlayPause}
+                              tempo={tempo}
+                              onTempoChange={setTempo}
+                              currentBeat={currentBeat}
+                              totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
+                              onSeek={handleSeek}
+                              onReset={handleReset}
+                              onStop={handleStop}
+                              loopStart={loopStart}
+                              loopEnd={loopEnd}
+                              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
+                              isLooping={isLooping}
+                              onLoopToggle={() => setIsLooping(!isLooping)}
+                              timeSignature={settings.timeSignature}
+                              onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
+                              metronomeEnabled={metronomeEnabled}
+                              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+                              onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                            />
             
             <PianoKeyboard
                 activeNotes={activeNotes}
