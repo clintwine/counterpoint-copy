@@ -120,9 +120,12 @@ IMPORTANT: Emulate this composer's authentic style throughout the composition!
 ` : '';
 
     // Detect if user wants a specific number of notes
-    const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
-    const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : null;
-    const minNotes = requestedNoteCount || Math.max(16, settings.measures * 4);
+          const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
+          const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : null;
+          const minNotes = requestedNoteCount || Math.max(32, settings.measures * 8);
+
+          // Detect if user wants chords
+          const wantsChords = /chord|polyphon|multi|simultan|together|stack/i.test(userMessage);
 
     try {
       let response;
@@ -257,80 +260,70 @@ This should sound like a REAL composition, not a simple exercise!`,
           }
         });
       } else {
-        // Generate just a melody
-        response = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are an expert composer and music theorist. Create a sophisticated, musically compelling melody.
+                // Generate melody (with optional chords)
+                response = await base44.integrations.Core.InvokeLLM({
+                  prompt: `You are an expert composer. Create a musically compelling composition.
 
-Current settings:
-- Key: ${settings.key} ${settings.mode}
-- Measures: ${settings.measures} (total beats: ${settings.measures * 4})
-- Tempo: ${tempo} BPM
-- Current notes: ${currentNotes.length > 0 ? JSON.stringify(currentNotes) : 'None yet'}
-${styleContext}
+      Current settings:
+      - Key: ${settings.key} ${settings.mode}
+      - Measures: ${settings.measures} (total beats: ${settings.measures * 4})
+      - Tempo: ${tempo} BPM
+      ${styleContext}
 
-User request: "${userMessage}"
+      User request: "${userMessage}"
 
-Generate a SOPHISTICATED melody with AT LEAST ${minNotes} NOTES using advanced compositional techniques:
+      CRITICAL REQUIREMENTS:
+      1. Generate EXACTLY ${minNotes} notes or MORE - this is mandatory!
+      2. ${wantsChords ? 'Include CHORDS - multiple notes at the same beat position create harmony' : 'Create a melodic line'}
+      3. Use the full beat range from 0 to ${settings.measures * 4}
 
-MELODIC STRUCTURE:
-1. MOTIF: Start with a memorable 3-5 note motif
-2. DEVELOPMENT: Vary the motif through:
-   - Sequence (repeat at different pitch levels)
-   - Inversion (flip intervals upside down)
-   - Augmentation/Diminution (stretch or compress rhythms)
-   - Fragmentation (use just part of the motif)
-3. CONTOUR: Build an arc - start moderately, build tension, reach climax, resolve
-4. RANGE: Use the full range C4-C6, with the climax often being the highest note
+      ${wantsChords ? `
+      CHORD CREATION:
+      - To create chords, place multiple notes at the SAME beat value
+      - Example chord at beat 0: [{pitch: "C4", beat: 0}, {pitch: "E4", beat: 0}, {pitch: "G4", beat: 0}]
+      - Common chord voicings: triads (3 notes), 7ths (4 notes), open voicings
+      - Mix chords with single melodic notes for texture
+      - Use chord progressions: I-IV-V-I, ii-V-I, I-vi-IV-V, etc.
+      ` : ''}
 
-MELODIC DEVICES:
-- Scalar runs (ascending/descending scale passages)
-- Arpeggiated figures (broken chord patterns)
-- Neighbor tones (note-step up/down-return)
-- Passing tones (fill in between chord tones)
-- Appoggiaturas (accented non-chord tones that resolve)
-- Escape tones (step then leap in opposite direction)
-- Sequences (2-3 repetitions of a pattern at different levels)
+      NOTE GENERATION STRATEGY:
+      - Distribute notes evenly across ALL ${settings.measures * 4} beats
+      - Use 16th notes (duration 0.25) for runs - generates 4 notes per beat!
+      - Use 8th notes (duration 0.5) for moderate motion - 2 notes per beat
+      - For ${minNotes} notes over ${settings.measures * 4} beats, average ${(minNotes / (settings.measures * 4)).toFixed(1)} notes per beat
+      - Include scalar runs: 8-16 consecutive notes stepping up/down
+      - Include arpeggios: chord tones played in sequence
 
-RHYTHM - ABSOLUTELY CRITICAL:
-- Generate MANY notes with VARIED durations
-- 0.25 = 16th note (very fast, use for runs and ornaments)
-- 0.5 = 8th note (quick, good for motion)
-- 1 = quarter note (standard)
-- 2 = half note (held, expressive)
-- 4 = whole note (very long, dramatic)
-- Create rhythmic PATTERNS that repeat and vary
-- Include: fast runs, held notes, syncopation, dotted rhythms (1.5 + 0.5)
-- The beat values are CUMULATIVE positions (beat 0, then beat 0.5, then beat 1, etc.)
+      PITCH RANGE: C3 to C6 (use full range for expressiveness)
 
-EXAMPLE of good variety: A melody might have:
-- Opening held note (duration 2)
-- Quick scalar run (4 notes at 0.25 each)
-- Medium motion (notes at 0.5 and 1)
-- Climactic long note (duration 2-4)
-- Resolution with mixed rhythms
+      DURATION VALUES:
+      - 0.25 = 16th note (fast runs, ornaments)
+      - 0.5 = 8th note (moderate motion)
+      - 1 = quarter note
+      - 2 = half note
+      - 4 = whole note
 
-Total span: ${settings.measures * 4} beats. Generate ${minNotes}+ notes!
-
-Respond with description and notes. Make this sound like REAL MUSIC composed by a master!`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              description: { type: "string" },
-              notes: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    pitch: { type: "string" },
-                    beat: { type: "number" },
-                    duration: { type: "number" }
+      YOU MUST generate at least ${minNotes} notes. Count them!`,
+                  response_json_schema: {
+                    type: "object",
+                    properties: {
+                      description: { type: "string" },
+                      noteCount: { type: "number", description: "Total number of notes generated" },
+                      notes: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            pitch: { type: "string" },
+                            beat: { type: "number" },
+                            duration: { type: "number" }
+                          }
+                        }
+                      }
+                    }
                   }
-                }
+                });
               }
-            }
-          }
-        });
-      }
 
       // Parse response based on type
       const notes = response.notes || response.melody;
