@@ -551,12 +551,16 @@ export default function NoteGrid({
         playNoteSound(pitches[newPitchIndex]);
       }
 
-      setDragState(prev => ({
-        ...prev,
-        currentPitchIndex: newPitchIndex,
-        currentBeat: newBeat,
-        isDragging: true
-      }));
+      // Only update if actually dragging (not just clicked)
+      const hasMoved = Math.abs(e.clientX - dragState.clickOffsetX) > 3 || Math.abs(e.clientY - dragState.clickOffsetY) > 3;
+      if (hasMoved || dragState.isDragging) {
+        setDragState(prev => ({
+          ...prev,
+          currentPitchIndex: newPitchIndex,
+          currentBeat: newBeat,
+          isDragging: true
+        }));
+      }
     }
   };
 
