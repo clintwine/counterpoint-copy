@@ -216,6 +216,24 @@ export default function PlaybackControls({
           <circle cx="12" cy="8" r="1" fill="currentColor" />
         </svg>
       </Button>
+
+      <div className="w-px h-5 bg-slate-700" />
+
+      {/* Timeline scrubber */}
+      <div className="flex-1 max-w-xs">
+        <Slider
+          value={[currentBeat]}
+          onValueChange={([value]) => {
+            onSeek(value);
+            onScrollToBeat?.(value);
+          }}
+          min={0}
+          max={totalBeats - 1}
+          step={1}
+          className="cursor-pointer [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+          aria-label="Playhead position"
+        />
+      </div>
     </div>
   );
 }
