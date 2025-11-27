@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Square, Save, Trash2, Plus, Volume2 } from 'lucide-react';
+import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
 import { initAudio, getAudioContext } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
@@ -104,6 +104,7 @@ export default function WaveEditor({
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
   const canvasRef = useRef(null);
   const analyserRef = useRef(null);
@@ -215,12 +216,11 @@ export default function WaveEditor({
     }
   }, [instrument, isPlaying, generateStaticWaveform]);
 
-  const playPreview = useCallback(() => {
+  const playPreviewForInstrument = useCallback((inst, onEnd) => {
     initAudio();
     const audioContext = getAudioContext();
     if (!audioContext) return;
 
-    // Create analyser
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyserRef.current = analyser;
@@ -228,21 +228,19 @@ export default function WaveEditor({
     const masterGain = audioContext.createGain();
     masterGain.gain.value = 0.3;
 
-    // Create filter
     const filter = audioContext.createBiquadFilter();
-    filter.type = instrument.filter.type;
-    filter.frequency.value = instrument.filter.frequency;
-    filter.Q.value = instrument.filter.Q;
+    filter.type = inst.filter.type;
+    filter.frequency.value = inst.filter.frequency;
+    filter.Q.value = inst.filter.Q;
 
     const now = audioContext.currentTime;
-    const { attack, decay, sustain, release } = instrument.envelope;
+    const { attack, decay, sustain, release } = inst.envelope;
     const duration = 1;
 
-    // Create oscillators
-    instrument.oscillators.forEach(oscConfig => {
+    inst.oscillators.forEach(oscConfig => {
       const osc = audioContext.createOscillator();
       osc.type = oscConfig.waveform;
-      osc.frequency.value = 440; // A4
+      osc.frequency.value = 440;
       osc.detune.value = oscConfig.detune;
 
       const oscGain = audioContext.createGain();
@@ -258,20 +256,29 @@ export default function WaveEditor({
     masterGain.connect(analyser);
     analyser.connect(audioContext.destination);
 
-    // Envelope
     masterGain.gain.setValueAtTime(0, now);
     masterGain.gain.linearRampToValueAtTime(0.3, now + attack);
     masterGain.gain.linearRampToValueAtTime(0.3 * sustain, now + attack + decay);
     masterGain.gain.setValueAtTime(0.3 * sustain, now + duration - release);
     masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-    setIsPlaying(true);
-    drawWaveform();
-
     setTimeout(() => {
       stopPreview();
+      if (onEnd) onEnd();
     }, duration * 1000 + 100);
-  }, [instrument, drawWaveform]);
+  }, []);
+
+  const playPreview = useCallback(() => {
+    setIsPlaying(true);
+    playPreviewForInstrument(instrument, () => setIsPlaying(false));
+    drawWaveform();
+  }, [instrument, drawWaveform, playPreviewForInstrument]);
+
+  const playPresetPreview = useCallback((preset, index) => {
+    if (previewingPreset !== null) return;
+    setPreviewingPreset(index);
+    playPreviewForInstrument(preset, () => setPreviewingPreset(null));
+  }, [previewingPreset, playPreviewForInstrument]);
 
   const stopPreview = useCallback(() => {
     oscillatorsRef.current.forEach(({ osc }) => {
@@ -328,18 +335,30 @@ export default function WaveEditor({
           <Label className="text-white/70 text-[10px] uppercase tracking-wider">Library</Label>
           <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[60px] overflow-y-auto">
             {PRESET_LIBRARY.map((preset, i) => (
-              <Button
-                key={`lib-${i}`}
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setInstrument({ ...preset });
-                  setEditingIndex(-1);
-                }}
-                className="w-full h-5 text-[9px] justify-start px-2 text-white/60 hover:text-white hover:bg-slate-600"
-              >
-                {preset.name}
-              </Button>
+              <div key={`lib-${i}`} className="flex items-center gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playPresetPreview(preset, `lib-${i}`);
+                  }}
+                  className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                >
+                  {previewingPreset === `lib-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setInstrument({ ...preset });
+                    setEditingIndex(-1);
+                  }}
+                  className="flex-1 h-5 text-[9px] justify-start px-1 text-white/60 hover:text-white hover:bg-slate-600"
+                >
+                  {preset.name}
+                </Button>
+              </div>
             ))}
           </div>
           <Label className="text-white/70 text-[10px] uppercase tracking-wider">My Presets</Label>
@@ -348,15 +367,27 @@ export default function WaveEditor({
               <p className="text-white/40 text-[9px] text-center py-1">None saved</p>
             ) : (
               customInstruments.map((inst, i) => (
-                <Button
-                  key={i}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => loadInstrument(inst, i)}
-                  className={`w-full h-5 text-[9px] justify-start px-2 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
-                >
-                  {inst.name}
-                </Button>
+                <div key={i} className="flex items-center gap-0.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playPresetPreview(inst, `custom-${i}`);
+                    }}
+                    className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                  >
+                    {previewingPreset === `custom-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => loadInstrument(inst, i)}
+                    className={`flex-1 h-5 text-[9px] justify-start px-1 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
+                  >
+                    {inst.name}
+                  </Button>
+                </div>
               ))
             )}
           </div>
