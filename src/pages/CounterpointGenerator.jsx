@@ -592,8 +592,15 @@ export default function CounterpointGenerator() {
             
             <PianoKeyboard
                                 activeNotes={activeNotes}
-                                instrument={pianoInstrument}
-                                onInstrumentChange={setPianoInstrument}
+                                instrument={voices[activeVoice]?.instrument || 'organ'}
+                                onInstrumentChange={(inst) => {
+                                  const newVoices = [...voices];
+                                  if (newVoices[activeVoice]) {
+                                    newVoices[activeVoice] = { ...newVoices[activeVoice], instrument: inst };
+                                    setVoices(newVoices);
+                                  }
+                                  setPianoInstrument(inst);
+                                }}
                                 onPressedNotesChange={setPressedPianoNotes}
                               />
           </motion.main>

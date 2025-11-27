@@ -33,7 +33,7 @@ const ZOOM_STEP = 0.1;
 const MIN_DURATION = 0.25; // Quarter of a beat
 const DEFAULT_DURATION = 1; // One beat
 
-const INSTRUMENTS = [
+const DEFAULT_INSTRUMENTS = [
   { value: 'organ', label: 'Organ' },
   { value: 'distortion', label: 'Distortion' },
   { value: 'clean', label: 'Clean' },
@@ -42,6 +42,19 @@ const INSTRUMENTS = [
   { value: 'flute', label: 'Flute' },
   { value: 'synth', label: 'Synth' },
 ];
+
+const PRESET_LIBRARY = [
+  { value: 'preset_0', label: 'Warm Pad' },
+  { value: 'preset_1', label: 'Bright Lead' },
+  { value: 'preset_2', label: 'Sub Bass' },
+  { value: 'preset_3', label: 'Pluck' },
+  { value: 'preset_4', label: 'Bell' },
+  { value: 'preset_5', label: 'Choir' },
+  { value: 'preset_6', label: 'Reese Bass' },
+  { value: 'preset_7', label: 'Flutey' },
+];
+
+const ALL_INSTRUMENTS = [...DEFAULT_INSTRUMENTS, ...PRESET_LIBRARY];
 
 export default function NoteGrid({ 
   voices, 
@@ -609,11 +622,11 @@ export default function NoteGrid({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
-                {INSTRUMENTS.map(inst => (
-                  <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
-                    {inst.label}
-                  </SelectItem>
-                ))}
+                {ALL_INSTRUMENTS.map(inst => (
+                        <SelectItem key={inst.value} value={inst.value} className="text-white text-xs">
+                          {inst.label}
+                        </SelectItem>
+                      ))}
               </SelectContent>
             </Select>
           </div>
