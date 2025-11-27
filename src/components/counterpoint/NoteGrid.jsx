@@ -987,7 +987,9 @@ export default function NoteGrid({
                                           currentBeat: beat,
                                           isDragging: false,
                                           clickOffsetX: e.clientX,
-                                          clickOffsetY: e.clientY
+                                          clickOffsetY: e.clientY,
+                                          initialScrollLeft: gridRef.current?.scrollLeft || 0,
+                                          initialScrollTop: gridRef.current?.scrollTop || 0
                                         });
                                       }
                                     }}
