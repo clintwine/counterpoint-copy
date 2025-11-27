@@ -203,6 +203,7 @@ export default function NoteGrid({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
+  const dragScrollRef = useRef(null); // For auto-scroll during drag
 
   // Expose scroll function via ref
   useEffect(() => {
