@@ -401,10 +401,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   return (
     <div className="bg-slate-800/60 rounded-xl p-2 sm:p-3 border border-slate-600 max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-        <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano (88 Keys)</h3>
-        <div className="flex items-center gap-4">
-          {/* ADSR Envelope Knobs */}
-          <div className="flex items-center gap-3">
+                  <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
+                  <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+          {/* ADSR Envelope Knobs - hidden on mobile */}
+                          <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[9px] text-white/50 uppercase">Attack</span>
               <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
@@ -470,10 +470,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             </div>
           </div>
 
-          <div className="w-px h-8 bg-slate-600" />
+          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
-          {/* Effect Knobs */}
-          <div className="flex items-center gap-3">
+                          {/* Effect Knobs - hidden on mobile */}
+                          <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[9px] text-white/50 uppercase">Reverb</span>
               <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
@@ -539,10 +539,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             </div>
           </div>
 
-          <div className="w-px h-8 bg-slate-600" />
+          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
-          <div className="flex items-center gap-2">
-            <InstrumentSelect
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <InstrumentSelect
                               value={instrument}
                               onChange={onInstrumentChange}
                               instruments={allInstruments}
@@ -571,7 +571,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
       
       <div className="overflow-x-auto pb-1">
-        <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
+                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 60 }}>
             {/* Generate all 88 keys - A0 to C8 */}
           {(() => {
             const keys = [];
@@ -591,9 +591,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   onMouseLeave={() => handleMouseLeave(note, 0)}
                   className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-0.5"
                   style={{
-                    left: whiteKeyIndex * whiteKeyWidth,
-                    width: whiteKeyWidth - 1,
-                    height: 70,
+                                                                                                      left: whiteKeyIndex * whiteKeyWidth,
+                                                                                                      width: whiteKeyWidth - 1,
+                                                                                                      height: 50,
                     backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                   }}
                 >
@@ -617,10 +617,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 onMouseEnter={() => handleMouseEnter('A#', 0)}
                 onMouseLeave={() => handleMouseLeave('A#', 0)}
                 className="absolute top-0 rounded-b z-10 cursor-pointer"
-                style={{
-                  left: whiteKeyWidth - blackKeyWidth / 2,
-                  width: blackKeyWidth,
-                  height: 45,
+                                      style={{
+                                        left: whiteKeyWidth - blackKeyWidth / 2,
+                                        width: blackKeyWidth,
+                                        height: 32,
                   backgroundColor: a0SharpPressed ? '#D4A574' : a0SharpActive !== -1 ? VOICE_COLORS[a0SharpActive] : '#1E293B',
                 }}
               />
@@ -644,10 +644,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
                     className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-0.5"
-                    style={{
-                      left: whiteKeyIndex * whiteKeyWidth,
-                      width: whiteKeyWidth - 1,
-                      height: 70,
+                                              style={{
+                                                left: whiteKeyIndex * whiteKeyWidth,
+                                                width: whiteKeyWidth - 1,
+                                                height: 50,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
                   >
@@ -675,10 +675,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     onMouseEnter={() => handleMouseEnter(key.note, octave)}
                     onMouseLeave={() => handleMouseLeave(key.note, octave)}
                     className="absolute top-0 rounded-b z-10 cursor-pointer flex items-end justify-center pb-1"
-                    style={{
-                      left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
-                      width: blackKeyWidth,
-                      height: 45,
+                                              style={{
+                                                left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
+                                                width: blackKeyWidth,
+                                                height: 32,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
                     }}
                   >
@@ -701,10 +701,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 onMouseEnter={() => handleMouseEnter('C', 8)}
                 onMouseLeave={() => handleMouseLeave('C', 8)}
                 className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
-                style={{
-                  left: whiteKeyIndex * whiteKeyWidth,
-                  width: whiteKeyWidth - 1,
-                  height: 70,
+                                      style={{
+                                        left: whiteKeyIndex * whiteKeyWidth,
+                                        width: whiteKeyWidth - 1,
+                                        height: 50,
                   backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5',
                 }}
               >
@@ -717,9 +717,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         </div>
       </div>
       
-      <p className="text-white/50 text-[10px] mt-1">
-        Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
-      </p>
+      <p className="text-white/50 text-[10px] mt-1 hidden sm:block">
+                    Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
+                  </p>
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>

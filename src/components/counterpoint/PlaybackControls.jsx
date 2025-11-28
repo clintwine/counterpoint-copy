@@ -217,10 +217,10 @@ export default function PlaybackControls({
         </svg>
       </Button>
 
-      <div className="w-px h-5 bg-slate-700" />
+      <div className="w-px h-5 bg-slate-700 hidden sm:block" />
 
-      {/* Timeline scrubber */}
-      <div className="flex-1 max-w-xs">
+                  {/* Timeline scrubber - hidden on mobile */}
+                  <div className="hidden sm:block flex-1 max-w-xs">
         <Slider
           value={[currentBeat]}
           onValueChange={([value]) => {

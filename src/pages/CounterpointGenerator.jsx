@@ -74,6 +74,7 @@ export default function CounterpointGenerator() {
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
+        const [showPiano, setShowPiano] = useState(true);
   
   const playbackRef = useRef(null);
       const audioInitialized = useRef(false);
@@ -364,38 +365,34 @@ export default function CounterpointGenerator() {
 
       <div className="relative z-10 max-w-7xl xl:max-w-[95vw] mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 overflow-x-hidden">
         {/* Header */}
-        <motion.header 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center">
-                  <Music2 className="w-5 h-5 text-slate-900" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-light text-cream tracking-tight">
-                  Counterpoint <span className="font-semibold">Generator</span>
-                </h1>
-              </div>
-              <p className="text-cream/50 text-sm">
-                Create polyphonic compositions following classical counterpoint rules
-              </p>
-            </div>
+                  <motion.header 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-2 sm:mb-8"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center flex-shrink-0">
+                          <Music2 className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900" />
+                        </div>
+                        <h1 className="text-lg sm:text-3xl font-light text-cream tracking-tight">
+                          Counterpoint <span className="font-semibold">Generator</span>
+                        </h1>
+                      </div>
             
-            <div className="flex gap-2 flex-wrap justify-end">
-              {/* Load Project */}
+            <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
+                                {/* Load Project */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
-                  >
-                    <FolderOpen className="w-4 h-4 mr-2" />
-                    Load
-                  </Button>
-                </DialogTrigger>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
+                                        >
+                                          <FolderOpen className="w-4 h-4 sm:mr-2" />
+                                          <span className="hidden sm:inline">Load</span>
+                                        </Button>
+                                      </DialogTrigger>
                 <DialogContent className="bg-slate-900 border-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Load Project</DialogTitle>
@@ -444,14 +441,15 @@ export default function CounterpointGenerator() {
               {/* Save Project */}
               <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save
-                  </Button>
-                </DialogTrigger>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
+                                        >
+                                          <Save className="w-4 h-4 sm:mr-2" />
+                                          <span className="hidden sm:inline">Save</span>
+                                        </Button>
+                                      </DialogTrigger>
                 <DialogContent className="bg-slate-900 border-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
@@ -479,49 +477,52 @@ export default function CounterpointGenerator() {
               </Dialog>
 
               {/* AI Composer */}
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  const isAuth = await base44.auth.isAuthenticated();
-                  if (!isAuth) {
-                    base44.auth.redirectToLogin(window.location.href);
-                    return;
-                  }
-                  setChatbotOpen(true);
-                }}
-                className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Composer
-              </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async () => {
+                                      const isAuth = await base44.auth.isAuthenticated();
+                                      if (!isAuth) {
+                                        base44.auth.redirectToLogin(window.location.href);
+                                        return;
+                                      }
+                                      setChatbotOpen(true);
+                                    }}
+                                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
+                                  >
+                                    <Sparkles className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">AI Composer</span>
+                                  </Button>
 
-              <Button
-                variant="outline"
-                onClick={handleExport}
-                disabled={generatedVoices.length === 0}
-                className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button
-                onClick={handleGenerate}
-                disabled={cantusFirmus.length === 0 || isGenerating}
-                style={{ 
-                  background: 'linear-gradient(to right, #fbbf24, #d97706)', 
-                  color: '#0f172a',
-                  border: '2px solid #f59e0b',
-                  fontWeight: 600
-                }}
-                className="hover:opacity-90 shadow-lg"
-              >
-                {isGenerating ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Wand2 className="w-4 h-4 mr-2" />
-                )}
-                Generate
-              </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleExport}
+                                    disabled={generatedVoices.length === 0}
+                                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
+                                  >
+                                    <Download className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Export</span>
+                                  </Button>
+                                  <Button
+                                    onClick={handleGenerate}
+                                    size="sm"
+                                    disabled={cantusFirmus.length === 0 || isGenerating}
+                                    style={{ 
+                                      background: 'linear-gradient(to right, #fbbf24, #d97706)', 
+                                      color: '#0f172a',
+                                      border: '2px solid #f59e0b',
+                                      fontWeight: 600
+                                    }}
+                                    className="hover:opacity-90 shadow-lg h-8 px-2 sm:px-3"
+                                  >
+                                    {isGenerating ? (
+                                      <RefreshCw className="w-4 h-4 sm:mr-2 animate-spin" />
+                                    ) : (
+                                      <Wand2 className="w-4 h-4 sm:mr-2" />
+                                    )}
+                                    <span className="hidden sm:inline">Generate</span>
+                                  </Button>
             </div>
           </div>
         </motion.header>
@@ -606,19 +607,34 @@ export default function CounterpointGenerator() {
                               }}
                             />
             
-            <PianoKeyboard
-                                activeNotes={activeNotes}
-                                instrument={voices[activeVoice]?.instrument || 'organ'}
-                                onInstrumentChange={(inst) => {
-                                  const newVoices = [...voices];
-                                  if (newVoices[activeVoice]) {
-                                    newVoices[activeVoice] = { ...newVoices[activeVoice], instrument: inst };
-                                    setVoices(newVoices);
-                                  }
-                                  setPianoInstrument(inst);
-                                }}
-                                onPressedNotesChange={setPressedPianoNotes}
-                              />
+            {/* Piano toggle for mobile */}
+                              <div className="sm:hidden flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-600">
+                                <span className="text-white/70 text-sm">Piano Keyboard</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setShowPiano(!showPiano)}
+                                  className="text-amber-400 h-7 px-2"
+                                >
+                                  {showPiano ? 'Hide' : 'Show'}
+                                </Button>
+                              </div>
+
+                              <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
+                                <PianoKeyboard
+                                  activeNotes={activeNotes}
+                                  instrument={voices[activeVoice]?.instrument || 'organ'}
+                                  onInstrumentChange={(inst) => {
+                                    const newVoices = [...voices];
+                                    if (newVoices[activeVoice]) {
+                                      newVoices[activeVoice] = { ...newVoices[activeVoice], instrument: inst };
+                                      setVoices(newVoices);
+                                    }
+                                    setPianoInstrument(inst);
+                                  }}
+                                  onPressedNotesChange={setPressedPianoNotes}
+                                />
+                              </div>
           </motion.main>
           </div>
           </div>
