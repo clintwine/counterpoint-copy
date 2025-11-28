@@ -1086,11 +1086,14 @@ export default function NoteGrid({
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
-                                                                                e.preventDefault(); // Prevent scroll when touching notes
-                                                                                const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+                                                                                e.preventDefault();
+                                                                                
+                                                                                const touch = e.touches[0];
+                                                                                activeTouchIdRef.current = touch.identifier;
+                                                                                const coords = { clientX: touch.clientX, clientY: touch.clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
-                                                                                playNoteSound(pitch);
+                                                                                playNoteSound(note.pitch);
 
                                                                                 if (clickX > rect.width - 10) {
                                                                                   // Resize mode
@@ -1114,12 +1117,10 @@ export default function NoteGrid({
                                                                                     setSelectedNotes(new Set([nKey]));
                                                                                   }
                                                                                   
-                                                                                  // Store the notes we're dragging from cantusFirmus BEFORE any state changes
-                                                                                  const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
-                                                                                    pitch: n.pitch,
-                                                                                    beat: n.beat,
-                                                                                    duration: n.duration || DEFAULT_DURATION
-                                                                                  }));
+                                                                                  // Store the notes we're dragging - use current cantusFirmus snapshot
+                                                                                  const notesToStore = cantusFirmus
+                                                                                    .filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat)))
+                                                                                    .map(n => ({ ...n, duration: n.duration || DEFAULT_DURATION }));
                                                                                   
                                                                                   originalDragNotesRef.current = {
                                                                                     keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
