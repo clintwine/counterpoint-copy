@@ -393,7 +393,10 @@ export default function NoteGrid({
         if (e.touches && e.touches.length > 0) {
           return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
         }
-        return { clientX: e.clientX, clientY: e.clientY };
+        if (e.clientX !== undefined) {
+          return { clientX: e.clientX, clientY: e.clientY };
+        }
+        return { clientX: 0, clientY: 0 };
       };
 
       const handlePointerDown = (e, pitch, beat) => {
