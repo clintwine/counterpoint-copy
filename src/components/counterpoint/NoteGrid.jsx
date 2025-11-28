@@ -849,30 +849,30 @@ export default function NoteGrid({
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
                       onTouchMove={(e) => { 
-                                                                  // Handle pinch to zoom first
-                                                                  if (e.touches.length === 2) {
-                                                                    e.preventDefault();
-                                                                    const touch1 = e.touches[0];
-                                                                    const touch2 = e.touches[1];
-                                                                    const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                                                    // Handle pinch to zoom first
+                                                    if (e.touches.length === 2) {
+                                                      e.preventDefault();
+                                                      const touch1 = e.touches[0];
+                                                      const touch2 = e.touches[1];
+                                                      const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
 
-                                                                    if (pinchState) {
-                                                                      const scale = currentDist / pinchState.initialDist;
-                                                                      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
-                                                                      const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
-                                                                      setZoom(newZoom);
-                                                                      setZoomY(newZoomY);
-                                                                    }
-                                                                    return;
-                                                                  }
+                                                      if (pinchState) {
+                                                        const scale = currentDist / pinchState.initialDist;
+                                                        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
+                                                        const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
+                                                        setZoom(newZoom);
+                                                        setZoomY(newZoomY);
+                                                      }
+                                                      return;
+                                                    }
 
-                                                                  // Only prevent default for active edit gestures that need custom handling
-                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
-                                                                    e.preventDefault(); 
-                                                                    handlePointerMove(e);
-                                                                  }
-                                                                  // Otherwise let native scroll happen via touch-action: pan-y on pitch labels
-                                                                }}
+                                                    // Only prevent default for active edit gestures that need custom handling
+                                                    if (tool === 'marquee' || (isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
+                                                      e.preventDefault(); 
+                                                      handlePointerMove(e);
+                                                    }
+                                                    // Otherwise let native scroll happen
+                                                  }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
                                       if (e.touches.length === 2) {
