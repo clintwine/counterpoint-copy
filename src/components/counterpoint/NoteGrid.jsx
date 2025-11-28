@@ -401,6 +401,14 @@ export default function NoteGrid({
         const hasNote = !!existingNote;
 
         if (tool === 'draw') {
+          // Prevent double-tap from adding then immediately removing a note
+          const now = Date.now();
+          if (lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300) {
+            // Ignore rapid double-tap on same cell
+            return;
+          }
+          lastTapRef.current = { key: noteKey, time: now };
+          
           // Draw mode - add/remove note
           if (hasNote) {
             const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
