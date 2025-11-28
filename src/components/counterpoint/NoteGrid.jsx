@@ -838,15 +838,7 @@ export default function NoteGrid({
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
                       onTouchMove={(e) => { 
-                                                                  // Only prevent default for active edit gestures, not passive note dragging for scroll
-                                                                                                              if (tool === 'marquee' || (tool === 'draw' && isPainting) || resizeState || (dragState && dragState.isDragging)) {
-                                                                                                                e.preventDefault(); 
-                                                                                                                handlePointerMove(e);
-                                                                                                              } else if (dragState && !dragState.isDragging) {
-                                                                                                                // Allow scroll via note drag - don't prevent default
-                                                                                                                handlePointerMove(e);
-                                                                                                              }
-                                                                  // Handle pinch to zoom
+                                                                  // Handle pinch to zoom first
                                                                   if (e.touches.length === 2) {
                                                                     e.preventDefault();
                                                                     const touch1 = e.touches[0];
@@ -860,14 +852,22 @@ export default function NoteGrid({
                                                                       setZoom(newZoom);
                                                                       setZoomY(newZoomY);
                                                                     }
+                                                                    return;
                                                                   }
-                                                                  // Allow vertical scroll when dragging on a note (before drag commits)
-                                                                                                              if (dragState && !dragState.isDragging && e.touches.length === 1) {
-                                                                                                                const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
-                                                                                                                if (gridRef.current && Math.abs(deltaY) > 5) {
-                                                                                                                  gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
-                                                                                                                }
-                                                                                                              }
+
+                                                                  // Only prevent default for active edit gestures
+                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting) || resizeState || (dragState && dragState.isDragging)) {
+                                                                    e.preventDefault(); 
+                                                                    handlePointerMove(e);
+                                                                  } else if (dragState && !dragState.isDragging && e.touches.length === 1) {
+                                                                    // Allow vertical scroll when dragging on a note (before drag commits)
+                                                                    // Manually scroll the grid
+                                                                    const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
+                                                                    if (gridRef.current && Math.abs(deltaY) > 5) {
+                                                                      e.preventDefault();
+                                                                      gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
+                                                                    }
+                                                                  }
                                                                 }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
