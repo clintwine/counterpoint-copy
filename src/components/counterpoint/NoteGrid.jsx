@@ -592,8 +592,8 @@ export default function NoteGrid({
       const originalNotes = originalDragNotesRef.current.notes;
       const originalKeys = originalDragNotesRef.current.keys;
       
-      // Only apply if there was actual movement
-      if ((pitchDelta !== 0 || beatDelta !== 0) && originalNotes.length > 0) {
+      // Only apply if there was actual movement and we have notes
+      if ((pitchDelta !== 0 || beatDelta !== 0) && originalNotes && originalNotes.length > 0) {
         // Remove notes that match the ORIGINAL positions using stored keys
         const notesWithoutOriginals = cantusFirmus.filter(n => {
           const key = getNoteKey(n.pitch, n.beat);
@@ -601,10 +601,11 @@ export default function NoteGrid({
         });
         
         // Create moved notes at new positions from the ORIGINAL stored notes
-        const movedNotes = originalNotes.map(note => {
-          const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, pitches.indexOf(note.pitch) + pitchDelta));
-          const newBeat = Math.max(0, Math.min(totalBeats - 1, note.beat + beatDelta));
-          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
+        const movedNotes = originalNotes.map(n => {
+          const origPitchIdx = pitches.indexOf(n.pitch);
+          const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
+          const newBeat = Math.max(0, Math.min(totalBeats - 1, n.beat + beatDelta));
+          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: n.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
         // Combine: notes that weren't dragged + moved notes
@@ -622,6 +623,7 @@ export default function NoteGrid({
       originalDragNotesRef.current = null;
     }
     setDragState(null);
+    activeTouchIdRef.current = null;
   };
 
   // Calculate drag preview offset
