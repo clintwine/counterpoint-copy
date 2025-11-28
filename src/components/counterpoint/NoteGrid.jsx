@@ -988,7 +988,30 @@ export default function NoteGrid({
                             <div
                               key={beat}
                               onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
-                                    onTouchStart={(e) => { e.preventDefault(); handlePointerDown(e, pitch, beat); }}
+                                    onTouchStart={(e) => { 
+                                      // Store touch start position to detect scrolling vs tapping
+                                      touchStartRef.current = { 
+                                        x: e.touches[0].clientX, 
+                                        y: e.touches[0].clientY, 
+                                        pitch, 
+                                        beat,
+                                        time: Date.now()
+                                      };
+                                    }}
+                                    onTouchEnd={(e) => {
+                                      if (!touchStartRef.current) return;
+                                      const touch = e.changedTouches[0];
+                                      const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+                                      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+                                      const deltaTime = Date.now() - touchStartRef.current.time;
+                                      
+                                      // Only trigger note action if it was a tap (small movement, quick touch)
+                                      if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
+                                        e.preventDefault();
+                                        handlePointerDown(e, touchStartRef.current.pitch, touchStartRef.current.beat);
+                                      }
+                                      touchStartRef.current = null;
+                                    }}
                               className={`flex-shrink-0 border-r border-b relative cursor-pointer
                                 ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
                                 ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
