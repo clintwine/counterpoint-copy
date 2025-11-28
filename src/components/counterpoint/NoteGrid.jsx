@@ -205,6 +205,7 @@ export default function NoteGrid({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
   const [pinchState, setPinchState] = useState(null);
+  const lastTapRef = useRef({ key: null, time: 0 });
 
   // Expose scroll function via ref
   useEffect(() => {
