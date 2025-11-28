@@ -1019,33 +1019,38 @@ export default function NoteGrid({
                                         return;
                                       }
                                       
-                                      // If we have selected notes and tapping on empty cell, start drag immediately
-                                      if (!hasNote && selectedNotes.size > 0 && tool === 'select') {
+                                      // If we have selected notes, allow dragging by touching anywhere
+                                      if (selectedNotes.size > 0 && tool === 'select') {
                                         e.preventDefault();
                                         activeTouchIdRef.current = touch.identifier;
                                         
                                         // Store notes for dragging
                                         const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                        const notesToStore = selectedNotesList.map(n => ({
-                                          ...n, duration: n.duration || DEFAULT_DURATION
-                                        }));
-                                        originalDragNotesRef.current = {
-                                          keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
-                                          notes: notesToStore
-                                        };
-                                        
-                                        const currentPitchIdx = pitches.indexOf(pitch);
-                                        setDragState({
-                                          startPitch: pitch,
-                                          startBeat: beat,
-                                          startPitchIndex: currentPitchIdx,
-                                          currentPitchIndex: currentPitchIdx,
-                                          currentBeat: beat,
-                                          isDragging: true,
-                                          clickOffsetX: touch.clientX,
-                                          clickOffsetY: touch.clientY
-                                        });
-                                        return;
+                                        if (selectedNotesList.length > 0) {
+                                          const notesToStore = selectedNotesList.map(n => ({
+                                            ...n, duration: n.duration || DEFAULT_DURATION
+                                          }));
+                                          originalDragNotesRef.current = {
+                                            keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
+                                            notes: notesToStore
+                                          };
+                                          
+                                          // Use first selected note as reference point
+                                          const refNote = selectedNotesList[0];
+                                          const refPitchIdx = pitches.indexOf(refNote.pitch);
+                                          
+                                          setDragState({
+                                            startPitch: refNote.pitch,
+                                            startBeat: refNote.beat,
+                                            startPitchIndex: refPitchIdx,
+                                            currentPitchIndex: refPitchIdx,
+                                            currentBeat: refNote.beat,
+                                            isDragging: true,
+                                            clickOffsetX: touch.clientX,
+                                            clickOffsetY: touch.clientY
+                                          });
+                                          return;
+                                        }
                                       }
                                       
                                       // Store touch start position to detect scrolling vs tapping
