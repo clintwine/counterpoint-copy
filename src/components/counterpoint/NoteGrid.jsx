@@ -889,7 +889,18 @@ export default function NoteGrid({
                                       }
                                     }}
                                     onTouchEnd={(e) => {
-                                      handlePointerUp();
+                                      // Check if the ended touch is our active one
+                                      let wasActiveTouch = false;
+                                      for (let i = 0; i < e.changedTouches.length; i++) {
+                                        if (e.changedTouches[i].identifier === activeTouchIdRef.current) {
+                                          wasActiveTouch = true;
+                                          break;
+                                        }
+                                      }
+                                      if (wasActiveTouch) {
+                                        handlePointerUp();
+                                        activeTouchIdRef.current = null;
+                                      }
                                       if (e.touches.length < 2) {
                                         setPinchState(null);
                                       }
@@ -897,6 +908,7 @@ export default function NoteGrid({
                                     onTouchCancel={() => {
                                       handlePointerUp();
                                       setPinchState(null);
+                                      activeTouchIdRef.current = null;
                                     }}
         onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
       >
