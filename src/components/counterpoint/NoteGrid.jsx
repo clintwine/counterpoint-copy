@@ -833,7 +833,7 @@ export default function NoteGrid({
           <div 
           ref={gridRef}
           className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
-        style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent', touchAction: 'none' }}
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent', touchAction: (tool === 'marquee' || tool === 'draw' || tool === 'select') ? 'none' : 'pan-y' }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
