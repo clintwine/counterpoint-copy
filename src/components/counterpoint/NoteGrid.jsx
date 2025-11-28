@@ -838,26 +838,33 @@ export default function NoteGrid({
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
                       onTouchMove={(e) => { 
-                                      if (tool === 'marquee' || (tool === 'draw' && isPainting) || dragState) {
-                                        e.preventDefault(); 
-                                        handlePointerMove(e);
-                                      }
-                                      // Handle pinch to zoom
-                                      if (e.touches.length === 2) {
-                                        e.preventDefault();
-                                        const touch1 = e.touches[0];
-                                        const touch2 = e.touches[1];
-                                        const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting) || dragState || resizeState) {
+                                                                    e.preventDefault(); 
+                                                                    handlePointerMove(e);
+                                                                  }
+                                                                  // Handle pinch to zoom
+                                                                  if (e.touches.length === 2) {
+                                                                    e.preventDefault();
+                                                                    const touch1 = e.touches[0];
+                                                                    const touch2 = e.touches[1];
+                                                                    const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
 
-                                        if (pinchState) {
-                                          const scale = currentDist / pinchState.initialDist;
-                                          const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
-                                          const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
-                                          setZoom(newZoom);
-                                          setZoomY(newZoomY);
-                                        }
-                                      }
-                                    }}
+                                                                    if (pinchState) {
+                                                                      const scale = currentDist / pinchState.initialDist;
+                                                                      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
+                                                                      const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
+                                                                      setZoom(newZoom);
+                                                                      setZoomY(newZoomY);
+                                                                    }
+                                                                  }
+                                                                  // Allow vertical scroll when dragging on a note
+                                                                  if (dragState && e.touches.length === 1) {
+                                                                    const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
+                                                                    if (gridRef.current && Math.abs(deltaY) > 5 && !dragState.isDragging) {
+                                                                      gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
+                                                                    }
+                                                                  }
+                                                                }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
                                       if (e.touches.length === 2) {
