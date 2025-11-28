@@ -838,10 +838,14 @@ export default function NoteGrid({
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
                       onTouchMove={(e) => { 
-                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting) || dragState || resizeState) {
-                                                                    e.preventDefault(); 
-                                                                    handlePointerMove(e);
-                                                                  }
+                                                                  // Only prevent default for active edit gestures, not passive note dragging for scroll
+                                                                                                              if (tool === 'marquee' || (tool === 'draw' && isPainting) || resizeState || (dragState && dragState.isDragging)) {
+                                                                                                                e.preventDefault(); 
+                                                                                                                handlePointerMove(e);
+                                                                                                              } else if (dragState && !dragState.isDragging) {
+                                                                                                                // Allow scroll via note drag - don't prevent default
+                                                                                                                handlePointerMove(e);
+                                                                                                              }
                                                                   // Handle pinch to zoom
                                                                   if (e.touches.length === 2) {
                                                                     e.preventDefault();
