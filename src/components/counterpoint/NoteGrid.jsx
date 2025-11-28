@@ -1039,51 +1039,52 @@ export default function NoteGrid({
                                       }
                                     }}
                                     onTouchStart={(e) => {
-                                      e.stopPropagation();
-                                      const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
-                                      const rect = e.currentTarget.getBoundingClientRect();
-                                      const clickX = coords.clientX - rect.left;
-                                      playNoteSound(pitch);
+                                                                                e.stopPropagation();
+                                                                                const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+                                                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                                                const clickX = coords.clientX - rect.left;
+                                                                                playNoteSound(pitch);
 
-                                      if (clickX > rect.width - 10) {
-                                        const startDurations = {};
-                                        if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
-                                          cantusFirmus.forEach(n => {
-                                            if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                              startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
-                                            }
-                                          });
-                                        } else {
-                                          startDurations[nKey] = note.duration || DEFAULT_DURATION;
-                                        }
-                                        setResizeState({ startX: coords.clientX, startDurations });
-                                      } else {
-                                        if (!selectedNotes.has(nKey)) {
-                                          setSelectedNotes(new Set([nKey]));
-                                        }
-                                        const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
-                                        const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
-                                          pitch: n.pitch,
-                                          beat: n.beat,
-                                          duration: n.duration || DEFAULT_DURATION
-                                        }));
-                                        originalDragNotesRef.current = {
-                                          keys: keysToUse,
-                                          notes: notesToStore
-                                        };
+                                                                                if (clickX > rect.width - 10) {
+                                                                                  const startDurations = {};
+                                                                                  if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                                                                    cantusFirmus.forEach(n => {
+                                                                                      if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                                                                        startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                                                                      }
+                                                                                    });
+                                                                                  } else {
+                                                                                    startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                                                                  }
+                                                                                  setResizeState({ startX: coords.clientX, startDurations, initialScrollTop: gridRef.current?.scrollTop || 0 });
+                                                                                } else {
+                                                                                  if (!selectedNotes.has(nKey)) {
+                                                                                    setSelectedNotes(new Set([nKey]));
+                                                                                  }
+                                                                                  const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
+                                                                                  const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
+                                                                                    pitch: n.pitch,
+                                                                                    beat: n.beat,
+                                                                                    duration: n.duration || DEFAULT_DURATION
+                                                                                  }));
+                                                                                  originalDragNotesRef.current = {
+                                                                                    keys: keysToUse,
+                                                                                    notes: notesToStore
+                                                                                  };
 
-                                        setDragState({
-                                          startPitch: pitch,
-                                          startBeat: beat,
-                                          startPitchIndex: pitches.indexOf(pitch),
-                                          currentPitchIndex: pitches.indexOf(pitch),
-                                          currentBeat: beat,
-                                          isDragging: false,
-                                          clickOffsetX: coords.clientX,
-                                          clickOffsetY: coords.clientY
-                                        });
-                                      }
-                                    }}
+                                                                                  setDragState({
+                                                                                    startPitch: pitch,
+                                                                                    startBeat: beat,
+                                                                                    startPitchIndex: pitches.indexOf(pitch),
+                                                                                    currentPitchIndex: pitches.indexOf(pitch),
+                                                                                    currentBeat: beat,
+                                                                                    isDragging: false,
+                                                                                    clickOffsetX: coords.clientX,
+                                                                                    clickOffsetY: coords.clientY,
+                                                                                    initialScrollTop: gridRef.current?.scrollTop || 0
+                                                                                  });
+                                                                                }
+                                                                              }}
                                     className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
                                       selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
                                     }`}
