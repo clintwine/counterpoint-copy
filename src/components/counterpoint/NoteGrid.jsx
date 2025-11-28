@@ -533,15 +533,15 @@ export default function NoteGrid({
     }
   };
 
-  const handleMouseUp = () => {
-    // Save history after painting stroke
-    if (isPainting && paintedNotesRef.current.size > 0) {
-      saveToHistory(cantusFirmus);
-    }
-    setIsPainting(false);
-    paintedNotesRef.current = new Set();
-    
-    if (resizeState) {
+  const handlePointerUp = () => {
+        // Save history after painting stroke
+        if (isPainting && paintedNotesRef.current.size > 0) {
+          saveToHistory(cantusFirmus);
+        }
+        setIsPainting(false);
+        paintedNotesRef.current = new Set();
+
+        if (resizeState) {
       // Save to history after resize
       saveToHistory(cantusFirmus);
       setResizeState(null);
@@ -1101,14 +1101,41 @@ export default function NoteGrid({
                 };
 
                 const handleMouseUp = () => {
-                  setIsScrubbing(false);
-                  document.removeEventListener('mousemove', handleMouseMove);
-                  document.removeEventListener('mouseup', handleMouseUp);
-                };
+                        setIsScrubbing(false);
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                        document.removeEventListener('touchmove', handleMouseMove);
+                        document.removeEventListener('touchend', handleMouseUp);
+                      };
 
                 document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-              }}
+                                      document.addEventListener('mouseup', handleMouseUp);
+                                      document.addEventListener('touchmove', handleMouseMove);
+                                      document.addEventListener('touchend', handleMouseUp);
+                                    }}
+                                    onTouchStart={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      setIsScrubbing(true);
+                                      const startX = e.touches[0].clientX;
+                                      const startBeat = currentBeat;
+
+                                      const handleTouchMove = (moveEvent) => {
+                                        const deltaX = moveEvent.touches[0].clientX - startX;
+                                        const beatDelta = Math.round(deltaX / CELL_WIDTH);
+                                        const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
+                                        onSeek && onSeek(newBeat);
+                                      };
+
+                                      const handleTouchEnd = () => {
+                                        setIsScrubbing(false);
+                                        document.removeEventListener('touchmove', handleTouchMove);
+                                        document.removeEventListener('touchend', handleTouchEnd);
+                                      };
+
+                                      document.addEventListener('touchmove', handleTouchMove);
+                                      document.addEventListener('touchend', handleTouchEnd);
+                                    }}
             >
               {/* Triangle marker at top - scales with zoom */}
               <div 
