@@ -1030,12 +1030,18 @@ export default function NoteGrid({
                                         // Store notes for dragging
                                         const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                                         const notesToStore = selectedNotesList.map(n => ({
-                                          ...n, duration: n.duration || DEFAULT_DURATION
+                                          pitch: n.pitch,
+                                          beat: n.beat,
+                                          duration: n.duration || DEFAULT_DURATION
                                         }));
                                         originalDragNotesRef.current = {
                                           keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                           notes: notesToStore
                                         };
+                                        
+                                        // Remove original notes immediately so they don't show duplicates
+                                        const notesWithoutDragged = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                        onNotesUpdate(notesWithoutDragged);
                                         
                                         const currentPitchIdx = pitches.indexOf(pitch);
                                         setDragState({
