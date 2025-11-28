@@ -846,9 +846,10 @@ export default function NoteGrid({
                   ref={gridRef}
                   className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
                 style={{ 
-                        scrollbarWidth: 'thin', 
-                        scrollbarColor: '#475569 transparent'
-                      }}
+                  scrollbarWidth: 'thin', 
+                  scrollbarColor: '#475569 transparent',
+                  touchAction: tool === 'marquee' ? 'none' : 'auto'
+                }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
@@ -870,8 +871,8 @@ export default function NoteGrid({
                                                       return;
                                                     }
 
-                                                    // Prevent scrolling when marquee is active, dragging notes, resizing, or painting
-                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
+                                                    // Prevent scrolling when marquee is active OR when in marquee tool mode
+                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
                                                       e.preventDefault(); 
                                                       handlePointerMove(e);
                                                     }
@@ -1095,7 +1096,6 @@ export default function NoteGrid({
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
-                                                                                e.preventDefault(); // Prevent scrolling when touching a note
                                                                                 const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
