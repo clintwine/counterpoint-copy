@@ -583,29 +583,21 @@ export default function NoteGrid({
         setSelectedNotes(newSelected);
       }
       setMarquee(null);
-    } else if (dragState && dragState.isDragging && originalDragNotesRef.current) {
+    } else if (dragState && originalDragNotesRef.current) {
       // Apply drag - remove original notes and add moved notes
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       const originalNotes = originalDragNotesRef.current.notes;
+      const originalKeys = originalDragNotesRef.current.keys;
       
+      // Only apply if there was actual movement
       if ((pitchDelta !== 0 || beatDelta !== 0) && originalNotes.length > 0) {
-        // Create a set of original note keys from stored notes (not from state)
-        const originalKeysFromStoredNotes = new Set(originalNotes.map(n => getNoteKey(n.pitch, n.beat)));
-        
-        console.log('Drag end - originalNotes:', originalNotes);
-        console.log('Drag end - originalKeys:', [...originalKeysFromStoredNotes]);
-        console.log('Drag end - cantusFirmus before filter:', cantusFirmus);
-        
-        // Remove notes that match the ORIGINAL positions
+        // Remove notes that match the ORIGINAL positions using stored keys
         const notesWithoutOriginals = cantusFirmus.filter(n => {
           const key = getNoteKey(n.pitch, n.beat);
-          const shouldRemove = originalKeysFromStoredNotes.has(key);
-          return !shouldRemove;
+          return !originalKeys.has(key);
         });
-        
-        console.log('Drag end - notesWithoutOriginals:', notesWithoutOriginals);
         
         // Create moved notes at new positions from the ORIGINAL stored notes
         const movedNotes = originalNotes.map(note => {
@@ -614,11 +606,8 @@ export default function NoteGrid({
           return { pitch: pitches[newPitchIdx], beat: newBeat, duration: note.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
-        console.log('Drag end - movedNotes:', movedNotes);
-        
         // Combine: notes that weren't dragged + moved notes
         const newNotes = [...notesWithoutOriginals, ...movedNotes].sort((a, b) => a.beat - b.beat);
-        console.log('Drag end - final newNotes:', newNotes);
         
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
