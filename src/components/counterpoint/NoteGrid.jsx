@@ -462,10 +462,10 @@ export default function NoteGrid({
       };
 
   const handlePointerMove = (e) => {
-            const coords = getEventCoords(e);
+                const coords = e.clientX !== undefined ? e : getEventCoords(e);
 
-            // Handle painting in draw mode (only if paintMode is enabled)
-            if (isPainting && tool === 'draw' && paintMode) {
+                // Handle painting in draw mode (only if paintMode is enabled)
+                if (isPainting && tool === 'draw' && paintMode) {
               const cell = getCellFromPosition(coords.clientX, coords.clientY);
               if (cell) {
                 const noteKey = getNoteKey(cell.pitch, cell.beat);
