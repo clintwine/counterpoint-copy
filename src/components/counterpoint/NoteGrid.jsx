@@ -1243,9 +1243,9 @@ export default function NoteGrid({
             })()}
 
             {/* Drag preview notes */}
-            {dragState?.isDragging && selectedNotes.size > 0 && (
-              <>
-                {cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat))).map(note => {
+                            {dragState?.isDragging && selectedNotes.size > 0 && originalDragNotesRef.current?.notes && (
+                              <>
+                                {originalDragNotesRef.current.notes.map(note => {
                   const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
                   const newBeat = note.beat + dragOffset.beatDelta;
                   if (newPitchIdx < 0 || newPitchIdx >= pitches.length || newBeat < 0 || newBeat >= totalBeats) return null;
