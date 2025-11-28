@@ -841,41 +841,41 @@ export default function NoteGrid({
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
                       onTouchMove={(e) => { 
-                                                    // Handle pinch to zoom first
-                                                    if (e.touches.length === 2) {
-                                                      e.preventDefault();
-                                                      const touch1 = e.touches[0];
-                                                      const touch2 = e.touches[1];
-                                                      const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                                                                                // Handle pinch to zoom first
+                                                                                if (e.touches.length === 2) {
+                                                                                  e.preventDefault();
+                                                                                  const touch1 = e.touches[0];
+                                                                                  const touch2 = e.touches[1];
+                                                                                  const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
 
-                                                      if (pinchState) {
-                                                        const scale = currentDist / pinchState.initialDist;
-                                                        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
-                                                        const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
-                                                        setZoom(newZoom);
-                                                        setZoomY(newZoomY);
-                                                      }
-                                                      return;
-                                                    }
+                                                                                  if (pinchState) {
+                                                                                    const scale = currentDist / pinchState.initialDist;
+                                                                                    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
+                                                                                    const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
+                                                                                    setZoom(newZoom);
+                                                                                    setZoomY(newZoomY);
+                                                                                  }
+                                                                                  return;
+                                                                                }
 
-                                                    // Prevent scrolling when any editing gesture is active
-                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
-                                                      e.preventDefault();
-                                                      // Find the active touch
-                                                      let activeTouch = null;
-                                                      for (let i = 0; i < e.touches.length; i++) {
-                                                        if (e.touches[i].identifier === activeTouchIdRef.current) {
-                                                          activeTouch = e.touches[i];
-                                                          break;
-                                                        }
-                                                      }
-                                                      if (activeTouch) {
-                                                        handlePointerMove({ touches: [activeTouch], clientX: activeTouch.clientX, clientY: activeTouch.clientY });
-                                                      } else if (e.touches.length > 0) {
-                                                        handlePointerMove({ touches: e.touches, clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-                                                      }
-                                                    }
-                                                  }}
+                                                                                // Prevent scrolling when any editing gesture is active
+                                                                                if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
+                                                                                  e.preventDefault();
+                                                                                  // Find the active touch
+                                                                                  let activeTouch = null;
+                                                                                  for (let i = 0; i < e.touches.length; i++) {
+                                                                                    if (e.touches[i].identifier === activeTouchIdRef.current) {
+                                                                                      activeTouch = e.touches[i];
+                                                                                      break;
+                                                                                    }
+                                                                                  }
+                                                                                  if (activeTouch) {
+                                                                                    handlePointerMove({ clientX: activeTouch.clientX, clientY: activeTouch.clientY });
+                                                                                  } else if (e.touches.length > 0) {
+                                                                                    handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+                                                                                  }
+                                                                                }
+                                                                              }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
                                       if (e.touches.length === 2) {
