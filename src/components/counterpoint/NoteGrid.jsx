@@ -895,8 +895,8 @@ export default function NoteGrid({
         onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
-          {/* Pitch labels - fixed column on left */}
-                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
+          {/* Pitch labels - fixed column on left, allows vertical scrolling */}
+                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)', touchAction: 'pan-y' }}>
                                         <div className="h-7 border-b border-slate-600 bg-slate-800 sticky top-0 z-30" />
                           {pitches.map((pitch) => {
                                                                         const isSharp = pitch.includes('#');
