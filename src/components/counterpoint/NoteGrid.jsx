@@ -400,23 +400,26 @@ export default function NoteGrid({
         const hasNote = !!existingNote;
 
         if (tool === 'draw') {
-          // Draw mode - add/remove note with painting support
-          setIsPainting(true);
-          paintedNotesRef.current = new Set();
-
+          // Draw mode - add/remove note
           if (hasNote) {
             const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
             saveToHistory(newNotes);
             onNotesUpdate(newNotes);
           } else {
-            // Add the note and track it
-            paintedNotesRef.current.add(noteKey);
+            // Add the note
             const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+            saveToHistory(newNotes);
             onNotesUpdate(newNotes);
             // Play the note with proper duration for feedback
             initAudio();
             const instrument = voices[activeVoice]?.instrument || 'organ';
             playNote(pitch, 0.5, 0.7, 0, instrument);
+          }
+          
+          // Only enable painting mode if paintMode is on
+          if (paintMode) {
+            setIsPainting(true);
+            paintedNotesRef.current = new Set([noteKey]);
           }
         } else if (tool === 'select') {
           if (hasNote) {
