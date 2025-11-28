@@ -1132,16 +1132,20 @@ export default function NoteGrid({
                                                                               };
                                                                               console.log('Drag start - storing notes:', notesToStore);
 
-                                                                              setDragState({
-                                                                                                                      startPitch: pitch,
-                                                                                                                      startBeat: beat,
-                                                                                                                      startPitchIndex: pitches.indexOf(pitch),
-                                                                                                                      currentPitchIndex: pitches.indexOf(pitch),
-                                                                                                                      currentBeat: beat,
-                                                                                                                      isDragging: false,
-                                                                                                                      clickOffsetX: coords.clientX,
-                                                                                                                      clickOffsetY: coords.clientY
-                                                                                                                    });
+                                                                              // Remove original notes immediately so they don't show duplicates
+                                                                                                                                                        const notesWithoutDragged = cantusFirmus.filter(n => !originalDragNotesRef.current.keys.has(getNoteKey(n.pitch, n.beat)));
+                                                                                                                                                        onNotesUpdate(notesWithoutDragged);
+
+                                                                                                                                                        setDragState({
+                                                                                                                                                        startPitch: pitch,
+                                                                                                                                                        startBeat: beat,
+                                                                                                                                                        startPitchIndex: pitches.indexOf(pitch),
+                                                                                                                                                        currentPitchIndex: pitches.indexOf(pitch),
+                                                                                                                                                        currentBeat: beat,
+                                                                                                                                                        isDragging: false,
+                                                                                                                                                        clickOffsetX: coords.clientX,
+                                                                                                                                                        clickOffsetY: coords.clientY
+                                                                                                                                                      });
                                       }
                                     }}
                                     onTouchStart={(e) => {
