@@ -871,7 +871,7 @@ export default function NoteGrid({
                                                       e.preventDefault(); 
                                                       handlePointerMove(e);
                                                     }
-                                                    // Otherwise let native scroll happen
+                                                    // Let native scroll happen for all other cases (including pitch label scrolling)
                                                   }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
