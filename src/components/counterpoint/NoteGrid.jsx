@@ -856,11 +856,11 @@ export default function NoteGrid({
                                                                   }
 
                                                                   // Only prevent default for active edit gestures that need custom handling
-                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting) || resizeState || (dragState && dragState.isDragging)) {
+                                                                  if (tool === 'marquee' || (tool === 'draw' && isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
                                                                     e.preventDefault(); 
                                                                     handlePointerMove(e);
                                                                   }
-                                                                  // Otherwise let native scroll happen via touch-action: pan-y
+                                                                  // Otherwise let native scroll happen via touch-action: pan-y on pitch labels
                                                                 }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
