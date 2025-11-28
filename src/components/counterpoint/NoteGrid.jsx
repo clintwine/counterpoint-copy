@@ -204,6 +204,7 @@ export default function NoteGrid({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
+  const [pinchState, setPinchState] = useState(null);
 
   // Expose scroll function via ref
   useEffect(() => {
@@ -832,13 +833,50 @@ export default function NoteGrid({
           <div 
           ref={gridRef}
           className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
-        style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent', touchAction: (tool === 'marquee' || tool === 'select' || tool === 'draw') ? 'none' : 'auto' }}
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent', touchAction: tool === 'marquee' ? 'none' : 'pan-x pan-y' }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
                       onMouseLeave={handlePointerUp}
-                      onTouchMove={(e) => { e.preventDefault(); handlePointerMove(e); }}
-                      onTouchEnd={handlePointerUp}
-                      onTouchCancel={handlePointerUp}
+                      onTouchMove={(e) => { 
+                                      if (tool === 'marquee' || (tool === 'draw' && isPainting) || dragState) {
+                                        e.preventDefault(); 
+                                        handlePointerMove(e);
+                                      }
+                                      // Handle pinch to zoom
+                                      if (e.touches.length === 2) {
+                                        e.preventDefault();
+                                        const touch1 = e.touches[0];
+                                        const touch2 = e.touches[1];
+                                        const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+
+                                        if (pinchState) {
+                                          const scale = currentDist / pinchState.initialDist;
+                                          const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
+                                          const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
+                                          setZoom(newZoom);
+                                          setZoomY(newZoomY);
+                                        }
+                                      }
+                                    }}
+                                    onTouchStart={(e) => {
+                                      // Detect pinch start
+                                      if (e.touches.length === 2) {
+                                        const touch1 = e.touches[0];
+                                        const touch2 = e.touches[1];
+                                        const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+                                        setPinchState({ initialDist: dist, initialZoom: zoom, initialZoomY: zoomY });
+                                      }
+                                    }}
+                                    onTouchEnd={(e) => {
+                                      handlePointerUp();
+                                      if (e.touches.length < 2) {
+                                        setPinchState(null);
+                                      }
+                                    }}
+                                    onTouchCancel={() => {
+                                      handlePointerUp();
+                                      setPinchState(null);
+                                    }}
         onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
