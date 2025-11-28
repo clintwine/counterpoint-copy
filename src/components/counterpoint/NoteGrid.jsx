@@ -1096,6 +1096,7 @@ export default function NoteGrid({
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
+                                                                                e.preventDefault(); // Prevent scroll when touching notes
                                                                                 const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
@@ -1134,7 +1135,7 @@ export default function NoteGrid({
                                                                                     startPitchIndex: pitches.indexOf(pitch),
                                                                                     currentPitchIndex: pitches.indexOf(pitch),
                                                                                     currentBeat: beat,
-                                                                                    isDragging: false,
+                                                                                    isDragging: true, // Start dragging immediately on touch
                                                                                     clickOffsetX: coords.clientX,
                                                                                     clickOffsetY: coords.clientY,
                                                                                     initialScrollTop: gridRef.current?.scrollTop || 0
