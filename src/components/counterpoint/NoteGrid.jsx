@@ -901,7 +901,7 @@ export default function NoteGrid({
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
                                                                               isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
                                                                             }`}
-                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)' }}
+                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)', touchAction: 'pan-y' }}
                                                                           >
                                                                             {pitch}
                                                                           </div>
