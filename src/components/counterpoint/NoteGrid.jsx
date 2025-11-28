@@ -1008,16 +1008,50 @@ export default function NoteGrid({
                               key={beat}
                               onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
                                     onTouchStart={(e) => { 
+                                      const touch = e.touches[0];
+                                      const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
+                                      
                                       // For marquee tool, prevent scrolling immediately
                                       if (tool === 'marquee') {
                                         e.preventDefault();
+                                        activeTouchIdRef.current = touch.identifier;
                                         handlePointerDown(e, pitch, beat);
                                         return;
                                       }
+                                      
+                                      // If we have selected notes and tapping on empty cell, start drag immediately
+                                      if (!hasNote && selectedNotes.size > 0 && tool === 'select') {
+                                        e.preventDefault();
+                                        activeTouchIdRef.current = touch.identifier;
+                                        
+                                        // Store notes for dragging
+                                        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                        const notesToStore = selectedNotesList.map(n => ({
+                                          ...n, duration: n.duration || DEFAULT_DURATION
+                                        }));
+                                        originalDragNotesRef.current = {
+                                          keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
+                                          notes: notesToStore
+                                        };
+                                        
+                                        const currentPitchIdx = pitches.indexOf(pitch);
+                                        setDragState({
+                                          startPitch: pitch,
+                                          startBeat: beat,
+                                          startPitchIndex: currentPitchIdx,
+                                          currentPitchIndex: currentPitchIdx,
+                                          currentBeat: beat,
+                                          isDragging: true,
+                                          clickOffsetX: touch.clientX,
+                                          clickOffsetY: touch.clientY
+                                        });
+                                        return;
+                                      }
+                                      
                                       // Store touch start position to detect scrolling vs tapping
                                       touchStartRef.current = { 
-                                        x: e.touches[0].clientX, 
-                                        y: e.touches[0].clientY, 
+                                        x: touch.clientX, 
+                                        y: touch.clientY, 
                                         pitch, 
                                         beat,
                                         time: Date.now()
