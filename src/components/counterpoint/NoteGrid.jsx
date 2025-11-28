@@ -870,8 +870,8 @@ export default function NoteGrid({
                                                       return;
                                                     }
 
-                                                    // Prevent scrolling when marquee is active OR when in marquee tool mode
-                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
+                                                    // Prevent scrolling when marquee is active, dragging notes, resizing, or painting
+                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
                                                       e.preventDefault(); 
                                                       handlePointerMove(e);
                                                     }
