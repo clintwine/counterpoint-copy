@@ -1277,85 +1277,87 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead with top marker - draggable */}
-            <div
-              className="absolute top-0 z-30 cursor-ew-resize will-change-transform"
-              style={{
-                height: 28 + pitches.length * CELL_HEIGHT,
-                transform: `translateX(${56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
-                left: 0,
-                width: Math.max(16, 20 * zoom)
-              }}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsScrubbing(true);
-                const startX = e.clientX;
-                const startBeat = currentBeat;
+        {/* Playhead triangle marker - fixed at top */}
+                    <div
+                      className="absolute z-40 cursor-ew-resize sticky top-0"
+                      style={{
+                        left: 56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom),
+                        top: 0,
+                        width: Math.max(16, 20 * zoom),
+                        height: 28,
+                        pointerEvents: 'auto'
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setIsScrubbing(true);
+                        const startX = e.clientX;
+                        const startBeat = currentBeat;
 
-                const handleMouseMove = (moveEvent) => {
-                  const deltaX = moveEvent.clientX - startX;
-                  const beatDelta = Math.round(deltaX / CELL_WIDTH);
-                  const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-                  onSeek && onSeek(newBeat);
-                };
+                        const handleMouseMove = (moveEvent) => {
+                          const deltaX = moveEvent.clientX - startX;
+                          const beatDelta = Math.round(deltaX / CELL_WIDTH);
+                          const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
+                          onSeek && onSeek(newBeat);
+                        };
 
-                const handleMouseUp = () => {
-                        setIsScrubbing(false);
-                        document.removeEventListener('mousemove', handleMouseMove);
-                        document.removeEventListener('mouseup', handleMouseUp);
-                        document.removeEventListener('touchmove', handleMouseMove);
-                        document.removeEventListener('touchend', handleMouseUp);
-                      };
+                        const handleMouseUp = () => {
+                          setIsScrubbing(false);
+                          document.removeEventListener('mousemove', handleMouseMove);
+                          document.removeEventListener('mouseup', handleMouseUp);
+                        };
 
-                document.addEventListener('mousemove', handleMouseMove);
-                                      document.addEventListener('mouseup', handleMouseUp);
-                                      document.addEventListener('touchmove', handleMouseMove);
-                                      document.addEventListener('touchend', handleMouseUp);
-                                    }}
-                                    onTouchStart={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      setIsScrubbing(true);
-                                      const startX = e.touches[0].clientX;
-                                      const startBeat = currentBeat;
+                        document.addEventListener('mousemove', handleMouseMove);
+                        document.addEventListener('mouseup', handleMouseUp);
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setIsScrubbing(true);
+                        const startX = e.touches[0].clientX;
+                        const startBeat = currentBeat;
 
-                                      const handleTouchMove = (moveEvent) => {
-                                        const deltaX = moveEvent.touches[0].clientX - startX;
-                                        const beatDelta = Math.round(deltaX / CELL_WIDTH);
-                                        const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-                                        onSeek && onSeek(newBeat);
-                                      };
+                        const handleTouchMove = (moveEvent) => {
+                          const deltaX = moveEvent.touches[0].clientX - startX;
+                          const beatDelta = Math.round(deltaX / CELL_WIDTH);
+                          const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
+                          onSeek && onSeek(newBeat);
+                        };
 
-                                      const handleTouchEnd = () => {
-                                        setIsScrubbing(false);
-                                        document.removeEventListener('touchmove', handleTouchMove);
-                                        document.removeEventListener('touchend', handleTouchEnd);
-                                      };
+                        const handleTouchEnd = () => {
+                          setIsScrubbing(false);
+                          document.removeEventListener('touchmove', handleTouchMove);
+                          document.removeEventListener('touchend', handleTouchEnd);
+                        };
 
-                                      document.addEventListener('touchmove', handleTouchMove);
-                                      document.addEventListener('touchend', handleTouchEnd);
-                                    }}
-            >
-              {/* Triangle marker at top - scales with zoom */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{
-                  top: -2,
-                  borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
-                  borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
-                  borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
-                }}
-              />
-              {/* Vertical line */}
-              <div 
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
-                style={{ 
-                  top: Math.max(10, 12 * zoom),
-                  width: Math.max(2, 3 * zoom)
-                }}
-              />
-            </div>
+                        document.addEventListener('touchmove', handleTouchMove);
+                        document.addEventListener('touchend', handleTouchEnd);
+                      }}
+                    >
+                      {/* Triangle marker */}
+                      <div 
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          top: 6,
+                          borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
+                          borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
+                          borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
+                        }}
+                      />
+                    </div>
+
+                    {/* Playhead vertical line - scrolls with content */}
+                    <div
+                      className="absolute z-30 pointer-events-none"
+                      style={{
+                        left: 56 + currentBeat * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom),
+                        top: 28,
+                        width: Math.max(2, 3 * zoom),
+                        height: pitches.length * CELL_HEIGHT,
+                        backgroundColor: '#ef4444',
+                        boxShadow: '0 0 8px rgba(239,68,68,0.6)'
+                      }}
+                    />
 
         {/* Marquee selection rectangle */}
         {marquee && (
