@@ -623,12 +623,12 @@ export default function NoteGrid({
   const dragOffset = getDragOffset();
 
   return (
-        <div className="bg-slate-800 rounded-2xl border border-slate-600 w-full overflow-hidden">
+        <div className="bg-slate-800 rounded-xl sm:rounded-2xl border border-slate-600 w-full overflow-hidden max-w-full">
           {/* Playback Controls - embedded at top */}
           {playbackControls}
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700">
+                      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-slate-700 overflow-x-auto">
         <div className="flex items-center gap-1">
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}
@@ -1129,7 +1129,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className="flex items-center justify-between px-5 py-3 border-t border-slate-700">
+      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
         <p className="text-white/50 text-xs">
           {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select'}
           {tool === 'marquee' && 'Click and drag to select multiple notes'}

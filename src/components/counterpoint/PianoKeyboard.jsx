@@ -399,8 +399,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const totalWidth = totalWhiteKeys * whiteKeyWidth;
 
   return (
-    <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-600">
-      <div className="flex items-center justify-between mb-2">
+    <div className="bg-slate-800/60 rounded-xl p-2 sm:p-3 border border-slate-600 max-w-full overflow-hidden">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium">Piano (88 Keys)</h3>
         <div className="flex items-center gap-4">
           {/* ADSR Envelope Knobs */}

@@ -100,7 +100,7 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center justify-center gap-3 px-3 py-2 bg-slate-900/80 border-b border-slate-700">
+    <div className="flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
       {/* Time Signature */}
       <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
         <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
