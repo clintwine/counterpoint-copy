@@ -863,10 +863,21 @@ export default function NoteGrid({
 
                                                     // Prevent scrolling when any editing gesture is active
                                                     if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
-                                                      e.preventDefault(); 
-                                                      handlePointerMove(e);
+                                                      e.preventDefault();
+                                                      // Find the active touch
+                                                      let activeTouch = null;
+                                                      for (let i = 0; i < e.touches.length; i++) {
+                                                        if (e.touches[i].identifier === activeTouchIdRef.current) {
+                                                          activeTouch = e.touches[i];
+                                                          break;
+                                                        }
+                                                      }
+                                                      if (activeTouch) {
+                                                        handlePointerMove({ touches: [activeTouch] });
+                                                      } else {
+                                                        handlePointerMove(e);
+                                                      }
                                                     }
-                                                    // Let native scroll happen for all other cases (including pitch label scrolling)
                                                   }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
