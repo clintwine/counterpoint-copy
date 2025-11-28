@@ -855,19 +855,12 @@ export default function NoteGrid({
                                                                     return;
                                                                   }
 
-                                                                  // Only prevent default for active edit gestures
+                                                                  // Only prevent default for active edit gestures that need custom handling
                                                                   if (tool === 'marquee' || (tool === 'draw' && isPainting) || resizeState || (dragState && dragState.isDragging)) {
                                                                     e.preventDefault(); 
                                                                     handlePointerMove(e);
-                                                                  } else if (dragState && !dragState.isDragging && e.touches.length === 1) {
-                                                                    // Allow vertical scroll when dragging on a note (before drag commits)
-                                                                    // Manually scroll the grid
-                                                                    const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
-                                                                    if (gridRef.current && Math.abs(deltaY) > 5) {
-                                                                      e.preventDefault();
-                                                                      gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
-                                                                    }
                                                                   }
+                                                                  // Otherwise let native scroll happen via touch-action: pan-y
                                                                 }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
