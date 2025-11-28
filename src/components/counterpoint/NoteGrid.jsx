@@ -1277,10 +1277,11 @@ export default function NoteGrid({
 
         {/* Playhead with top marker - draggable */}
             <div
-              className="absolute top-0 z-30 cursor-ew-resize"
+              className="absolute top-0 z-30 cursor-ew-resize will-change-transform"
               style={{
                 height: 28 + pitches.length * CELL_HEIGHT,
-                left: 56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom),
+                transform: `translateX(${56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
+                left: 0,
                 width: Math.max(16, 20 * zoom)
               }}
               onMouseDown={(e) => {
