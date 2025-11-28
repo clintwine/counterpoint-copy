@@ -867,8 +867,8 @@ export default function NoteGrid({
                                                       return;
                                                     }
 
-                                                    // Only prevent default for active edit gestures that need custom handling
-                                                    if (tool === 'marquee' || (isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
+                                                    // Prevent scrolling when marquee is active OR when in marquee tool mode
+                                                    if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || (dragState && dragState.isDragging)) {
                                                       e.preventDefault(); 
                                                       handlePointerMove(e);
                                                     }
