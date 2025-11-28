@@ -1092,7 +1092,6 @@ export default function NoteGrid({
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
-                                                                                e.preventDefault(); // Prevent scroll when touching a note
                                                                                 const coords = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
