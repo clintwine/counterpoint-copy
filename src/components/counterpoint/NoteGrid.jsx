@@ -206,6 +206,7 @@ export default function NoteGrid({
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
   const [pinchState, setPinchState] = useState(null);
   const lastTapRef = useRef({ key: null, time: 0 });
+  const touchStartRef = useRef(null); // Track touch start for scroll detection
 
   // Expose scroll function via ref
   useEffect(() => {
