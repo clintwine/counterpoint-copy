@@ -1103,6 +1103,7 @@ export default function NoteGrid({
                                                                                 playNoteSound(pitch);
 
                                                                                 if (clickX > rect.width - 10) {
+                                                                                  // Resize mode
                                                                                   const startDurations = {};
                                                                                   if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
                                                                                     cantusFirmus.forEach(n => {
@@ -1113,32 +1114,37 @@ export default function NoteGrid({
                                                                                   } else {
                                                                                     startDurations[nKey] = note.duration || DEFAULT_DURATION;
                                                                                   }
-                                                                                  setResizeState({ startX: coords.clientX, startDurations, initialScrollTop: gridRef.current?.scrollTop || 0 });
+                                                                                  setResizeState({ startX: coords.clientX, startDurations });
                                                                                 } else {
+                                                                                  // Drag mode - determine which notes to drag
+                                                                                  const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
+                                                                                  
+                                                                                  // Update selection immediately
                                                                                   if (!selectedNotes.has(nKey)) {
                                                                                     setSelectedNotes(new Set([nKey]));
                                                                                   }
-                                                                                  const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
+                                                                                  
+                                                                                  // Store the notes we're dragging from cantusFirmus BEFORE any state changes
                                                                                   const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
                                                                                     pitch: n.pitch,
                                                                                     beat: n.beat,
                                                                                     duration: n.duration || DEFAULT_DURATION
                                                                                   }));
+                                                                                  
                                                                                   originalDragNotesRef.current = {
-                                                                                    keys: keysToUse,
+                                                                                    keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                                                                     notes: notesToStore
                                                                                   };
 
                                                                                   setDragState({
-                                                                                    startPitch: pitch,
-                                                                                    startBeat: beat,
-                                                                                    startPitchIndex: pitches.indexOf(pitch),
-                                                                                    currentPitchIndex: pitches.indexOf(pitch),
-                                                                                    currentBeat: beat,
-                                                                                    isDragging: true, // Start dragging immediately on touch
+                                                                                    startPitch: note.pitch,
+                                                                                    startBeat: note.beat,
+                                                                                    startPitchIndex: pitches.indexOf(note.pitch),
+                                                                                    currentPitchIndex: pitches.indexOf(note.pitch),
+                                                                                    currentBeat: note.beat,
+                                                                                    isDragging: true,
                                                                                     clickOffsetX: coords.clientX,
-                                                                                    clickOffsetY: coords.clientY,
-                                                                                    initialScrollTop: gridRef.current?.scrollTop || 0
+                                                                                    clickOffsetY: coords.clientY
                                                                                   });
                                                                                 }
                                                                               }}
