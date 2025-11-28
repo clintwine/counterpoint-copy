@@ -989,6 +989,12 @@ export default function NoteGrid({
                               key={beat}
                               onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
                                     onTouchStart={(e) => { 
+                                      // For marquee tool, prevent scrolling immediately
+                                      if (tool === 'marquee') {
+                                        e.preventDefault();
+                                        handlePointerDown(e, pitch, beat);
+                                        return;
+                                      }
                                       // Store touch start position to detect scrolling vs tapping
                                       touchStartRef.current = { 
                                         x: e.touches[0].clientX, 
