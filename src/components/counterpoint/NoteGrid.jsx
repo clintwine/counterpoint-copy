@@ -385,81 +385,91 @@ export default function NoteGrid({
     return clickX > noteWidth - 8;
   };
 
-  const handleMouseDown = (e, pitch, beat) => {
-    const noteKey = getNoteKey(pitch, beat);
-    const existingNote = cantusFirmus.find(n => n.pitch === pitch && n.beat === beat);
-    const hasNote = !!existingNote;
-    
-    if (tool === 'draw') {
-      // Draw mode - add/remove note with painting support
-      setIsPainting(true);
-      paintedNotesRef.current = new Set();
-      
-      if (hasNote) {
-        const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
-        saveToHistory(newNotes);
-        onNotesUpdate(newNotes);
-      } else {
-        // Add the note and track it
-        paintedNotesRef.current.add(noteKey);
-        const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
-        onNotesUpdate(newNotes);
-        // Play the note with proper duration for feedback
-        initAudio();
-        const instrument = voices[activeVoice]?.instrument || 'organ';
-        playNote(pitch, 0.5, 0.7, 0, instrument);
-      }
-    } else if (tool === 'select') {
-      if (hasNote) {
-        // Note click is handled by the note element itself
-        return;
-      } else {
-        // Click on empty cell - deselect or add note
-        if (!e.shiftKey) {
-          setSelectedNotes(new Set());
+  const getEventCoords = (e) => {
+        if (e.touches && e.touches.length > 0) {
+          return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
         }
-        // Start marquee
-        setMarquee({
-          startX: e.clientX,
-          startY: e.clientY,
-          endX: e.clientX,
-          endY: e.clientY
-        });
-      }
-    } else if (tool === 'marquee') {
-      setMarquee({
-        startX: e.clientX,
-        startY: e.clientY,
-        endX: e.clientX,
-        endY: e.clientY
-      });
-    }
-  };
+        return { clientX: e.clientX, clientY: e.clientY };
+      };
 
-  const handleMouseMove = (e) => {
-        // Handle painting in draw mode (only if paintMode is enabled)
-        if (isPainting && tool === 'draw' && paintMode) {
-          const cell = getCellFromPosition(e.clientX, e.clientY);
-          if (cell) {
-            const noteKey = getNoteKey(cell.pitch, cell.beat);
-            const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
+      const handlePointerDown = (e, pitch, beat) => {
+        const coords = getEventCoords(e);
+        const noteKey = getNoteKey(pitch, beat);
+        const existingNote = cantusFirmus.find(n => n.pitch === pitch && n.beat === beat);
+        const hasNote = !!existingNote;
 
-            // Only add if not already painted in this stroke and no existing note
-            if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
-              paintedNotesRef.current.add(noteKey);
-              const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
-              onNotesUpdate(newNotes);
-              // Play the note with proper duration for feedback
-              initAudio();
-              const instrument = voices[activeVoice]?.instrument || 'organ';
-              playNote(cell.pitch, 0.5, 0.7, 0, instrument);
-            }
+        if (tool === 'draw') {
+          // Draw mode - add/remove note with painting support
+          setIsPainting(true);
+          paintedNotesRef.current = new Set();
+
+          if (hasNote) {
+            const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
+            saveToHistory(newNotes);
+            onNotesUpdate(newNotes);
+          } else {
+            // Add the note and track it
+            paintedNotesRef.current.add(noteKey);
+            const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+            onNotesUpdate(newNotes);
+            // Play the note with proper duration for feedback
+            initAudio();
+            const instrument = voices[activeVoice]?.instrument || 'organ';
+            playNote(pitch, 0.5, 0.7, 0, instrument);
           }
+        } else if (tool === 'select') {
+          if (hasNote) {
+            // Note click is handled by the note element itself
+            return;
+          } else {
+            // Click on empty cell - deselect or add note
+            if (!e.shiftKey) {
+              setSelectedNotes(new Set());
+            }
+            // Start marquee
+            setMarquee({
+              startX: coords.clientX,
+              startY: coords.clientY,
+              endX: coords.clientX,
+              endY: coords.clientY
+            });
+          }
+        } else if (tool === 'marquee') {
+          setMarquee({
+            startX: coords.clientX,
+            startY: coords.clientY,
+            endX: coords.clientX,
+            endY: coords.clientY
+          });
         }
-    
-    if (resizeState) {
+      };
+
+  const handlePointerMove = (e) => {
+            const coords = getEventCoords(e);
+
+            // Handle painting in draw mode (only if paintMode is enabled)
+            if (isPainting && tool === 'draw' && paintMode) {
+              const cell = getCellFromPosition(coords.clientX, coords.clientY);
+              if (cell) {
+                const noteKey = getNoteKey(cell.pitch, cell.beat);
+                const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
+
+                // Only add if not already painted in this stroke and no existing note
+                if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
+                  paintedNotesRef.current.add(noteKey);
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+                  onNotesUpdate(newNotes);
+                  // Play the note with proper duration for feedback
+                  initAudio();
+                  const instrument = voices[activeVoice]?.instrument || 'organ';
+                  playNote(cell.pitch, 0.5, 0.7, 0, instrument);
+                }
+              }
+            }
+
+        if (resizeState) {
       // Handle note duration resize
-      const deltaX = e.clientX - resizeState.startX;
+              const deltaX = coords.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
 
       // Update note durations in real-time (group resize if multiple selected)
@@ -474,11 +484,11 @@ export default function NoteGrid({
       });
       onNotesUpdate(newNotes);
     } else if (marquee) {
-      setMarquee(prev => ({ ...prev, endX: e.clientX, endY: e.clientY }));
-    } else if (dragState && selectedNotes.size > 0) {
-      // Calculate delta from original click position for smooth dragging
-      const deltaX = e.clientX - dragState.clickOffsetX;
-      const deltaY = e.clientY - dragState.clickOffsetY;
+            setMarquee(prev => ({ ...prev, endX: coords.clientX, endY: coords.clientY }));
+          } else if (dragState && selectedNotes.size > 0) {
+            // Calculate delta from original click position for smooth dragging
+            const deltaX = coords.clientX - dragState.clickOffsetX;
+            const deltaY = coords.clientY - dragState.clickOffsetY;
       
       const beatDelta = Math.round(deltaX / CELL_WIDTH);
       const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
@@ -494,25 +504,25 @@ export default function NoteGrid({
       }
 
       // Auto-scroll when dragging near edges
-      if (gridRef.current && dragState.isDragging) {
-        const rect = gridRef.current.getBoundingClientRect();
-        const edgeThreshold = 60;
-        const scrollSpeed = 15;
-        
-        // Horizontal scrolling
-        if (e.clientX > rect.right - edgeThreshold) {
-          gridRef.current.scrollLeft += scrollSpeed;
-        } else if (e.clientX < rect.left + edgeThreshold + 56) {
-          gridRef.current.scrollLeft -= scrollSpeed;
-        }
-        
-        // Vertical scrolling
-        if (e.clientY > rect.bottom - edgeThreshold) {
-          gridRef.current.scrollTop += scrollSpeed;
-        } else if (e.clientY < rect.top + edgeThreshold + 28) {
-          gridRef.current.scrollTop -= scrollSpeed;
-        }
-      }
+                  if (gridRef.current && dragState.isDragging) {
+                    const rect = gridRef.current.getBoundingClientRect();
+                    const edgeThreshold = 60;
+                    const scrollSpeed = 15;
+
+                    // Horizontal scrolling
+                    if (coords.clientX > rect.right - edgeThreshold) {
+                      gridRef.current.scrollLeft += scrollSpeed;
+                    } else if (coords.clientX < rect.left + edgeThreshold + 56) {
+                      gridRef.current.scrollLeft -= scrollSpeed;
+                    }
+
+                    // Vertical scrolling
+                    if (coords.clientY > rect.bottom - edgeThreshold) {
+                      gridRef.current.scrollTop += scrollSpeed;
+                    } else if (coords.clientY < rect.top + edgeThreshold + 28) {
+                      gridRef.current.scrollTop -= scrollSpeed;
+                    }
+                  }
 
       setDragState(prev => ({
         ...prev,
@@ -823,9 +833,12 @@ export default function NoteGrid({
           ref={gridRef}
           className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#475569 transparent' }}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseMove={handlePointerMove}
+                      onMouseUp={handlePointerUp}
+                      onMouseLeave={handlePointerUp}
+                      onTouchMove={(e) => { e.preventDefault(); handlePointerMove(e); }}
+                      onTouchEnd={handlePointerUp}
+                      onTouchCancel={handlePointerUp}
         onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
@@ -913,7 +926,8 @@ export default function NoteGrid({
                           return (
                             <div
                               key={beat}
-                              onMouseDown={(e) => handleMouseDown(e, pitch, beat)}
+                              onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
+                                    onTouchStart={(e) => { e.preventDefault(); handlePointerDown(e, pitch, beat); }}
                               className={`flex-shrink-0 border-r border-b relative cursor-pointer
                                 ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
                                 ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
@@ -933,23 +947,24 @@ export default function NoteGrid({
                                   <div
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
-                                      e.stopPropagation();
-                                      const rect = e.currentTarget.getBoundingClientRect();
-                                      const clickX = e.clientX - rect.left;
-                                      playNoteSound(pitch);
+                                                                                e.stopPropagation();
+                                                                                const coords = getEventCoords(e);
+                                                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                                                const clickX = coords.clientX - rect.left;
+                                                                                playNoteSound(pitch);
 
                                       if (clickX > rect.width - 10) {
-                                        const startDurations = {};
-                                        if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
-                                          cantusFirmus.forEach(n => {
-                                            if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                              startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
-                                            }
-                                          });
-                                        } else {
-                                          startDurations[nKey] = note.duration || DEFAULT_DURATION;
-                                        }
-                                        setResizeState({ startX: e.clientX, startDurations });
+                                                                                    const startDurations = {};
+                                                                                    if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                                                                      cantusFirmus.forEach(n => {
+                                                                                        if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                                                                          startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                                                                        }
+                                                                                      });
+                                                                                    } else {
+                                                                                      startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                                                                    }
+                                                                                    setResizeState({ startX: coords.clientX, startDurations });
                                       } else {
                                         if (!selectedNotes.has(nKey)) {
                                           if (!e.shiftKey) {
@@ -974,15 +989,15 @@ export default function NoteGrid({
                                                                               console.log('Drag start - storing notes:', notesToStore);
 
                                                                               setDragState({
-                                                                                startPitch: pitch,
-                                                                                startBeat: beat,
-                                                                                startPitchIndex: pitches.indexOf(pitch),
-                                                                                currentPitchIndex: pitches.indexOf(pitch),
-                                                                                currentBeat: beat,
-                                                                                isDragging: false,
-                                                                                clickOffsetX: e.clientX,
-                                                                                clickOffsetY: e.clientY
-                                                                              });
+                                                                                                                      startPitch: pitch,
+                                                                                                                      startBeat: beat,
+                                                                                                                      startPitchIndex: pitches.indexOf(pitch),
+                                                                                                                      currentPitchIndex: pitches.indexOf(pitch),
+                                                                                                                      currentBeat: beat,
+                                                                                                                      isDragging: false,
+                                                                                                                      clickOffsetX: coords.clientX,
+                                                                                                                      clickOffsetY: coords.clientY
+                                                                                                                    });
                                       }
                                     }}
                                     className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
