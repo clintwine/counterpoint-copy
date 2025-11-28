@@ -540,7 +540,7 @@ export default function NoteGrid({
           saveToHistory(cantusFirmus);
         }
         setIsPainting(false);
-        paintedNotesRef.current = new Set();
+        paintedNotesRef.current.clear();
 
         if (resizeState) {
       // Save to history after resize
