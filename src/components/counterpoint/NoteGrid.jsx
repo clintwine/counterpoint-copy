@@ -857,13 +857,13 @@ export default function NoteGrid({
                                                                       setZoomY(newZoomY);
                                                                     }
                                                                   }
-                                                                  // Allow vertical scroll when dragging on a note
-                                                                  if (dragState && e.touches.length === 1) {
-                                                                    const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
-                                                                    if (gridRef.current && Math.abs(deltaY) > 5 && !dragState.isDragging) {
-                                                                      gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
-                                                                    }
-                                                                  }
+                                                                  // Allow vertical scroll when dragging on a note (before drag commits)
+                                                                                                              if (dragState && !dragState.isDragging && e.touches.length === 1) {
+                                                                                                                const deltaY = e.touches[0].clientY - dragState.clickOffsetY;
+                                                                                                                if (gridRef.current && Math.abs(deltaY) > 5) {
+                                                                                                                  gridRef.current.scrollTop = (dragState.initialScrollTop || 0) - deltaY;
+                                                                                                                }
+                                                                                                              }
                                                                 }}
                                     onTouchStart={(e) => {
                                       // Detect pinch start
