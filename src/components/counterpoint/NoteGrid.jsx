@@ -875,9 +875,9 @@ export default function NoteGrid({
                                                         }
                                                       }
                                                       if (activeTouch) {
-                                                        handlePointerMove({ touches: [activeTouch] });
-                                                      } else {
-                                                        handlePointerMove(e);
+                                                        handlePointerMove({ touches: [activeTouch], clientX: activeTouch.clientX, clientY: activeTouch.clientY });
+                                                      } else if (e.touches.length > 0) {
+                                                        handlePointerMove({ touches: e.touches, clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
                                                       }
                                                     }
                                                   }}
