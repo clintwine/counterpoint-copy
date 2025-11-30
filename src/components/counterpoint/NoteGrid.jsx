@@ -1281,11 +1281,14 @@ export default function NoteGrid({
                     <div
                       className="absolute z-40 cursor-ew-resize sticky top-0"
                       style={{
-                        left: 56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom),
+                        transform: `translateX(${56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
                         top: 0,
+                        left: 0,
                         width: Math.max(16, 20 * zoom),
                         height: 28,
-                        pointerEvents: 'auto'
+                        pointerEvents: 'auto',
+                        transition: isPlaying && !isScrubbing ? 'transform 50ms linear' : 'none',
+                        willChange: 'transform'
                       }}
                       onMouseDown={(e) => {
                         e.stopPropagation();
