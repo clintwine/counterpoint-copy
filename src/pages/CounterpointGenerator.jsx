@@ -657,7 +657,6 @@ export default function CounterpointGenerator() {
                                       newVoices[activeVoice] = { ...newVoices[activeVoice], instrument: inst };
                                       setVoices(newVoices);
                                     }
-                                    setPianoInstrument(inst);
                                   }}
                                   onPressedNotesChange={setPressedPianoNotes}
                                 />
