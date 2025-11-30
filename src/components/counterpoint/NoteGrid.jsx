@@ -1354,7 +1354,7 @@ export default function NoteGrid({
                                 <div
                                   className="absolute z-30 pointer-events-none"
                                   style={{
-                                    transform: `translateX(${56 + currentBeat * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom)}px)`,
+                                    transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom)}px)`,
                                     top: 28,
                                     left: 0,
                                     width: Math.max(2, 3 * zoom),
