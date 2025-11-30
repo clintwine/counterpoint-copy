@@ -129,27 +129,30 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 }
 
 export default function NoteGrid({ 
-  voices, 
-  currentBeat, 
-  isPlaying, 
-  measures = 8, 
-  onNoteClick,
-  onNotesUpdate,
-  cantusFirmus = [],
-  onExportMidi,
-  onSeek,
-  activeVoice = 0,
-  onActiveVoiceChange,
-  onVoiceInstrumentChange,
-  onSelectionChange,
-  tempo = 80,
-  timeSignature = '4/4',
-  scrollToBeatRef,
-  pressedPianoNotes = new Set(),
-  pianoInstrument = 'organ',
-  playbackControls,
-  onOpenWaveEditor
-}) {
+    voices, 
+    currentBeat, 
+    playheadPosition,
+    isPlaying, 
+    measures = 8, 
+    onNoteClick,
+    onNotesUpdate,
+    cantusFirmus = [],
+    onExportMidi,
+    onSeek,
+    activeVoice = 0,
+    onActiveVoiceChange,
+    onVoiceInstrumentChange,
+    onSelectionChange,
+    tempo = 80,
+    timeSignature = '4/4',
+    scrollToBeatRef,
+    pressedPianoNotes = new Set(),
+    pianoInstrument = 'organ',
+    playbackControls,
+    onOpenWaveEditor
+  }) {
+    // Use smooth playhead position if available, otherwise fall back to currentBeat
+    const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
   const gridRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
