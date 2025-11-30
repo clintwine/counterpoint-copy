@@ -1347,17 +1347,20 @@ export default function NoteGrid({
                     </div>
 
                     {/* Playhead vertical line - scrolls with content */}
-                    <div
-                      className="absolute z-30 pointer-events-none"
-                      style={{
-                        left: 56 + currentBeat * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom),
-                        top: 28,
-                        width: Math.max(2, 3 * zoom),
-                        height: pitches.length * CELL_HEIGHT,
-                        backgroundColor: '#ef4444',
-                        boxShadow: '0 0 8px rgba(239,68,68,0.6)'
-                      }}
-                    />
+                                <div
+                                  className="absolute z-30 pointer-events-none"
+                                  style={{
+                                    transform: `translateX(${56 + currentBeat * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom)}px)`,
+                                    top: 28,
+                                    left: 0,
+                                    width: Math.max(2, 3 * zoom),
+                                    height: pitches.length * CELL_HEIGHT,
+                                    backgroundColor: '#ef4444',
+                                    boxShadow: '0 0 8px rgba(239,68,68,0.6)',
+                                    transition: isPlaying && !isScrubbing ? 'transform 50ms linear' : 'none',
+                                    willChange: 'transform'
+                                  }}
+                                />
 
         {/* Marquee selection rectangle */}
         {marquee && (
