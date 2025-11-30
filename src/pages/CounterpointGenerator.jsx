@@ -78,6 +78,8 @@ export default function CounterpointGenerator() {
         const [showPiano, setShowPiano] = useState(true);
   
   const playbackRef = useRef(null);
+      const animationRef = useRef(null);
+      const lastTimeRef = useRef(null);
       const audioInitialized = useRef(false);
       const queryClient = useQueryClient();
 
