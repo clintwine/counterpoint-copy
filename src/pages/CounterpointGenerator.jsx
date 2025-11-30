@@ -71,7 +71,6 @@ export default function CounterpointGenerator() {
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
-      const [pianoInstrument, setPianoInstrument] = useState('organ');
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
