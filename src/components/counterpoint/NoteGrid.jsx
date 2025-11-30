@@ -1286,9 +1286,7 @@ export default function NoteGrid({
                         left: 0,
                         width: Math.max(16, 20 * zoom),
                         height: 28,
-                        pointerEvents: 'auto',
-                        transition: isPlaying && !isScrubbing ? 'transform 50ms linear' : 'none',
-                        willChange: 'transform'
+                        pointerEvents: 'auto'
                       }}
                       onMouseDown={(e) => {
                         e.stopPropagation();
@@ -1359,9 +1357,7 @@ export default function NoteGrid({
                                     width: Math.max(2, 3 * zoom),
                                     height: pitches.length * CELL_HEIGHT,
                                     backgroundColor: '#ef4444',
-                                    boxShadow: '0 0 8px rgba(239,68,68,0.6)',
-                                    transition: isPlaying && !isScrubbing ? 'transform 50ms linear' : 'none',
-                                    willChange: 'transform'
+                                    boxShadow: '0 0 8px rgba(239,68,68,0.6)'
                                   }}
                                 />
 
