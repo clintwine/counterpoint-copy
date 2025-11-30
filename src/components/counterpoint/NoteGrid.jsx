@@ -1284,7 +1284,7 @@ export default function NoteGrid({
                     <div
                       className="absolute z-40 cursor-ew-resize sticky top-0"
                       style={{
-                        transform: `translateX(${56 + currentBeat * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
+                        transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
                         top: 0,
                         left: 0,
                         width: Math.max(16, 20 * zoom),
