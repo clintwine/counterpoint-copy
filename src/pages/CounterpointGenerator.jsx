@@ -565,6 +565,7 @@ export default function CounterpointGenerator() {
             className="space-y-4"
           >
             <NoteGrid
+                              playheadPosition={playheadPosition}
                               playbackControls={
                                 <PlaybackControls
                                   isPlaying={isPlaying}
