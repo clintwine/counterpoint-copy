@@ -602,7 +602,7 @@ export default function CounterpointGenerator() {
                               timeSignature={settings.timeSignature}
                               scrollToBeatRef={scrollToBeatRef}
                               pressedPianoNotes={pressedPianoNotes}
-                              pianoInstrument={pianoInstrument}
+                              pianoInstrument={voices[activeVoice]?.instrument || 'organ'}
                               onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                 const newVoices = [...voices];
                                 if (newVoices[voiceIndex]) {
