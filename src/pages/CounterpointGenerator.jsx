@@ -220,11 +220,11 @@ export default function CounterpointGenerator() {
     return map[timeSig] || 16;
   };
 
-  // Playback logic - based on time signature
+  // Playback logic - smooth animation with requestAnimationFrame
   useEffect(() => {
     if (isPlaying) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-      const msPerBeat = (60 / tempo) * 1000 / 4; // 16th notes = quarter note / 4
+      const beatsPerSecond = (tempo / 60) * 4; // 16th notes per second
       const totalBeats = settings.measures * beatsPerMeasure;
       
       // If selected notes exist, determine loop bounds from selection
@@ -238,9 +238,15 @@ export default function CounterpointGenerator() {
       const effectiveLoopEnd = selectedNotes.length > 0 ? selectionEnd : (loopEnd ?? totalBeats);
       const effectiveLoopStart = selectedNotes.length > 0 ? selectionStart : loopStart;
       
-      playbackRef.current = setInterval(() => {
-        setCurrentBeat(prev => {
-          const next = prev + 1;
+      lastTimeRef.current = performance.now();
+      
+      const animate = (timestamp) => {
+        if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+        const deltaTime = (timestamp - lastTimeRef.current) / 1000; // Convert to seconds
+        lastTimeRef.current = timestamp;
+        
+        setPlayheadPosition(prev => {
+          const next = prev + deltaTime * beatsPerSecond;
           if (next >= effectiveLoopEnd) {
             if (isLooping || selectedNotes.length > 0) {
               return effectiveLoopStart;
@@ -250,15 +256,32 @@ export default function CounterpointGenerator() {
           }
           return next;
         });
-      }, msPerBeat);
+        
+        animationRef.current = requestAnimationFrame(animate);
+      };
       
-      return () => clearInterval(playbackRef.current);
+      animationRef.current = requestAnimationFrame(animate);
+      
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
     } else {
-      if (playbackRef.current) {
-        clearInterval(playbackRef.current);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
+      lastTimeRef.current = null;
     }
   }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd, selectedNotes]);
+
+  // Update discrete beat for note triggering
+  useEffect(() => {
+    const discreteBeat = Math.floor(playheadPosition);
+    if (discreteBeat !== currentBeat) {
+      setCurrentBeat(discreteBeat);
+    }
+  }, [playheadPosition, currentBeat]);
 
   // Pre-index notes by beat for fast playback lookup
   const notesAtBeatMap = React.useMemo(() => {
