@@ -361,6 +361,7 @@ export default function CounterpointGenerator() {
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);
+    setPlayheadPosition(beat);
   };
 
   // Export as data
