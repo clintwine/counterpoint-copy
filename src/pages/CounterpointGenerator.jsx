@@ -76,6 +76,7 @@ export default function CounterpointGenerator() {
           const scrollToBeatRef = useRef(null);
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
         const [showPiano, setShowPiano] = useState(true);
+  const [previewingSongId, setPreviewingSongId] = useState(null);
   
   const playbackRef = useRef(null);
       const animationRef = useRef(null);
@@ -176,6 +177,47 @@ export default function CounterpointGenerator() {
     setCurrentProjectId(null); // Not a project, it's a song
     setTempo(song.settings?.tempo || 80);
     setSongDialogOpen(false);
+  };
+
+  const handlePreviewSong = (song, e) => {
+    e.stopPropagation();
+    ensureAudio();
+    
+    if (previewingSongId === song.id) {
+      // Stop preview
+      stopAllNotes();
+      setPreviewingSongId(null);
+      return;
+    }
+    
+    // Start preview
+    setPreviewingSongId(song.id);
+    const previewTempo = song.settings?.tempo || 80;
+    const previewNotes = song.cantusFirmus || [];
+    
+    let beatIndex = 0;
+    const beatsPerSecond = (previewTempo / 60) * 4;
+    const interval = 1000 / beatsPerSecond;
+    
+    const playInterval = setInterval(() => {
+      if (beatIndex >= previewNotes.length) {
+        clearInterval(playInterval);
+        setPreviewingSongId(null);
+        return;
+      }
+      
+      const note = previewNotes[beatIndex];
+      if (note) {
+        playNote(note.pitch, 0.3, 0.7, 0, 'organ');
+      }
+      beatIndex++;
+    }, interval);
+    
+    // Auto-stop after song duration
+    setTimeout(() => {
+      clearInterval(playInterval);
+      setPreviewingSongId(null);
+    }, (previewNotes.length * interval) + 500);
   };
 
   const handleNewProject = () => {
@@ -518,13 +560,23 @@ export default function CounterpointGenerator() {
                               </span>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-amber-400 hover:text-amber-300"
-                          >
-                            Load →
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handlePreviewSong(song, e)}
+                              className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}
+                            >
+                              {previewingSongId === song.id ? '⏹' : '▶'}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-amber-400 hover:text-amber-300"
+                            >
+                              Load →
+                            </Button>
+                          </div>
                         </div>
                       ))
                     )}
