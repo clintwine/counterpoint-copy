@@ -166,6 +166,14 @@ export default function CounterpointGenerator() {
   };
 
   const handleLoadSong = (song) => {
+    // Stop any preview
+    if (previewTimeoutRef.current) {
+      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current = null;
+    }
+    stopAllNotes();
+    setPreviewingSongId(null);
+    
     setSettings(song.settings || DEFAULT_SETTINGS);
     setCantusFirmus(song.cantusFirmus || []);
     setGeneratedVoices(song.generatedVoices || []);
