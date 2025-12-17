@@ -206,7 +206,7 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
-  const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0 });
+  const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
   const [pinchState, setPinchState] = useState(null);
   const lastTapRef = useRef({ key: null, time: 0 });
   const touchStartRef = useRef(null); // Track touch start for scroll detection
