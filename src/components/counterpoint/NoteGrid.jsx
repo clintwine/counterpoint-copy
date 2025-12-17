@@ -415,6 +415,18 @@ export default function NoteGrid({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [deleteSelected, copySelected, paste, selectAll, undo, redo]);
 
+  const getBeatFromHeaderPosition = (clientX) => {
+    if (!gridRef.current) return null;
+    const gridRect = gridRef.current.getBoundingClientRect();
+    const scrollLeft = gridRef.current.scrollLeft;
+    const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
+    const beat = Math.floor(x / CELL_WIDTH);
+    if (beat >= 0 && beat < totalBeats) {
+      return beat;
+    }
+    return null;
+  };
+
   const getCellFromPosition = (clientX, clientY) => {
     if (!containerRef.current || !gridRef.current) return null;
     const gridRect = gridRef.current.getBoundingClientRect();
@@ -988,33 +1000,33 @@ export default function NoteGrid({
                             <div 
                               className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800"
                               onMouseDown={(e) => {
-                                const cell = getCellFromPosition(e.clientX, e.clientY);
-                                if (!cell) return;
+                                const beat = getBeatFromHeaderPosition(e.clientX);
+                                if (beat === null) return;
 
                                 // Start loop selection on any mousedown
                                 setIsLoopSelecting(true);
-                                setLoopSelectStart(cell.beat);
+                                setLoopSelectStart(beat);
                                 if (onLoopChange) {
-                                  onLoopChange(cell.beat, cell.beat);
+                                  onLoopChange(beat, beat);
                                 }
                               }}
                               onMouseMove={(e) => {
-                                const cell = getCellFromPosition(e.clientX, e.clientY);
-                                if (!cell) return;
+                                const beat = getBeatFromHeaderPosition(e.clientX);
+                                if (beat === null) return;
 
                                 if (isLoopSelecting && loopSelectStart !== null) {
-                                  const start = Math.min(loopSelectStart, cell.beat);
-                                  const end = Math.max(loopSelectStart, cell.beat);
+                                  const start = Math.min(loopSelectStart, beat);
+                                  const end = Math.max(loopSelectStart, beat);
                                   if (onLoopChange) {
                                     onLoopChange(start, end);
                                   }
                                 }
                               }}
                               onMouseUp={(e) => {
-                                const cell = getCellFromPosition(e.clientX, e.clientY);
+                                const beat = getBeatFromHeaderPosition(e.clientX);
                                 // If no drag occurred (same beat), seek instead of setting loop
-                                if (cell && loopSelectStart === cell.beat && onSeek) {
-                                  onSeek(cell.beat);
+                                if (beat !== null && loopSelectStart === beat && onSeek) {
+                                  onSeek(beat);
                                 }
                                 setIsLoopSelecting(false);
                                 setLoopSelectStart(null);
