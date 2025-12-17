@@ -507,8 +507,6 @@ export default function CounterpointGenerator() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-2 sm:mb-8"
                   >
-             
-            <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
                                 {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
                 <DialogTrigger asChild>
@@ -647,10 +645,6 @@ export default function CounterpointGenerator() {
                   </form>
                 </DialogContent>
               </Dialog>
-
-
-            </div>
-          </div>
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
