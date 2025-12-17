@@ -730,6 +730,10 @@ export default function CounterpointGenerator() {
                               scrollToBeatRef={scrollToBeatRef}
                               pressedPianoNotes={pressedPianoNotes}
                               pianoInstrument={voices[activeVoice]?.instrument || 'organ'}
+                              loopStart={loopStart}
+                              loopEnd={loopEnd}
+                              isLooping={isLooping}
+                              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
                               onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                 const newVoices = [...voices];
                                 if (newVoices[voiceIndex]) {

@@ -177,7 +177,11 @@ export default function NoteGrid({
     pressedPianoNotes = new Set(),
     pianoInstrument = 'organ',
     playbackControls,
-    onOpenWaveEditor
+    onOpenWaveEditor,
+    loopStart = null,
+    loopEnd = null,
+    isLooping = false,
+    onLoopChange
   }) {
     // Use smooth playhead position if available, otherwise fall back to currentBeat
     const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
