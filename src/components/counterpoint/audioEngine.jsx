@@ -148,19 +148,19 @@ export function setEffectLevel(effect, level) {
   effectLevels[effect] = level;
   if (!audioContext) return;
   
-  const now = Math.max(0, audioContext.currentTime + 0.001);
+  const now = Math.max(0.001, audioContext.currentTime + 0.01);
   if (effect === 'reverb' && reverbGain) {
     reverbGain.gain.cancelScheduledValues(now);
     reverbGain.gain.setValueAtTime(reverbGain.gain.value, now);
-    reverbGain.gain.linearRampToValueAtTime(level, now + 0.05);
+    reverbGain.gain.linearRampToValueAtTime(level, Math.max(now + 0.05, 0.06));
   } else if (effect === 'delay' && delayGain) {
     delayGain.gain.cancelScheduledValues(now);
     delayGain.gain.setValueAtTime(delayGain.gain.value, now);
-    delayGain.gain.linearRampToValueAtTime(level, now + 0.05);
+    delayGain.gain.linearRampToValueAtTime(level, Math.max(now + 0.05, 0.06));
   } else if (effect === 'chorus' && chorusGain) {
     chorusGain.gain.cancelScheduledValues(now);
     chorusGain.gain.setValueAtTime(chorusGain.gain.value, now);
-    chorusGain.gain.linearRampToValueAtTime(level, now + 0.05);
+    chorusGain.gain.linearRampToValueAtTime(level, Math.max(now + 0.05, 0.06));
   }
 }
 
@@ -262,7 +262,7 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
 
-  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
   const { oscillators: oscConfigs, envelope, filter: filterConfig } = customConfig;
 
   const oscillators = [];
@@ -292,23 +292,28 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   // Envelope
   const { attack, decay, sustain, release } = envelope;
   const totalDuration = duration + release;
+  const attackTime = Math.max(now + 0.001, now + attack);
+  const decayTime = Math.max(attackTime + 0.001, now + attack + decay);
+  const releaseStartTime = Math.max(decayTime + 0.001, now + duration - release);
+  const releaseEndTime = Math.max(releaseStartTime + 0.001, now + totalDuration);
 
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
-  gainNode.gain.linearRampToValueAtTime(volume * sustain * 0.6, now + attack + decay);
-  gainNode.gain.setValueAtTime(volume * sustain * 0.6, now + duration - release);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, attackTime);
+  gainNode.gain.linearRampToValueAtTime(volume * sustain * 0.6, decayTime);
+  gainNode.gain.setValueAtTime(volume * sustain * 0.6, releaseStartTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
 
   filterNode.connect(gainNode);
   gainNode.connect(masterGain);
 
+  const stopTime = Math.max(now + 0.01, now + totalDuration);
   oscillators.forEach(osc => {
     osc.start(now);
-    osc.stop(now + totalDuration);
+    osc.stop(stopTime);
   });
 
   return { oscillators, gainNode };
-}
+  }
 
 function createDistortion(amount) {
   if (!audioContext) return null;
@@ -332,7 +337,7 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   if (!freq) return;
   
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
-  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
   // Use global envelope settings
   const attack = envelopeSettings.attack;
@@ -372,11 +377,16 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   
   // Envelope using global settings
   const totalDuration = duration + release;
+  const attackTime = Math.max(now + 0.001, now + attack);
+  const decayTime = Math.max(attackTime + 0.001, now + attack + 0.05);
+  const releaseStartTime = Math.max(decayTime + 0.001, now + duration - release);
+  const releaseEndTime = Math.max(releaseStartTime + 0.001, now + totalDuration);
+  
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
-  gainNode.gain.linearRampToValueAtTime(volume * sustainLevel * 0.6, now + attack + 0.05);
-  gainNode.gain.setValueAtTime(volume * sustainLevel * 0.6, now + duration - release);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, attackTime);
+  gainNode.gain.linearRampToValueAtTime(volume * sustainLevel * 0.6, decayTime);
+  gainNode.gain.setValueAtTime(volume * sustainLevel * 0.6, releaseStartTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
   
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
@@ -397,7 +407,7 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
   if (!freq) return null;
   
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
-  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
   // Create oscillators based on instrument harmonics
   const oscillators = [];
@@ -431,9 +441,12 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
   }
   
   // Attack envelope - sustain level maintained until release
+  const attackTime = Math.max(now + 0.001, now + attack);
+  const sustainTime = Math.max(attackTime + 0.001, now + attack + 0.1);
+  
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + attack);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.6, now + attack + 0.1);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, attackTime);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.6, sustainTime);
   
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
@@ -448,12 +461,13 @@ export function stopNoteSustain(oscillatorObj, release = 0.3) {
   if (!oscillatorObj || !audioContext) return;
   
   const { oscillators, gainNode } = oscillatorObj;
-  const now = Math.max(0, audioContext.currentTime + 0.001);
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
+  const releaseEndTime = Math.max(now + 0.01, now + release);
   
   // Release envelope
   gainNode.gain.cancelScheduledValues(now);
   gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + release);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
   
   // Stop oscillators after release
   setTimeout(() => {
@@ -476,13 +490,17 @@ export function playChord(pitches, duration = 0.5, volumes = []) {
 
 export function stopAllNotes() {
   if (audioContext) {
-    const now = Math.max(0, audioContext.currentTime + 0.001);
+    const now = Math.max(0.01, audioContext.currentTime + 0.01);
+    const fadeEndTime = Math.max(now + 0.01, now + 0.05);
     // Smooth fade out to prevent snapping
     masterGain.gain.cancelScheduledValues(now);
     masterGain.gain.setValueAtTime(masterGain.gain.value, now);
-    masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, fadeEndTime);
     setTimeout(() => {
-      if (masterGain) masterGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+      if (masterGain && audioContext) {
+        const resetTime = Math.max(0.01, audioContext.currentTime);
+        masterGain.gain.setValueAtTime(0.4, resetTime);
+      }
     }, 100);
   }
 }
@@ -497,7 +515,8 @@ export function setMasterVolume(volume) {
 export function playMetronomeClick(isDownbeat = false) {
   if (!audioContext) initAudio();
   
-  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
+  const endTime = Math.max(now + 0.01, now + 0.05);
   const osc = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
   
@@ -506,13 +525,13 @@ export function playMetronomeClick(isDownbeat = false) {
   osc.type = 'sine';
   
   gainNode.gain.setValueAtTime(0.3, now);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, endTime);
   
   osc.connect(gainNode);
   gainNode.connect(audioContext.destination); // Direct to output, bypass effects
   
   osc.start(now);
-  osc.stop(now + 0.05);
+  osc.stop(endTime);
 }
 
 // Create a more sophisticated instrument
