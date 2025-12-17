@@ -507,16 +507,7 @@ export default function CounterpointGenerator() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-2 sm:mb-8"
                   >
-                    // <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                    //   <div className="flex items-center gap-2 sm:gap-3">
-                    //     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center flex-shrink-0">
-                    //       <Music2 className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900" />
-                    //     </div>
-                    //     <h1 className="text-lg sm:text-3xl font-light text-cream tracking-tight">
-                    //       Counterpoint <span className="font-semibold">Generator</span>
-                    //     </h1>
-                    //   </div>
-            
+             
             <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
                                 {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
