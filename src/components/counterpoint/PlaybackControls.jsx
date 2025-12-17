@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +46,8 @@ export default function PlaybackControls({
   onAIComposer,
   onGenerate,
   canGenerate,
-  isGenerating
+  isGenerating,
+  onExportMidi
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -144,7 +145,11 @@ export default function PlaybackControls({
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onExport} className="text-white cursor-pointer">
             <Download className="w-4 h-4 mr-2" />
-            Export
+            Export JSON
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onExportMidi} className="text-white cursor-pointer">
+            <FileAudio className="w-4 h-4 mr-2" />
+            Export MIDI
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">

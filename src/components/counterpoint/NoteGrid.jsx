@@ -757,20 +757,6 @@ export default function NoteGrid({
           </Button>
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onExportMidi}
-            disabled={cantusFirmus.length === 0}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Export MIDI"
-          >
-            <FileAudio className="w-4 h-4" />
-            <span className="ml-1 text-xs hidden sm:inline">MIDI</span>
-          </Button>
-
-          <div className="w-px h-5 bg-slate-600 mx-2" />
 
           {/* Instrument for active voice */}
                         <InstrumentSelect 

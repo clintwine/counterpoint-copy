@@ -541,7 +541,29 @@ export default function CounterpointGenerator() {
                                   onGenerate={handleGenerate}
                                   canGenerate={cantusFirmus.length > 0}
                                   isGenerating={isGenerating}
-                                />
+                                  onExportMidi={() => {
+                                    const midiData = {
+                                      tempo,
+                                      timeSignature: [4, 4],
+                                      tracks: allVoices.map((voice, idx) => ({
+                                        name: voice.name,
+                                        notes: voice.notes?.map(n => ({
+                                          pitch: n.pitch,
+                                          startTime: n.beat * (60 / tempo),
+                                          duration: 60 / tempo,
+                                          velocity: 80
+                                        })) || []
+                                      }))
+                                    };
+                                    const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                  }}
+                                  />
                               }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
                               currentBeat={currentBeat}
@@ -564,28 +586,6 @@ export default function CounterpointGenerator() {
                                   newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
                                   setVoices(newVoices);
                                 }
-                              }}
-                              onExportMidi={() => {
-                                const midiData = {
-                                  tempo,
-                                  timeSignature: [4, 4],
-                                  tracks: allVoices.map((voice, idx) => ({
-                                    name: voice.name,
-                                    notes: voice.notes?.map(n => ({
-                                      pitch: n.pitch,
-                                      startTime: n.beat * (60 / tempo),
-                                      duration: 60 / tempo,
-                                      velocity: 80
-                                    })) || []
-                                  }))
-                                };
-                                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                a.click();
-                                URL.revokeObjectURL(url);
                               }}
                             />
             
