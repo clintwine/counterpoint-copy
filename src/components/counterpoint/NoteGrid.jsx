@@ -1284,74 +1284,31 @@ export default function NoteGrid({
         </div>
 
         {/* Playhead triangle marker - fixed at top */}
-                    <div
-                      className="absolute z-40 cursor-ew-resize sticky top-0"
-                      style={{
-                        transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
-                        top: 0,
-                        left: 0,
-                        width: Math.max(16, 20 * zoom),
-                        height: 28,
-                        pointerEvents: 'auto'
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        setIsScrubbing(true);
-                        const startX = e.clientX;
-                        const startBeat = currentBeat;
-
-                        const handleMouseMove = (moveEvent) => {
-                          const deltaX = moveEvent.clientX - startX;
-                          const beatDelta = Math.round(deltaX / CELL_WIDTH);
-                          const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-                          onSeek && onSeek(newBeat);
-                        };
-
-                        const handleMouseUp = () => {
-                          setIsScrubbing(false);
-                          document.removeEventListener('mousemove', handleMouseMove);
-                          document.removeEventListener('mouseup', handleMouseUp);
-                        };
-
-                        document.addEventListener('mousemove', handleMouseMove);
-                        document.addEventListener('mouseup', handleMouseUp);
-                      }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        setIsScrubbing(true);
-                        const startX = e.touches[0].clientX;
-                        const startBeat = currentBeat;
-
-                        const handleTouchMove = (moveEvent) => {
-                          const deltaX = moveEvent.touches[0].clientX - startX;
-                          const beatDelta = Math.round(deltaX / CELL_WIDTH);
-                          const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-                          onSeek && onSeek(newBeat);
-                        };
-
-                        const handleTouchEnd = () => {
-                          setIsScrubbing(false);
-                          document.removeEventListener('touchmove', handleTouchMove);
-                          document.removeEventListener('touchend', handleTouchEnd);
-                        };
-
-                        document.addEventListener('touchmove', handleTouchMove);
-                        document.addEventListener('touchend', handleTouchEnd);
-                      }}
-                    >
-                      {/* Triangle marker */}
-                      <div 
-                        className="absolute left-1/2 -translate-x-1/2"
-                        style={{
-                          top: 6,
-                          borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
-                          borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
-                          borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
-                        }}
-                      />
-                    </div>
+        <div
+          className="absolute z-40 cursor-ew-resize sticky top-0"
+          style={{
+            transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
+            top: 0,
+            left: 0,
+            width: Math.max(16, 20 * zoom),
+            height: 28,
+            pointerEvents: 'auto'
+          }}
+          onMouseDown={(e) => {
+        ...
+          }}
+        >
+          {/* Triangle marker */}
+          <div 
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{
+              top: 0,
+              borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
+              borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
+              borderBottom: `${Math.max(10, 12 * zoom)}px solid #ef4444`
+            }}
+          />
+        </div>
 
                     {/* Playhead vertical line - scrolls with content */}
                                 <div
