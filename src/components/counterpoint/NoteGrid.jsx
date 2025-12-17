@@ -1173,12 +1173,10 @@ export default function NoteGrid({
                                 
                                 if (isBeingDragged) return null;
                                 
+                                const noteVelocity = note.velocity ?? 0.8;
+                                const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
+                                
                                 return (
-                                  {(() => {
-                                    const noteVelocity = note.velocity ?? 0.8;
-                                    const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
-
-                                    return (
                                   <div
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
@@ -1327,11 +1325,9 @@ export default function NoteGrid({
                                       {note.pitch.replace(/\d/, '')}
                                     </span>
                                     <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
-                                    </div>
-                                    );
-                                    })()}
-                                    );
-                                    })}
+                                  </div>
+                                );
+                              })}
                             </div>
                           );
                         })}
