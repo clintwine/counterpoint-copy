@@ -439,7 +439,7 @@ export default function NoteGrid({
               onNotesUpdate(newNotes);
             } else {
               // Add the note
-              const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+              const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
               saveToHistory(newNotes);
               onNotesUpdate(newNotes);
               // Play the note with proper duration for feedback
@@ -494,7 +494,7 @@ export default function NoteGrid({
                 // Only add if not already painted in this stroke and no existing note
                 if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
                   paintedNotesRef.current.add(noteKey);
-                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION }].sort((a, b) => a.beat - b.beat);
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   onNotesUpdate(newNotes);
                   // Play the note with proper duration for feedback
                   initAudio();
@@ -1422,15 +1422,45 @@ export default function NoteGrid({
         </div>
       
       <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
-        <p className="text-white/50 text-xs">
-          {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select'}
-          {tool === 'marquee' && 'Click and drag to select multiple notes'}
-          {tool === 'draw' && 'Click to add/remove notes'}
-        </p>
-        <div className="flex items-center gap-3">
-          {selectedNotes.size > 0 && (
+      <p className="text-white/50 text-xs">
+        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select'}
+        {tool === 'marquee' && 'Click and drag to select multiple notes'}
+        {tool === 'draw' && 'Click to add/remove notes'}
+      </p>
+      <div className="flex items-center gap-3">
+        {selectedNotes.size > 0 && (
+          <>
             <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
-          )}
+            <div className="flex items-center gap-2">
+              <span className="text-white/50 text-xs">Velocity:</span>
+              <Slider
+                value={[(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return (firstSelected?.velocity ?? 0.8) * 100;
+                })()]}
+                onValueChange={([value]) => {
+                  const velocity = value / 100;
+                  const newNotes = cantusFirmus.map(n => 
+                    selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                      ? { ...n, velocity } 
+                      : n
+                  );
+                  onNotesUpdate(newNotes);
+                }}
+                min={10}
+                max={100}
+                step={1}
+                className="w-24 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+              />
+              <span className="text-white/70 text-xs w-8 text-right">
+                {Math.round(((() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return (firstSelected?.velocity ?? 0.8) * 100;
+                })()))}
+              </span>
+            </div>
+          </>
+        )}
           <ScoreMinimap
             notes={cantusFirmus}
             totalBeats={totalBeats}

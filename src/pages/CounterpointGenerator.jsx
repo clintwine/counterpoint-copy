@@ -395,9 +395,10 @@ export default function CounterpointGenerator() {
       const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
       notesAtBeat.forEach(note => {
         const volume = (voices[0]?.volume || 80) / 100;
+        const velocity = note.velocity ?? 0.8;
         const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
         const instrument = voices[0]?.instrument || 'organ';
-        playNote(note.pitch, actualDuration, volume * 0.7, 0, instrument);
+        playNote(note.pitch, actualDuration, volume * velocity * 0.7, 0, instrument);
       });
     } else {
       // Use pre-indexed map for O(1) lookup
@@ -405,9 +406,10 @@ export default function CounterpointGenerator() {
       notesAtBeat.forEach(({ note, voiceIndex }) => {
         if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
         const volume = (voices[voiceIndex]?.volume || 80) / 100;
+        const velocity = note.velocity ?? 0.8;
         const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
-        playNote(note.pitch, actualDuration, volume * 0.7, voiceIndex, instrument);
+        playNote(note.pitch, actualDuration, volume * velocity * 0.7, voiceIndex, instrument);
       });
     }
 
