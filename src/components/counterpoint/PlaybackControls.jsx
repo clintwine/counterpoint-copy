@@ -178,52 +178,9 @@ export default function PlaybackControls({
       </DropdownMenu>
 
         <div className="w-px h-5 bg-slate-700 mx-2" />
-        {/* Time Signature */}
-      <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-        <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-slate-700">
-          {TIME_SIGNATURES.map(ts => (
-            <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
-              {ts.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
 
-      {/* BPM */}
-      <div className="flex items-center gap-1">
-        {isEditingBpm ? (
-          <input
-            type="number"
-            value={bpmInputValue}
-            onChange={(e) => setBpmInputValue(e.target.value)}
-            onBlur={handleBpmInputBlur}
-            onKeyDown={handleBpmInputKeyDown}
-            autoFocus
-            className="bg-slate-800 border border-amber-500 rounded px-2 py-0.5 text-white font-mono text-xs font-medium w-12 text-center outline-none"
-            min={20}
-            max={455}
-          />
-        ) : (
-          <div
-            ref={bpmRef}
-            onMouseDown={handleBpmMouseDown}
-            onDoubleClick={handleBpmDoubleClick}
-            className={`bg-slate-800 border border-slate-700 rounded px-2 py-0.5 cursor-ew-resize select-none hover:border-slate-600 transition-colors ${isDragging ? 'border-amber-500' : ''}`}
-            title="Drag to change tempo"
-          >
-            <span className="text-white font-mono text-xs font-medium">{tempo}</span>
-          </div>
-        )}
-        <span className="text-white/40 text-[10px] uppercase">bpm</span>
-      </div>
-
-      <div className="w-px h-5 bg-slate-700" />
-
-      {/* Transport controls - centered */}
-      <div className="flex items-center gap-1">
+        {/* Transport controls - prominent placement */}
+        <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="sm"
@@ -255,11 +212,55 @@ export default function PlaybackControls({
         >
           <Square className="w-3 h-3 fill-current" />
         </Button>
-      </div>
+        </div>
 
-      <div className="w-px h-5 bg-slate-700" />
+        <div className="w-px h-5 bg-slate-700" />
 
-      {/* Time display */}
+        {/* Time Signature */}
+        <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+        <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="bg-slate-800 border-slate-700">
+          {TIME_SIGNATURES.map(ts => (
+            <SelectItem key={ts.value} value={ts.value} className="text-white text-xs">
+              {ts.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+        </Select>
+
+        {/* BPM */}
+        <div className="flex items-center gap-1">
+        {isEditingBpm ? (
+          <input
+            type="number"
+            value={bpmInputValue}
+            onChange={(e) => setBpmInputValue(e.target.value)}
+            onBlur={handleBpmInputBlur}
+            onKeyDown={handleBpmInputKeyDown}
+            autoFocus
+            className="bg-slate-800 border border-amber-500 rounded px-2 py-0.5 text-white font-mono text-xs font-medium w-12 text-center outline-none"
+            min={20}
+            max={455}
+          />
+        ) : (
+          <div
+            ref={bpmRef}
+            onMouseDown={handleBpmMouseDown}
+            onDoubleClick={handleBpmDoubleClick}
+            className={`bg-slate-800 border border-slate-700 rounded px-2 py-0.5 cursor-ew-resize select-none hover:border-slate-600 transition-colors ${isDragging ? 'border-amber-500' : ''}`}
+            title="Drag to change tempo"
+          >
+            <span className="text-white font-mono text-xs font-medium">{tempo}</span>
+          </div>
+        )}
+        <span className="text-white/40 text-[10px] uppercase">bpm</span>
+        </div>
+
+        <div className="w-px h-5 bg-slate-700" />
+
+        {/* Time display */}
       <div className="flex items-center gap-1 bg-slate-800 rounded px-2 py-1 font-mono text-xs">
         <span className="text-amber-400 font-medium">{formatTime(currentBeat)}</span>
         <span className="text-white/40">/</span>
