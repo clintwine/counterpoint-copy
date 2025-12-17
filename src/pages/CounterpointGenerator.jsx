@@ -83,6 +83,7 @@ export default function CounterpointGenerator() {
       const lastTimeRef = useRef(null);
       const audioInitialized = useRef(false);
       const queryClient = useQueryClient();
+  const previewTimeoutRef = useRef(null);
 
       // Global spacebar handler for play/pause
       useEffect(() => {
@@ -183,41 +184,52 @@ export default function CounterpointGenerator() {
     e.stopPropagation();
     ensureAudio();
     
+    // Clear any existing preview
+    if (previewTimeoutRef.current) {
+      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current = null;
+    }
+    stopAllNotes();
+    
     if (previewingSongId === song.id) {
       // Stop preview
-      stopAllNotes();
       setPreviewingSongId(null);
       return;
     }
     
-    // Start preview
+    // Start new preview
     setPreviewingSongId(song.id);
     const previewTempo = song.settings?.tempo || 80;
     const previewNotes = song.cantusFirmus || [];
+    const previewVoices = song.generatedVoices || [];
+    const allPreviewVoices = [{ notes: previewNotes }, ...previewVoices];
     
-    let beatIndex = 0;
-    const beatsPerSecond = (previewTempo / 60) * 4;
-    const interval = 1000 / beatsPerSecond;
-    
-    const playInterval = setInterval(() => {
-      if (beatIndex >= previewNotes.length) {
-        clearInterval(playInterval);
-        setPreviewingSongId(null);
-        return;
-      }
-      
-      const note = previewNotes[beatIndex];
-      if (note) {
-        playNote(note.pitch, 0.3, 0.7, 0, 'organ');
-      }
-      beatIndex++;
-    }, interval);
+    // Play all voices with proper timing
+    const timeouts = [];
+    allPreviewVoices.forEach((voice, voiceIndex) => {
+      voice.notes?.forEach(note => {
+        const startTime = (note.beat / 4) * (60 / previewTempo) * 1000; // Convert beat to milliseconds
+        const duration = ((note.duration || 1) / 4) * (60 / previewTempo);
+        
+        const timeout = setTimeout(() => {
+          playNote(note.pitch, duration, 0.7, voiceIndex, 'organ');
+        }, startTime);
+        
+        timeouts.push(timeout);
+      });
+    });
     
     // Auto-stop after song duration
-    setTimeout(() => {
-      clearInterval(playInterval);
+    const maxBeat = Math.max(...previewNotes.map(n => n.beat + (n.duration || 1)));
+    const totalDuration = (maxBeat / 4) * (60 / previewTempo) * 1000 + 500;
+    
+    const stopTimeout = setTimeout(() => {
       setPreviewingSongId(null);
-    }, (previewNotes.length * interval) + 500);
+      previewTimeoutRef.current = null;
+    }, totalDuration);
+    
+    timeouts.push(stopTimeout);
+    previewTimeoutRef.current = timeouts;
   };
 
   const handleNewProject = () => {
