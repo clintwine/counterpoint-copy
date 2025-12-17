@@ -146,12 +146,21 @@ export async function initAudio() {
 
 export function setEffectLevel(effect, level) {
   effectLevels[effect] = level;
+  if (!audioContext) return;
+  
+  const now = audioContext.currentTime;
   if (effect === 'reverb' && reverbGain) {
-    reverbGain.gain.value = level;
+    reverbGain.gain.cancelScheduledValues(now);
+    reverbGain.gain.setValueAtTime(reverbGain.gain.value, now);
+    reverbGain.gain.linearRampToValueAtTime(level, now + 0.05);
   } else if (effect === 'delay' && delayGain) {
-    delayGain.gain.value = level;
+    delayGain.gain.cancelScheduledValues(now);
+    delayGain.gain.setValueAtTime(delayGain.gain.value, now);
+    delayGain.gain.linearRampToValueAtTime(level, now + 0.05);
   } else if (effect === 'chorus' && chorusGain) {
-    chorusGain.gain.value = level;
+    chorusGain.gain.cancelScheduledValues(now);
+    chorusGain.gain.setValueAtTime(chorusGain.gain.value, now);
+    chorusGain.gain.linearRampToValueAtTime(level, now + 0.05);
   }
 }
 
@@ -467,9 +476,13 @@ export function playChord(pitches, duration = 0.5, volumes = []) {
 
 export function stopAllNotes() {
   if (audioContext) {
-    masterGain.gain.setValueAtTime(0, audioContext.currentTime);
+    const now = audioContext.currentTime;
+    // Smooth fade out to prevent snapping
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
     setTimeout(() => {
-      if (masterGain) masterGain.gain.value = 0.4;
+      if (masterGain) masterGain.gain.setValueAtTime(0.4, audioContext.currentTime);
     }, 100);
   }
 }
