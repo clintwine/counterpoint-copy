@@ -2,7 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16, clicksPerMeasure: 4 },
@@ -31,7 +38,15 @@ export default function PlaybackControls({
   onTimeSignatureChange,
   metronomeEnabled,
   onMetronomeToggle,
-  onScrollToBeat
+  onScrollToBeat,
+  onNewProject,
+  onSaveProject,
+  onLoadProject,
+  onExport,
+  onAIComposer,
+  onGenerate,
+  canGenerate,
+  isGenerating
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -100,7 +115,58 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center justify-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
+    <div className="flex items-center justify-between gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
+      {/* File Menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-white/70 hover:text-white hover:bg-slate-700"
+          >
+            <Menu className="w-4 h-4 mr-1" />
+            File
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-slate-800 border-slate-700">
+          <DropdownMenuItem onClick={onNewProject} className="text-white cursor-pointer">
+            <FileText className="w-4 h-4 mr-2" />
+            New Project
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onLoadProject} className="text-white cursor-pointer">
+            <FolderOpen className="w-4 h-4 mr-2" />
+            Load Project
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onSaveProject} className="text-white cursor-pointer">
+            <Save className="w-4 h-4 mr-2" />
+            Save Project
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem onClick={onExport} className="text-white cursor-pointer">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Composer
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={onGenerate} 
+            disabled={!canGenerate || isGenerating}
+            className="text-amber-400 cursor-pointer font-semibold"
+          >
+            {isGenerating ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 mr-2" />
+            )}
+            Generate Counterpoint
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <div className="flex items-center gap-2 sm:gap-3">
       {/* Time Signature */}
       <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
         <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">

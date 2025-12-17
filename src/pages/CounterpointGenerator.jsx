@@ -407,18 +407,11 @@ export default function CounterpointGenerator() {
                       </div>
             
             <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
-                                {/* Load Project */}
+                                {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
                 <DialogTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
-                                        >
-                                          <FolderOpen className="w-4 h-4 sm:mr-2" />
-                                          <span className="hidden sm:inline">Load</span>
-                                        </Button>
-                                      </DialogTrigger>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
                 <DialogContent className="bg-slate-900 border-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Load Project</DialogTitle>
@@ -464,18 +457,11 @@ export default function CounterpointGenerator() {
                 </DialogContent>
               </Dialog>
 
-              {/* Save Project */}
+              {/* Save Project Dialog */}
               <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
                 <DialogTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
-                                        >
-                                          <Save className="w-4 h-4 sm:mr-2" />
-                                          <span className="hidden sm:inline">Save</span>
-                                        </Button>
-                                      </DialogTrigger>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
                 <DialogContent className="bg-slate-900 border-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
@@ -502,53 +488,7 @@ export default function CounterpointGenerator() {
                 </DialogContent>
               </Dialog>
 
-              {/* AI Composer */}
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={async () => {
-                                      const isAuth = await base44.auth.isAuthenticated();
-                                      if (!isAuth) {
-                                        base44.auth.redirectToLogin(window.location.href);
-                                        return;
-                                      }
-                                      setChatbotOpen(true);
-                                    }}
-                                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
-                                  >
-                                    <Sparkles className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">AI Composer</span>
-                                  </Button>
 
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleExport}
-                                    disabled={generatedVoices.length === 0}
-                                    className="border-slate-700 text-cream/70 hover:text-cream hover:bg-slate-800 h-8 px-2 sm:px-3"
-                                  >
-                                    <Download className="w-4 h-4 sm:mr-2" />
-                                    <span className="hidden sm:inline">Export</span>
-                                  </Button>
-                                  <Button
-                                    onClick={handleGenerate}
-                                    size="sm"
-                                    disabled={cantusFirmus.length === 0 || isGenerating}
-                                    style={{ 
-                                      background: 'linear-gradient(to right, #fbbf24, #d97706)', 
-                                      color: '#0f172a',
-                                      border: '2px solid #f59e0b',
-                                      fontWeight: 600
-                                    }}
-                                    className="hover:opacity-90 shadow-lg h-8 px-2 sm:px-3"
-                                  >
-                                    {isGenerating ? (
-                                      <RefreshCw className="w-4 h-4 sm:mr-2 animate-spin" />
-                                    ) : (
-                                      <Wand2 className="w-4 h-4 sm:mr-2" />
-                                    )}
-                                    <span className="hidden sm:inline">Generate</span>
-                                  </Button>
             </div>
           </div>
         </motion.header>
@@ -586,6 +526,21 @@ export default function CounterpointGenerator() {
                                   metronomeEnabled={metronomeEnabled}
                                   onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
                                   onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                                  onNewProject={handleNewProject}
+                                  onSaveProject={() => setSaveDialogOpen(true)}
+                                  onLoadProject={() => setLoadDialogOpen(true)}
+                                  onExport={handleExport}
+                                  onAIComposer={async () => {
+                                    const isAuth = await base44.auth.isAuthenticated();
+                                    if (!isAuth) {
+                                      base44.auth.redirectToLogin(window.location.href);
+                                      return;
+                                    }
+                                    setChatbotOpen(true);
+                                  }}
+                                  onGenerate={handleGenerate}
+                                  canGenerate={cantusFirmus.length > 0}
+                                  isGenerating={isGenerating}
                                 />
                               }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
