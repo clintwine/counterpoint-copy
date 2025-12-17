@@ -115,7 +115,7 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center justify-between gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
+    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
       {/* File Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -166,7 +166,7 @@ export default function PlaybackControls({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="w-px h-5 bg-slate-700" />
       {/* Time Signature */}
       <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
         <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
@@ -285,8 +285,8 @@ export default function PlaybackControls({
 
       <div className="w-px h-5 bg-slate-700 hidden sm:block" />
 
-                  {/* Timeline scrubber - hidden on mobile */}
-                  <div className="hidden sm:block flex-1 max-w-xs">
+      {/* Timeline scrubber - hidden on mobile */}
+      <div className="hidden sm:block flex-1 max-w-xs">
         <Slider
           value={[currentBeat]}
           onValueChange={([value]) => {
@@ -300,7 +300,6 @@ export default function PlaybackControls({
           aria-label="Playhead position"
         />
       </div>
-    </div>
     </div>
   );
 }
