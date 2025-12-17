@@ -1029,7 +1029,7 @@ export default function NoteGrid({
                                 return (
                                   <div 
                                     key={beat}
-                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/20 ${
+                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none ${
                                       beat % beatsPerMeasure === 0 
                                         ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
                                         : 'border-r-slate-700 text-white/60'
@@ -1484,9 +1484,9 @@ export default function NoteGrid({
       
       <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
       <p className="text-white/50 text-xs">
-        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select • Shift+drag header to set loop'}
-        {tool === 'marquee' && 'Click and drag to select multiple notes • Shift+drag header to set loop'}
-        {tool === 'draw' && 'Click to add/remove notes • Shift+drag header to set loop'}
+        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select • Drag header to set loop'}
+        {tool === 'marquee' && 'Click and drag to select multiple notes • Drag header to set loop'}
+        {tool === 'draw' && 'Click to add/remove notes • Drag header to set loop'}
       </p>
       <div className="flex items-center gap-3">
         {selectedNotes.size > 0 && (
