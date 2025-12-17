@@ -37,6 +37,34 @@ const NOTE_COLORS = {
   3: '#A68B7B', // Voice 4 - Warm brown
 };
 
+// Velocity to color gradient: blue → green → yellow → red
+const getVelocityColor = (velocity) => {
+  const v = Math.max(0, Math.min(1, velocity)); // Clamp between 0 and 1
+  
+  if (v < 0.33) {
+    // Blue to Green
+    const t = v / 0.33;
+    const r = Math.round(0 + t * 0);
+    const g = Math.round(100 + t * 155);
+    const b = Math.round(255 - t * 55);
+    return `rgb(${r}, ${g}, ${b})`;
+  } else if (v < 0.66) {
+    // Green to Yellow
+    const t = (v - 0.33) / 0.33;
+    const r = Math.round(0 + t * 255);
+    const g = Math.round(255);
+    const b = Math.round(200 - t * 200);
+    return `rgb(${r}, ${g}, ${b})`;
+  } else {
+    // Yellow to Red
+    const t = (v - 0.66) / 0.34;
+    const r = Math.round(255);
+    const g = Math.round(255 - t * 100);
+    const b = Math.round(0);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+};
+
 const BASE_CELL_WIDTH = 48;
 const BASE_CELL_HEIGHT = 28;
 const MIN_ZOOM = 0.5;
@@ -1146,6 +1174,11 @@ export default function NoteGrid({
                                 if (isBeingDragged) return null;
                                 
                                 return (
+                                  {(() => {
+                                    const noteVelocity = note.velocity ?? 0.8;
+                                    const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
+
+                                    return (
                                   <div
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
@@ -1284,19 +1317,21 @@ export default function NoteGrid({
                                     style={{ 
                                       width: noteWidth,
                                       minWidth: 20,
-                                      backgroundColor: NOTE_COLORS[voiceIndex],
-                                      boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${NOTE_COLORS[voiceIndex]}` : undefined,
+                                      backgroundColor: velocityColor,
+                                      boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${velocityColor}` : undefined,
                                       cursor: resizeState ? 'ew-resize' : 'grab',
                                       zIndex: 5
                                     }}
-                                  >
+                                    >
                                     <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
                                       {note.pitch.replace(/\d/, '')}
                                     </span>
                                     <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
-                                  </div>
-                                );
-                              })}
+                                    </div>
+                                    );
+                                    })()}
+                                    );
+                                    })}
                             </div>
                           );
                         })}
@@ -1321,34 +1356,36 @@ export default function NoteGrid({
                             {dragState?.isDragging && selectedNotes.size > 0 && originalDragNotesRef.current?.notes && (
                               <>
                                 {originalDragNotesRef.current.notes.map(note => {
-                  const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
-                  const newBeat = note.beat + dragOffset.beatDelta;
-                  if (newPitchIdx < 0 || newPitchIdx >= pitches.length || newBeat < 0 || newBeat >= totalBeats) return null;
+                                  const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
+                                  const newBeat = note.beat + dragOffset.beatDelta;
+                                  if (newPitchIdx < 0 || newPitchIdx >= pitches.length || newBeat < 0 || newBeat >= totalBeats) return null;
 
-                  const duration = note.duration || DEFAULT_DURATION;
-                  const noteWidth = duration * CELL_WIDTH - 4;
+                                  const duration = note.duration || DEFAULT_DURATION;
+                                  const noteWidth = duration * CELL_WIDTH - 4;
+                                  const noteVelocity = note.velocity ?? 0.8;
+                                  const velocityColor = getVelocityColor(noteVelocity);
 
-                  return (
-                    <div
-                      key={`preview-${note.pitch}-${note.beat}`}
-                      className="absolute rounded flex items-center justify-start pl-1 shadow-lg pointer-events-none z-10"
-                      style={{
-                        left: 56 + newBeat * CELL_WIDTH + 2,
-                        top: 28 + newPitchIdx * CELL_HEIGHT + 2,
-                        width: noteWidth,
-                        height: CELL_HEIGHT - 4,
-                        backgroundColor: NOTE_COLORS[0],
-                        opacity: 0.8
-                      }}
-                    >
-                      <span className="text-[10px] font-bold text-slate-900">
-                        {pitches[newPitchIdx].replace(/\d/, '')}
-                      </span>
-                    </div>
-                  );
-                })}
-              </>
-            )}
+                                  return (
+                                    <div
+                                      key={`preview-${note.pitch}-${note.beat}`}
+                                      className="absolute rounded flex items-center justify-start pl-1 shadow-lg pointer-events-none z-10"
+                                      style={{
+                                        left: 56 + newBeat * CELL_WIDTH + 2,
+                                        top: 28 + newPitchIdx * CELL_HEIGHT + 2,
+                                        width: noteWidth,
+                                        height: CELL_HEIGHT - 4,
+                                        backgroundColor: velocityColor,
+                                        opacity: 0.8
+                                      }}
+                                    >
+                                      <span className="text-[10px] font-bold text-slate-900">
+                                        {pitches[newPitchIdx].replace(/\d/, '')}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </>
+                            )}
           </div>
         </div>
 
@@ -1478,6 +1515,7 @@ export default function NoteGrid({
                       ? { ...n, velocity } 
                       : n
                   );
+                  saveToHistory(newNotes);
                   onNotesUpdate(newNotes);
                 }}
                 min={10}
