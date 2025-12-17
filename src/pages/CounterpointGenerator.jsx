@@ -174,6 +174,7 @@ export default function CounterpointGenerator() {
     setVoices(unifiedVoices);
     setProjectName(song.name);
     setCurrentProjectId(null); // Not a project, it's a song
+    setTempo(song.settings?.tempo || 80);
     setSongDialogOpen(false);
   };
 
