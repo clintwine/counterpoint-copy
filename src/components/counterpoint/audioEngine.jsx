@@ -262,7 +262,7 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
 
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
   const { oscillators: oscConfigs, envelope, filter: filterConfig } = customConfig;
 
   const oscillators = [];
@@ -332,7 +332,7 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   if (!freq) return;
   
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
   
   // Use global envelope settings
   const attack = envelopeSettings.attack;
@@ -397,7 +397,7 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
   if (!freq) return null;
   
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
   
   // Create oscillators based on instrument harmonics
   const oscillators = [];
@@ -497,7 +497,7 @@ export function setMasterVolume(volume) {
 export function playMetronomeClick(isDownbeat = false) {
   if (!audioContext) initAudio();
   
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001); // Ensure non-negative and slightly in the future
   const osc = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
   
