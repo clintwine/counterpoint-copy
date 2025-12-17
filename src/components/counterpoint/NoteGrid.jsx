@@ -985,11 +985,11 @@ export default function NoteGrid({
             {(() => {
               // Calculate visible range with buffer
               const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
-              const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + 400) / CELL_HEIGHT) + 5);
-              
+              const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + viewportState.height) / CELL_HEIGHT) + 5);
+
               // Calculate visible beat range
               const visibleStartBeat = Math.max(0, Math.floor(viewportState.scrollLeft / CELL_WIDTH) - 2);
-              const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + 800) / CELL_WIDTH) + 2);
+              const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + viewportState.width) / CELL_WIDTH) + 2);
               
               return (
                 <>
