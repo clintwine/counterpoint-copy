@@ -148,7 +148,7 @@ export function setEffectLevel(effect, level) {
   effectLevels[effect] = level;
   if (!audioContext) return;
   
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001);
   if (effect === 'reverb' && reverbGain) {
     reverbGain.gain.cancelScheduledValues(now);
     reverbGain.gain.setValueAtTime(reverbGain.gain.value, now);
@@ -448,7 +448,7 @@ export function stopNoteSustain(oscillatorObj, release = 0.3) {
   if (!oscillatorObj || !audioContext) return;
   
   const { oscillators, gainNode } = oscillatorObj;
-  const now = audioContext.currentTime;
+  const now = Math.max(0, audioContext.currentTime + 0.001);
   
   // Release envelope
   gainNode.gain.cancelScheduledValues(now);
@@ -476,7 +476,7 @@ export function playChord(pitches, duration = 0.5, volumes = []) {
 
 export function stopAllNotes() {
   if (audioContext) {
-    const now = audioContext.currentTime;
+    const now = Math.max(0, audioContext.currentTime + 0.001);
     // Smooth fade out to prevent snapping
     masterGain.gain.cancelScheduledValues(now);
     masterGain.gain.setValueAtTime(masterGain.gain.value, now);
