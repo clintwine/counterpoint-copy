@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,7 +48,8 @@ export default function PlaybackControls({
   onGenerate,
   canGenerate,
   isGenerating,
-  onExportMidi
+  onExportMidi,
+  onTheoryTools
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -158,6 +159,10 @@ export default function PlaybackControls({
             Export MIDI
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem onClick={onTheoryTools} className="text-amber-400 cursor-pointer font-semibold">
+            <BookOpen className="w-4 h-4 mr-2" />
+            Music Theory Tools
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
             <Sparkles className="w-4 h-4 mr-2" />
             AI Composer

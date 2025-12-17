@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
+import MusicTheoryPanel from '@/components/counterpoint/MusicTheoryPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
@@ -71,6 +72,7 @@ export default function CounterpointGenerator() {
   const [projectName, setProjectName] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [theoryPanelOpen, setTheoryPanelOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
@@ -474,6 +476,21 @@ export default function CounterpointGenerator() {
     setPlayheadPosition(beat);
   };
 
+  const handleApplyProgression = (notes) => {
+    saveToHistory(notes);
+    setCantusFirmus(notes);
+  };
+
+  const handleApplyScale = (notes) => {
+    saveToHistory(notes);
+    setCantusFirmus(notes);
+  };
+
+  const saveToHistory = (notes) => {
+    // Simple history tracking for undo/redo
+    // This can be expanded later
+  };
+
   // Export as data
   const handleExport = () => {
     const data = {
@@ -718,6 +735,7 @@ export default function CounterpointGenerator() {
                                     a.click();
                                     URL.revokeObjectURL(url);
                                   }}
+                                  onTheoryTools={() => setTheoryPanelOpen(true)}
                                   />
                               }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
@@ -778,6 +796,16 @@ export default function CounterpointGenerator() {
           </motion.main>
           </div>
           </div>
+
+      {/* Music Theory Panel */}
+      <MusicTheoryPanel
+        isOpen={theoryPanelOpen}
+        onClose={() => setTheoryPanelOpen(false)}
+        cantusFirmus={cantusFirmus}
+        generatedVoices={generatedVoices}
+        onApplyProgression={handleApplyProgression}
+        onApplyScale={handleApplyScale}
+      />
 
       {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
