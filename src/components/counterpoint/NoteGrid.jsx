@@ -927,7 +927,7 @@ export default function NoteGrid({
                                       setPinchState(null);
                                       activeTouchIdRef.current = null;
                                     }}
-        onScroll={(e) => setViewportState({ scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop })}
+        onScroll={(e) => setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }))}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
