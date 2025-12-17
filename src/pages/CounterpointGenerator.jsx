@@ -67,6 +67,7 @@ export default function CounterpointGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
+  const [songDialogOpen, setSongDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
@@ -99,6 +100,12 @@ export default function CounterpointGenerator() {
   const { data: savedProjects = [] } = useQuery({
     queryKey: ['counterpoint-projects'],
     queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
+  });
+
+  // Fetch songs
+  const { data: songs = [] } = useQuery({
+    queryKey: ['songs'],
+    queryFn: () => base44.entities.Song.list('-created_date'),
   });
 
   // Save project mutation
@@ -150,6 +157,16 @@ export default function CounterpointGenerator() {
     setProjectName(project.name);
     setCurrentProjectId(project.id);
     setLoadDialogOpen(false);
+  };
+
+  const handleLoadSong = (song) => {
+    setSettings(song.settings || DEFAULT_SETTINGS);
+    setCantusFirmus(song.cantusFirmus || []);
+    setGeneratedVoices(song.generatedVoices || []);
+    setVoices(song.voices || DEFAULT_VOICES);
+    setProjectName(song.name);
+    setCurrentProjectId(null); // Not a project, it's a song
+    setSongDialogOpen(false);
   };
 
   const handleNewProject = () => {
@@ -458,6 +475,54 @@ export default function CounterpointGenerator() {
                 </DialogContent>
               </Dialog>
 
+              {/* Browse Songs Dialog */}
+              <Dialog open={songDialogOpen} onOpenChange={setSongDialogOpen}>
+                <DialogTrigger asChild>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Browse Songs</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {songs.length === 0 ? (
+                      <p className="text-white/60 text-sm text-center py-4">No songs available</p>
+                    ) : (
+                      songs.map((song) => (
+                        <div
+                          key={song.id}
+                          className="flex items-center justify-between p-4 bg-slate-800 rounded-lg hover:bg-slate-700 cursor-pointer border border-slate-700"
+                          onClick={() => handleLoadSong(song)}
+                        >
+                          <div className="flex-1">
+                            <p className="text-white font-medium text-lg">{song.name}</p>
+                            <p className="text-white/70 text-sm mt-1">{song.description}</p>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                              <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+                                {song.settings?.key} {song.settings?.mode}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                                {song.settings?.timeSignature}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
+                                {song.cantusFirmus?.length || 0} notes
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-amber-400 hover:text-amber-300"
+                          >
+                            Load →
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               {/* Save Project Dialog */}
               <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
                 <DialogTrigger asChild>
@@ -530,6 +595,7 @@ export default function CounterpointGenerator() {
                                   onNewProject={handleNewProject}
                                   onSaveProject={() => setSaveDialogOpen(true)}
                                   onLoadProject={() => setLoadDialogOpen(true)}
+                                  onBrowseSongs={() => setSongDialogOpen(true)}
                                   onExport={handleExport}
                                   onAIComposer={async () => {
                                     const isAuth = await base44.auth.isAuthenticated();

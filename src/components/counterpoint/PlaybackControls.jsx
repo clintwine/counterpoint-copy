@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +42,7 @@ export default function PlaybackControls({
   onNewProject,
   onSaveProject,
   onLoadProject,
+  onBrowseSongs,
   onExport,
   onAIComposer,
   onGenerate,
@@ -141,6 +142,11 @@ export default function PlaybackControls({
           <DropdownMenuItem onClick={onSaveProject} className="text-white cursor-pointer">
             <Save className="w-4 h-4 mr-2" />
             Save Project
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer">
+            <Music className="w-4 h-4 mr-2" />
+            Browse Songs
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onExport} className="text-white cursor-pointer">
