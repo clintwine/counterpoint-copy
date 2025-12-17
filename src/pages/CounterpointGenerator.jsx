@@ -165,6 +165,16 @@ export default function CounterpointGenerator() {
     setLoadDialogOpen(false);
   };
 
+  // Stop preview when modal closes
+  useEffect(() => {
+    if (!songDialogOpen && previewTimeoutRef.current) {
+      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current = null;
+      stopAllNotes();
+      setPreviewingSongId(null);
+    }
+  }, [songDialogOpen]);
+
   const handleLoadSong = (song) => {
     // Stop any preview
     if (previewTimeoutRef.current) {
