@@ -1295,7 +1295,50 @@ export default function NoteGrid({
             pointerEvents: 'auto'
           }}
           onMouseDown={(e) => {
-        ...
+            e.stopPropagation();
+            e.preventDefault();
+            setIsScrubbing(true);
+            const startX = e.clientX;
+            const startBeat = currentBeat;
+
+            const handleMouseMove = (moveEvent) => {
+              const deltaX = moveEvent.clientX - startX;
+              const beatDelta = Math.round(deltaX / CELL_WIDTH);
+              const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
+              onSeek && onSeek(newBeat);
+            };
+
+            const handleMouseUp = () => {
+              setIsScrubbing(false);
+              document.removeEventListener('mousemove', handleMouseMove);
+              document.removeEventListener('mouseup', handleMouseUp);
+            };
+
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setIsScrubbing(true);
+            const startX = e.touches[0].clientX;
+            const startBeat = currentBeat;
+
+            const handleTouchMove = (moveEvent) => {
+              const deltaX = moveEvent.touches[0].clientX - startX;
+              const beatDelta = Math.round(deltaX / CELL_WIDTH);
+              const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
+              onSeek && onSeek(newBeat);
+            };
+
+            const handleTouchEnd = () => {
+              setIsScrubbing(false);
+              document.removeEventListener('touchmove', handleTouchMove);
+              document.removeEventListener('touchend', handleTouchEnd);
+            };
+
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleTouchEnd);
           }}
         >
           {/* Triangle marker */}
