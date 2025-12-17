@@ -1323,13 +1323,13 @@ export default function NoteGrid({
         <div
           className="absolute cursor-ew-resize"
           style={{
-            transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
+            left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
             top: 28,
-            left: 0,
-            width: Math.max(16, 20 * zoom),
-            height: 28,
+            width: 0,
+            height: 0,
             pointerEvents: 'auto',
-            zIndex: 50
+            zIndex: 50,
+            transform: 'translateX(-50%)'
           }}
           onMouseDown={(e) => {
             e.stopPropagation();
@@ -1380,8 +1380,12 @@ export default function NoteGrid({
         >
           {/* Triangle marker pointing down */}
           <div 
-            className="absolute left-1/2 -translate-x-1/2 bottom-0"
+            className="absolute bottom-0"
             style={{
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 0,
+              height: 0,
               borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
               borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
               borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
@@ -1393,9 +1397,9 @@ export default function NoteGrid({
                                 <div
                                   className="absolute z-30 pointer-events-none"
                                   style={{
-                                    transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH + Math.max(8, 10 * zoom) - Math.max(1, 1.5 * zoom)}px)`,
+                                    left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
                                     top: 28,
-                                    left: 0,
+                                    transform: 'translateX(-50%)',
                                     width: Math.max(2, 3 * zoom),
                                     height: pitches.length * CELL_HEIGHT,
                                     backgroundColor: '#ef4444',
