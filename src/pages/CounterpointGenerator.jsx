@@ -176,8 +176,9 @@ export default function CounterpointGenerator() {
     if (!songDialogOpen && previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
       previewTimeoutRef.current = null;
-      stopAllNotes();
       setPreviewingSongId(null);
+      // Delay stopAllNotes slightly to ensure timeouts are cleared first
+      setTimeout(() => stopAllNotes(), 50);
     }
   }, [songDialogOpen]);
 
@@ -216,12 +217,13 @@ export default function CounterpointGenerator() {
     if (previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
       previewTimeoutRef.current = null;
+      stopAllNotes();
     }
-    stopAllNotes();
     
     if (previewingSongId === song.id) {
       // Stop preview
       setPreviewingSongId(null);
+      stopAllNotes();
       return;
     }
     
@@ -238,11 +240,14 @@ export default function CounterpointGenerator() {
     allPreviewVoices.forEach((voice, voiceIndex) => {
       const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
       voice.notes?.forEach(note => {
-        const startTime = (note.beat / 4) * (60 / previewTempo) * 1000; // Convert beat to milliseconds
-        const duration = (note.duration || 1) * (60 / previewTempo) * 0.9;
+        const beatDuration = 60 / previewTempo; // Duration of one beat in seconds
+        const startTime = note.beat * beatDuration * 1000; // Convert beat to milliseconds
+        const noteDuration = (note.duration || 1) * beatDuration * 0.9;
         
         const timeout = setTimeout(() => {
-          playNote(note.pitch, duration, 0.7, voiceIndex, voiceInstrument);
+          if (previewTimeoutRef.current) { // Only play if preview is still active
+            playNote(note.pitch, noteDuration, 0.7, voiceIndex, voiceInstrument);
+          }
         }, startTime);
         
         timeouts.push(timeout);
@@ -250,10 +255,13 @@ export default function CounterpointGenerator() {
     });
     
     // Auto-stop after song duration
-    const maxBeat = Math.max(...previewNotes.map(n => n.beat + (n.duration || 1)));
-    const totalDuration = (maxBeat / 4) * (60 / previewTempo) * 1000 + 500;
+    const maxBeat = Math.max(
+      ...allPreviewVoices.flatMap(v => v.notes?.map(n => n.beat + (n.duration || 1)) || [0])
+    );
+    const totalDuration = maxBeat * (60 / previewTempo) * 1000 + 500;
     
     const stopTimeout = setTimeout(() => {
+      stopAllNotes();
       setPreviewingSongId(null);
       previewTimeoutRef.current = null;
     }, totalDuration);
