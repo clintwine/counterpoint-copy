@@ -1341,14 +1341,13 @@ export default function NoteGrid({
             document.addEventListener('touchend', handleTouchEnd);
           }}
         >
-          {/* Triangle marker */}
+          {/* Triangle marker pointing down */}
           <div 
-            className="absolute left-1/2 -translate-x-1/2"
+            className="absolute left-1/2 -translate-x-1/2 bottom-0"
             style={{
-              top: 0,
               borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
               borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
-              borderBottom: `${Math.max(10, 12 * zoom)}px solid #ef4444`
+              borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
             }}
           />
         </div>
