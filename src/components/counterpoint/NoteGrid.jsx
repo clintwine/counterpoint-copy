@@ -206,6 +206,8 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isScrubbing, setIsScrubbing] = useState(false);
+  const [isLoopSelecting, setIsLoopSelecting] = useState(false);
+  const [loopSelectStart, setLoopSelectStart] = useState(null);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
   const [pinchState, setPinchState] = useState(null);
   const lastTapRef = useRef({ key: null, time: 0 });
@@ -954,36 +956,67 @@ export default function NoteGrid({
                             <div 
                               className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800"
                               onMouseDown={(e) => {
-                                setIsScrubbing(true);
                                 const cell = getCellFromPosition(e.clientX, e.clientY);
-                                if (cell && onSeek) {
-                                  onSeek(cell.beat);
-                                }
-                              }}
-                              onMouseMove={(e) => {
-                                if (isScrubbing) {
-                                  const cell = getCellFromPosition(e.clientX, e.clientY);
-                                  if (cell && onSeek) {
+                                if (!cell) return;
+
+                                if (e.shiftKey) {
+                                  // Shift+drag for loop selection
+                                  setIsLoopSelecting(true);
+                                  setLoopSelectStart(cell.beat);
+                                  if (onLoopChange) {
+                                    onLoopChange(cell.beat, cell.beat);
+                                  }
+                                } else {
+                                  // Normal click for seeking
+                                  setIsScrubbing(true);
+                                  if (onSeek) {
                                     onSeek(cell.beat);
                                   }
                                 }
                               }}
-                              onMouseUp={() => setIsScrubbing(false)}
-                              onMouseLeave={() => setIsScrubbing(false)}
+                              onMouseMove={(e) => {
+                                const cell = getCellFromPosition(e.clientX, e.clientY);
+                                if (!cell) return;
+
+                                if (isLoopSelecting && loopSelectStart !== null) {
+                                  const start = Math.min(loopSelectStart, cell.beat);
+                                  const end = Math.max(loopSelectStart, cell.beat);
+                                  if (onLoopChange) {
+                                    onLoopChange(start, end);
+                                  }
+                                } else if (isScrubbing) {
+                                  if (onSeek) {
+                                    onSeek(cell.beat);
+                                  }
+                                }
+                              }}
+                              onMouseUp={() => {
+                                setIsScrubbing(false);
+                                setIsLoopSelecting(false);
+                                setLoopSelectStart(null);
+                              }}
+                              onMouseLeave={() => {
+                                setIsScrubbing(false);
+                                setIsLoopSelecting(false);
+                                setLoopSelectStart(null);
+                              }}
                             >
-                              {Array.from({ length: totalBeats }).map((_, beat) => (
-                <div 
-                  key={beat}
-                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/20 ${
-                    beat % beatsPerMeasure === 0 
-                      ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
-                      : 'border-r-slate-700 text-white/60'
-                  }`}
-                  style={{ width: CELL_WIDTH }}
-                >
-                  {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
-                </div>
-              ))}
+                              {Array.from({ length: totalBeats }).map((_, beat) => {
+                                const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat <= loopEnd;
+                                return (
+                                  <div 
+                                    key={beat}
+                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/20 ${
+                                      beat % beatsPerMeasure === 0 
+                                        ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
+                                        : 'border-r-slate-700 text-white/60'
+                                    } ${inLoopRegion ? 'bg-amber-500/30' : ''}`}
+                                    style={{ width: CELL_WIDTH }}
+                                  >
+                                    {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
+                                  </div>
+                                );
+                              })}
             </div>
 
             {/* Virtualized Note grid rows - only render visible rows */}
@@ -1423,9 +1456,9 @@ export default function NoteGrid({
       
       <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
       <p className="text-white/50 text-xs">
-        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select'}
-        {tool === 'marquee' && 'Click and drag to select multiple notes'}
-        {tool === 'draw' && 'Click to add/remove notes'}
+        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select • Shift+drag header to set loop'}
+        {tool === 'marquee' && 'Click and drag to select multiple notes • Shift+drag header to set loop'}
+        {tool === 'draw' && 'Click to add/remove notes • Shift+drag header to set loop'}
       </p>
       <div className="flex items-center gap-3">
         {selectedNotes.size > 0 && (
