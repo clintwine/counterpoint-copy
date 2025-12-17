@@ -356,6 +356,7 @@ export default function CounterpointGenerator() {
     setIsPlaying(false);
     stopAllNotes();
     setCurrentBeat(0);
+    setPlayheadPosition(0);
   };
 
   const handleSeek = (beat) => {

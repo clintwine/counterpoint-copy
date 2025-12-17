@@ -571,7 +571,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
       
       <div className="overflow-x-auto pb-1">
-                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 60 }}>
+                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
           {(() => {
             const keys = [];
@@ -593,7 +593,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   style={{
                                                                                                       left: whiteKeyIndex * whiteKeyWidth,
                                                                                                       width: whiteKeyWidth - 1,
-                                                                                                      height: 50,
+                                                                                                      height: 70,
                     backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                   }}
                 >
@@ -647,7 +647,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                               style={{
                                                 left: whiteKeyIndex * whiteKeyWidth,
                                                 width: whiteKeyWidth - 1,
-                                                height: 50,
+                                                height: 70,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
                   >
@@ -704,7 +704,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                       style={{
                                         left: whiteKeyIndex * whiteKeyWidth,
                                         width: whiteKeyWidth - 1,
-                                        height: 50,
+                                        height: 70,
                   backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5',
                 }}
               >
