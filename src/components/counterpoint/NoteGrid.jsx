@@ -991,19 +991,11 @@ export default function NoteGrid({
                                 const cell = getCellFromPosition(e.clientX, e.clientY);
                                 if (!cell) return;
 
-                                if (e.shiftKey) {
-                                  // Shift+drag for loop selection
-                                  setIsLoopSelecting(true);
-                                  setLoopSelectStart(cell.beat);
-                                  if (onLoopChange) {
-                                    onLoopChange(cell.beat, cell.beat);
-                                  }
-                                } else {
-                                  // Normal click for seeking
-                                  setIsScrubbing(true);
-                                  if (onSeek) {
-                                    onSeek(cell.beat);
-                                  }
+                                // Start loop selection on any mousedown
+                                setIsLoopSelecting(true);
+                                setLoopSelectStart(cell.beat);
+                                if (onLoopChange) {
+                                  onLoopChange(cell.beat, cell.beat);
                                 }
                               }}
                               onMouseMove={(e) => {
@@ -1016,19 +1008,18 @@ export default function NoteGrid({
                                   if (onLoopChange) {
                                     onLoopChange(start, end);
                                   }
-                                } else if (isScrubbing) {
-                                  if (onSeek) {
-                                    onSeek(cell.beat);
-                                  }
                                 }
                               }}
-                              onMouseUp={() => {
-                                setIsScrubbing(false);
+                              onMouseUp={(e) => {
+                                const cell = getCellFromPosition(e.clientX, e.clientY);
+                                // If no drag occurred (same beat), seek instead of setting loop
+                                if (cell && loopSelectStart === cell.beat && onSeek) {
+                                  onSeek(cell.beat);
+                                }
                                 setIsLoopSelecting(false);
                                 setLoopSelectStart(null);
                               }}
                               onMouseLeave={() => {
-                                setIsScrubbing(false);
                                 setIsLoopSelecting(false);
                                 setLoopSelectStart(null);
                               }}
