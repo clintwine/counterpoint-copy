@@ -212,6 +212,23 @@ export default function NoteGrid({
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
 
+  // Update viewport dimensions on mount and resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (gridRef.current) {
+        setViewportState(prev => ({
+          ...prev,
+          height: gridRef.current.clientHeight,
+          width: gridRef.current.clientWidth
+        }));
+      }
+    };
+    
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
   // Expose scroll function via ref
   useEffect(() => {
     if (scrollToBeatRef) {
