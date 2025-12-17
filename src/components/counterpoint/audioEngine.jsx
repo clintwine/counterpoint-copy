@@ -391,9 +391,10 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
   
+  const stopTime = Math.max(now + 0.01, now + totalDuration);
   oscillators.forEach(osc => {
     osc.start(now);
-    osc.stop(now + totalDuration);
+    osc.stop(stopTime);
   });
   
   return { oscillators, gainNode };
