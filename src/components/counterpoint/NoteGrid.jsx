@@ -951,11 +951,29 @@ export default function NoteGrid({
           {/* Grid area */}
           <div className="flex-shrink-0">
             {/* Beat numbers header */}
-                            <div className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800">
+                            <div 
+                              className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800"
+                              onMouseDown={(e) => {
+                                setIsScrubbing(true);
+                                const cell = getCellFromPosition(e.clientX, e.clientY);
+                                if (cell && onSeek) {
+                                  onSeek(cell.beat);
+                                }
+                              }}
+                              onMouseMove={(e) => {
+                                if (isScrubbing) {
+                                  const cell = getCellFromPosition(e.clientX, e.clientY);
+                                  if (cell && onSeek) {
+                                    onSeek(cell.beat);
+                                  }
+                                }
+                              }}
+                              onMouseUp={() => setIsScrubbing(false)}
+                              onMouseLeave={() => setIsScrubbing(false)}
+                            >
                               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
-                  onClick={() => onSeek && onSeek(beat)}
                   className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/20 ${
                     beat % beatsPerMeasure === 0 
                       ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
@@ -1303,14 +1321,15 @@ export default function NoteGrid({
 
         {/* Playhead triangle marker - fixed at top */}
         <div
-          className="absolute z-40 cursor-ew-resize sticky top-0"
+          className="absolute cursor-ew-resize"
           style={{
             transform: `translateX(${56 + smoothPlayhead * CELL_WIDTH - Math.max(8, 10 * zoom)}px)`,
-            top: 0,
+            top: 28,
             left: 0,
             width: Math.max(16, 20 * zoom),
             height: 28,
-            pointerEvents: 'auto'
+            pointerEvents: 'auto',
+            zIndex: 50
           }}
           onMouseDown={(e) => {
             e.stopPropagation();
