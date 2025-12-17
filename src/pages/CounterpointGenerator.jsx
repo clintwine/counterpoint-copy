@@ -155,7 +155,15 @@ export default function CounterpointGenerator() {
     setSettings(project.settings || DEFAULT_SETTINGS);
     setCantusFirmus(project.cantusFirmus || []);
     setGeneratedVoices(project.generatedVoices || []);
-    setVoices(project.voices || DEFAULT_VOICES);
+    
+    // Load voices and ensure each has an instrument
+    const loadedVoices = project.voices || DEFAULT_VOICES;
+    const voicesWithInstruments = loadedVoices.map((v, idx) => ({
+      ...v,
+      instrument: v.instrument || DEFAULT_VOICES[idx]?.instrument || 'organ'
+    }));
+    setVoices(voicesWithInstruments);
+    
     setProjectName(project.name);
     setCurrentProjectId(project.id);
     setLoadDialogOpen(false);
@@ -183,7 +191,15 @@ export default function CounterpointGenerator() {
     setSettings(song.settings || DEFAULT_SETTINGS);
     setCantusFirmus(song.cantusFirmus || []);
     setGeneratedVoices(song.generatedVoices || []);
-    setVoices(song.voices || DEFAULT_VOICES);
+    
+    // Load voices and ensure each has an instrument
+    const loadedVoices = song.voices || DEFAULT_VOICES;
+    const voicesWithInstruments = loadedVoices.map((v, idx) => ({
+      ...v,
+      instrument: v.instrument || DEFAULT_VOICES[idx]?.instrument || 'organ'
+    }));
+    setVoices(voicesWithInstruments);
+    
     setProjectName(song.name);
     setCurrentProjectId(null); // Not a project, it's a song
     setTempo(song.settings?.tempo || 80);
