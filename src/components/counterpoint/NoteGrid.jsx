@@ -1099,6 +1099,15 @@ export default function NoteGrid({
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
                                                                                 e.stopPropagation();
+                                                                                
+                                                                                // In draw mode, clicking a note removes it
+                                                                                if (tool === 'draw') {
+                                                                                  const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
+                                                                                  saveToHistory(newNotes);
+                                                                                  onNotesUpdate(newNotes);
+                                                                                  return;
+                                                                                }
+                                                                                
                                                                                 const coords = getEventCoords(e);
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
@@ -1158,6 +1167,14 @@ export default function NoteGrid({
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
                                                                                 e.preventDefault();
+                                                                                
+                                                                                // In draw mode, touching a note removes it
+                                                                                if (tool === 'draw') {
+                                                                                  const newNotes = cantusFirmus.filter(n => !(n.pitch === note.pitch && n.beat === note.beat));
+                                                                                  saveToHistory(newNotes);
+                                                                                  onNotesUpdate(newNotes);
+                                                                                  return;
+                                                                                }
                                                                                 
                                                                                 const touch = e.touches[0];
                                                                                 activeTouchIdRef.current = touch.identifier;
