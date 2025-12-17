@@ -301,5 +301,6 @@ export default function PlaybackControls({
         />
       </div>
     </div>
+    </div>
   );
 }
