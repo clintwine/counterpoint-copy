@@ -239,7 +239,7 @@ export default function CounterpointGenerator() {
       const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
       voice.notes?.forEach(note => {
         const startTime = (note.beat / 4) * (60 / previewTempo) * 1000; // Convert beat to milliseconds
-        const duration = ((note.duration || 1) / 4) * (60 / previewTempo);
+        const duration = (note.duration || 1) * (60 / previewTempo) * 0.9;
         
         const timeout = setTimeout(() => {
           playNote(note.pitch, duration, 0.7, voiceIndex, voiceInstrument);
