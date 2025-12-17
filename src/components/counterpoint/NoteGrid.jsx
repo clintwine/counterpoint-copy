@@ -955,7 +955,8 @@ export default function NoteGrid({
                               {Array.from({ length: totalBeats }).map((_, beat) => (
                 <div 
                   key={beat}
-                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none ${
+                  onClick={() => onSeek && onSeek(beat)}
+                  className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r cursor-pointer hover:bg-amber-500/20 ${
                     beat % beatsPerMeasure === 0 
                       ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
                       : 'border-r-slate-700 text-white/60'
