@@ -220,17 +220,19 @@ export default function CounterpointGenerator() {
     const previewTempo = song.settings?.tempo || 80;
     const previewNotes = song.cantusFirmus || [];
     const previewVoices = song.generatedVoices || [];
+    const songVoices = song.voices || [];
     const allPreviewVoices = [{ notes: previewNotes }, ...previewVoices];
     
     // Play all voices with proper timing
     const timeouts = [];
     allPreviewVoices.forEach((voice, voiceIndex) => {
+      const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
       voice.notes?.forEach(note => {
         const startTime = (note.beat / 4) * (60 / previewTempo) * 1000; // Convert beat to milliseconds
         const duration = ((note.duration || 1) / 4) * (60 / previewTempo);
         
         const timeout = setTimeout(() => {
-          playNote(note.pitch, duration, 0.7, voiceIndex, 'organ');
+          playNote(note.pitch, duration, 0.7, voiceIndex, voiceInstrument);
         }, startTime);
         
         timeouts.push(timeout);
