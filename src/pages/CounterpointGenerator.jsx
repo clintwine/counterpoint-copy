@@ -525,12 +525,12 @@ export default function CounterpointGenerator() {
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl xl:max-w-[95vw] mx-auto px-2 sm:px-6 lg:px-8 pt-2 pb-4 sm:pb-8 overflow-x-hidden">
+      <div className="relative z-10 max-w-7xl xl:max-w-[95vw] mx-auto px-1 pt-1 pb-2 overflow-x-hidden">
         {/* Header */}
                   <motion.header 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-2 sm:mb-8"
+                    className="mb-1"
                   >
                                 {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
@@ -680,7 +680,7 @@ export default function CounterpointGenerator() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-4"
+            className="space-y-2"
           >
             <NoteGrid
                               playheadPosition={playheadPosition}
