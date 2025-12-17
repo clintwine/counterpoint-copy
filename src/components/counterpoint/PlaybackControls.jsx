@@ -177,8 +177,8 @@ export default function PlaybackControls({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div className="w-px h-5 bg-slate-700" />
-      {/* Time Signature */}
+        <div className="w-px h-5 bg-slate-700 mx-2" />
+        {/* Time Signature */}
       <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
         <SelectTrigger className="w-14 h-7 bg-slate-800 border-slate-700 text-white text-xs px-2">
           <SelectValue />
