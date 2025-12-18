@@ -147,7 +147,7 @@ export default function CounterpointGenerator() {
     if (!projectName.trim()) return;
     saveProjectMutation.mutate({
       name: projectName,
-      settings,
+      settings: { ...settings, tempo },
       cantusFirmus,
       generatedVoices,
       voices
