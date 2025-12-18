@@ -9,6 +9,10 @@ let delayGain = null;
 let chorusNode = null;
 let chorusGain = null;
 
+// Active notes tracking for polyphony limiting
+const activeNotes = new Set();
+const MAX_POLYPHONY = 32; // Limit concurrent notes to prevent crackling
+
 // Effect levels (0-1)
 let effectLevels = {
   reverb: 0.3,
@@ -336,6 +340,11 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
   
+  // Limit polyphony to prevent crackling
+  if (activeNotes.size >= MAX_POLYPHONY) {
+    return;
+  }
+  
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
@@ -369,8 +378,9 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   
   // Distortion for metal sounds
   let outputNode = filterNode;
+  let distNode = null;
   if (config.distortion > 0) {
-    const distNode = createDistortion(config.distortion);
+    distNode = createDistortion(config.distortion);
     filterNode.connect(distNode);
     outputNode = distNode;
   }
@@ -392,10 +402,28 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   gainNode.connect(masterGain);
   
   const stopTime = Math.max(now + 0.01, now + totalDuration);
+  
+  // Track this note
+  const noteId = Symbol();
+  activeNotes.add(noteId);
+  
   oscillators.forEach(osc => {
     osc.start(now);
     osc.stop(stopTime);
   });
+  
+  // Clean up nodes after note ends to prevent memory buildup
+  setTimeout(() => {
+    try {
+      oscillators.forEach(osc => osc.disconnect());
+      filterNode.disconnect();
+      if (distNode) distNode.disconnect();
+      gainNode.disconnect();
+      activeNotes.delete(noteId);
+    } catch (e) {
+      // Already disconnected
+    }
+  }, totalDuration * 1000 + 100);
   
   return { oscillators, gainNode };
 }
@@ -502,6 +530,8 @@ export function stopAllNotes() {
         const resetTime = Math.max(0.01, audioContext.currentTime);
         masterGain.gain.setValueAtTime(0.4, resetTime);
       }
+      // Clear active notes tracking
+      activeNotes.clear();
     }, 100);
   }
 }
