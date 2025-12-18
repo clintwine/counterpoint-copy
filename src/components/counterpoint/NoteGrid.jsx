@@ -510,7 +510,10 @@ export default function NoteGrid({
               const instrument = voices[0]?.instrument || 'organ';
               playNote(pitch, 0.5, 0.7, 0, instrument);
             }
-            
+
+            // Clear selection after adding/removing note so it doesn't interfere with playback
+            setSelectedNotes(new Set());
+
             // Only enable painting mode if paintMode is on
             if (paintMode) {
               setIsPainting(true);
