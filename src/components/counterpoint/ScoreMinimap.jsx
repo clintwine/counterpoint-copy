@@ -34,10 +34,13 @@ export default function ScoreMinimap({
   const playheadX = (currentBeat / totalBeats) * width;
   
   const handleClick = (e) => {
+    if (!onSeek) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const beat = Math.floor((x / width) * totalBeats);
-    onSeek?.(Math.max(0, Math.min(totalBeats - 1, beat)));
+    const clampedBeat = Math.max(0, Math.min(totalBeats - 1, beat));
+    onSeek(clampedBeat);
+    e.stopPropagation();
   };
   
   return (
