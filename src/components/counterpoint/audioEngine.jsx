@@ -261,6 +261,118 @@ const INSTRUMENT_CONFIGS = {
     filterFreq: 2500,
     filterQ: 2,
     distortion: 15
+  },
+  bells: {
+    waveform: 'sine',
+    harmonics: [1, 0.6, 0.9, 0.4, 0.25, 0.1],
+    attack: 0.001,
+    filterFreq: 5000,
+    filterQ: 2,
+    distortion: 0
+  },
+  brass: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.8, 0.6, 0.5, 0.3],
+    attack: 0.05,
+    filterFreq: 3000,
+    filterQ: 3,
+    distortion: 8
+  },
+  clarinet: {
+    waveform: 'square',
+    harmonics: [1, 0, 0.3, 0, 0.1],
+    attack: 0.04,
+    filterFreq: 2800,
+    filterQ: 1,
+    distortion: 0
+  },
+  pad: {
+    waveform: 'sine',
+    harmonics: [1, 0.5, 0.4, 0.3, 0.2],
+    attack: 0.3,
+    filterFreq: 1800,
+    filterQ: 0.5,
+    distortion: 0
+  },
+  pluck: {
+    waveform: 'triangle',
+    harmonics: [1, 0.4, 0.15],
+    attack: 0.001,
+    filterFreq: 3500,
+    filterQ: 2,
+    distortion: 0
+  },
+  celeste: {
+    waveform: 'sine',
+    harmonics: [1, 0.8, 0.5, 0.3, 0.2],
+    attack: 0.002,
+    filterFreq: 6000,
+    filterQ: 1,
+    distortion: 0
+  },
+  trumpet: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.9, 0.7, 0.5, 0.4],
+    attack: 0.03,
+    filterFreq: 4000,
+    filterQ: 4,
+    distortion: 12
+  },
+  saxophone: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.6, 0.4, 0.3, 0.2, 0.1],
+    attack: 0.06,
+    filterFreq: 2500,
+    filterQ: 2,
+    distortion: 5
+  },
+  vibraphone: {
+    waveform: 'sine',
+    harmonics: [1, 0.7, 0.5, 0.3, 0.2, 0.15],
+    attack: 0.002,
+    filterFreq: 5500,
+    filterQ: 1.5,
+    distortion: 0
+  },
+  marimba: {
+    waveform: 'triangle',
+    harmonics: [1, 0.5, 0.3, 0.15],
+    attack: 0.001,
+    filterFreq: 2000,
+    filterQ: 1,
+    distortion: 0
+  },
+  choir: {
+    waveform: 'sine',
+    harmonics: [1, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1],
+    attack: 0.25,
+    filterFreq: 2200,
+    filterQ: 0.7,
+    distortion: 0
+  },
+  oboe: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.7, 0.5, 0.3, 0.2],
+    attack: 0.08,
+    filterFreq: 3200,
+    filterQ: 2,
+    distortion: 2
+  },
+  cello: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.4, 0.3, 0.2],
+    attack: 0.12,
+    filterFreq: 1500,
+    filterQ: 1,
+    distortion: 0
+  },
+  harp: {
+    waveform: 'triangle',
+    harmonics: [1, 0.6, 0.4, 0.2, 0.1],
+    attack: 0.001,
+    filterFreq: 4500,
+    filterQ: 1,
+    distortion: 0
   }
 };
 
