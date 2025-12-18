@@ -533,6 +533,10 @@ export default function CounterpointGenerator() {
         const arrayBuffer = await file.arrayBuffer();
         const midi = new Midi(arrayBuffer);
         
+        // Extract tempo from MIDI (convert to BPM based on quarter notes)
+        const midiTempo = midi.header.tempos.length > 0 ? midi.header.tempos[0].bpm : 120;
+        const midiBPM = Math.round(midiTempo);
+        
         // Get all notes from all tracks, sorted by time
         const allNotes = [];
         midi.tracks.forEach(track => {
@@ -546,19 +550,23 @@ export default function CounterpointGenerator() {
           });
         });
         
-        // Sort by time and convert to beat-based format
+        // Sort by time
         allNotes.sort((a, b) => a.time - b.time);
         
-        const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-        const secondsPerBeat = (60 / tempo) / (beatsPerMeasure / 16);
+        // Convert MIDI times (in seconds) to our 16th-note beat grid
+        // At X BPM, there are X quarter notes per minute = X/60 quarter notes per second
+        // Since our beat is a 16th note, multiply by 4
+        const sixteenthNotesPerSecond = (midiBPM / 60) * 4;
         
         const importedNotes = allNotes.map(n => ({
           pitch: n.pitch,
-          beat: Math.round(n.time / secondsPerBeat),
-          duration: Math.max(0.25, Math.round((n.duration / secondsPerBeat) * 4) / 4),
+          beat: Math.round(n.time * sixteenthNotesPerSecond),
+          duration: Math.max(0.25, Math.round((n.duration * sixteenthNotesPerSecond) * 4) / 4),
           velocity: n.velocity
         }));
         
+        // Update tempo to match MIDI file
+        setTempo(midiBPM);
         setCantusFirmus(importedNotes);
       } catch (error) {
         console.error('Failed to import MIDI:', error);
