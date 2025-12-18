@@ -44,11 +44,14 @@ const PITCH_TO_KEY = Object.entries(KEY_MAP).reduce((acc, [key, pitch]) => {
 
 const DEFAULT_INSTRUMENTS = [
   { value: 'organ', label: 'Organ' },
-  { value: 'distortion', label: 'Distortion' },
-  { value: 'clean', label: 'Clean' },
-  { value: 'bass', label: 'Bass' },
+  { value: 'piano', label: 'Piano' },
+  { value: 'harpsichord', label: 'Harpsichord' },
   { value: 'strings', label: 'Strings' },
   { value: 'flute', label: 'Flute' },
+  { value: 'bass', label: 'Bass' },
+  { value: 'clean', label: 'Clean' },
+  { value: 'electric', label: 'Electric' },
+  { value: 'distortion', label: 'Distortion' },
   { value: 'synth', label: 'Synth' },
 ];
 
