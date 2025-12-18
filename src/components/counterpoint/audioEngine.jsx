@@ -9,10 +9,6 @@ let delayGain = null;
 let chorusNode = null;
 let chorusGain = null;
 
-// Active notes tracking for polyphony limiting
-const activeNotes = new Set();
-const MAX_POLYPHONY = 32; // Limit concurrent notes to prevent crackling
-
 // Effect levels (0-1)
 let effectLevels = {
   reverb: 0.3,
@@ -241,6 +237,30 @@ const INSTRUMENT_CONFIGS = {
     filterFreq: 3000,
     filterQ: 3,
     distortion: 5
+  },
+  harpsichord: {
+    waveform: 'sawtooth',
+    harmonics: [1, 0.7, 0.4, 0.2],
+    attack: 0.001,
+    filterFreq: 4000,
+    filterQ: 1.5,
+    distortion: 0
+  },
+  piano: {
+    waveform: 'triangle',
+    harmonics: [1, 0.5, 0.3, 0.1],
+    attack: 0.005,
+    filterFreq: 3500,
+    filterQ: 1,
+    distortion: 0
+  },
+  electric: {
+    waveform: 'square',
+    harmonics: [1, 0.6, 0.4],
+    attack: 0.01,
+    filterFreq: 2500,
+    filterQ: 2,
+    distortion: 15
   }
 };
 
@@ -334,16 +354,20 @@ function createDistortion(amount) {
   return distortion;
 }
 
+// Active oscillators tracking to prevent too many at once
+let activeOscillatorCount = 0;
+const MAX_CONCURRENT_NOTES = 32;
+
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ') {
   if (!audioContext) initAudio();
   
-  const freq = NOTE_FREQUENCIES[pitch];
-  if (!freq) return;
-  
-  // Limit polyphony to prevent crackling
-  if (activeNotes.size >= MAX_POLYPHONY) {
+  // Throttle to prevent audio crackling
+  if (activeOscillatorCount >= MAX_CONCURRENT_NOTES) {
     return;
   }
+  
+  const freq = NOTE_FREQUENCIES[pitch];
+  if (!freq) return;
   
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
@@ -378,9 +402,8 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   
   // Distortion for metal sounds
   let outputNode = filterNode;
-  let distNode = null;
   if (config.distortion > 0) {
-    distNode = createDistortion(config.distortion);
+    const distNode = createDistortion(config.distortion);
     filterNode.connect(distNode);
     outputNode = distNode;
   }
@@ -402,28 +425,15 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   gainNode.connect(masterGain);
   
   const stopTime = Math.max(now + 0.01, now + totalDuration);
-  
-  // Track this note
-  const noteId = Symbol();
-  activeNotes.add(noteId);
+  activeOscillatorCount += oscillators.length;
   
   oscillators.forEach(osc => {
     osc.start(now);
     osc.stop(stopTime);
+    osc.onended = () => {
+      activeOscillatorCount--;
+    };
   });
-  
-  // Clean up nodes after note ends to prevent memory buildup
-  setTimeout(() => {
-    try {
-      oscillators.forEach(osc => osc.disconnect());
-      filterNode.disconnect();
-      if (distNode) distNode.disconnect();
-      gainNode.disconnect();
-      activeNotes.delete(noteId);
-    } catch (e) {
-      // Already disconnected
-    }
-  }, totalDuration * 1000 + 100);
   
   return { oscillators, gainNode };
 }
@@ -530,8 +540,6 @@ export function stopAllNotes() {
         const resetTime = Math.max(0.01, audioContext.currentTime);
         masterGain.gain.setValueAtTime(0.4, resetTime);
       }
-      // Clear active notes tracking
-      activeNotes.clear();
     }, 100);
   }
 }
