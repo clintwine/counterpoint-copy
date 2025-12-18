@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
 import MusicTheoryPanel from '@/components/counterpoint/MusicTheoryPanel';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Midi } from '@tonejs/midi';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
 import VoiceEditor from '@/components/counterpoint/VoiceEditor';
@@ -523,31 +524,45 @@ export default function CounterpointGenerator() {
   const handleImportMidi = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json,.mid,.midi';
+    input.accept = '.mid,.midi';
     input.onchange = async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       
       try {
-        const text = await file.text();
-        const data = JSON.parse(text);
+        const arrayBuffer = await file.arrayBuffer();
+        const midi = new Midi(arrayBuffer);
         
-        // Parse MIDI JSON format
-        if (data.tracks && Array.isArray(data.tracks)) {
-          const mainTrack = data.tracks[0];
-          if (mainTrack?.notes) {
-            const importedNotes = mainTrack.notes.map(n => ({
-              pitch: n.pitch,
-              beat: Math.round(n.startTime * (tempo / 60)),
-              duration: Math.max(0.25, Math.round(n.duration * (tempo / 60) * 4) / 4),
-              velocity: (n.velocity || 80) / 100
-            }));
-            setCantusFirmus(importedNotes);
-          }
-        }
+        // Get all notes from all tracks, sorted by time
+        const allNotes = [];
+        midi.tracks.forEach(track => {
+          track.notes.forEach(note => {
+            allNotes.push({
+              pitch: note.name,
+              time: note.time,
+              duration: note.duration,
+              velocity: note.velocity
+            });
+          });
+        });
+        
+        // Sort by time and convert to beat-based format
+        allNotes.sort((a, b) => a.time - b.time);
+        
+        const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+        const secondsPerBeat = (60 / tempo) / (beatsPerMeasure / 16);
+        
+        const importedNotes = allNotes.map(n => ({
+          pitch: n.pitch,
+          beat: Math.round(n.time / secondsPerBeat),
+          duration: Math.max(0.25, Math.round((n.duration / secondsPerBeat) * 4) / 4),
+          velocity: n.velocity
+        }));
+        
+        setCantusFirmus(importedNotes);
       } catch (error) {
         console.error('Failed to import MIDI:', error);
-        alert('Failed to import MIDI file. Please ensure it\'s a valid MIDI JSON file.');
+        alert('Failed to import MIDI file: ' + error.message);
       }
     };
     input.click();
