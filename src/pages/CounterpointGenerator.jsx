@@ -542,7 +542,6 @@ export default function CounterpointGenerator() {
               duration: Math.max(0.25, Math.round(n.duration * (tempo / 60) * 4) / 4),
               velocity: (n.velocity || 80) / 100
             }));
-            saveToHistory(importedNotes);
             setCantusFirmus(importedNotes);
           }
         }
