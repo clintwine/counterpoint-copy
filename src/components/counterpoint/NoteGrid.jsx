@@ -493,7 +493,7 @@ export default function NoteGrid({
               onNotesUpdate(newNotes);
               // Play the note with proper duration for feedback
               initAudio();
-              const instrument = voices[activeVoice]?.instrument || 'organ';
+              const instrument = voices[0]?.instrument || 'organ';
               playNote(pitch, 0.5, 0.7, 0, instrument);
             }
             
@@ -807,10 +807,10 @@ export default function NoteGrid({
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          {/* Instrument for active voice */}
+          {/* Instrument for cantus firmus (voice being edited) */}
                         <InstrumentSelect 
-                          value={voices[activeVoice]?.instrument || 'organ'} 
-                          onChange={(v) => onVoiceInstrumentChange?.(activeVoice, v)}
+                          value={voices[0]?.instrument || 'organ'} 
+                          onChange={(v) => onVoiceInstrumentChange?.(0, v)}
                           instruments={ALL_INSTRUMENTS}
                           onCreateNew={onOpenWaveEditor}
                         />

@@ -820,15 +820,16 @@ export default function CounterpointGenerator() {
                               timeSignature={settings.timeSignature}
                               scrollToBeatRef={scrollToBeatRef}
                               pressedPianoNotes={pressedPianoNotes}
-                              pianoInstrument={voices[activeVoice]?.instrument || 'organ'}
+                              pianoInstrument={voices[0]?.instrument || 'organ'}
                               loopStart={loopStart}
                               loopEnd={loopEnd}
                               isLooping={isLooping}
                               onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
                               onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                 const newVoices = [...voices];
-                                if (newVoices[voiceIndex]) {
-                                  newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument };
+                                // Always update voice 0 (cantus firmus) since that's what's being edited
+                                if (newVoices[0]) {
+                                  newVoices[0] = { ...newVoices[0], instrument };
                                   setVoices(newVoices);
                                 }
                               }}
@@ -850,11 +851,11 @@ export default function CounterpointGenerator() {
                               <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
                                 <PianoKeyboard
                                   activeNotes={activeNotes}
-                                  instrument={voices[activeVoice]?.instrument || 'organ'}
+                                  instrument={voices[0]?.instrument || 'organ'}
                                   onInstrumentChange={(inst) => {
                                     const newVoices = [...voices];
-                                    if (newVoices[activeVoice]) {
-                                      newVoices[activeVoice] = { ...newVoices[activeVoice], instrument: inst };
+                                    if (newVoices[0]) {
+                                      newVoices[0] = { ...newVoices[0], instrument: inst };
                                       setVoices(newVoices);
                                     }
                                   }}
