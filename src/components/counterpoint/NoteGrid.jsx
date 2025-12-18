@@ -353,7 +353,7 @@ export default function NoteGrid({
         // Allow multiple notes per beat - just add it
         const exists = newNotes.some(n => n.beat === targetBeat && n.pitch === note.pitch);
         if (!exists) {
-          newNotes.push({ pitch: note.pitch, beat: targetBeat, duration: note.duration || DEFAULT_DURATION, velocity: note.velocity ?? 0.8 });
+          newNotes.push({ pitch: note.pitch, beat: targetBeat });
         }
       }
     });
@@ -666,7 +666,7 @@ export default function NoteGrid({
           const origPitchIdx = pitches.indexOf(n.pitch);
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, n.beat + beatDelta));
-          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: n.duration || DEFAULT_DURATION, velocity: n.velocity ?? 0.8 };
+          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: n.duration || DEFAULT_DURATION };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
         // cantusFirmus already has originals removed, just add the moved notes
@@ -1117,8 +1117,7 @@ export default function NoteGrid({
                                         const notesToStore = selectedNotesList.map(n => ({
                                           pitch: n.pitch,
                                           beat: n.beat,
-                                          duration: n.duration || DEFAULT_DURATION,
-                                          velocity: n.velocity ?? 0.8
+                                          duration: n.duration || DEFAULT_DURATION
                                         }));
                                         originalDragNotesRef.current = {
                                           keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
@@ -1230,8 +1229,7 @@ export default function NoteGrid({
                                                                               const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
                                                                                 pitch: n.pitch,
                                                                                 beat: n.beat,
-                                                                                duration: n.duration || DEFAULT_DURATION,
-                                                                                velocity: n.velocity ?? 0.8
+                                                                                duration: n.duration || DEFAULT_DURATION
                                                                               }));
                                                                               originalDragNotesRef.current = {
                                                                                 keys: keysToUse,
@@ -1299,7 +1297,7 @@ export default function NoteGrid({
                                                                                   // Store the notes we're dragging - use current cantusFirmus snapshot
                                                                                   const notesToStore = cantusFirmus
                                                                                     .filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat)))
-                                                                                    .map(n => ({ ...n, duration: n.duration || DEFAULT_DURATION, velocity: n.velocity ?? 0.8 }));
+                                                                                    .map(n => ({ ...n, duration: n.duration || DEFAULT_DURATION }));
                                                                                   
                                                                                   originalDragNotesRef.current = {
                                                                                     keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
@@ -1520,12 +1518,14 @@ export default function NoteGrid({
                       ? { ...n, velocity } 
                       : n
                   );
-                  saveToHistory(newNotes);
                   onNotesUpdate(newNotes);
                 }}
-                min={10}
+                onValueCommit={([value]) => {
+                  saveToHistory(cantusFirmus);
+                }}
+                min={20}
                 max={100}
-                step={1}
+                step={5}
                 className="w-24 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
               />
               <span className="text-white/70 text-xs w-8 text-right">

@@ -428,7 +428,8 @@ export default function CounterpointGenerator() {
         const velocity = note.velocity ?? 0.8;
         const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
         const instrument = voices[0]?.instrument || 'organ';
-        playNote(note.pitch, actualDuration, volume * velocity * 0.7, 0, instrument);
+        // Make velocity more pronounced: square it to increase dynamic range
+        playNote(note.pitch, actualDuration, volume * (velocity * velocity), 0, instrument);
       });
     } else {
       // Use pre-indexed map for O(1) lookup
@@ -439,7 +440,8 @@ export default function CounterpointGenerator() {
         const velocity = note.velocity ?? 0.8;
         const actualDuration = (note.duration || 1) * (60 / tempo) * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
-        playNote(note.pitch, actualDuration, volume * velocity * 0.7, voiceIndex, instrument);
+        // Make velocity more pronounced: square it to increase dynamic range
+        playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument);
       });
     }
 
