@@ -49,6 +49,7 @@ export default function PlaybackControls({
   canGenerate,
   isGenerating,
   onExportMidi,
+  onImportMidi,
   onTheoryTools
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
@@ -157,6 +158,10 @@ export default function PlaybackControls({
           <DropdownMenuItem onClick={onExportMidi} className="text-white cursor-pointer">
             <FileAudio className="w-4 h-4 mr-2" />
             Export MIDI
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onImportMidi} className="text-white cursor-pointer">
+            <FileAudio className="w-4 h-4 mr-2" />
+            Import MIDI
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onTheoryTools} className="text-amber-400 cursor-pointer font-semibold">

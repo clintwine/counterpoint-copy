@@ -519,6 +519,41 @@ export default function CounterpointGenerator() {
     URL.revokeObjectURL(url);
   };
 
+  // Import MIDI
+  const handleImportMidi = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,.mid,.midi';
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Parse MIDI JSON format
+        if (data.tracks && Array.isArray(data.tracks)) {
+          const mainTrack = data.tracks[0];
+          if (mainTrack?.notes) {
+            const importedNotes = mainTrack.notes.map(n => ({
+              pitch: n.pitch,
+              beat: Math.round(n.startTime * (tempo / 60)),
+              duration: Math.max(0.25, Math.round(n.duration * (tempo / 60) * 4) / 4),
+              velocity: (n.velocity || 80) / 100
+            }));
+            saveToHistory(importedNotes);
+            setCantusFirmus(importedNotes);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to import MIDI:', error);
+        alert('Failed to import MIDI file. Please ensure it\'s a valid MIDI JSON file.');
+      }
+    };
+    input.click();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
       {/* Ambient background effects */}
@@ -732,8 +767,8 @@ export default function CounterpointGenerator() {
                                         notes: voice.notes?.map(n => ({
                                           pitch: n.pitch,
                                           startTime: n.beat * (60 / tempo),
-                                          duration: 60 / tempo,
-                                          velocity: 80
+                                          duration: (n.duration || 1) * (60 / tempo),
+                                          velocity: Math.round((n.velocity ?? 0.8) * 100)
                                         })) || []
                                       }))
                                     };
@@ -745,6 +780,7 @@ export default function CounterpointGenerator() {
                                     a.click();
                                     URL.revokeObjectURL(url);
                                   }}
+                                  onImportMidi={handleImportMidi}
                                   onTheoryTools={() => setTheoryPanelOpen(true)}
                                   />
                               }
