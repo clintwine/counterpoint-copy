@@ -671,9 +671,6 @@ export default function NoteGrid({
           setPendingNote(null);
         }
 
-
-        }
-
         // Save history after painting stroke
         if (isPainting && paintedNotesRef.current.size > 0) {
           saveToHistory(cantusFirmus);
