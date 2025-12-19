@@ -1210,67 +1210,72 @@ export default function NoteGrid({
                                   <div
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
-                                                                                e.stopPropagation();
-                                                                                
-                                                                                // In draw mode, clicking a note removes it
-                                                                                if (tool === 'draw') {
-                                                                                  const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
-                                                                                  saveToHistory(newNotes);
-                                                                                  onNotesUpdate(newNotes);
-                                                                                  return;
-                                                                                }
-                                                                                
-                                                                                const coords = getEventCoords(e);
-                                                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                                                const clickX = coords.clientX - rect.left;
-                                                                                playNoteSound(pitch);
+                                                e.stopPropagation();
 
-                                      if (clickX > rect.width - 10) {
-                                                                                    const startDurations = {};
-                                                                                    if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
-                                                                                      cantusFirmus.forEach(n => {
-                                                                                        if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                                                                          startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
-                                                                                        }
-                                                                                      });
-                                                                                    } else {
-                                                                                      startDurations[nKey] = note.duration || DEFAULT_DURATION;
-                                                                                    }
-                                                                                    setResizeState({ startX: coords.clientX, startDurations });
-                                      } else {
-                                        if (!selectedNotes.has(nKey)) {
-                                          if (!e.shiftKey) {
-                                            setSelectedNotes(new Set([nKey]));
-                                          } else {
-                                            const newSelected = new Set(selectedNotes);
-                                            newSelected.add(nKey);
-                                            setSelectedNotes(newSelected);
-                                          }
-                                        }
-                                        // Store original selected notes for the drag operation
-                                                                              const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
-                                                                              const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
-                                                                                pitch: n.pitch,
-                                                                                beat: n.beat,
-                                                                                duration: n.duration || DEFAULT_DURATION,
-                                                                                velocity: n.velocity
-                                                                              }));
-                                                                              originalDragNotesRef.current = {
-                                                                                keys: keysToUse,
-                                                                                notes: notesToStore
-                                                                              };
+                                                // In draw mode, clicking a note removes it
+                                                if (tool === 'draw') {
+                                                  const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
+                                                  saveToHistory(newNotes);
+                                                  onNotesUpdate(newNotes);
+                                                  return;
+                                                }
 
-                                                                              setDragState({
-                                                                              startPitch: pitch,
-                                                                              startBeat: beat,
-                                                                              startPitchIndex: pitches.indexOf(pitch),
-                                                                              currentPitchIndex: pitches.indexOf(pitch),
-                                                                              currentBeat: beat,
-                                                                              isDragging: false,
-                                                                              clickOffsetX: coords.clientX,
-                                                                              clickOffsetY: coords.clientY
-                                                                            });
-                                      }
+                                                const coords = getEventCoords(e);
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                const clickX = coords.clientX - rect.left;
+                                                playNoteSound(pitch);
+
+                                    if (clickX > rect.width - 10) {
+                                                    const startDurations = {};
+                                                    if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                                      cantusFirmus.forEach(n => {
+                                                        if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                                          startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                                        }
+                                                      });
+                                                    } else {
+                                                      startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                                    }
+                                                    setResizeState({ startX: coords.clientX, startDurations });
+                                    } else {
+                                    // Determine keys before updating selection
+                                    const wasSelected = selectedNotes.has(nKey);
+                                    const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]);
+
+                                    // Update selection
+                                    if (!wasSelected) {
+                                    if (!e.shiftKey) {
+                                    setSelectedNotes(new Set([nKey]));
+                                    } else {
+                                    const newSelected = new Set(selectedNotes);
+                                    newSelected.add(nKey);
+                                    setSelectedNotes(newSelected);
+                                    }
+                                    }
+
+                                    // Store original selected notes for the drag operation
+                                              const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
+                                                pitch: n.pitch,
+                                                beat: n.beat,
+                                                duration: n.duration || DEFAULT_DURATION,
+                                                velocity: n.velocity
+                                              }));
+                                              originalDragNotesRef.current = {
+                                                keys: keysToUse,
+                                                notes: notesToStore
+                                              };
+
+                                              setDragState({
+                                              startPitch: pitch,
+                                              startBeat: beat,
+                                              startPitchIndex: pitches.indexOf(pitch),
+                                              currentPitchIndex: pitches.indexOf(pitch),
+                                              currentBeat: beat,
+                                              isDragging: false,
+                                              clickOffsetX: coords.clientX,
+                                              clickOffsetY: coords.clientY
+                                            });
+                                    }
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
