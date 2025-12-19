@@ -611,8 +611,11 @@ export default function NoteGrid({
       
       const prevPitchIndex = dragState.currentPitchIndex;
 
+      // Set dragging to true if we've moved at all
+      const hasMoved = beatDelta !== 0 || pitchDelta !== 0;
+      
       // Play note sound when pitch changes during drag
-      if (dragState.isDragging && newPitchIndex !== prevPitchIndex && newPitchIndex >= 0 && newPitchIndex < pitches.length) {
+      if ((dragState.isDragging || hasMoved) && newPitchIndex !== prevPitchIndex && newPitchIndex >= 0 && newPitchIndex < pitches.length) {
         playNoteSound(pitches[newPitchIndex]);
       }
 
@@ -641,7 +644,7 @@ export default function NoteGrid({
         ...prev,
         currentPitchIndex: newPitchIndex,
         currentBeat: newBeat,
-        isDragging: true
+        isDragging: prev.isDragging || hasMoved // Set to true if already dragging or if we've moved
       }));
     }
   };
@@ -1425,7 +1428,7 @@ export default function NoteGrid({
             })()}
 
             {/* Drag preview notes */}
-                            {dragState?.isDragging && selectedNotes.size > 0 && originalDragNotesRef.current?.notes && (
+                            {dragState && (dragState.isDragging || dragOffset.beatDelta !== 0 || dragOffset.pitchDelta !== 0) && originalDragNotesRef.current?.notes && (
                               <>
                                 {originalDragNotesRef.current.notes.map(note => {
                                   const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
