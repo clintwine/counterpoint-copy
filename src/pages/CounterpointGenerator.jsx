@@ -97,8 +97,6 @@ export default function CounterpointGenerator() {
             setIsPlaying(prev => {
               if (prev) {
                 stopAllNotes();
-              } else {
-                ensureAudio();
               }
               return !prev;
             });
@@ -106,7 +104,7 @@ export default function CounterpointGenerator() {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-      }, [ensureAudio]);
+      }, []);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
