@@ -220,17 +220,28 @@ export default function NoteGrid({
 
   const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
   
-  // Memoize notes lookup for performance
+  // Memoize notes lookup for performance - filter duplicates
   const notesMap = useMemo(() => {
     const map = new Map();
+    const seen = new Set();
+    
     cantusFirmus.forEach(note => {
+      const uniqueKey = `0-${note.pitch}-${note.beat}`;
+      if (seen.has(uniqueKey)) return; // Skip duplicates
+      seen.add(uniqueKey);
+      
       const key = `${note.pitch}-${note.beat}`;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push({ voiceIndex: 0, note });
     });
+    
     voices.forEach((voice, voiceIndex) => {
       if (!voice.notes) return;
       voice.notes.forEach(note => {
+        const uniqueKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
+        if (seen.has(uniqueKey)) return; // Skip duplicates
+        seen.add(uniqueKey);
+        
         const key = `${note.pitch}-${note.beat}`;
         if (!map.has(key)) map.set(key, []);
         map.get(key).push({ voiceIndex, note });
