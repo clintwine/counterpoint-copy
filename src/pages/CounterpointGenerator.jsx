@@ -70,8 +70,12 @@ export default function CounterpointGenerator() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [songDialogOpen, setSongDialogOpen] = useState(false);
+  const [saveSongDialogOpen, setSaveSongDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
+  const [songName, setSongName] = useState('');
+  const [songDescription, setSongDescription] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [theoryPanelOpen, setTheoryPanelOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
@@ -105,6 +109,11 @@ export default function CounterpointGenerator() {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
       }, []);
+
+  // Get current user
+  useEffect(() => {
+    base44.auth.me().then(user => setCurrentUser(user)).catch(() => setCurrentUser(null));
+  }, []);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
@@ -148,10 +157,52 @@ export default function CounterpointGenerator() {
     }
   });
 
+  // Save song mutation (admin only)
+  const saveSongMutation = useMutation({
+    mutationFn: async (data) => {
+      await base44.entities.Song.create(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['songs'] });
+      setSaveSongDialogOpen(false);
+      setSongName('');
+      setSongDescription('');
+    }
+  });
+
+  // Clone song mutation
+  const cloneSongMutation = useMutation({
+    mutationFn: async (song) => {
+      await base44.entities.Song.create({
+        name: `${song.name} (Copy)`,
+        description: song.description,
+        settings: song.settings,
+        cantusFirmus: song.cantusFirmus,
+        generatedVoices: song.generatedVoices,
+        voices: song.voices
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['songs'] });
+    }
+  });
+
   const handleSaveProject = () => {
     if (!projectName.trim()) return;
     saveProjectMutation.mutate({
       name: projectName,
+      settings: { ...settings, tempo },
+      cantusFirmus,
+      generatedVoices,
+      voices
+    });
+  };
+
+  const handleSaveSong = () => {
+    if (!songName.trim()) return;
+    saveSongMutation.mutate({
+      name: songName,
+      description: songDescription,
       settings: { ...settings, tempo },
       cantusFirmus,
       generatedVoices,
@@ -702,6 +753,19 @@ export default function CounterpointGenerator() {
                             >
                               {previewingSongId === song.id ? '⏹' : '▶'}
                             </Button>
+                            {currentUser?.role === 'admin' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  cloneSongMutation.mutate(song);
+                                }}
+                                className="text-blue-400 hover:text-blue-300"
+                              >
+                                Clone
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -747,6 +811,46 @@ export default function CounterpointGenerator() {
                   </form>
                 </DialogContent>
               </Dialog>
+
+              {/* Save Song Dialog (Admin Only) */}
+              <Dialog open={saveSongDialogOpen} onOpenChange={setSaveSongDialogOpen}>
+                <DialogTrigger asChild>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900 border-slate-700">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Save as Song</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); handleSaveSong(); }} className="space-y-4">
+                    <div>
+                      <Label className="text-white/80">Song Name</Label>
+                      <Input
+                        value={songName}
+                        onChange={(e) => setSongName(e.target.value)}
+                        placeholder="My Beautiful Song"
+                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-white/80">Description</Label>
+                      <Input
+                        value={songDescription}
+                        onChange={(e) => setSongDescription(e.target.value)}
+                        placeholder="A brief description..."
+                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!songName.trim() || saveSongMutation.isPending}
+                      className="w-full bg-amber-500 text-slate-900 hover:bg-amber-400"
+                    >
+                      {saveSongMutation.isPending ? 'Saving...' : 'Save Song'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
@@ -784,6 +888,7 @@ export default function CounterpointGenerator() {
                                   onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
                                   onNewProject={handleNewProject}
                                   onSaveProject={() => setSaveDialogOpen(true)}
+                                  onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
                                   onLoadProject={() => setLoadDialogOpen(true)}
                                   onBrowseSongs={() => setSongDialogOpen(true)}
                                   onExport={handleExport}

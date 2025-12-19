@@ -41,6 +41,7 @@ export default function PlaybackControls({
   onScrollToBeat,
   onNewProject,
   onSaveProject,
+  onSaveSong,
   onLoadProject,
   onBrowseSongs,
   onExport,
@@ -148,6 +149,12 @@ export default function PlaybackControls({
             <Save className="w-4 h-4 mr-2" />
             Save Project
           </DropdownMenuItem>
+          {onSaveSong && (
+            <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold">
+              <Save className="w-4 h-4 mr-2" />
+              Save as Song (Admin)
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer">
             <Music className="w-4 h-4 mr-2" />
