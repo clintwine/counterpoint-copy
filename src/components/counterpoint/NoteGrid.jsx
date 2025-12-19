@@ -274,6 +274,7 @@ export default function NoteGrid({
   const lastTapRef = useRef({ key: null, time: 0 });
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
+  const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
 
   // Update viewport dimensions on mount and resize
   useEffect(() => {
@@ -612,7 +613,7 @@ export default function NoteGrid({
                 // Only add if not already painted in this stroke and no existing note
                 if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
                   paintedNotesRef.current.add(noteKey);
-                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: DEFAULT_DURATION, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   onNotesUpdate(newNotes);
                   // Play the note with proper duration for feedback
                   initAudio();
@@ -735,11 +736,15 @@ export default function NoteGrid({
         paintedNotesRef.current.clear();
 
         if (resizeState) {
-      // Save to history after resize
-      saveToHistory(cantusFirmus);
-      setResizeState(null);
-      return;
-    }
+          // Save to history after resize and update last duration
+          const resizedNote = cantusFirmus.find(n => resizeState.startDurations[getNoteKey(n.pitch, n.beat)] !== undefined);
+          if (resizedNote) {
+            setLastNoteDuration(resizedNote.duration || DEFAULT_DURATION);
+          }
+          saveToHistory(cantusFirmus);
+          setResizeState(null);
+          return;
+        }
     
     if (marquee) {
       // Calculate selected notes from marquee
