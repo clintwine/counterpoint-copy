@@ -1257,7 +1257,8 @@ export default function NoteGrid({
                                 const duration = note.duration || DEFAULT_DURATION;
                                 const noteWidth = duration * CELL_WIDTH - 4;
                                 const nKey = getNoteKey(note.pitch, note.beat);
-                                const isBeingDragged = selectedNotes.has(nKey) && dragState?.isDragging;
+                                // Hide note if it's being dragged OR if it's in originalDragNotesRef (about to be dragged)
+                                const isBeingDragged = originalDragNotesRef.current?.keys.has(nKey) && dragState;
                                 
                                 if (isBeingDragged) return null;
                                 
