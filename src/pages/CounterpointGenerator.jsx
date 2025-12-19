@@ -570,11 +570,8 @@ export default function CounterpointGenerator() {
     if (isPlaying) {
       stopAllNotes();
     } else {
-      // If there are selected notes, start from the earliest selected note
-      if (selectedNotes.length > 0) {
-        const minBeat = Math.min(...selectedNotes.map(n => n.beat));
-        setCurrentBeat(minBeat);
-      }
+      // Clear selection to play all notes
+      setSelectedNotes([]);
     }
     setIsPlaying(!isPlaying);
   };
