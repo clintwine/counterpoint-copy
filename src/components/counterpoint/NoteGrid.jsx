@@ -493,13 +493,12 @@ export default function NoteGrid({
           const now = Date.now();
           const isDoubleTap = lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300;
           lastTapRef.current = { key: noteKey, time: now };
-          
+
           if (!isDoubleTap) {
-            // Draw mode - add/remove note
+            // Draw mode - add/remove note ONLY on empty cells
             if (hasNote) {
-              const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
-              saveToHistory(newNotes);
-              onNotesUpdate(newNotes);
+              // Don't delete here - handled by note's own handler
+              return;
             } else {
               // Add the note
               const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
@@ -511,7 +510,7 @@ export default function NoteGrid({
               playNote(pitch, 0.5, 0.7, 0, instrument);
             }
 
-            // Clear selection after adding/removing note so it doesn't interfere with playback
+            // Clear selection after adding note so it doesn't interfere with playback
             setSelectedNotes(new Set());
 
             // Only enable painting mode if paintMode is on
@@ -525,7 +524,7 @@ export default function NoteGrid({
             // Note click is handled by the note element itself
             return;
           } else {
-            // Click on empty cell - deselect or add note
+            // Click on empty cell - deselect
             if (!e.shiftKey) {
               setSelectedNotes(new Set());
             }
