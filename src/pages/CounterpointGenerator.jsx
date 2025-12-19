@@ -262,18 +262,42 @@ export default function CounterpointGenerator() {
     }));
     setVoices(voicesWithInstruments);
     
-    // Fix tempo first - songs may have been saved with 16th-note BPM instead of quarter-note BPM
+    // Detect if song was saved with beats in wrong unit (eighth notes instead of 16th notes)
+    // If tempo is < 200 and beats are small decimals (0.5, 1, 1.5), multiply beats by 4
     const loadedTempo = song.settings?.tempo || 80;
-    const correctedTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
+    const needsBeatConversion = loadedTempo < 200;
     
-    // Update settings with corrected tempo
-    setSettings({ ...(song.settings || DEFAULT_SETTINGS), tempo: correctedTempo });
-    setTempo(correctedTempo);
+    const convertedCantusFirmus = needsBeatConversion 
+      ? (song.cantusFirmus || []).map(n => ({ ...n, beat: n.beat * 4 }))
+      : (song.cantusFirmus || []);
     
-    setCantusFirmus(song.cantusFirmus || []);
-    setGeneratedVoices(song.generatedVoices || []);
+    const convertedGeneratedVoices = needsBeatConversion
+      ? (song.generatedVoices || []).map(voice => ({
+          ...voice,
+          notes: (voice.notes || []).map(n => ({ ...n, beat: n.beat * 4 }))
+        }))
+      : (song.generatedVoices || []);
+    
+    // Also update measures to account for longer beat range
+    const maxBeat = Math.max(
+      ...convertedCantusFirmus.map(n => n.beat + (n.duration || 1)),
+      ...convertedGeneratedVoices.flatMap(v => (v.notes || []).map(n => n.beat + (n.duration || 1))),
+      0
+    );
+    const beatsPerMeasure = getBeatsPerMeasure(song.settings?.timeSignature || '4/4');
+    const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || (song.settings?.measures || 8);
+    
+    setSettings({ 
+      ...(song.settings || DEFAULT_SETTINGS), 
+      tempo: loadedTempo,
+      measures: requiredMeasures 
+    });
+    setTempo(loadedTempo);
+    
+    setCantusFirmus(convertedCantusFirmus);
+    setGeneratedVoices(convertedGeneratedVoices);
     setProjectName(song.name);
-    setCurrentProjectId(null); // Not a project, it's a song
+    setCurrentProjectId(null);
     setSongDialogOpen(false);
   };
 
