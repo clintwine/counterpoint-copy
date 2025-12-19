@@ -1289,8 +1289,9 @@ export default function NoteGrid({
                                               isDragging: false,
                                               clickOffsetX: coords.clientX,
                                               clickOffsetY: coords.clientY
-                                            });
-                                    }
+                                              });
+                                              setPendingNote(null); // Clear pending note when starting drag
+                                              }
                                     }}
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
@@ -1352,7 +1353,8 @@ export default function NoteGrid({
                                                                                     clickOffsetX: coords.clientX,
                                                                                     clickOffsetY: coords.clientY
                                                                                   });
-                                                                                }
+                                                                                  setPendingNote(null); // Clear pending note when starting drag
+                                                                                  }
                                                                               }}
                                     className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
                                       selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
