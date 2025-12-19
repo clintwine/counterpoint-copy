@@ -56,9 +56,12 @@ export default function PlaybackControls({
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
   
   const formatTime = (beat) => {
-    const measure = Math.floor(beat / beatsPerMeasure) + 1;
-    const sixteenth = (beat % beatsPerMeasure) + 1;
-    return `${measure}:${sixteenth.toString().padStart(2, '0')}`;
+    // Convert beat (16th note) to actual time in seconds
+    const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note in seconds
+    const totalSeconds = beat * sixteenthNoteDuration;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // Scrubbable BPM input
