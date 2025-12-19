@@ -212,7 +212,9 @@ export default function CounterpointGenerator() {
     
     setProjectName(song.name);
     setCurrentProjectId(null); // Not a project, it's a song
-    setTempo(song.settings?.tempo || 80);
+    // Songs may have tempo stored in a different format - if tempo seems too high, adjust it
+    const loadedTempo = song.settings?.tempo || 80;
+    setTempo(loadedTempo > 200 ? Math.round(loadedTempo / 2) : loadedTempo);
     setSongDialogOpen(false);
   };
 
@@ -236,7 +238,8 @@ export default function CounterpointGenerator() {
     
     // Start new preview
     setPreviewingSongId(song.id);
-    const previewTempo = song.settings?.tempo || 80;
+    const loadedTempo = song.settings?.tempo || 80;
+    const previewTempo = loadedTempo > 200 ? Math.round(loadedTempo / 2) : loadedTempo;
     const previewNotes = song.cantusFirmus || [];
     const previewVoices = song.generatedVoices || [];
     const songVoices = song.voices || [];
