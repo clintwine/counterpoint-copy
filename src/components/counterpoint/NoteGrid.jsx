@@ -1232,11 +1232,14 @@ export default function NoteGrid({
                                                     }
                                                     setResizeState({ startX: coords.clientX, startDurations });
                                     } else {
+                                    // Clear any previous drag state first
+                                    originalDragNotesRef.current = null;
+
                                     // Determine keys before updating selection
                                     const wasSelected = selectedNotes.has(nKey);
                                     const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]);
 
-                                    // Update selection
+                                    // Update selection immediately
                                     if (!wasSelected) {
                                     if (!e.shiftKey) {
                                     setSelectedNotes(new Set([nKey]));
@@ -1296,19 +1299,25 @@ export default function NoteGrid({
                                                                                   }
                                                                                   setResizeState({ startX: coords.clientX, startDurations });
                                                                                 } else {
+                                                                                  // Clear any previous drag state first
+                                                                                  originalDragNotesRef.current = null;
+
                                                                                   // Drag mode - determine which notes to drag
                                                                                   const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
-                                                                                  
-                                                                                  // Update selection immediately
-                                                                                  if (!selectedNotes.has(nKey)) {
-                                                                                    setSelectedNotes(new Set([nKey]));
-                                                                                  }
-                                                                                  
+
+                                                                                  // Update selection immediately before starting drag
+                                                                                  setSelectedNotes(prev => {
+                                                                                    if (!prev.has(nKey)) {
+                                                                                      return new Set([nKey]);
+                                                                                    }
+                                                                                    return prev;
+                                                                                  });
+
                                                                                   // Store the notes we're dragging - use current cantusFirmus snapshot
                                                                                   const notesToStore = cantusFirmus
                                                                                     .filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat)))
                                                                                     .map(n => ({ ...n, duration: n.duration || DEFAULT_DURATION }));
-                                                                                  
+
                                                                                   originalDragNotesRef.current = {
                                                                                     keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                                                                     notes: notesToStore
