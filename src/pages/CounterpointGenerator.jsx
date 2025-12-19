@@ -576,16 +576,22 @@ export default function CounterpointGenerator() {
           velocity: n.velocity
         }));
         
-        // Update tempo to match MIDI file
+        // Calculate required measures based on the longest note
+        const maxBeat = Math.max(...importedNotes.map(n => n.beat + (n.duration || 1)), 0);
+        const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+        const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || 1;
+
+        // Update tempo and measures to match MIDI file
         setTempo(midiBPM);
+        setSettings(prev => ({ ...prev, measures: requiredMeasures }));
         setCantusFirmus(importedNotes);
-      } catch (error) {
+        } catch (error) {
         console.error('Failed to import MIDI:', error);
         alert('Failed to import MIDI file: ' + error.message);
-      }
-    };
-    input.click();
-  };
+        }
+        };
+        input.click();
+        };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
