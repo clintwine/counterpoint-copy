@@ -94,12 +94,19 @@ export default function CounterpointGenerator() {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
           if (e.key === ' ') {
             e.preventDefault();
-            handlePlayPause();
+            setIsPlaying(prev => {
+              if (prev) {
+                stopAllNotes();
+              } else {
+                ensureAudio();
+              }
+              return !prev;
+            });
           }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-      }, [isPlaying]);
+      }, [ensureAudio]);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
