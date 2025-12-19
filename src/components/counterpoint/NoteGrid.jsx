@@ -490,14 +490,14 @@ export default function NoteGrid({
         const hasNote = !!existingNote;
 
         if (tool === 'draw') {
-          // Prevent double-tap from adding then immediately removing a note
-          const now = Date.now();
-          const isDoubleTap = lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300;
-          lastTapRef.current = { key: noteKey, time: now };
-          
-          if (!isDoubleTap) {
-            // Draw mode - store pending note to add on mouseup (only if empty cell)
-            if (!hasNote) {
+          // In draw mode on an empty cell, add note functionality
+          if (!hasNote) {
+            // Prevent double-tap issues
+            const now = Date.now();
+            const isDoubleTap = lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300;
+            lastTapRef.current = { key: noteKey, time: now };
+            
+            if (!isDoubleTap) {
               // Store pending note - will be added on mouseup
               setPendingNote({ pitch, beat, clickX: coords.clientX, clickY: coords.clientY });
               
@@ -510,8 +510,8 @@ export default function NoteGrid({
               // Clear selection
               setSelectedNotes(new Set());
             }
-            // If there's a note, let the note's own handler deal with it (don't interfere)
           }
+          // If there's a note, do nothing - let the note element handle clicks
         } else if (tool === 'select') {
           if (hasNote) {
             // Note click is handled by the note element itself
