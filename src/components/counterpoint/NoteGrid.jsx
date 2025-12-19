@@ -598,7 +598,7 @@ export default function NoteGrid({
       onNotesUpdate(newNotes);
     } else if (marquee) {
             setMarquee(prev => ({ ...prev, endX: coords.clientX, endY: coords.clientY }));
-          } else if (dragState && selectedNotes.size > 0) {
+          } else if (dragState && (selectedNotes.size > 0 || originalDragNotesRef.current)) {
             // Calculate delta from original click position for smooth dragging
             const deltaX = coords.clientX - dragState.clickOffsetX;
             const deltaY = coords.clientY - dragState.clickOffsetY;
