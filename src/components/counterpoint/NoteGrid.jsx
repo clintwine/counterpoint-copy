@@ -710,7 +710,7 @@ export default function NoteGrid({
               const newNotes = [...cantusFirmus, { 
                 pitch: pendingNote.pitch, 
                 beat: pendingNote.beat, 
-                duration: DEFAULT_DURATION, 
+                duration: lastNoteDuration, 
                 velocity: 0.8 
               }].sort((a, b) => a.beat - b.beat);
               saveToHistory(newNotes);
