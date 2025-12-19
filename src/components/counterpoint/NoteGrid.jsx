@@ -673,17 +673,18 @@ export default function NoteGrid({
         setSelectedNotes(newSelected);
       }
       setMarquee(null);
-    } else if (dragState && originalDragNotesRef.current) {
+    } else if (dragState && originalDragNotesRef.current && dragState.isDragging) {
       // Apply drag if actually moved
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
-      
+
       const originalNotes = originalDragNotesRef.current.notes;
-      
+      const draggedKeys = originalDragNotesRef.current.keys;
+
       if (originalNotes && originalNotes.length > 0 && (pitchDelta !== 0 || beatDelta !== 0)) {
         // Remove original notes and add moved notes at new positions
-        const notesWithoutDragged = cantusFirmus.filter(n => !originalDragNotesRef.current.keys.has(getNoteKey(n.pitch, n.beat)));
-        
+        const notesWithoutDragged = cantusFirmus.filter(n => !draggedKeys.has(getNoteKey(n.pitch, n.beat)));
+
         const movedNotes = originalNotes.map(n => {
           const origPitchIdx = pitches.indexOf(n.pitch);
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
@@ -695,17 +696,17 @@ export default function NoteGrid({
             velocity: n.velocity ?? 0.8
           };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
-        
+
         const newNotes = [...notesWithoutDragged, ...movedNotes].sort((a, b) => a.beat - b.beat);
-        
+
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
-        
+
         // Update selection keys to new positions
         const newSelected = new Set(movedNotes.map(n => getNoteKey(n.pitch, n.beat)));
         setSelectedNotes(newSelected);
       }
-      
+
       // Clear the ref
       originalDragNotesRef.current = null;
     }
