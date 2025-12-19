@@ -246,9 +246,9 @@ export default function CounterpointGenerator() {
     allPreviewVoices.forEach((voice, voiceIndex) => {
       const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
       voice.notes?.forEach(note => {
-        const beatDuration = 60 / previewTempo; // Duration of one beat in seconds
-        const startTime = note.beat * beatDuration * 1000; // Convert beat to milliseconds
-        const noteDuration = (note.duration || 1) * beatDuration * 0.9;
+        const sixteenthNoteDuration = (60 / previewTempo) / 4; // Duration of one 16th note in seconds
+        const startTime = note.beat * sixteenthNoteDuration * 1000; // Convert beat to milliseconds
+        const noteDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
         
         const timeout = setTimeout(() => {
           if (previewTimeoutRef.current) { // Only play if preview is still active
@@ -264,7 +264,8 @@ export default function CounterpointGenerator() {
     const maxBeat = Math.max(
       ...allPreviewVoices.flatMap(v => v.notes?.map(n => n.beat + (n.duration || 1)) || [0])
     );
-    const totalDuration = maxBeat * (60 / previewTempo) * 1000 + 500;
+    const sixteenthNoteDuration = (60 / previewTempo) / 4;
+    const totalDuration = maxBeat * sixteenthNoteDuration * 1000 + 500;
     
     const stopTimeout = setTimeout(() => {
       stopAllNotes();
