@@ -221,25 +221,26 @@ export default function CounterpointGenerator() {
   const handlePreviewSong = (song, e) => {
     e.stopPropagation();
     ensureAudio();
-    
+
     // Clear any existing preview
     if (previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
       previewTimeoutRef.current = null;
       stopAllNotes();
     }
-    
+
     if (previewingSongId === song.id) {
       // Stop preview
       setPreviewingSongId(null);
       stopAllNotes();
       return;
     }
-    
+
     // Start new preview
     setPreviewingSongId(song.id);
     const loadedTempo = song.settings?.tempo || 80;
-    const previewTempo = loadedTempo > 200 ? Math.round(loadedTempo / 2) : loadedTempo;
+    // Fix tempo if it was saved as 16th-note BPM instead of quarter-note BPM
+    const previewTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
     const previewNotes = song.cantusFirmus || [];
     const previewVoices = song.generatedVoices || [];
     const songVoices = song.voices || [];
