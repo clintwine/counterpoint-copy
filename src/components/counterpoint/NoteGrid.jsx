@@ -1248,6 +1248,7 @@ export default function NoteGrid({
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
                                               e.stopPropagation();
+                                              console.log('[NoteGrid] Existing note mousedown', { pitch, beat, hasPendingNote: !!pendingNote });
                                               setPendingNote(null); // Clear any pending note when clicking existing note
 
                                               const coords = getEventCoords(e);
@@ -1299,6 +1300,7 @@ export default function NoteGrid({
                                               clickOffsetX: coords.clientX,
                                               clickOffsetY: coords.clientY
                                               });
+                                              console.log('[NoteGrid] Set drag state for existing note', { pitch, beat });
                                               setPendingNote(null); // Clear pending note when starting drag
                                               }
                                     }}
