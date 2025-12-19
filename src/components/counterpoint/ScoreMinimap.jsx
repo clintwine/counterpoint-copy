@@ -33,7 +33,9 @@ export default function ScoreMinimap({
   // Playhead position
   const playheadX = (currentBeat / totalBeats) * width;
   
-  const handleClick = (e) => {
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  const handleSeek = (e) => {
     if (!onSeek) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -42,13 +44,37 @@ export default function ScoreMinimap({
     onSeek(clampedBeat);
     e.stopPropagation();
   };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    handleSeek(e);
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      handleSeek(e);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  React.useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMouseUp = () => setIsDragging(false);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    }
+  }, [isDragging]);
   
   return (
     <div 
       className="bg-slate-900/80 rounded border border-slate-700 cursor-pointer relative overflow-hidden"
       style={{ width, height }}
-      onClick={handleClick}
-      title="Click to navigate"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      title="Click or drag to navigate"
     >
       {/* Notes */}
       {notes.map((note, idx) => {
