@@ -674,23 +674,29 @@ export default function NoteGrid({
       }
       setMarquee(null);
     } else if (dragState && originalDragNotesRef.current) {
-      // Apply drag - add moved notes to their new positions
+      // Apply drag if actually moved
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
       
       const originalNotes = originalDragNotesRef.current.notes;
       
-      if (originalNotes && originalNotes.length > 0) {
-        // Create moved notes at new positions from the ORIGINAL stored notes
+      if (originalNotes && originalNotes.length > 0 && (pitchDelta !== 0 || beatDelta !== 0)) {
+        // Remove original notes and add moved notes at new positions
+        const notesWithoutDragged = cantusFirmus.filter(n => !originalDragNotesRef.current.keys.has(getNoteKey(n.pitch, n.beat)));
+        
         const movedNotes = originalNotes.map(n => {
           const origPitchIdx = pitches.indexOf(n.pitch);
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
           const newBeat = Math.max(0, Math.min(totalBeats - 1, n.beat + beatDelta));
-          return { pitch: pitches[newPitchIdx], beat: newBeat, duration: n.duration || DEFAULT_DURATION };
+          return { 
+            pitch: pitches[newPitchIdx], 
+            beat: newBeat, 
+            duration: n.duration || DEFAULT_DURATION,
+            velocity: n.velocity ?? 0.8
+          };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
         
-        // cantusFirmus already has originals removed, just add the moved notes
-        const newNotes = [...cantusFirmus, ...movedNotes].sort((a, b) => a.beat - b.beat);
+        const newNotes = [...notesWithoutDragged, ...movedNotes].sort((a, b) => a.beat - b.beat);
         
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
@@ -1137,16 +1143,13 @@ export default function NoteGrid({
                                         const notesToStore = selectedNotesList.map(n => ({
                                           pitch: n.pitch,
                                           beat: n.beat,
-                                          duration: n.duration || DEFAULT_DURATION
+                                          duration: n.duration || DEFAULT_DURATION,
+                                          velocity: n.velocity
                                         }));
                                         originalDragNotesRef.current = {
                                           keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                           notes: notesToStore
                                         };
-                                        
-                                        // Remove original notes immediately so they don't show duplicates
-                                        const notesWithoutDragged = cantusFirmus.filter(n => !selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                        onNotesUpdate(notesWithoutDragged);
                                         
                                         const currentPitchIdx = pitches.indexOf(pitch);
                                         setDragState({
@@ -1249,28 +1252,24 @@ export default function NoteGrid({
                                                                               const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
                                                                                 pitch: n.pitch,
                                                                                 beat: n.beat,
-                                                                                duration: n.duration || DEFAULT_DURATION
+                                                                                duration: n.duration || DEFAULT_DURATION,
+                                                                                velocity: n.velocity
                                                                               }));
                                                                               originalDragNotesRef.current = {
                                                                                 keys: keysToUse,
                                                                                 notes: notesToStore
                                                                               };
-                                                                              console.log('Drag start - storing notes:', notesToStore);
 
-                                                                              // Remove original notes immediately so they don't show duplicates
-                                                                                                                                                        const notesWithoutDragged = cantusFirmus.filter(n => !originalDragNotesRef.current.keys.has(getNoteKey(n.pitch, n.beat)));
-                                                                                                                                                        onNotesUpdate(notesWithoutDragged);
-
-                                                                                                                                                        setDragState({
-                                                                                                                                                        startPitch: pitch,
-                                                                                                                                                        startBeat: beat,
-                                                                                                                                                        startPitchIndex: pitches.indexOf(pitch),
-                                                                                                                                                        currentPitchIndex: pitches.indexOf(pitch),
-                                                                                                                                                        currentBeat: beat,
-                                                                                                                                                        isDragging: false,
-                                                                                                                                                        clickOffsetX: coords.clientX,
-                                                                                                                                                        clickOffsetY: coords.clientY
-                                                                                                                                                      });
+                                                                              setDragState({
+                                                                              startPitch: pitch,
+                                                                              startBeat: beat,
+                                                                              startPitchIndex: pitches.indexOf(pitch),
+                                                                              currentPitchIndex: pitches.indexOf(pitch),
+                                                                              currentBeat: beat,
+                                                                              isDragging: false,
+                                                                              clickOffsetX: coords.clientX,
+                                                                              clickOffsetY: coords.clientY
+                                                                            });
                                       }
                                     }}
                                     onTouchStart={(e) => {
