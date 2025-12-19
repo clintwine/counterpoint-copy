@@ -630,12 +630,12 @@ export default function NoteGrid({
 
   const handlePointerUp = (e) => {
         // Add pending note if in draw mode and mouse hasn't moved much
-        if (pendingNote) {
+        if (pendingNote && !dragState) {
           const coords = e?.clientX !== undefined ? e : getEventCoords(e || {});
           const deltaX = Math.abs(coords.clientX - pendingNote.clickX);
           const deltaY = Math.abs(coords.clientY - pendingNote.clickY);
 
-          // Only add note if mouse hasn't moved significantly (not a drag)
+          // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
           if (deltaX < 5 && deltaY < 5) {
             const newNotes = [...cantusFirmus, { 
               pitch: pendingNote.pitch, 
