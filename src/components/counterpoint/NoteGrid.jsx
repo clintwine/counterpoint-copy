@@ -1232,35 +1232,30 @@ export default function NoteGrid({
                                                     }
                                                     setResizeState({ startX: coords.clientX, startDurations });
                                     } else {
-                                    // Clear any previous drag state first
-                                    originalDragNotesRef.current = null;
-
-                                    // Determine keys before updating selection
+                                    // Determine which notes to drag BEFORE any state updates
                                     const wasSelected = selectedNotes.has(nKey);
                                     const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]);
 
-                                    // Update selection immediately
-                                    if (!wasSelected) {
-                                    if (!e.shiftKey) {
-                                    setSelectedNotes(new Set([nKey]));
-                                    } else {
-                                    const newSelected = new Set(selectedNotes);
-                                    newSelected.add(nKey);
-                                    setSelectedNotes(newSelected);
-                                    }
-                                    }
+                                    // Capture notes to drag synchronously
+                                    const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
+                                      pitch: n.pitch,
+                                      beat: n.beat,
+                                      duration: n.duration || DEFAULT_DURATION,
+                                      velocity: n.velocity
+                                    }));
 
-                                    // Store original selected notes for the drag operation
-                                              const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
-                                                pitch: n.pitch,
-                                                beat: n.beat,
-                                                duration: n.duration || DEFAULT_DURATION,
-                                                velocity: n.velocity
-                                              }));
-                                              originalDragNotesRef.current = {
-                                                keys: keysToUse,
-                                                notes: notesToStore
-                                              };
+                                    // Clear previous drag state and store new one
+                                    originalDragNotesRef.current = {
+                                      keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
+                                      notes: notesToStore
+                                    };
+
+                                    // Update selection after storing notes
+                                    if (!wasSelected && !e.shiftKey) {
+                                      setSelectedNotes(new Set([nKey]));
+                                    } else if (!wasSelected && e.shiftKey) {
+                                      setSelectedNotes(prev => new Set([...prev, nKey]));
+                                    }
 
                                               setDragState({
                                               startPitch: pitch,
@@ -1299,29 +1294,29 @@ export default function NoteGrid({
                                                                                   }
                                                                                   setResizeState({ startX: coords.clientX, startDurations });
                                                                                 } else {
-                                                                                  // Clear any previous drag state first
-                                                                                  originalDragNotesRef.current = null;
-
-                                                                                  // Drag mode - determine which notes to drag
+                                                                                  // Determine which notes to drag BEFORE any state updates
                                                                                   const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
 
-                                                                                  // Update selection immediately before starting drag
-                                                                                  setSelectedNotes(prev => {
-                                                                                    if (!prev.has(nKey)) {
-                                                                                      return new Set([nKey]);
-                                                                                    }
-                                                                                    return prev;
-                                                                                  });
-
-                                                                                  // Store the notes we're dragging - use current cantusFirmus snapshot
+                                                                                  // Capture notes synchronously
                                                                                   const notesToStore = cantusFirmus
                                                                                     .filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat)))
-                                                                                    .map(n => ({ ...n, duration: n.duration || DEFAULT_DURATION }));
+                                                                                    .map(n => ({ 
+                                                                                      pitch: n.pitch,
+                                                                                      beat: n.beat,
+                                                                                      duration: n.duration || DEFAULT_DURATION,
+                                                                                      velocity: n.velocity
+                                                                                    }));
 
+                                                                                  // Store drag state with exact keys
                                                                                   originalDragNotesRef.current = {
                                                                                     keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                                                                     notes: notesToStore
                                                                                   };
+
+                                                                                  // Update selection after storing
+                                                                                  if (!selectedNotes.has(nKey)) {
+                                                                                    setSelectedNotes(new Set([nKey]));
+                                                                                  }
 
                                                                                   setDragState({
                                                                                     startPitch: note.pitch,
