@@ -647,22 +647,31 @@ export default function NoteGrid({
           console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
           // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
           if (deltaX < 5 && deltaY < 5) {
-            const newNotes = [...cantusFirmus, { 
-              pitch: pendingNote.pitch, 
-              beat: pendingNote.beat, 
-              duration: DEFAULT_DURATION, 
-              velocity: 0.8 
-            }].sort((a, b) => a.beat - b.beat);
-            saveToHistory(newNotes);
-            onNotesUpdate(newNotes);
+            // Check if note already exists at this position
+            const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
+            if (!noteExists) {
+              const newNotes = [...cantusFirmus, { 
+                pitch: pendingNote.pitch, 
+                beat: pendingNote.beat, 
+                duration: DEFAULT_DURATION, 
+                velocity: 0.8 
+              }].sort((a, b) => a.beat - b.beat);
+              saveToHistory(newNotes);
+              onNotesUpdate(newNotes);
 
-            // Play the note with proper duration for feedback
-            initAudio();
-            const instrument = voices[0]?.instrument || 'organ';
-            playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
+              // Play the note with proper duration for feedback
+              initAudio();
+              const instrument = voices[0]?.instrument || 'organ';
+              playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
+            } else {
+              console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
+            }
           }
 
           setPendingNote(null);
+        }
+
+
         }
 
         // Save history after painting stroke
