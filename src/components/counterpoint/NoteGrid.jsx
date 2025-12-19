@@ -496,11 +496,8 @@ export default function NoteGrid({
           lastTapRef.current = { key: noteKey, time: now };
           
           if (!isDoubleTap) {
-            // Draw mode - store pending note to add on mouseup
-            if (hasNote) {
-              // Don't allow clicking existing notes in draw mode
-              return;
-            } else {
+            // Draw mode - store pending note to add on mouseup (only if empty cell)
+            if (!hasNote) {
               // Store pending note - will be added on mouseup
               setPendingNote({ pitch, beat, clickX: coords.clientX, clickY: coords.clientY });
               
@@ -509,10 +506,11 @@ export default function NoteGrid({
                 setIsPainting(true);
                 paintedNotesRef.current = new Set([noteKey]);
               }
+              
+              // Clear selection
+              setSelectedNotes(new Set());
             }
-
-            // Clear selection
-            setSelectedNotes(new Set());
+            // If there's a note, let the note's own handler deal with it (don't interfere)
           }
         } else if (tool === 'select') {
           if (hasNote) {
