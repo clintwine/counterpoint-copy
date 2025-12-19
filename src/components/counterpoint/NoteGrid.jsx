@@ -434,31 +434,43 @@ export default function NoteGrid({
       } else if (e.key === 'ArrowUp' && e.shiftKey && selectedNotes.size > 0) {
         e.preventDefault();
         // Move selected notes up one octave (12 semitones)
+        const newSelectedKeys = new Set();
         const newNotes = cantusFirmus.map(n => {
           if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
             const currentIdx = pitches.indexOf(n.pitch);
             const newIdx = currentIdx - 12;
             if (newIdx >= 0) {
-              return { ...n, pitch: pitches[newIdx] };
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
             }
           }
           return n;
         });
+        setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
       } else if (e.key === 'ArrowDown' && e.shiftKey && selectedNotes.size > 0) {
         e.preventDefault();
         // Move selected notes down one octave (12 semitones)
+        const newSelectedKeys = new Set();
         const newNotes = cantusFirmus.map(n => {
           if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
             const currentIdx = pitches.indexOf(n.pitch);
             const newIdx = currentIdx + 12;
             if (newIdx < pitches.length) {
-              return { ...n, pitch: pitches[newIdx] };
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
             }
           }
           return n;
         });
+        setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
       } else if (e.key === 'v') {
