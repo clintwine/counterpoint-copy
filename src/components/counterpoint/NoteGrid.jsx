@@ -637,8 +637,9 @@ export default function NoteGrid({
 
   const handlePointerUp = (e) => {
         // Add pending note if in draw mode and mouse hasn't moved much
-        console.log('[NoteGrid] PointerUp', { hasPendingNote: !!pendingNote, hasDragState: !!dragState });
-        if (pendingNote && !dragState) {
+        console.log('[NoteGrid] PointerUp', { hasPendingNote: !!pendingNote, hasDragState: !!dragState, hasOriginalDragNotes: !!originalDragNotesRef.current });
+        // Don't add pending note if we started a drag operation (even if dragState hasn't updated yet)
+        if (pendingNote && !dragState && !originalDragNotesRef.current) {
           const coords = e?.clientX !== undefined ? e : getEventCoords(e || {});
           const deltaX = Math.abs(coords.clientX - pendingNote.clickX);
           const deltaY = Math.abs(coords.clientY - pendingNote.clickY);
