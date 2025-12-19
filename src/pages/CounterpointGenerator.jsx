@@ -214,7 +214,7 @@ export default function CounterpointGenerator() {
     setCurrentProjectId(null); // Not a project, it's a song
     // Songs may have tempo stored in a different format - if tempo seems too high, adjust it
     const loadedTempo = song.settings?.tempo || 80;
-    setTempo(loadedTempo > 200 ? Math.round(loadedTempo / 2) : loadedTempo);
+    setTempo(loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo);
     setSongDialogOpen(false);
   };
 
