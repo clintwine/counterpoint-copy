@@ -499,6 +499,7 @@ export default function NoteGrid({
             
             if (!isDoubleTap) {
               // Store pending note - will be added on mouseup
+              console.log('[NoteGrid] Setting pendingNote', { pitch, beat });
               setPendingNote({ pitch, beat, clickX: coords.clientX, clickY: coords.clientY });
               
               // Only enable painting mode if paintMode is on
@@ -541,6 +542,12 @@ export default function NoteGrid({
 
   const handlePointerMove = (e) => {
                 const coords = e.clientX !== undefined ? e : getEventCoords(e);
+
+                // Clear pending note if we start moving with dragState
+                if (dragState && pendingNote) {
+                  console.log('[NoteGrid] Clearing pendingNote because drag began');
+                  setPendingNote(null);
+                }
 
                 // Handle painting in draw mode (only if paintMode is enabled)
                 if (isPainting && tool === 'draw' && paintMode) {
@@ -630,11 +637,13 @@ export default function NoteGrid({
 
   const handlePointerUp = (e) => {
         // Add pending note if in draw mode and mouse hasn't moved much
+        console.log('[NoteGrid] PointerUp', { hasPendingNote: !!pendingNote, hasDragState: !!dragState });
         if (pendingNote && !dragState) {
           const coords = e?.clientX !== undefined ? e : getEventCoords(e || {});
           const deltaX = Math.abs(coords.clientX - pendingNote.clickX);
           const deltaY = Math.abs(coords.clientY - pendingNote.clickY);
 
+          console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
           // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
           if (deltaX < 5 && deltaY < 5) {
             const newNotes = [...cantusFirmus, { 
