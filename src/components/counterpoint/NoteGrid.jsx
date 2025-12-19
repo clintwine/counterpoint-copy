@@ -493,12 +493,13 @@ export default function NoteGrid({
           const now = Date.now();
           const isDoubleTap = lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300;
           lastTapRef.current = { key: noteKey, time: now };
-
+          
           if (!isDoubleTap) {
-            // Draw mode - add/remove note ONLY on empty cells
+            // Draw mode - add/remove note
             if (hasNote) {
-              // Don't delete here - handled by note's own handler
-              return;
+              const newNotes = cantusFirmus.filter(n => !(n.pitch === pitch && n.beat === beat));
+              saveToHistory(newNotes);
+              onNotesUpdate(newNotes);
             } else {
               // Add the note
               const newNotes = [...cantusFirmus, { pitch, beat, duration: DEFAULT_DURATION, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
@@ -510,7 +511,7 @@ export default function NoteGrid({
               playNote(pitch, 0.5, 0.7, 0, instrument);
             }
 
-            // Clear selection after adding note so it doesn't interfere with playback
+            // Clear selection after adding/removing note so it doesn't interfere with playback
             setSelectedNotes(new Set());
 
             // Only enable painting mode if paintMode is on
@@ -524,7 +525,7 @@ export default function NoteGrid({
             // Note click is handled by the note element itself
             return;
           } else {
-            // Click on empty cell - deselect
+            // Click on empty cell - deselect or add note
             if (!e.shiftKey) {
               setSelectedNotes(new Set());
             }
@@ -677,8 +678,7 @@ export default function NoteGrid({
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
 
-      const originalNotes = originalDragNotesRef.current.notes;
-      const draggedKeys = originalDragNotesRef.current.keys;
+      const { notes: originalNotes, keys: draggedKeys, shouldUpdateSelection, shiftKey, targetKey } = originalDragNotesRef.current;
 
       // Only apply drag if there was actual movement AND dragging was initiated
       if (originalNotes && originalNotes.length > 0 && dragState.isDragging && (pitchDelta !== 0 || beatDelta !== 0)) {
@@ -705,6 +705,15 @@ export default function NoteGrid({
         // Update selection keys to new positions
         const newSelected = new Set(movedNotes.map(n => getNoteKey(n.pitch, n.beat)));
         setSelectedNotes(newSelected);
+      } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
+        // Simple click without drag - update selection now
+        if (shouldUpdateSelection) {
+          if (!shiftKey) {
+            setSelectedNotes(new Set([targetKey]));
+          } else {
+            setSelectedNotes(prev => new Set([...prev, targetKey]));
+          }
+        }
       }
 
       // Clear the ref
@@ -1235,7 +1244,7 @@ export default function NoteGrid({
                                     const wasSelected = selectedNotes.has(nKey);
                                     const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]);
 
-                                    // Capture notes to drag synchronously
+                                    // Capture notes to drag synchronously from current state
                                     const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({
                                       pitch: n.pitch,
                                       beat: n.beat,
@@ -1243,18 +1252,14 @@ export default function NoteGrid({
                                       velocity: n.velocity
                                     }));
 
-                                    // Clear previous drag state and store new one
+                                    // Store drag state with exact keys and notes
                                     originalDragNotesRef.current = {
                                       keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
-                                      notes: notesToStore
+                                      notes: notesToStore,
+                                      shouldUpdateSelection: !wasSelected,
+                                      shiftKey: e.shiftKey,
+                                      targetKey: nKey
                                     };
-
-                                    // Update selection after storing notes
-                                    if (!wasSelected && !e.shiftKey) {
-                                      setSelectedNotes(new Set([nKey]));
-                                    } else if (!wasSelected && e.shiftKey) {
-                                      setSelectedNotes(prev => new Set([...prev, nKey]));
-                                    }
 
                                               setDragState({
                                               startPitch: pitch,
