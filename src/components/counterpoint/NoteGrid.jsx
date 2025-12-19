@@ -251,6 +251,7 @@ export default function NoteGrid({
   const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
   const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
   const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
+  const [pendingNote, setPendingNote] = useState(null); // For draw tool - only add note on mouseup
   const [clipboard, setClipboard] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -636,7 +637,33 @@ export default function NoteGrid({
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e) => {
+        // Add pending note if in draw mode and mouse hasn't moved much
+        if (pendingNote) {
+          const coords = e?.clientX !== undefined ? e : getEventCoords(e || {});
+          const deltaX = Math.abs(coords.clientX - pendingNote.clickX);
+          const deltaY = Math.abs(coords.clientY - pendingNote.clickY);
+
+          // Only add note if mouse hasn't moved significantly (not a drag)
+          if (deltaX < 5 && deltaY < 5) {
+            const newNotes = [...cantusFirmus, { 
+              pitch: pendingNote.pitch, 
+              beat: pendingNote.beat, 
+              duration: DEFAULT_DURATION, 
+              velocity: 0.8 
+            }].sort((a, b) => a.beat - b.beat);
+            saveToHistory(newNotes);
+            onNotesUpdate(newNotes);
+
+            // Play the note with proper duration for feedback
+            initAudio();
+            const instrument = voices[0]?.instrument || 'organ';
+            playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
+          }
+
+          setPendingNote(null);
+        }
+
         // Save history after painting stroke
         if (isPainting && paintedNotesRef.current.size > 0) {
           saveToHistory(cantusFirmus);
