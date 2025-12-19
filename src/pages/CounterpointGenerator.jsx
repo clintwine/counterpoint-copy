@@ -268,7 +268,7 @@ export default function CounterpointGenerator() {
     const maxBeat = Math.max(
       ...allPreviewVoices.flatMap(v => v.notes?.map(n => n.beat + (n.duration || 1)) || [0])
     );
-    const totalDuration = maxBeat * (60 / previewTempo) * 1000 + 500;
+    const totalDuration = maxBeat * ((60 / previewTempo) / 4) * 1000 + 500;
     
     const stopTimeout = setTimeout(() => {
       stopAllNotes();
