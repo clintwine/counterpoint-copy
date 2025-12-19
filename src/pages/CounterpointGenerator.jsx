@@ -211,10 +211,6 @@ export default function CounterpointGenerator() {
   };
 
   const handleLoadProject = (project) => {
-    setSettings(project.settings || DEFAULT_SETTINGS);
-    setCantusFirmus(project.cantusFirmus || []);
-    setGeneratedVoices(project.generatedVoices || []);
-    
     // Load voices and ensure each has an instrument
     const loadedVoices = project.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -223,9 +219,18 @@ export default function CounterpointGenerator() {
     }));
     setVoices(voicesWithInstruments);
     
+    // Fix tempo if needed
+    const loadedTempo = project.settings?.tempo || 80;
+    const correctedTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
+    
+    // Update settings with corrected tempo
+    setSettings({ ...(project.settings || DEFAULT_SETTINGS), tempo: correctedTempo });
+    setTempo(correctedTempo);
+    
+    setCantusFirmus(project.cantusFirmus || []);
+    setGeneratedVoices(project.generatedVoices || []);
     setProjectName(project.name);
     setCurrentProjectId(project.id);
-    setTempo(project.settings?.tempo || 80);
     setLoadDialogOpen(false);
   };
 
