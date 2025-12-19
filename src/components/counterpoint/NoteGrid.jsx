@@ -1238,12 +1238,13 @@ export default function NoteGrid({
                                   <div
                                     key={`${voiceIndex}-${note.beat}-${note.pitch}`}
                                     onMouseDown={(e) => {
-                                                e.stopPropagation();
+                                              e.stopPropagation();
+                                              setPendingNote(null); // Clear any pending note when clicking existing note
 
-                                                const coords = getEventCoords(e);
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                const clickX = coords.clientX - rect.left;
-                                                playNoteSound(pitch);
+                                              const coords = getEventCoords(e);
+                                              const rect = e.currentTarget.getBoundingClientRect();
+                                              const clickX = coords.clientX - rect.left;
+                                              playNoteSound(pitch);
 
                                     if (clickX > rect.width - 10) {
                                                     const startDurations = {};
@@ -1294,6 +1295,7 @@ export default function NoteGrid({
                                     onTouchStart={(e) => {
                                                                                 e.stopPropagation();
                                                                                 e.preventDefault();
+                                                                                setPendingNote(null); // Clear any pending note when touching existing note
 
                                                                                 const touch = e.touches[0];
                                                                                 activeTouchIdRef.current = touch.identifier;
