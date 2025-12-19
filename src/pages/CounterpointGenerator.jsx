@@ -249,10 +249,6 @@ export default function CounterpointGenerator() {
     stopAllNotes();
     setPreviewingSongId(null);
     
-    setSettings(song.settings || DEFAULT_SETTINGS);
-    setCantusFirmus(song.cantusFirmus || []);
-    setGeneratedVoices(song.generatedVoices || []);
-    
     // Load voices and ensure each has an instrument
     const loadedVoices = song.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -261,11 +257,18 @@ export default function CounterpointGenerator() {
     }));
     setVoices(voicesWithInstruments);
     
+    // Fix tempo first - songs may have been saved with 16th-note BPM instead of quarter-note BPM
+    const loadedTempo = song.settings?.tempo || 80;
+    const correctedTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
+    
+    // Update settings with corrected tempo
+    setSettings({ ...(song.settings || DEFAULT_SETTINGS), tempo: correctedTempo });
+    setTempo(correctedTempo);
+    
+    setCantusFirmus(song.cantusFirmus || []);
+    setGeneratedVoices(song.generatedVoices || []);
     setProjectName(song.name);
     setCurrentProjectId(null); // Not a project, it's a song
-    // Songs may have tempo stored in a different format - if tempo seems too high, adjust it
-    const loadedTempo = song.settings?.tempo || 80;
-    setTempo(loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo);
     setSongDialogOpen(false);
   };
 
