@@ -417,6 +417,12 @@ export default function CounterpointGenerator() {
       const effectiveLoopEnd = selectedNotes.length > 0 ? selectionEnd : (loopEnd ?? totalBeats);
       const effectiveLoopStart = selectedNotes.length > 0 ? selectionStart : loopStart;
       
+      // Safety: ensure loop range is at least 1 beat to prevent stuck loops
+      if (effectiveLoopEnd <= effectiveLoopStart) {
+        setIsPlaying(false);
+        return;
+      }
+      
       lastTimeRef.current = performance.now();
       
       const animate = (timestamp) => {
@@ -454,10 +460,10 @@ export default function CounterpointGenerator() {
     }
   }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd, selectedNotes]);
 
-  // Update discrete beat for note triggering
+  // Update discrete beat for note triggering - only when it actually changes
   useEffect(() => {
     const discreteBeat = Math.floor(playheadPosition);
-    if (discreteBeat !== currentBeat) {
+    if (discreteBeat !== currentBeat && discreteBeat >= 0) {
       setCurrentBeat(discreteBeat);
     }
   }, [playheadPosition, currentBeat]);
@@ -466,21 +472,28 @@ export default function CounterpointGenerator() {
   const notesAtBeatMap = React.useMemo(() => {
     const map = new Map();
     cantusFirmus.forEach(note => {
-      if (!map.has(note.beat)) map.set(note.beat, []);
-      map.get(note.beat).push({ note, voiceIndex: 0 });
+      if (note.beat >= 0 && !map.has(note.beat)) map.set(note.beat, []);
+      if (note.beat >= 0) map.get(note.beat).push({ note, voiceIndex: 0 });
     });
     generatedVoices.forEach((voice, idx) => {
       voice.notes?.forEach(note => {
-        if (!map.has(note.beat)) map.set(note.beat, []);
-        map.get(note.beat).push({ note, voiceIndex: idx + 1 });
+        if (note.beat >= 0 && !map.has(note.beat)) map.set(note.beat, []);
+        if (note.beat >= 0) map.get(note.beat).push({ note, voiceIndex: idx + 1 });
       });
     });
     return map;
   }, [cantusFirmus, generatedVoices]);
 
-  // Play notes at current beat
+  // Track last played beat to prevent duplicate plays
+  const lastPlayedBeatRef = useRef(-1);
+
+  // Play notes at current beat - with duplicate prevention
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || currentBeat < 0) return;
+    
+    // Prevent playing the same beat multiple times in rapid succession
+    if (lastPlayedBeatRef.current === currentBeat) return;
+    lastPlayedBeatRef.current = currentBeat;
     
     // If there are selected notes, only play those
     if (selectedNotes.length > 0) {
@@ -543,6 +556,7 @@ export default function CounterpointGenerator() {
     stopAllNotes();
     setCurrentBeat(0);
     setPlayheadPosition(0);
+    lastPlayedBeatRef.current = -1;
   };
 
   const handleSeek = (beat) => {
