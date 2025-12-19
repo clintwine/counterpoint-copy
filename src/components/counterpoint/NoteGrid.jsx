@@ -70,8 +70,8 @@ const BASE_CELL_HEIGHT = 28;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
-const MIN_DURATION = 0.25; // Quarter of a beat
-const DEFAULT_DURATION = 1; // One beat
+const MIN_DURATION = 0.125; // Eighth of a beat (128th note)
+const DEFAULT_DURATION = 0.5; // Half a beat (32nd note by default)
 
 const DEFAULT_INSTRUMENTS = [
   { value: 'organ', label: 'Organ' },
@@ -632,7 +632,7 @@ export default function NoteGrid({
         const noteKey = getNoteKey(n.pitch, n.beat);
         const startDuration = resizeState.startDurations[noteKey];
         if (startDuration !== undefined) {
-          const newDuration = Math.max(MIN_DURATION, Math.round((startDuration + deltaDuration) * 4) / 4);
+          const newDuration = Math.max(MIN_DURATION, Math.round((startDuration + deltaDuration) * 8) / 8);
           return { ...n, duration: newDuration };
         }
         return n;
