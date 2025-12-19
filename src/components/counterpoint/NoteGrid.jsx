@@ -429,15 +429,45 @@ export default function NoteGrid({
         setSelectedNotes(new Set());
         setMarquee(null);
       } else if (e.key === ' ') {
-                e.preventDefault();
-                // Spacebar is handled by parent for play/pause
-              } else if (e.key === 'v') {
-                setTool('select');
-              } else if (e.key === 'm') {
-                setTool('marquee');
-              } else if (e.key === 'b') {
-                setTool('draw');
-              }
+        e.preventDefault();
+        // Spacebar is handled by parent for play/pause
+      } else if (e.key === 'ArrowUp' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes up one octave (12 semitones)
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx - 12;
+            if (newIdx >= 0) {
+              return { ...n, pitch: pitches[newIdx] };
+            }
+          }
+          return n;
+        });
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowDown' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes down one octave (12 semitones)
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx + 12;
+            if (newIdx < pitches.length) {
+              return { ...n, pitch: pitches[newIdx] };
+            }
+          }
+          return n;
+        });
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'v') {
+        setTool('select');
+      } else if (e.key === 'm') {
+        setTool('marquee');
+      } else if (e.key === 'b') {
+        setTool('draw');
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
