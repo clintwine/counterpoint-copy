@@ -673,15 +673,16 @@ export default function NoteGrid({
         setSelectedNotes(newSelected);
       }
       setMarquee(null);
-    } else if (dragState && originalDragNotesRef.current && dragState.isDragging) {
-      // Apply drag if actually moved
+    } else if (dragState && originalDragNotesRef.current) {
+      // Apply drag only if actually moved
       const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
       const beatDelta = dragState.currentBeat - dragState.startBeat;
 
       const originalNotes = originalDragNotesRef.current.notes;
       const draggedKeys = originalDragNotesRef.current.keys;
 
-      if (originalNotes && originalNotes.length > 0 && (pitchDelta !== 0 || beatDelta !== 0)) {
+      // Only apply drag if there was actual movement AND dragging was initiated
+      if (originalNotes && originalNotes.length > 0 && dragState.isDragging && (pitchDelta !== 0 || beatDelta !== 0)) {
         // Remove original notes and add moved notes at new positions
         const notesWithoutDragged = cantusFirmus.filter(n => !draggedKeys.has(getNoteKey(n.pitch, n.beat)));
 
