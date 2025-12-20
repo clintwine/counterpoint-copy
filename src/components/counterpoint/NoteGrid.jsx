@@ -1248,7 +1248,7 @@ export default function NoteGrid({
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
                                       <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
-                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-30" style={{ backgroundColor: '#3a3a3a' }} />
+                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a' }} />
                           {pitches.map((pitch) => {
                                                                         const isSharp = pitch.includes('#');
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
