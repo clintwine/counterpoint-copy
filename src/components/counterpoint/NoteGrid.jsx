@@ -387,6 +387,9 @@ export default function NoteGrid({
     }
   }, [scrollToBeatRef, CELL_WIDTH]);
 
+  // Use pre-generated pitches
+  const pitches = ALL_PITCHES;
+
   // Scroll to keep playhead visible during playback (not while scrubbing)
     useEffect(() => {
       if (gridRef.current && isPlaying && !isScrubbing) {
