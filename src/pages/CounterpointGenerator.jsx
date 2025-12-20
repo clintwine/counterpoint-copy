@@ -1161,7 +1161,7 @@ export default function CounterpointGenerator() {
             dragControls={dragControls}
             dragMomentum={false}
             dragElastic={0}
-            dragConstraints={{ top: -window.innerHeight * 0.08, left: -window.innerWidth * 0.08, right: window.innerWidth * 0.5, bottom: window.innerHeight * 0.5 }}
+            dragConstraints={{ top: 0, left: 0, right: window.innerWidth - pianoPopoutSize.width - 20, bottom: window.innerHeight - pianoPopoutSize.height - 20 }}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

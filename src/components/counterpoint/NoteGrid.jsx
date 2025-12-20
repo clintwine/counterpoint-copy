@@ -2255,13 +2255,14 @@ export default function NoteGrid({
               {/* Right side - keyboard button */}
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                 <Button
-                  variant="ghost"
+                  variant={showPianoPanel ? 'default' : 'ghost'}
                   size="sm"
                   onClick={onTogglePianoPanel}
-                  className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+                  className={`h-7 px-3 ${showPianoPanel ? 'bg-amber-500 text-slate-900' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
                   title="Toggle Piano Keyboard"
                 >
-                  <Keyboard className="w-4 h-4" />
+                  <Keyboard className="w-4 h-4 mr-1.5" />
+                  <span className="text-xs font-medium">{showPianoPanel ? 'Hide' : 'Show'} Piano</span>
                 </Button>
               </div>
       </div>
