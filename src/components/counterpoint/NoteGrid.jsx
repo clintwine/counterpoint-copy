@@ -1996,7 +1996,7 @@ export default function NoteGrid({
         >
           {/* Triangle marker pointing down */}
           <div 
-            className="absolute bottom-0"
+            className="absolute top-0 -translate-y-full"
             style={{
               left: '50%',
               transform: 'translateX(-50%)',
