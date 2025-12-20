@@ -638,20 +638,23 @@ export default function NoteGrid({
             const now = Date.now();
             const isDoubleTap = lastTapRef.current.key === noteKey && now - lastTapRef.current.time < 300;
             lastTapRef.current = { key: noteKey, time: now };
-            
+
             if (!isDoubleTap) {
               // Store pending note - will be added on mouseup
               console.log('[NoteGrid] Setting pendingNote', { pitch, beat });
               setPendingNote({ pitch, beat, clickX: coords.clientX, clickY: coords.clientY });
-              
+
               // Only enable painting mode if paintMode is on
               if (paintMode) {
                 setIsPainting(true);
                 paintedNotesRef.current = new Set([noteKey]);
               }
-              
-              // Clear selection
+
+              // Clear selection and loop
               setSelectedNotes(new Set());
+              if (onLoopChange) {
+                onLoopChange(null, null);
+              }
             }
           }
           // If there's a note, do nothing - let the note element handle clicks
@@ -660,9 +663,12 @@ export default function NoteGrid({
             // Note click is handled by the note element itself
             return;
           } else {
-            // Click on empty cell - deselect or add note
+            // Click on empty cell - deselect and clear loop
             if (!e.shiftKey) {
               setSelectedNotes(new Set());
+              if (onLoopChange) {
+                onLoopChange(null, null);
+              }
             }
             // Start marquee
             setMarquee({
