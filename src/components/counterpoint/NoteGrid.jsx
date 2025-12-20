@@ -1215,8 +1215,8 @@ export default function NoteGrid({
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
-                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: 'rgb(30, 41, 59)' }}>
-                                        <div className="h-7 border-b border-slate-600 bg-slate-800 sticky top-0 z-30" />
+                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
+                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-30" style={{ backgroundColor: '#C8A570' }} />
                           {pitches.map((pitch) => {
                                                                         const isSharp = pitch.includes('#');
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
@@ -1238,7 +1238,7 @@ export default function NoteGrid({
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
                                                                               isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
                                                                             }`}
-                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(251, 191, 36, 0.15)' : isSharp ? 'rgba(0,0,0,0.2)' : 'rgb(30, 41, 59)' }}
+                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(200, 165, 112, 0.15)' : isSharp ? 'rgba(0,0,0,0.3)' : '#2B2B2B' }}
                                                                           >
                                                                             {pitch}
                                                                           </div>
@@ -1250,7 +1250,8 @@ export default function NoteGrid({
           <div className="flex-shrink-0">
             {/* Beat numbers header */}
                             <div 
-                              className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800 relative"
+                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-10 relative"
+                              style={{ backgroundColor: '#C8A570' }}
                               onMouseDown={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
@@ -1301,8 +1302,8 @@ export default function NoteGrid({
                                       inLoopRegion ? 'bg-amber-500/30' : ''
                                     } ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
                                     style={{ width: CELL_WIDTH * beatsPerMeasure }}
-                                  >
-                                    <span className="text-amber-400">
+                                    >
+                                    <span className="text-slate-900 font-bold">
                                       {measureIndex + 1}
                                     </span>
                                   </div>
@@ -1419,9 +1420,9 @@ export default function NoteGrid({
                                       touchStartRef.current = null;
                                     }}
                               className={`flex-shrink-0 border-b relative cursor-pointer
-                                ${isBarLine ? 'border-l-2 border-l-slate-500' : 'border-l border-l-slate-700'} 
-                                ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
-                                hover:bg-slate-700/50
+                                ${isBarLine ? 'border-l-2 border-l-amber-900/60' : 'border-l border-l-slate-700/40'} 
+                                ${isCLine ? 'border-b-slate-600/50 bg-slate-800/30' : isSharpLine ? 'border-b-slate-700/30 bg-slate-950/40' : 'border-b-slate-700/30'}
+                                hover:bg-slate-700/30
                               `}
                               style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
                             >
