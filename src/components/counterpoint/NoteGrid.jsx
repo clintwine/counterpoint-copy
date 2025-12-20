@@ -867,8 +867,14 @@ export default function NoteGrid({
           const newSelected = new Set();
           cantusFirmus.forEach(note => {
             const pitchIdx = pitches.indexOf(note.pitch);
-            if (note.beat >= minBeat && note.beat <= maxBeat && 
-                pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx) {
+            const duration = note.duration || DEFAULT_DURATION;
+            const noteEndBeat = note.beat + duration;
+            
+            // Select note if it overlaps with marquee at all (more lenient)
+            const overlapsHorizontally = noteEndBeat > minBeat && note.beat <= maxBeat;
+            const overlapsVertically = pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx;
+            
+            if (overlapsHorizontally && overlapsVertically) {
               newSelected.add(getNoteKey(note.pitch, note.beat));
             }
           });
