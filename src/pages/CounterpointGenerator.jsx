@@ -262,26 +262,15 @@ export default function CounterpointGenerator() {
     }));
     setVoices(voicesWithInstruments);
     
-    // Detect if song was saved with beats in wrong unit (eighth notes instead of 16th notes)
-    // If tempo is < 200 and beats are small decimals (0.5, 1, 1.5), multiply beats by 4
+    // Load notes as-is (preview plays correctly, so no conversion needed)
     const loadedTempo = song.settings?.tempo || 80;
-    const needsBeatConversion = loadedTempo < 200;
+    const loadedCantusFirmus = song.cantusFirmus || [];
+    const loadedGeneratedVoices = song.generatedVoices || [];
     
-    const convertedCantusFirmus = needsBeatConversion 
-      ? (song.cantusFirmus || []).map(n => ({ ...n, beat: n.beat * 4 }))
-      : (song.cantusFirmus || []);
-    
-    const convertedGeneratedVoices = needsBeatConversion
-      ? (song.generatedVoices || []).map(voice => ({
-          ...voice,
-          notes: (voice.notes || []).map(n => ({ ...n, beat: n.beat * 4 }))
-        }))
-      : (song.generatedVoices || []);
-    
-    // Also update measures to account for longer beat range
+    // Calculate required measures based on actual beat range
     const maxBeat = Math.max(
-      ...convertedCantusFirmus.map(n => n.beat + (n.duration || 1)),
-      ...convertedGeneratedVoices.flatMap(v => (v.notes || []).map(n => n.beat + (n.duration || 1))),
+      ...loadedCantusFirmus.map(n => n.beat + (n.duration || 1)),
+      ...loadedGeneratedVoices.flatMap(v => (v.notes || []).map(n => n.beat + (n.duration || 1))),
       0
     );
     const beatsPerMeasure = getBeatsPerMeasure(song.settings?.timeSignature || '4/4');
@@ -294,8 +283,8 @@ export default function CounterpointGenerator() {
     });
     setTempo(loadedTempo);
     
-    setCantusFirmus(convertedCantusFirmus);
-    setGeneratedVoices(convertedGeneratedVoices);
+    setCantusFirmus(loadedCantusFirmus);
+    setGeneratedVoices(loadedGeneratedVoices);
     setProjectName(song.name);
     setCurrentProjectId(null);
     setSongDialogOpen(false);
