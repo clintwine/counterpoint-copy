@@ -1288,52 +1288,50 @@ export default function NoteGrid({
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
 
-                                // Start loop selection on any mousedown
                                 setIsLoopSelecting(true);
                                 setLoopSelectStart(beat);
                                 if (onLoopChange) {
                                   onLoopChange(beat, beat);
                                 }
-                              }}
-                              onMouseMove={(e) => {
-                                const beat = getBeatFromHeaderPosition(e.clientX);
-                                if (beat === null) return;
 
-                                if (isLoopSelecting && loopSelectStart !== null) {
-                                  const start = Math.min(loopSelectStart, beat);
-                                  const end = Math.max(loopSelectStart, beat);
-                                  if (onLoopChange) {
-                                    onLoopChange(start, end);
-                                  }
-                                }
-                              }}
-                              onMouseUp={(e) => {
-                                const beat = getBeatFromHeaderPosition(e.clientX);
-                                if (beat !== null && loopSelectStart !== null) {
-                                  const dragDistance = Math.abs(beat - loopSelectStart);
-                                  if (dragDistance === 0) {
-                                    // Single click without drag - seek and clear loop
-                                    if (onSeek) {
-                                      onSeek(beat);
-                                    }
-                                    if (onLoopChange) {
-                                      onLoopChange(null, null);
-                                    }
-                                  } else {
-                                    // Dragged - set loop region
-                                    const start = Math.min(loopSelectStart, beat);
-                                    const end = Math.max(loopSelectStart, beat) + 1;
+                                const handleMouseMove = (moveEvent) => {
+                                  const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
+                                  if (moveBeat !== null) {
+                                    const start = Math.min(beat, moveBeat);
+                                    const end = Math.max(beat, moveBeat);
                                     if (onLoopChange) {
                                       onLoopChange(start, end);
                                     }
                                   }
-                                }
-                                setIsLoopSelecting(false);
-                                setLoopSelectStart(null);
-                              }}
-                              onMouseLeave={() => {
-                                setIsLoopSelecting(false);
-                                setLoopSelectStart(null);
+                                };
+
+                                const handleMouseUp = (upEvent) => {
+                                  const upBeat = getBeatFromHeaderPosition(upEvent.clientX);
+                                  if (upBeat !== null) {
+                                    const dragDistance = Math.abs(upBeat - beat);
+                                    if (dragDistance === 0) {
+                                      if (onSeek) {
+                                        onSeek(beat);
+                                      }
+                                      if (onLoopChange) {
+                                        onLoopChange(null, null);
+                                      }
+                                    } else {
+                                      const start = Math.min(beat, upBeat);
+                                      const end = Math.max(beat, upBeat) + 1;
+                                      if (onLoopChange) {
+                                        onLoopChange(start, end);
+                                      }
+                                    }
+                                  }
+                                  setIsLoopSelecting(false);
+                                  setLoopSelectStart(null);
+                                  document.removeEventListener('mousemove', handleMouseMove);
+                                  document.removeEventListener('mouseup', handleMouseUp);
+                                };
+
+                                document.addEventListener('mousemove', handleMouseMove);
+                                document.addEventListener('mouseup', handleMouseUp);
                               }}
                             >
                               {Array.from({ length: measures }).map((_, measureIndex) => {
