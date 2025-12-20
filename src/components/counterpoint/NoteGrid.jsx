@@ -2036,6 +2036,25 @@ export default function NoteGrid({
             }}
           />
         )}
+
+        {/* Score Minimap - positioned at bottom right of grid */}
+        <ScoreMinimap
+          notes={cantusFirmus}
+          totalBeats={totalBeats}
+          totalPitches={pitches.length}
+          viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
+          viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
+          viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
+          viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
+          currentBeat={currentBeat}
+          onSeek={(beat) => {
+            onSeek?.(beat);
+            if (gridRef.current) {
+              gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
+            }
+          }}
+          pitches={pitches}
+        />
         </div>
       
       <div className={`flex items-center justify-between gap-2 border-t border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3' : 'hidden'}`}>
