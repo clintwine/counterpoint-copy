@@ -433,7 +433,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         }
         const value = count > 0 ? sum / count : 0;
         
-        const barHeight = (value / 255) * rect.height * 0.85;
+        const labelSpace = 12; // Reserve space for labels
+        const barHeight = (value / 255) * (rect.height - labelSpace) * 0.85;
         const x = i * barWidth;
         
         // Logic Pro style gradient - blue to green to yellow to red
