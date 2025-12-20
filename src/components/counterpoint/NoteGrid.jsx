@@ -1281,6 +1281,17 @@ export default function NoteGrid({
                                 // If no drag occurred (same beat), seek instead of setting loop
                                 if (beat !== null && loopSelectStart === beat && onSeek) {
                                   onSeek(beat);
+                                  // Clear loop when clicking without dragging
+                                  if (onLoopChange) {
+                                    onLoopChange(null, null);
+                                  }
+                                } else if (isLoopSelecting && loopSelectStart !== null && beat !== null) {
+                                  // Ensure loop end is at least one beat after start
+                                  const start = Math.min(loopSelectStart, beat);
+                                  const end = Math.max(loopSelectStart, beat) + 1;
+                                  if (onLoopChange) {
+                                    onLoopChange(start, end);
+                                  }
                                 }
                                 setIsLoopSelecting(false);
                                 setLoopSelectStart(null);

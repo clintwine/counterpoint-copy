@@ -426,18 +426,10 @@ export default function CounterpointGenerator() {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const beatsPerSecond = (tempo / 60) * 4; // 16th notes per second
       const totalBeats = settings.measures * beatsPerMeasure;
-      
-      // If selected notes exist, determine loop bounds from selection
-      let selectionStart = 0;
-      let selectionEnd = totalBeats;
-      if (selectedNotes.length > 0) {
-        selectionStart = Math.min(...selectedNotes.map(n => n.beat));
-        selectionEnd = Math.max(...selectedNotes.map(n => n.beat + (n.duration || 1)));
-      }
-      
-      const effectiveLoopEnd = selectedNotes.length > 0 ? selectionEnd : (loopEnd ?? totalBeats);
-      const effectiveLoopStart = selectedNotes.length > 0 ? selectionStart : loopStart;
-      
+
+      const effectiveLoopEnd = loopEnd ?? totalBeats;
+      const effectiveLoopStart = loopStart ?? 0;
+
       // Safety: ensure loop range is at least 1 beat to prevent stuck loops
       if (effectiveLoopEnd <= effectiveLoopStart) {
         setIsPlaying(false);
@@ -450,11 +442,11 @@ export default function CounterpointGenerator() {
         if (!lastTimeRef.current) lastTimeRef.current = timestamp;
         const deltaTime = (timestamp - lastTimeRef.current) / 1000; // Convert to seconds
         lastTimeRef.current = timestamp;
-        
+
         setPlayheadPosition(prev => {
           const next = prev + deltaTime * beatsPerSecond;
           if (next >= effectiveLoopEnd) {
-            if (isLooping || selectedNotes.length > 0) {
+            if (isLooping) {
               return effectiveLoopStart;
             }
             setIsPlaying(false);
@@ -462,7 +454,7 @@ export default function CounterpointGenerator() {
           }
           return next;
         });
-        
+
         animationRef.current = requestAnimationFrame(animate);
       };
       
@@ -479,7 +471,7 @@ export default function CounterpointGenerator() {
       }
       lastTimeRef.current = null;
     }
-  }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd, selectedNotes]);
+  }, [isPlaying, tempo, settings.measures, settings.timeSignature, isLooping, loopStart, loopEnd]);
 
   // Update discrete beat for note triggering - only when it actually changes
   useEffect(() => {
@@ -511,37 +503,23 @@ export default function CounterpointGenerator() {
   // Play notes at current beat - with duplicate prevention
   useEffect(() => {
     if (!isPlaying || currentBeat < 0) return;
-    
+
     // Prevent playing the same beat multiple times in rapid succession
     if (lastPlayedBeatRef.current === currentBeat) return;
     lastPlayedBeatRef.current = currentBeat;
-    
-    // If there are selected notes, only play those
-    if (selectedNotes.length > 0) {
-      const notesAtBeat = selectedNotes.filter(n => n.beat === currentBeat);
-      notesAtBeat.forEach(note => {
-        const volume = (voices[0]?.volume || 80) / 100;
-        const velocity = note.velocity ?? 0.8;
-        const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
-        const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-        const instrument = voices[0]?.instrument || 'organ';
-        // Make velocity more pronounced: square it to increase dynamic range
-        playNote(note.pitch, actualDuration, volume * (velocity * velocity), 0, instrument);
-      });
-    } else {
-      // Use pre-indexed map for O(1) lookup
-      const notesAtBeat = notesAtBeatMap.get(currentBeat) || [];
-      notesAtBeat.forEach(({ note, voiceIndex }) => {
-        if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
-        const volume = (voices[voiceIndex]?.volume || 80) / 100;
-        const velocity = note.velocity ?? 0.8;
-        const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
-        const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-        const instrument = voices[voiceIndex]?.instrument || 'organ';
-        // Make velocity more pronounced: square it to increase dynamic range
-        playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument);
-      });
-    }
+
+    // Use pre-indexed map for O(1) lookup
+    const notesAtBeat = notesAtBeatMap.get(currentBeat) || [];
+    notesAtBeat.forEach(({ note, voiceIndex }) => {
+      if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
+      const volume = (voices[voiceIndex]?.volume || 80) / 100;
+      const velocity = note.velocity ?? 0.8;
+      const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
+      const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
+      const instrument = voices[voiceIndex]?.instrument || 'organ';
+      // Make velocity more pronounced: square it to increase dynamic range
+      playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument);
+    });
 
     // Metronome click
     if (metronomeEnabled) {
@@ -552,15 +530,12 @@ export default function CounterpointGenerator() {
         playMetronomeClick(isDownbeat);
       }
     }
-  }, [currentBeat, isPlaying, notesAtBeatMap, tempo, voices, selectedNotes, metronomeEnabled, settings.timeSignature]);
+  }, [currentBeat, isPlaying, notesAtBeatMap, tempo, voices, metronomeEnabled, settings.timeSignature]);
 
   const handlePlayPause = () => {
     ensureAudio();
     if (isPlaying) {
       stopAllNotes();
-    } else {
-      // Clear selection to play all notes
-      setSelectedNotes([]);
     }
     setIsPlaying(!isPlaying);
   };
