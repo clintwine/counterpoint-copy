@@ -76,6 +76,14 @@ export default function CounterpointGenerator() {
   const [songDescription, setSongDescription] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  // Auto-expand measures functionality
+  useEffect(() => {
+    window.expandMeasures = () => {
+      setSettings(prev => ({ ...prev, measures: prev.measures + 4 }));
+    };
+    return () => { delete window.expandMeasures; };
+  }, []);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [theoryPanelOpen, setTheoryPanelOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);

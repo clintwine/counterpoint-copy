@@ -1230,7 +1230,20 @@ export default function NoteGrid({
                                       setPinchState(null);
                                       activeTouchIdRef.current = null;
                                     }}
-        onScroll={(e) => setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }))}
+        onScroll={(e) => {
+        setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
+        
+        // Auto-expand measures when scrolling near the end (like Excel)
+        const scrollRight = e.target.scrollLeft + e.target.clientWidth;
+        const totalWidth = totalBeats * CELL_WIDTH;
+        if (scrollRight > totalWidth - (beatsPerMeasure * CELL_WIDTH * 2)) {
+          // Add 4 more measures when getting close to the end
+          onNotesUpdate?.(cantusFirmus); // Trigger a minor update to refresh
+          if (window.expandMeasures) {
+            window.expandMeasures();
+          }
+        }
+      }}
       >
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
