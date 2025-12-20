@@ -1348,7 +1348,7 @@ export default function NoteGrid({
                                         key={beatIndex}
                                         className="absolute top-0 pointer-events-none"
                                         style={{
-                                          left: beatIndex * CELL_WIDTH,
+                                          left: `${beatIndex * CELL_WIDTH - 1}px`,
                                           width: '2px',
                                           height: beatIndex % 4 === 0 ? '12px' : '6px',
                                           backgroundColor: 'rgba(0, 0, 0, 0.6)'
