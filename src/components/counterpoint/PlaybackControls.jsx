@@ -123,7 +123,7 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-slate-900/80 border-b border-slate-700 flex-wrap">
+    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 bg-[#2D2D2D] border-b border-[#3A3A3A] flex-wrap">
       {/* File Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -214,7 +214,7 @@ export default function PlaybackControls({
         <Button
           onClick={onPlayPause}
           size="sm"
-          className="h-8 w-8 p-0 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-900"
+          className="h-8 w-8 p-0 rounded-md bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E]"
         >
           {isPlaying ? (
             <Pause className="w-4 h-4" />

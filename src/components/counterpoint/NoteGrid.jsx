@@ -32,10 +32,10 @@ const TIME_SIGNATURES = [
 ];
 
 const NOTE_COLORS = {
-  0: '#E8B885', // Voice 1 - Gold
-  1: '#7B9E89', // Voice 2 - Sage
-  2: '#9B8AA6', // Voice 3 - Lavender
-  3: '#A68B7B', // Voice 4 - Warm brown
+  0: '#D4AF37', // Voice 1 - Logic Pro Gold
+  1: '#5F9EA0', // Voice 2 - Logic Pro Teal
+  2: '#9370DB', // Voice 3 - Logic Pro Purple
+  3: '#CD853F', // Voice 4 - Logic Pro Bronze
 };
 
 // Velocity to color gradient: blue → green → yellow → red
@@ -1156,9 +1156,9 @@ export default function NoteGrid({
                   className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
                 style={{ 
                   scrollbarWidth: 'thin', 
-                  scrollbarColor: '#475569 transparent',
+                  scrollbarColor: '#505050 transparent',
                   touchAction: tool === 'marquee' ? 'none' : 'auto',
-                  backgroundColor: '#1E1E1E'
+                  backgroundColor: '#232323'
                 }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
