@@ -204,11 +204,15 @@ export function getAnalyser() {
   return analyser;
 }
 
-// Instrument configurations
+// Instrument configurations with sophisticated multi-oscillator layering
 const INSTRUMENT_CONFIGS = {
   organ: {
-    waveform: 'sine',
-    harmonics: [1, 0.8, 0.6, 0.4, 0.3, 0.2],
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
+      { waveform: 'sine', detune: -2, gain: 0.6, harmonic: 3 },
+      { waveform: 'sine', detune: 2, gain: 0.4, harmonic: 5 }
+    ],
     attack: 0.02,
     filterFreq: 3000,
     filterQ: 1.2,
@@ -239,8 +243,12 @@ const INSTRUMENT_CONFIGS = {
     distortion: 10
   },
   strings: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.7, 0.5, 0.4, 0.2],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.5, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 3 }
+    ],
     attack: 0.2,
     filterFreq: 3200,
     filterQ: 1.2,
@@ -271,8 +279,12 @@ const INSTRUMENT_CONFIGS = {
     distortion: 0
   },
   piano: {
-    waveform: 'triangle',
-    harmonics: [1, 0.8, 0.5, 0.3, 0.15, 0.05],
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
+      { waveform: 'triangle', detune: -1, gain: 0.5, harmonic: 3 },
+      { waveform: 'sine', detune: 1, gain: 0.3, harmonic: 4 }
+    ],
     attack: 0.003,
     filterFreq: 4500,
     filterQ: 0.8,
@@ -295,8 +307,11 @@ const INSTRUMENT_CONFIGS = {
     distortion: 0
   },
   brass: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.8, 0.6, 0.5, 0.3],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.8, harmonic: 1 },
+      { waveform: 'square', detune: -4, gain: 0.5, harmonic: 2 },
+      { waveform: 'sawtooth', detune: 4, gain: 0.6, harmonic: 3 }
+    ],
     attack: 0.05,
     filterFreq: 3000,
     filterQ: 3,
@@ -311,8 +326,12 @@ const INSTRUMENT_CONFIGS = {
     distortion: 0
   },
   pad: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.4, harmonic: 2 }
+    ],
     attack: 0.4,
     filterFreq: 1500,
     filterQ: 0.3,
@@ -367,8 +386,12 @@ const INSTRUMENT_CONFIGS = {
     distortion: 0
   },
   choir: {
-    waveform: 'sine',
-    harmonics: [1, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -7, gain: 0.4, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.4, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 7, gain: 0.4, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.3, harmonic: 2 }
+    ],
     attack: 0.25,
     filterFreq: 2200,
     filterQ: 0.7,
@@ -383,8 +406,12 @@ const INSTRUMENT_CONFIGS = {
     distortion: 2
   },
   cello: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.6, 0.5, 0.35, 0.25, 0.15],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -3, gain: 0.6, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 3, gain: 0.6, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.4, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.25, harmonic: 3 }
+    ],
     attack: 0.15,
     filterFreq: 1800,
     filterQ: 1.5,
@@ -514,16 +541,19 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   const sustainLevel = envelopeSettings.sustain;
   const release = envelopeSettings.release;
   
-  // Create oscillators based on harmonics (limit to first 3 for performance)
+  // Create oscillators - support both old format (harmonics) and new format (oscillators)
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
   
-  const maxHarmonics = Math.min(3, config.harmonics.length);
-  config.harmonics.slice(0, maxHarmonics).forEach((harmGain, idx) => {
-    const osc = audioContext.createOscillator();
-    osc.type = config.waveform;
-    osc.frequency.value = freq * (idx + 1);
+  if (config.oscillators) {
+    // New sophisticated multi-oscillator format
+    const maxOscs = Math.min(4, config.oscillators.length);
+    config.oscillators.slice(0, maxOscs).forEach((oscConfig) => {
+      const osc = audioContext.createOscillator();
+      osc.type = oscConfig.waveform;
+      osc.frequency.value = freq * (oscConfig.harmonic || 1);
+      osc.detune.value = oscConfig.detune || 0;
     
     // Apply pitch bend envelope if provided
     if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
@@ -546,17 +576,33 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
         }
         osc.detune.linearRampToValueAtTime(bendEnd, bendEndTimeAbs);
       }
-    }
     
-    const oscGain = audioContext.createGain();
-    // Reduce gain when reverb is active to prevent clipping
-    const effectReduction = 1 - (effectLevels.reverb * 0.4);
-    oscGain.gain.value = harmGain * 0.3 * effectReduction;
-    
-    osc.connect(oscGain);
-    oscGain.connect(filterNode);
-    oscillators.push(osc);
-  });
+      const oscGain = audioContext.createGain();
+      // Reduce gain when reverb is active to prevent clipping
+      const effectReduction = 1 - (effectLevels.reverb * 0.4);
+      oscGain.gain.value = (oscConfig.gain || 1) * 0.25 * effectReduction;
+      
+      osc.connect(oscGain);
+      oscGain.connect(filterNode);
+      oscillators.push(osc);
+    });
+  } else {
+    // Old harmonics format (fallback)
+    const maxHarmonics = Math.min(3, config.harmonics?.length || 0);
+    (config.harmonics || [1]).slice(0, maxHarmonics).forEach((harmGain, idx) => {
+      const osc = audioContext.createOscillator();
+      osc.type = config.waveform || 'sine';
+      osc.frequency.value = freq * (idx + 1);
+      
+      const oscGain = audioContext.createGain();
+      const effectReduction = 1 - (effectLevels.reverb * 0.4);
+      oscGain.gain.value = harmGain * 0.3 * effectReduction;
+      
+      osc.connect(oscGain);
+      oscGain.connect(filterNode);
+      oscillators.push(osc);
+    });
+  }
   
   // Filter
   filterNode.type = 'lowpass';
@@ -611,26 +657,45 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
-  // Create oscillators based on instrument harmonics (limit to first 3 for performance)
+  // Create oscillators - support both old format (harmonics) and new format (oscillators)
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
   
-  const maxHarmonics = Math.min(3, config.harmonics.length);
-  config.harmonics.slice(0, maxHarmonics).forEach((harmGain, idx) => {
-    const osc = audioContext.createOscillator();
-    osc.type = config.waveform;
-    osc.frequency.value = freq * (idx + 1);
-    
-    const oscGain = audioContext.createGain();
-    // Reduce gain when reverb is active to prevent clipping
-    const effectReduction = 1 - (effectLevels.reverb * 0.4);
-    oscGain.gain.value = harmGain * 0.3 * effectReduction;
-    
-    osc.connect(oscGain);
-    oscGain.connect(filterNode);
-    oscillators.push(osc);
-  });
+  if (config.oscillators) {
+    // New sophisticated multi-oscillator format
+    const maxOscs = Math.min(4, config.oscillators.length);
+    config.oscillators.slice(0, maxOscs).forEach((oscConfig) => {
+      const osc = audioContext.createOscillator();
+      osc.type = oscConfig.waveform;
+      osc.frequency.value = freq * (oscConfig.harmonic || 1);
+      osc.detune.value = oscConfig.detune || 0;
+      
+      const oscGain = audioContext.createGain();
+      const effectReduction = 1 - (effectLevels.reverb * 0.4);
+      oscGain.gain.value = (oscConfig.gain || 1) * 0.25 * effectReduction;
+      
+      osc.connect(oscGain);
+      oscGain.connect(filterNode);
+      oscillators.push(osc);
+    });
+  } else {
+    // Old harmonics format (fallback)
+    const maxHarmonics = Math.min(3, config.harmonics?.length || 0);
+    (config.harmonics || [1]).slice(0, maxHarmonics).forEach((harmGain, idx) => {
+      const osc = audioContext.createOscillator();
+      osc.type = config.waveform || 'sine';
+      osc.frequency.value = freq * (idx + 1);
+      
+      const oscGain = audioContext.createGain();
+      const effectReduction = 1 - (effectLevels.reverb * 0.4);
+      oscGain.gain.value = harmGain * 0.3 * effectReduction;
+      
+      osc.connect(oscGain);
+      oscGain.connect(filterNode);
+      oscillators.push(osc);
+    });
+  }
   
   // Filter
   filterNode.type = 'lowpass';
