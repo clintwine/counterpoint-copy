@@ -1182,19 +1182,29 @@ export default function NoteGrid({
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700"
-                title="Quantize notes to grid (Q)"
-              >
-                <span className="font-bold text-sm">Q</span>
-                <ChevronDown className="w-3 h-3 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-800 border-slate-700">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => selectedNotes.size > 0 && quantize()}
+              disabled={selectedNotes.size === 0}
+              className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700 rounded-r-none border-r border-slate-600 disabled:opacity-30"
+              title="Quantize selected notes (Q)"
+            >
+              <span className="font-bold text-sm">Q</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-1 text-white/70 hover:text-white hover:bg-slate-700 rounded-l-none"
+                  title="Quantize grid settings"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-slate-800 border-slate-700">
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(0.25); quantize(0.25); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.25 ? 'bg-slate-700' : ''}`}
