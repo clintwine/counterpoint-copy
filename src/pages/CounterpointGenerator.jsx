@@ -1064,6 +1064,47 @@ export default function CounterpointGenerator() {
                               }}
                               onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
                               showPianoPanel={showPianoPanel && !pianoPopout}
+                              onNewProject={handleNewProject}
+                              onSaveProject={() => setSaveDialogOpen(true)}
+                              onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+                              onLoadProject={() => setLoadDialogOpen(true)}
+                              onBrowseSongs={() => setSongDialogOpen(true)}
+                              onExport={handleExport}
+                              onAIComposer={async () => {
+                                const isAuth = await base44.auth.isAuthenticated();
+                                if (!isAuth) {
+                                  base44.auth.redirectToLogin(window.location.href);
+                                  return;
+                                }
+                                setChatbotOpen(true);
+                              }}
+                              onGenerate={handleGenerate}
+                              canGenerate={cantusFirmus.length > 0}
+                              isGenerating={isGenerating}
+                              onExportMidi={() => {
+                                const midiData = {
+                                  tempo,
+                                  timeSignature: [4, 4],
+                                  tracks: allVoices.map((voice, idx) => ({
+                                    name: voice.name,
+                                    notes: voice.notes?.map(n => ({
+                                      pitch: n.pitch,
+                                      startTime: n.beat * (60 / tempo),
+                                      duration: (n.duration || 1) * (60 / tempo),
+                                      velocity: Math.round((n.velocity ?? 0.8) * 100)
+                                    })) || []
+                                  }))
+                                };
+                                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }}
+                              onImportMidi={handleImportMidi}
+                              onTheoryTools={() => setTheoryPanelOpen(true)}
                             />
             
             {/* Piano toggle for mobile */}
