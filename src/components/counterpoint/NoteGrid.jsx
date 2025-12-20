@@ -388,7 +388,7 @@ export default function NoteGrid({
   }, [scrollToBeatRef, CELL_WIDTH]);
 
   // Scroll to keep playhead visible during playback (not while scrubbing)
-    useEffect(() => {
+  useEffect(() => {
       if (gridRef.current && isPlaying && !isScrubbing) {
         if (smoothPlayhead === 0) {
           // Reset scroll to beginning
