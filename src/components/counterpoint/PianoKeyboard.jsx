@@ -509,7 +509,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       ctx.textAlign = 'center';
       freqMarkers.forEach(marker => {
         const x = marker.pos * rect.width;
-        ctx.fillText(marker.freq, x, rect.height - 4);
+        ctx.fillText(marker.freq, x, 10);
       });
     };
     

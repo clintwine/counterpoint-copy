@@ -1923,12 +1923,12 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead triangle marker - sticky at top of header */}
+        {/* Playhead triangle marker - sticky vertically, follows playhead horizontally */}
         <div
-          className="absolute cursor-ew-resize"
+          className="sticky cursor-ew-resize"
           style={{
             left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-            top: 28, // Position at header level (h-7 = 28px)
+            top: 28, // Stick at header level when scrolling vertically
             width: 0,
             height: 0,
             pointerEvents: 'auto',
