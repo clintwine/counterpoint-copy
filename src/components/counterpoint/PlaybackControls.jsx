@@ -240,55 +240,58 @@ export default function PlaybackControls({
           </Button>
         </div>
 
+        {/* BPM and Time Signature container */}
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1">
+          {/* BPM - Large Logic Pro style */}
+          <div className="flex items-center">
+            {isEditingBpm ? (
+              <input
+                type="number"
+                value={bpmInputValue}
+                onChange={(e) => setBpmInputValue(e.target.value)}
+                onBlur={handleBpmInputBlur}
+                onKeyDown={handleBpmInputKeyDown}
+                autoFocus
+                className="bg-[#0A0A0A] border border-[#D4AF37] rounded px-2 py-0.5 text-white font-mono text-xl font-bold w-16 text-center outline-none"
+                min={20}
+                max={455}
+              />
+            ) : (
+              <div
+                ref={bpmRef}
+                onMouseDown={handleBpmMouseDown}
+                onDoubleClick={handleBpmDoubleClick}
+                className={`bg-transparent border-none rounded px-2 py-0.5 cursor-ew-resize select-none hover:bg-[#2D2D2D] transition-colors`}
+                title="Drag to change tempo"
+              >
+                <span className="text-white font-mono text-xl font-bold tabular-nums">{tempo}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-6 bg-[#3A3A3A]" />
+
+          {/* Time Signature */}
+          <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+            <SelectTrigger className="h-7 w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+              {TIME_SIGNATURES.map(ts => (
+                <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
+                  {ts.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Time display - Logic Pro style */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
           <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
           <span className="text-white/40 mx-1.5">/</span>
           <span className="text-white/60 font-mono text-sm tabular-nums">{formatTime(totalBeats - 1)}</span>
         </div>
-
-        <div className="w-px h-6 bg-[#3A3A3A]" />
-
-        {/* BPM - Large Logic Pro style */}
-        <div className="flex items-center gap-2">
-          {isEditingBpm ? (
-            <input
-              type="number"
-              value={bpmInputValue}
-              onChange={(e) => setBpmInputValue(e.target.value)}
-              onBlur={handleBpmInputBlur}
-              onKeyDown={handleBpmInputKeyDown}
-              autoFocus
-              className="bg-[#1A1A1A] border border-[#D4AF37] rounded px-3 py-1 text-white font-mono text-2xl font-bold w-20 text-center outline-none"
-              min={20}
-              max={455}
-            />
-          ) : (
-            <div
-              ref={bpmRef}
-              onMouseDown={handleBpmMouseDown}
-              onDoubleClick={handleBpmDoubleClick}
-              className={`bg-[#1A1A1A] border ${isDragging ? 'border-[#D4AF37]' : 'border-[#3A3A3A]'} rounded px-3 py-1 cursor-ew-resize select-none hover:border-[#4A4A4A] transition-colors`}
-              title="Drag to change tempo"
-            >
-              <span className="text-white font-mono text-2xl font-bold tabular-nums">{tempo}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Time Signature */}
-        <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-          <SelectTrigger className="h-8 w-14 bg-[#1A1A1A] border-[#3A3A3A] text-white text-sm font-medium px-2">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-            {TIME_SIGNATURES.map(ts => (
-              <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
-                {ts.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <div className="w-px h-6 bg-[#3A3A3A]" />
 
