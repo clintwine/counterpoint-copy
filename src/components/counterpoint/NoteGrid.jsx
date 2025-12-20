@@ -305,11 +305,23 @@ export default function NoteGrid({
         }));
       }
     };
-    
+
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  // Set initial scroll to center on middle C (C4)
+  useEffect(() => {
+    if (gridRef.current && pitches.length > 0) {
+      const c4Index = pitches.indexOf('C4');
+      if (c4Index >= 0) {
+        const c4Position = c4Index * CELL_HEIGHT;
+        const viewportHeight = gridRef.current.clientHeight - 28; // subtract header height
+        gridRef.current.scrollTop = c4Position - viewportHeight / 2;
+      }
+    }
+  }, []); // Only run on mount
 
   // Expose scroll function via ref
   useEffect(() => {
