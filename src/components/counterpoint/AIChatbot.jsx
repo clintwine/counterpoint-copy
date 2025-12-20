@@ -538,6 +538,21 @@ This should sound like a REAL composition, not a simple exercise!`,
               />
             </div>
 
+            <div>
+              <div className="flex justify-between mb-1">
+                <Label className="text-white/70 text-xs">Tempo</Label>
+                <span className="text-white text-xs">{tempo} BPM</span>
+              </div>
+              <Slider
+                value={[tempo]}
+                onValueChange={([v]) => onSettingsChange?.({...settings, tempo: v})}
+                min={40}
+                max={200}
+                step={5}
+                className="[&_[role=slider]]:bg-amber-400"
+              />
+            </div>
+
             <div className="flex items-center justify-between">
               <Label className="text-white/70 text-xs">Strict Rules</Label>
               <Switch
