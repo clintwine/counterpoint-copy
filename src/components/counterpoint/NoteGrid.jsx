@@ -1360,6 +1360,7 @@ export default function NoteGrid({
                           const isSelected = selectedNotes.has(noteKey);
                           const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
                           const isCurrentBeat = currentBeat === beat;
+                          const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
 
                           return (
                             <div
@@ -1439,7 +1440,7 @@ export default function NoteGrid({
                               style={{ 
                                 width: CELL_WIDTH, 
                                 height: CELL_HEIGHT,
-                                backgroundColor: isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323',
+                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323'),
                                 borderBottomColor: '#404040'
                               }}
                             >
@@ -1449,11 +1450,12 @@ export default function NoteGrid({
                                 const nKey = getNoteKey(note.pitch, note.beat);
                                 // Hide note only when actually dragging (ghost is showing)
                                 const isBeingDragged = originalDragNotesRef.current?.keys.has(nKey) && dragState && (dragState.isDragging || dragOffset.beatDelta !== 0 || dragOffset.pitchDelta !== 0);
-                                
+
                                 if (isBeingDragged) return null;
-                                
+
                                 const noteVelocity = note.velocity ?? 0.8;
                                 const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
+                                const noteInLoop = loopStart !== null && loopEnd !== null && note.beat >= loopStart && note.beat < loopEnd;
                                 
                                 return (
                                   <div
@@ -1580,7 +1582,7 @@ export default function NoteGrid({
                                                                                   }
                                                                               }}
                                     className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
-                                      selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : ''
+                                      selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : noteInLoop && isLooping ? 'ring-2 ring-amber-400/60' : ''
                                     }`}
                                     style={{ 
                                       width: noteWidth,
