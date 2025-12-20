@@ -807,6 +807,10 @@ export default function NoteGrid({
   const handlePointerMove = (e) => {
                 const coords = e.clientX !== undefined ? e : getEventCoords(e);
 
+                // Update hovered cell for piano highlighting
+                const cell = getCellFromPosition(coords.clientX, coords.clientY);
+                setHoveredCell(cell);
+
                 // Clear pending note if we start moving with dragState
                 if (dragState && pendingNote) {
                   console.log('[NoteGrid] Clearing pendingNote because drag began');
@@ -815,7 +819,6 @@ export default function NoteGrid({
 
                 // Handle painting in draw mode (only if paintMode is enabled)
                 if (isPainting && tool === 'draw' && paintMode) {
-              const cell = getCellFromPosition(coords.clientX, coords.clientY);
               if (cell) {
                 const noteKey = getNoteKey(cell.pitch, cell.beat);
                 const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
