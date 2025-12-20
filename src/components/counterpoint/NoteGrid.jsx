@@ -1282,7 +1282,7 @@ export default function NoteGrid({
           <div className="flex-shrink-0">
             {/* Beat numbers header */}
                             <div 
-                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-10 relative cursor-pointer"
+                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
                               style={{ backgroundColor: '#3a3a3a' }}
                               onMouseDown={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
