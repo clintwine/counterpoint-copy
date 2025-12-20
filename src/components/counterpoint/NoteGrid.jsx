@@ -455,6 +455,8 @@ export default function NoteGrid({
   }, [cantusFirmus]);
 
   const quantize = useCallback((gridValue = quantizeGrid) => {
+    if (cantusFirmus.length === 0) return;
+    
     const notesToQuantize = selectedNotes.size > 0 
       ? cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)))
       : cantusFirmus;
@@ -462,10 +464,11 @@ export default function NoteGrid({
     if (notesToQuantize.length === 0) return;
 
     const newNotes = cantusFirmus.map(n => {
-      if (selectedNotes.size === 0 || selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+      const shouldQuantize = selectedNotes.size === 0 || selectedNotes.has(getNoteKey(n.pitch, n.beat));
+      if (shouldQuantize) {
         // Snap to nearest grid value - use proper rounding for triplets
-        const quantizedBeat = Math.round(n.beat / gridValue * 1000) / 1000 * gridValue;
-        return { ...n, beat: Math.max(0, quantizedBeat) };
+        const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
+        return { ...n, beat: Math.max(0, Math.round(quantizedBeat * 1000) / 1000) };
       }
       return n;
     }).sort((a, b) => a.beat - b.beat);
@@ -474,8 +477,8 @@ export default function NoteGrid({
     if (selectedNotes.size > 0) {
       const newSelectedKeys = new Set(
         notesToQuantize.map(n => {
-          const quantizedBeat = Math.round(n.beat / gridValue * 1000) / 1000 * gridValue;
-          return getNoteKey(n.pitch, Math.max(0, quantizedBeat));
+          const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
+          return getNoteKey(n.pitch, Math.max(0, Math.round(quantizedBeat * 1000) / 1000));
         })
       );
       setSelectedNotes(newSelectedKeys);
@@ -483,7 +486,7 @@ export default function NoteGrid({
 
     saveToHistory(newNotes);
     onNotesUpdate(newNotes);
-  }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory, quantizeGrid]);
+  }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory, quantizeGrid, getNoteKey]);
 
   // Keyboard shortcuts
   useEffect(() => {
