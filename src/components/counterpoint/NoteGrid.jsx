@@ -632,7 +632,7 @@ export default function NoteGrid({
         setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
-      } else if (e.key === 'q' && selectedNotes.size > 0) {
+      } else if (e.key === 'q' && cantusFirmus.length > 0) {
         e.preventDefault();
         quantize();
       } else if (e.key === 'v') {
@@ -1186,10 +1186,10 @@ export default function NoteGrid({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => selectedNotes.size > 0 && quantize()}
-              disabled={selectedNotes.size === 0}
+              onClick={() => quantize()}
+              disabled={cantusFirmus.length === 0}
               className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700 rounded-r-none border-r border-slate-600 disabled:opacity-30"
-              title="Quantize selected notes (Q)"
+              title={selectedNotes.size > 0 ? "Quantize selected notes (Q)" : "Quantize all notes (Q)"}
             >
               <span className="font-bold text-sm">Q</span>
             </Button>
