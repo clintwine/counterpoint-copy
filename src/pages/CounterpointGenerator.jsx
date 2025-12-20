@@ -1015,6 +1015,7 @@ export default function CounterpointGenerator() {
                                       }
                                     }}
                                     onPressedNotesChange={setPressedPianoNotes}
+                                    onTogglePanel={() => setShowPianoPanel(false)}
                                   />
                                 </div>
                               )}
