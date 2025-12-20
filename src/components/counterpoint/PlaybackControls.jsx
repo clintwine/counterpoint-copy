@@ -322,7 +322,8 @@ export default function PlaybackControls({
         </Button>
       </div>
 
-
+      {/* Right section - spacer for layout balance */}
+      <div className="w-24" />
     </div>
   );
 }
