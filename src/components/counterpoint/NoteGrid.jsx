@@ -2034,9 +2034,9 @@ export default function NoteGrid({
         </div>
       
       <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 gap-2">
-        {/* Left side - help text or note controls */}
-        <div className="flex-1 min-w-0" style={{ opacity: selectedNotes.size > 0 ? 1 : 0 }}>
-          {selectedNotes.size > 0 ? (
+        {/* Left side - note controls */}
+        {selectedNotes.size > 0 && (
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-amber-400 text-xs flex-shrink-0">{selectedNotes.size} selected</span>
               <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -2244,18 +2244,12 @@ export default function NoteGrid({
                   })()}
                 </span>
               </div>
-            </div>
-          ) : (
-            <p className="text-white/50 text-xs">
-              {tool === 'select' && 'Click notes to select, drag to move'}
-              {tool === 'marquee' && 'Drag to select multiple'}
-              {tool === 'draw' && 'Click to add/remove'}
-            </p>
-          )}
-        </div>
+              </div>
+              </div>
+              )}
 
-        {/* Right side - keyboard button and minimap */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Right side - keyboard button and minimap */}
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
           <Button
             variant="ghost"
             size="sm"
