@@ -525,7 +525,18 @@ export default function CounterpointGenerator() {
       const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
       const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
       const instrument = voices[voiceIndex]?.instrument || 'organ';
-      const pitchBend = note.pitchBend ?? 0;
+      
+      // Build pitch bend envelope if bend data exists
+      let pitchBend = 0;
+      if (note.bendStart !== undefined || note.bendEnd !== undefined) {
+        pitchBend = {
+          start: note.bendStart ?? 0,
+          end: note.bendEnd ?? 0,
+          startTime: note.bendStartTime ?? 0,
+          endTime: note.bendEndTime ?? 1
+        };
+      }
+      
       // Make velocity more pronounced: square it to increase dynamic range
       playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument, pitchBend);
     });

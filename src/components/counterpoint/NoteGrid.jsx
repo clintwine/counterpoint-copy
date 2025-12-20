@@ -1868,12 +1868,12 @@ export default function NoteGrid({
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                  return firstSelected?.pitchBend ?? 0;
+                  return firstSelected?.bendStart ?? 0;
                 })()]}
                 onValueChange={([value]) => {
                   const newNotes = cantusFirmus.map(n => 
                     selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                      ? { ...n, pitchBend: value } 
+                      ? { ...n, bendStart: value } 
                       : n
                   );
                   onNotesUpdate(newNotes);
@@ -1884,13 +1884,101 @@ export default function NoteGrid({
                 min={-12}
                 max={12}
                 step={0.1}
-                className="w-24 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
               />
-              <span className="text-white/70 text-xs w-10 text-right">
+              <span className="text-white/70 text-xs w-8 text-right">
                 {(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                  const bend = firstSelected?.pitchBend ?? 0;
+                  const bend = firstSelected?.bendStart ?? 0;
                   return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
+                })()}
+              </span>
+              <span className="text-white/50 text-xs">→</span>
+              <Slider
+                value={[(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return firstSelected?.bendEnd ?? 0;
+                })()]}
+                onValueChange={([value]) => {
+                  const newNotes = cantusFirmus.map(n => 
+                    selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                      ? { ...n, bendEnd: value } 
+                      : n
+                  );
+                  onNotesUpdate(newNotes);
+                }}
+                onValueCommit={([value]) => {
+                  saveToHistory(cantusFirmus);
+                }}
+                min={-12}
+                max={12}
+                step={0.1}
+                className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+              />
+              <span className="text-white/70 text-xs w-8 text-right">
+                {(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  const bend = firstSelected?.bendEnd ?? 0;
+                  return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
+                })()}
+              </span>
+            </div>
+            <div className="w-px h-4 bg-slate-600" />
+            <div className="flex items-center gap-2">
+              <span className="text-white/50 text-xs">Start:</span>
+              <Slider
+                value={[(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return (firstSelected?.bendStartTime ?? 0) * 100;
+                })()]}
+                onValueChange={([value]) => {
+                  const newNotes = cantusFirmus.map(n => 
+                    selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                      ? { ...n, bendStartTime: value / 100 } 
+                      : n
+                  );
+                  onNotesUpdate(newNotes);
+                }}
+                onValueCommit={([value]) => {
+                  saveToHistory(cantusFirmus);
+                }}
+                min={0}
+                max={100}
+                step={5}
+                className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+              />
+              <span className="text-white/70 text-xs w-8 text-right">
+                {(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return `${Math.round((firstSelected?.bendStartTime ?? 0) * 100)}%`;
+                })()}
+              </span>
+              <span className="text-white/50 text-xs">End:</span>
+              <Slider
+                value={[(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return (firstSelected?.bendEndTime ?? 1) * 100;
+                })()]}
+                onValueChange={([value]) => {
+                  const newNotes = cantusFirmus.map(n => 
+                    selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                      ? { ...n, bendEndTime: value / 100 } 
+                      : n
+                  );
+                  onNotesUpdate(newNotes);
+                }}
+                onValueCommit={([value]) => {
+                  saveToHistory(cantusFirmus);
+                }}
+                min={0}
+                max={100}
+                step={5}
+                className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+              />
+              <span className="text-white/70 text-xs w-8 text-right">
+                {(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return `${Math.round((firstSelected?.bendEndTime ?? 1) * 100)}%`;
                 })()}
               </span>
             </div>
