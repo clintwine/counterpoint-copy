@@ -1896,7 +1896,7 @@ export default function NoteGrid({
                   min={20}
                   max={100}
                   step={5}
-                  className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
+                  className="w-16 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-6">
                   {Math.round(((() => {
@@ -1939,7 +1939,7 @@ export default function NoteGrid({
                   min={-12}
                   max={12}
                   step={0.1}
-                  className="w-14 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
+                  className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-7">
                   {(() => {
@@ -1980,7 +1980,7 @@ export default function NoteGrid({
                   min={-12}
                   max={12}
                   step={0.1}
-                  className="w-14 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
+                  className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-7">
                   {(() => {
@@ -2024,7 +2024,7 @@ export default function NoteGrid({
                   min={0}
                   max={100}
                   step={5}
-                  className="w-12 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
+                  className="w-12 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-6">
                   {(() => {
@@ -2064,7 +2064,7 @@ export default function NoteGrid({
                   min={0}
                   max={100}
                   step={5}
-                  className="w-12 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
+                  className="w-12 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-6">
                   {(() => {
