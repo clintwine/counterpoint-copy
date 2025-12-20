@@ -435,6 +435,10 @@ export default function NoteGrid({
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteSelected();
+      } else if (e.key === 'x' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        copySelected();
+        deleteSelected();
       } else if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         copySelected();
