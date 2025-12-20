@@ -1139,7 +1139,8 @@ export default function NoteGrid({
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#475569 transparent',
-                  touchAction: tool === 'marquee' ? 'none' : 'auto'
+                  touchAction: tool === 'marquee' ? 'none' : 'auto',
+                  backgroundColor: '#1E1E1E'
                 }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
@@ -1298,11 +1299,11 @@ export default function NoteGrid({
                                 return (
                                   <div 
                                     key={measureIndex}
-                                    className={`flex-shrink-0 flex items-center justify-center text-sm font-semibold pointer-events-none relative ${
+                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold pointer-events-none relative ${
                                       inLoopRegion ? 'bg-amber-500/30' : ''
                                     } ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
                                     style={{ width: CELL_WIDTH * beatsPerMeasure }}
-                                    >
+                                  >
                                     <span className="text-slate-900 font-bold">
                                       {measureIndex + 1}
                                     </span>
