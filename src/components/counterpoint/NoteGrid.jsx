@@ -1966,6 +1966,19 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
+                  // Preview bend change
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  if (firstSelected) {
+                    initAudio();
+                    const instrument = voices[0]?.instrument || 'organ';
+                    const pitchBend = {
+                      start: firstSelected?.bendStart ?? 0,
+                      end: firstSelected?.bendEnd ?? 0,
+                      startTime: value / 100,
+                      endTime: firstSelected?.bendEndTime ?? 1
+                    };
+                    playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                  }
                 }}
                 min={0}
                 max={100}
@@ -1994,6 +2007,19 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
+                  // Preview bend change
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  if (firstSelected) {
+                    initAudio();
+                    const instrument = voices[0]?.instrument || 'organ';
+                    const pitchBend = {
+                      start: firstSelected?.bendStart ?? 0,
+                      end: firstSelected?.bendEnd ?? 0,
+                      startTime: firstSelected?.bendStartTime ?? 0,
+                      endTime: value / 100
+                    };
+                    playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                  }
                 }}
                 min={0}
                 max={100}
