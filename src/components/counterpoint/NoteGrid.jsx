@@ -2041,7 +2041,7 @@ export default function NoteGrid({
             variant={showPianoPanel ? 'default' : 'ghost'}
             size="sm"
             onClick={onTogglePianoPanel}
-            className={`h-8 px-2 ${showPianoPanel ? 'bg-amber-500 text-slate-900' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
+            className={`h-8 px-2 ${showPianoPanel ? 'bg-amber-500 text-slate-900 hover:bg-amber-600 hover:text-slate-900' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
             title="Toggle Piano Keyboard"
           >
             <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
