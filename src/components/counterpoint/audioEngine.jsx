@@ -520,7 +520,7 @@ function createDistortion(amount) {
 
 // Active oscillators tracking to prevent too many at once
 let activeOscillatorCount = 0;
-const MAX_CONCURRENT_NOTES = 20; // Lower limit to prevent crackling
+const MAX_CONCURRENT_NOTES = 50; // Higher limit to accommodate notes with long release envelopes
 
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
