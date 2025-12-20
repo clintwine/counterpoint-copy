@@ -473,6 +473,15 @@ export default function NoteGrid({
       return n;
     }).sort((a, b) => a.beat - b.beat);
 
+    // Remove duplicate notes at same pitch and beat (keep first one)
+    const seen = new Set();
+    const uniqueNotes = newNotes.filter(n => {
+      const key = getNoteKey(n.pitch, n.beat);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     // Update selection keys to new positions
     if (selectedNotes.size > 0) {
       const newSelectedKeys = new Set(
@@ -484,8 +493,8 @@ export default function NoteGrid({
       setSelectedNotes(newSelectedKeys);
     }
 
-    saveToHistory(newNotes);
-    onNotesUpdate(newNotes);
+    saveToHistory(uniqueNotes);
+    onNotesUpdate(uniqueNotes);
   }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory, quantizeGrid, getNoteKey]);
 
   // Keyboard shortcuts
