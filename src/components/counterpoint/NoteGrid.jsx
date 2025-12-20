@@ -474,6 +474,78 @@ export default function NoteGrid({
         setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowUp' && !e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes up one semitone
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx - 1;
+            if (newIdx >= 0) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowDown' && !e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes down one semitone
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx + 1;
+            if (newIdx < pitches.length) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowLeft' && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes left one beat
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const newBeat = Math.max(0, n.beat - 1);
+            newSelectedKeys.add(getNoteKey(n.pitch, newBeat));
+            return { ...n, beat: newBeat };
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowRight' && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes right one beat
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const newBeat = Math.min(totalBeats - 1, n.beat + 1);
+            newSelectedKeys.add(getNoteKey(n.pitch, newBeat));
+            return { ...n, beat: newBeat };
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
       } else if (e.key === 'v') {
         setTool('select');
       } else if (e.key === 'm') {
