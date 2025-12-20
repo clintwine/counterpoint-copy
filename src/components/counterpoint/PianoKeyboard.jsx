@@ -273,14 +273,16 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   };
 
   const handleEffectChange = (effect, value) => {
-    setEffects(prev => ({ ...prev, [effect]: value }));
-    setEffectLevel(effect, value);
+    const numValue = parseFloat(value);
+    setEffects(prev => ({ ...prev, [effect]: numValue }));
+    setEffectLevel(effect, numValue);
   };
 
   const handleEnvelopeChange = (param, value) => {
-    const newEnvelope = { ...envelope, [param]: value };
+    const numValue = parseFloat(value);
+    const newEnvelope = { ...envelope, [param]: numValue };
     setEnvelope(newEnvelope);
-    setGlobalEnvelope(newEnvelope); // Update global audio engine
+    setGlobalEnvelope(newEnvelope);
   };
   
   const whiteKeyWidth = 24;
@@ -433,6 +435,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
     
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
@@ -455,12 +458,12 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       let x = 0;
       
       for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+        const barHeight = (dataArray[i] / 255) * canvas.height;
         
         const hue = (i / bufferLength) * 60 + 30;
         ctx.fillStyle = `hsl(${hue}, 80%, ${40 + (dataArray[i] / 255) * 30}%)`;
         
-        ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         x += barWidth;
       }
     };
@@ -817,12 +820,12 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             </div>
 
             {/* Audio Visualizer */}
-            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block">
+            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-20 h-20">
               <canvas 
                 ref={canvasRef} 
                 width={80} 
-                height={64}
-                className="rounded"
+                height={80}
+                className="rounded w-full h-full"
               />
             </div>
             </div>
