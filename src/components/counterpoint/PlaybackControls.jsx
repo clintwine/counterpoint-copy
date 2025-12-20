@@ -9,10 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 
 const TIME_SIGNATURES = [
@@ -55,9 +51,7 @@ export default function PlaybackControls({
   isGenerating,
   onExportMidi,
   onImportMidi,
-  onTheoryTools,
-  showPiano = true,
-  onTogglePiano
+  onTheoryTools
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -179,22 +173,6 @@ export default function PlaybackControls({
             <FileAudio className="w-4 h-4 mr-2" />
             Import MIDI
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-slate-700" />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white cursor-pointer">
-              <Grid3x3 className="w-4 h-4 mr-2" />
-              Panels
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="bg-slate-800 border-slate-700">
-              <DropdownMenuCheckboxItem
-                checked={showPiano}
-                onCheckedChange={onTogglePiano}
-                className="text-white cursor-pointer"
-              >
-                Piano Keyboard
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
           <DropdownMenuSeparator className="bg-slate-700" />
           <DropdownMenuItem onClick={onTheoryTools} className="text-amber-400 cursor-pointer font-semibold">
             <BookOpen className="w-4 h-4 mr-2" />

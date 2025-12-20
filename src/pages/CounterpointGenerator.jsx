@@ -931,8 +931,6 @@ export default function CounterpointGenerator() {
                                   onGenerate={handleGenerate}
                                   canGenerate={cantusFirmus.length > 0}
                                   isGenerating={isGenerating}
-                                  showPiano={showPiano}
-                                  onTogglePiano={() => setShowPiano(!showPiano)}
                                   onExportMidi={() => {
                                     const midiData = {
                                       tempo,
@@ -988,8 +986,20 @@ export default function CounterpointGenerator() {
                               }}
                             />
             
-            {showPiano && (
-                              <div>
+            {/* Piano toggle for mobile */}
+                              <div className="sm:hidden flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-600">
+                                <span className="text-white/70 text-sm">Piano Keyboard</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setShowPiano(!showPiano)}
+                                  className="text-amber-400 h-7 px-2"
+                                >
+                                  {showPiano ? 'Hide' : 'Show'}
+                                </Button>
+                              </div>
+
+                              <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
                                 <PianoKeyboard
                                   activeNotes={activeNotes}
                                   instrument={voices[0]?.instrument || 'organ'}
@@ -1003,7 +1013,6 @@ export default function CounterpointGenerator() {
                                   onPressedNotesChange={setPressedPianoNotes}
                                 />
                               </div>
-                            )}
           </motion.main>
           </div>
           </div>
