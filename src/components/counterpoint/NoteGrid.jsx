@@ -1278,19 +1278,23 @@ export default function NoteGrid({
                               }}
                               onMouseUp={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
-                                // If no drag occurred (same beat), seek instead of setting loop
-                                if (beat !== null && loopSelectStart === beat && onSeek) {
-                                  onSeek(beat);
-                                  // Clear loop when clicking without dragging
-                                  if (onLoopChange) {
-                                    onLoopChange(null, null);
-                                  }
-                                } else if (isLoopSelecting && loopSelectStart !== null && beat !== null) {
-                                  // Ensure loop end is at least one beat after start
-                                  const start = Math.min(loopSelectStart, beat);
-                                  const end = Math.max(loopSelectStart, beat) + 1;
-                                  if (onLoopChange) {
-                                    onLoopChange(start, end);
+                                if (beat !== null && loopSelectStart !== null) {
+                                  const dragDistance = Math.abs(beat - loopSelectStart);
+                                  if (dragDistance === 0) {
+                                    // Single click without drag - seek and clear loop
+                                    if (onSeek) {
+                                      onSeek(beat);
+                                    }
+                                    if (onLoopChange) {
+                                      onLoopChange(null, null);
+                                    }
+                                  } else {
+                                    // Dragged - set loop region
+                                    const start = Math.min(loopSelectStart, beat);
+                                    const end = Math.max(loopSelectStart, beat) + 1;
+                                    if (onLoopChange) {
+                                      onLoopChange(start, end);
+                                    }
                                   }
                                 }
                                 setIsLoopSelecting(false);
