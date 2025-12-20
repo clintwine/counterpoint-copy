@@ -1248,7 +1248,7 @@ export default function NoteGrid({
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
                                       <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
-                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-30" style={{ backgroundColor: '#64748b' }} />
+                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-30" style={{ backgroundColor: '#3a3a3a' }} />
                           {pitches.map((pitch) => {
                                                                         const isSharp = pitch.includes('#');
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
@@ -1283,7 +1283,7 @@ export default function NoteGrid({
             {/* Beat numbers header */}
                             <div 
                               className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-10 relative cursor-pointer"
-                              style={{ backgroundColor: '#64748b' }}
+                              style={{ backgroundColor: '#3a3a3a' }}
                               onMouseDown={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
@@ -1343,10 +1343,10 @@ export default function NoteGrid({
                                     className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
                                     style={{ 
                                       width: CELL_WIDTH * beatsPerMeasure,
-                                      backgroundColor: '#64748b'
+                                      backgroundColor: '#3a3a3a'
                                     }}
-                                  >
-                                    <span className="text-slate-900 font-bold pointer-events-none relative z-10">
+                                    >
+                                    <span className="text-white font-bold pointer-events-none relative z-10">
                                       {measureIndex + 1}
                                     </span>
 
@@ -1376,7 +1376,7 @@ export default function NoteGrid({
                                           left: `${beatIndex * CELL_WIDTH}px`,
                                           width: '1px',
                                           height: beatIndex % 4 === 0 ? '12px' : '6px',
-                                          backgroundColor: 'rgba(0, 0, 0, 0.6)'
+                                          backgroundColor: 'rgba(255, 255, 255, 0.3)'
                                         }}
                                       />
                                     ))}
