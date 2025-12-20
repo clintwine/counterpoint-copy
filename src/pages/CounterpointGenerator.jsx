@@ -586,16 +586,12 @@ export default function CounterpointGenerator() {
   const handleRecordToggle = () => {
     if (isRecording) {
       // Stop recording
+      console.log('Stopping recording. Total notes recorded:', recordedNotesRef.current.length);
       setIsRecording(false);
       setIsPlaying(false);
       setIsCountingIn(false);
       stopAllNotes();
-      
-      // Save recorded notes
-      if (recordedNotesRef.current.length > 0) {
-        setCantusFirmus(prev => [...prev, ...recordedNotesRef.current].sort((a, b) => a.beat - b.beat));
-        recordedNotesRef.current = [];
-      }
+      recordedNotesRef.current = [];
     } else {
       // Start count-in
       ensureAudio();
@@ -634,12 +630,17 @@ export default function CounterpointGenerator() {
         n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
       );
       if (!alreadyRecorded) {
-        recordedNotesRef.current.push({
+        const newNote = {
           pitch,
           beat: currentBeat,
           duration: 1,
           velocity: 0.8
-        });
+        };
+        recordedNotesRef.current.push(newNote);
+        console.log('Recorded note:', newNote, 'Total recorded:', recordedNotesRef.current.length);
+        
+        // Update cantusFirmus immediately for real-time visual feedback
+        setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
       }
     }
   }, [isRecording, currentBeat]);
