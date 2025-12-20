@@ -8,6 +8,7 @@ let delayNode = null;
 let delayGain = null;
 let chorusNode = null;
 let chorusGain = null;
+let analyser = null;
 
 // Effect levels (0-1)
 let effectLevels = {
@@ -112,7 +113,14 @@ export async function initAudio() {
 
     masterGain = audioContext.createGain();
     masterGain.gain.value = 0.25; // Lower to prevent clipping
-    masterGain.connect(compressor);
+    
+    // Create analyser for visualization
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.85;
+    
+    masterGain.connect(analyser);
+    analyser.connect(compressor);
     compressor.connect(audioContext.destination);
     
     // Create effect nodes
@@ -190,6 +198,10 @@ export function getEnvelope() {
 
 export function getAudioContext() {
   return audioContext;
+}
+
+export function getAnalyser() {
+  return analyser;
 }
 
 // Instrument configurations

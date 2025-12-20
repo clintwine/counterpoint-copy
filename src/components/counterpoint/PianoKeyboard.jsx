@@ -5,7 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Keyboard, Guitar, Volume2, Waves, ChevronDown, ExternalLink } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
-import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAudioContext } from './audioEngine';
+import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 import WaveEditor from './WaveEditor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -433,31 +433,20 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const audioCtx = getAudioContext();
     
-    if (!audioCtx) return;
-
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 128;
-    analyser.smoothingTimeConstant = 0.85;
-    
-    // Connect to audio destination to analyze output
-    const audioDestination = audioCtx.destination;
-    
-    // Create a splitter to tap into the audio without affecting it
-    try {
-      const source = audioCtx.createMediaStreamDestination();
-    } catch (e) {
-      // Fallback: just connect analyser directly (won't work for all audio)
-    }
-    
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
       
-      analyser.getByteFrequencyData(dataArray);
+      const analyserNode = getAnalyser();
+      if (!analyserNode) {
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+      
+      const bufferLength = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserNode.getByteFrequencyData(dataArray);
       
       ctx.fillStyle = '#1A1A1A';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -468,20 +457,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       for (let i = 0; i < bufferLength; i++) {
         const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
         
-        const hue = (i / bufferLength) * 60 + 30; // Gold to amber
+        const hue = (i / bufferLength) * 60 + 30;
         ctx.fillStyle = `hsl(${hue}, 80%, ${40 + (dataArray[i] / 255) * 30}%)`;
         
         ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
         x += barWidth;
       }
     };
-    
-    // Try to connect analyser to audio context destination
-    try {
-      audioCtx.destination.connect?.(analyser);
-    } catch (e) {
-      // Some browsers don't allow this
-    }
     
     draw();
     
@@ -835,13 +817,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             </div>
 
             {/* Audio Visualizer */}
-            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-2">
-            <canvas 
-            ref={canvasRef} 
-            width={120} 
-            height={80}
-            className="rounded"
-            />
+            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block">
+              <canvas 
+                ref={canvasRef} 
+                width={80} 
+                height={64}
+                className="rounded"
+              />
             </div>
             </div>
 
