@@ -229,7 +229,8 @@ export default function NoteGrid({
       canGenerate,
       isGenerating,
       onImportMidi,
-      onTheoryTools
+      onTheoryTools,
+      onPressedNotesChange
     }) {
     // Use smooth playhead position if available, otherwise fall back to currentBeat
     const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
