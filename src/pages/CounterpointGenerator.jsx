@@ -1034,26 +1034,47 @@ export default function CounterpointGenerator() {
         onApplyScale={handleApplyScale}
       />
 
-      {/* Piano Popout Modal */}
-      <Dialog open={pianoPopout} onOpenChange={setPianoPopout}>
-        <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-6xl p-4">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="text-white text-sm">Piano Keyboard</DialogTitle>
-          </DialogHeader>
-          <PianoKeyboard
-            activeNotes={activeNotes}
-            instrument={voices[0]?.instrument || 'organ'}
-            onInstrumentChange={(inst) => {
-              const newVoices = [...voices];
-              if (newVoices[0]) {
-                newVoices[0] = { ...newVoices[0], instrument: inst };
-                setVoices(newVoices);
-              }
-            }}
-            onPressedNotesChange={setPressedPianoNotes}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Piano Popout - Draggable Window */}
+      <AnimatePresence>
+        {pianoPopout && (
+          <motion.div
+            drag
+            dragMomentum={false}
+            dragElastic={0}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
+            style={{ top: '10%', left: '10%', maxWidth: '90vw' }}
+          >
+            <div className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between">
+              <span className="text-white text-sm font-medium">Piano Keyboard</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPianoPopout(false)}
+                className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="p-4">
+              <PianoKeyboard
+                activeNotes={activeNotes}
+                instrument={voices[0]?.instrument || 'organ'}
+                onInstrumentChange={(inst) => {
+                  const newVoices = [...voices];
+                  if (newVoices[0]) {
+                    newVoices[0] = { ...newVoices[0], instrument: inst };
+                    setVoices(newVoices);
+                  }
+                }}
+                onPressedNotesChange={setPressedPianoNotes}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
