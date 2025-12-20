@@ -936,12 +936,12 @@ export default function NoteGrid({
   const dragOffset = getDragOffset();
 
   return (
-        <div className="bg-slate-800 rounded-xl sm:rounded-2xl border border-slate-600 w-full overflow-hidden max-w-full">
+        <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
           {/* Playback Controls - embedded at top */}
           {playbackControls}
 
           {/* Toolbar */}
-                      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-slate-700 overflow-x-auto">
+                      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto">
         <div className="flex items-center gap-1">
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}

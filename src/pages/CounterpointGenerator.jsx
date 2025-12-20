@@ -824,7 +824,7 @@ export default function CounterpointGenerator() {
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
                         placeholder="My Counterpoint"
-                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
                         autoFocus
                       />
                     </div>
@@ -855,7 +855,7 @@ export default function CounterpointGenerator() {
                         value={songName}
                         onChange={(e) => setSongName(e.target.value)}
                         placeholder="My Beautiful Song"
-                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
                         autoFocus
                       />
                     </div>
@@ -865,7 +865,7 @@ export default function CounterpointGenerator() {
                         value={songDescription}
                         onChange={(e) => setSongDescription(e.target.value)}
                         placeholder="A brief description..."
-                        className="bg-slate-800 border-slate-700 text-white mt-1"
+                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
                       />
                     </div>
                     <Button
