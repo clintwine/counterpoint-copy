@@ -1281,6 +1281,20 @@ export default function NoteGrid({
 
           <div className={`w-px h-5 bg-slate-600 mx-2 ${showPianoPanel ? 'invisible' : ''}`} />
 
+          {/* Piano Toggle */}
+          <Button
+            variant={showPianoPanel ? 'default' : 'ghost'}
+            size="sm"
+            onClick={onTogglePianoPanel}
+            className={`h-8 px-3 ${showPianoPanel ? 'bg-amber-500 text-slate-900' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
+            title="Toggle Piano Keyboard"
+          >
+            <Keyboard className="w-4 h-4 mr-1.5" />
+            <span className="text-xs font-medium">{showPianoPanel ? 'Hide' : 'Show'} Piano</span>
+          </Button>
+
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+
           {/* Transport controls from PlaybackControls */}
           {playbackControls}
           </div>
@@ -2252,19 +2266,7 @@ export default function NoteGrid({
               </div></div>
               )}
 
-              {/* Right side - keyboard button */}
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-                <Button
-                  variant={showPianoPanel ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={onTogglePianoPanel}
-                  className={`h-7 px-3 ${showPianoPanel ? 'bg-amber-500 text-slate-900' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
-                  title="Toggle Piano Keyboard"
-                >
-                  <Keyboard className="w-4 h-4 mr-1.5" />
-                  <span className="text-xs font-medium">{showPianoPanel ? 'Hide' : 'Show'} Piano</span>
-                </Button>
-              </div>
+
       </div>
 
       {/* Minimap - positioned absolutely */}
