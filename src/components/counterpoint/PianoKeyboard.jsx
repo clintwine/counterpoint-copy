@@ -458,16 +458,18 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       ctx.fillStyle = '#1A1A1A';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      const barWidth = canvas.width / bufferLength;
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      const gap = 2;
       let x = 0;
       
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
+      for (let i = 0; i < bufferLength; i += 2) {
+        const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
         
         const hue = (i / bufferLength) * 60 + 30;
-        ctx.fillStyle = `hsl(${hue}, 80%, ${40 + (dataArray[i] / 255) * 30}%)`;
+        const brightness = 50 + (dataArray[i] / 255) * 40;
+        ctx.fillStyle = `hsl(${hue}, 85%, ${brightness}%)`;
         
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        ctx.fillRect(x, canvas.height - barHeight, barWidth - gap, barHeight);
         x += barWidth;
       }
     };
