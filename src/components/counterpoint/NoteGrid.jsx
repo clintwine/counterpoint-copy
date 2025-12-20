@@ -1746,15 +1746,15 @@ export default function NoteGrid({
             e.stopPropagation();
             e.preventDefault();
             setIsScrubbing(true);
-            const startX = e.clientX;
-            const startBeat = currentBeat;
 
             const handleMouseMove = (moveEvent) => {
-              const deltaX = moveEvent.clientX - startX;
-              const beatDelta = Math.round(deltaX / CELL_WIDTH);
-              const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-              onSeek && onSeek(newBeat);
-              scrollToBeatRef.current && scrollToBeatRef.current(newBeat);
+              if (!gridRef.current) return;
+              const gridRect = gridRef.current.getBoundingClientRect();
+              const scrollLeft = gridRef.current.scrollLeft;
+              const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
+              const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
+              onSeek && onSeek(beat);
+              scrollToBeatRef.current && scrollToBeatRef.current(beat);
             };
 
             const handleMouseUp = () => {
@@ -1770,15 +1770,15 @@ export default function NoteGrid({
             e.stopPropagation();
             e.preventDefault();
             setIsScrubbing(true);
-            const startX = e.touches[0].clientX;
-            const startBeat = currentBeat;
 
             const handleTouchMove = (moveEvent) => {
-              const deltaX = moveEvent.touches[0].clientX - startX;
-              const beatDelta = Math.round(deltaX / CELL_WIDTH);
-              const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
-              onSeek && onSeek(newBeat);
-              scrollToBeatRef.current && scrollToBeatRef.current(newBeat);
+              if (!gridRef.current || !moveEvent.touches[0]) return;
+              const gridRect = gridRef.current.getBoundingClientRect();
+              const scrollLeft = gridRef.current.scrollLeft;
+              const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
+              const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
+              onSeek && onSeek(beat);
+              scrollToBeatRef.current && scrollToBeatRef.current(beat);
             };
 
             const handleTouchEnd = () => {
