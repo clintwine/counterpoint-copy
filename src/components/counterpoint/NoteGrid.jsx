@@ -1985,10 +1985,11 @@ export default function NoteGrid({
         >
           {/* Triangle marker pointing down */}
           <div 
-            className="absolute top-0"
+            className="absolute"
             style={{
               left: '50%',
-              transform: 'translate(-50%, -100%)',
+              top: `-${Math.max(10, 12 * zoom)}px`,
+              transform: 'translateX(-50%)',
               width: 0,
               height: 0,
               borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
