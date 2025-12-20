@@ -1418,10 +1418,9 @@ export default function NoteGrid({
                                       }
                                       touchStartRef.current = null;
                                     }}
-                              className={`flex-shrink-0 border-r border-b relative cursor-pointer
-                                ${isBarLine ? 'border-l-2 border-l-slate-500' : ''} 
+                              className={`flex-shrink-0 border-b relative cursor-pointer
+                                ${isBarLine ? 'border-l-2 border-l-slate-500' : 'border-l border-l-slate-700'} 
                                 ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
-                                border-r-slate-700
                                 hover:bg-slate-700/50
                               `}
                               style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
