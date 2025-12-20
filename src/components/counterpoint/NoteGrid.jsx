@@ -1356,8 +1356,8 @@ export default function NoteGrid({
                   ref={gridRef}
                   className={`overflow-auto relative select-none mx-2 sm:mx-5 ${
                     showPianoPanel 
-                      ? 'max-h-[52vh] sm:max-h-[460px]'
-                      : 'max-h-[72vh] sm:max-h-[620px]'
+                      ? (selectedNotes.size > 0 ? 'max-h-[52vh] sm:max-h-[460px]' : 'max-h-[61vh] sm:max-h-[550px]')
+                      : (selectedNotes.size > 0 ? 'max-h-[72vh] sm:max-h-[620px]' : 'max-h-[81vh] sm:max-h-[710px]')
                   }`}
                 style={{ 
                   scrollbarWidth: 'thin', 
@@ -2037,7 +2037,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className={`flex items-center justify-between gap-2 border-t border-slate-700 transition-all duration-200 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3 h-auto' : 'h-0 overflow-hidden'}`}>
+      <div className={`flex items-center justify-between gap-2 border-t border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3' : 'hidden'}`}>
         {/* Left side - note controls */}
         {selectedNotes.size > 0 && (<div className="flex-1 min-w-0">
           <div className="flex-1 min-w-0">
