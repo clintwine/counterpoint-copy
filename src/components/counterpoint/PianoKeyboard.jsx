@@ -158,67 +158,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
     playNote('C4', 0.5, 0.7, 0, instrumentValue);
   };
   
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-32 h-7 justify-between bg-[#3A3A3A] border-[#4A4A4A] text-white text-xs hover:bg-[#424242]"
-        >
-          <div className="flex items-center gap-1.5">
-            <Guitar className="w-3.5 h-3.5 text-white/60" />
-            <span>{selected?.label || 'Select...'}</span>
-          </div>
-          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-52 p-0 bg-[#2D2D2D] border-[#3A3A3A]">
-        <Command className="bg-[#2D2D2D]">
-          <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
-          <CommandList>
-            <CommandEmpty className="text-white/50 text-xs py-2 text-center">
-              No instrument found.
-              {onCreateNew && (
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    onCreateNew();
-                  }}
-                  className="block w-full mt-2 text-amber-400 hover:text-amber-300 underline"
-                >
-                  Create new instrument
-                </button>
-              )}
-            </CommandEmpty>
-            <CommandGroup>
-              {instruments.map(inst => (
-                <CommandItem
-                  key={inst.value}
-                  value={inst.label}
-                  onSelect={() => {
-                    onChange(inst.value);
-                    setOpen(false);
-                  }}
-                  className="text-white text-xs cursor-pointer flex items-center justify-between group"
-                >
-                  <span>{inst.label}</span>
-                  <button
-                    onClick={(e) => handlePreview(inst.value, e)}
-                    className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                    title="Preview sound"
-                  >
-                    ▶
-                  </button>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
+
 }
 
 export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress }) {
