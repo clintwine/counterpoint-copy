@@ -7,7 +7,7 @@ import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
-import ScoreView from './ScoreView';
+
 
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
@@ -292,7 +292,7 @@ export default function NoteGrid({
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'score'
+  const [viewMode, setViewMode] = useState('grid');
 
   // Update viewport dimensions on mount and resize
   useEffect(() => {
