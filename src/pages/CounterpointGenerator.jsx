@@ -100,6 +100,7 @@ export default function CounterpointGenerator() {
         const [showPiano, setShowPiano] = useState(true);
   const [showPianoPanel, setShowPianoPanel] = useState(true);
   const [pianoPopout, setPianoPopout] = useState(false);
+  const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
   const [previewingSongId, setPreviewingSongId] = useState(null);
   
   const playbackRef = useRef(null);
@@ -1110,7 +1111,7 @@ export default function CounterpointGenerator() {
         onApplyScale={handleApplyScale}
       />
 
-      {/* Piano Popout - Draggable Window */}
+      {/* Piano Popout - Draggable & Resizable Window */}
       <AnimatePresence>
         {pianoPopout && (
           <motion.div
@@ -1124,7 +1125,14 @@ export default function CounterpointGenerator() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
-            style={{ top: '10%', left: '10%', maxWidth: '90vw' }}
+            style={{ 
+              top: '10%', 
+              left: '10%', 
+              width: `${pianoPopoutSize.width}px`,
+              height: `${pianoPopoutSize.height}px`,
+              maxWidth: '90vw',
+              maxHeight: '80vh'
+            }}
           >
             <div 
               className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between"
@@ -1140,7 +1148,7 @@ export default function CounterpointGenerator() {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="p-4">
+            <div className="p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
               <PianoKeyboard
                 activeNotes={activeNotes}
                 instrument={voices[0]?.instrument || 'organ'}
@@ -1154,6 +1162,47 @@ export default function CounterpointGenerator() {
                 onPressedNotesChange={setPressedPianoNotes}
                 onNotePress={handleNotePress}
               />
+            </div>
+            
+            {/* Resize handle - bottom right corner */}
+            <div
+              className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startWidth = pianoPopoutSize.width;
+                const startHeight = pianoPopoutSize.height;
+                
+                const handleMove = (moveEvent) => {
+                  const deltaX = moveEvent.clientX - startX;
+                  const deltaY = moveEvent.clientY - startY;
+                  setPianoPopoutSize({
+                    width: Math.max(400, Math.min(window.innerWidth * 0.9, startWidth + deltaX)),
+                    height: Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + deltaY))
+                  });
+                };
+                
+                const handleUp = () => {
+                  document.removeEventListener('pointermove', handleMove);
+                  document.removeEventListener('pointerup', handleUp);
+                };
+                
+                document.addEventListener('pointermove', handleMove);
+                document.addEventListener('pointerup', handleUp);
+              }}
+            >
+              <svg 
+                className="absolute bottom-1 right-1 text-white/30"
+                width="12" 
+                height="12" 
+                viewBox="0 0 12 12"
+              >
+                <path d="M12 0 L12 12 L0 12" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 0 L12 4" stroke="currentColor" strokeWidth="1"/>
+                <path d="M4 8 L12 8 L12 12 L4 12" fill="currentColor" opacity="0.3"/>
+              </svg>
             </div>
           </motion.div>
         )}
