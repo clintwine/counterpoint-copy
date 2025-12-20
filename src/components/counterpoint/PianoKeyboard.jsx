@@ -458,8 +458,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       ctx.fillStyle = '#1A1A1A';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      const gap = 2;
+      const barWidth = (canvas.width / bufferLength) * 5;
+      const gap = 1;
       let x = 0;
       
       for (let i = 0; i < bufferLength; i += 2) {
@@ -825,7 +825,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           </div>
           
           {/* Audio Visualizer */}
-          <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-24 h-20">
+          <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-20">
             <canvas 
               ref={canvasRef}
               className="rounded w-full h-full block"
