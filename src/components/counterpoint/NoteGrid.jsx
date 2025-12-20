@@ -999,11 +999,8 @@ export default function NoteGrid({
   const dragOffset = getDragOffset();
 
   return (
-        <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
-          {/* Playback Controls - embedded at top */}
-          {playbackControls}
-
-          {/* Toolbar */}
+          <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
+            {/* Toolbar */}
           <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto gap-2">
             <div className="flex items-center gap-1">
           <Button
