@@ -256,88 +256,97 @@ export default function PlaybackControls({
           </Button>
         </div>
 
-        {/* Time display box */}
-        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] px-2.5 py-1.5 h-9">
-          <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
-          <span className="text-white/40 mx-1.5">/</span>
-          <span className="text-white/60 font-mono text-sm tabular-nums">{formatTime(totalBeats - 1)}</span>
+        {/* Combined info display - Logic Pro style single box */}
+        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 divide-x divide-[#3A3A3A]">
+          {/* Measures */}
+          <div className="px-2.5 flex items-center gap-1.5">
+            <span className="text-white font-mono text-base tabular-nums">{Math.ceil(currentBeat / timeSigConfig.beatsPerMeasure) + 1}</span>
+            <span className="text-white/50 font-mono text-sm">{Math.ceil(totalBeats / timeSigConfig.beatsPerMeasure)}</span>
+          </div>
+          
+          {/* Beat position */}
+          <div className="px-2.5 flex items-center">
+            <span className="text-white font-mono text-base tabular-nums">{(currentBeat % timeSigConfig.beatsPerMeasure) + 1}</span>
+          </div>
+          
+          {/* Sub-beat */}
+          <div className="px-2.5 flex items-center">
+            <span className="text-white font-mono text-base tabular-nums">1</span>
+          </div>
+          
+          {/* BPM */}
+          <div className="px-2.5 flex items-center">
+            {isEditingBpm ? (
+              <input
+                type="number"
+                value={bpmInputValue}
+                onChange={(e) => setBpmInputValue(e.target.value)}
+                onBlur={handleBpmInputBlur}
+                onKeyDown={handleBpmInputKeyDown}
+                autoFocus
+                className="bg-transparent border-0 text-white font-mono text-base font-medium w-12 text-center outline-none"
+                min={20}
+                max={455}
+              />
+            ) : (
+              <div
+                ref={bpmRef}
+                onMouseDown={handleBpmMouseDown}
+                onDoubleClick={handleBpmDoubleClick}
+                className={`cursor-ew-resize select-none ${isDragging ? 'text-[#D4AF37]' : ''}`}
+                title="Drag to change tempo"
+              >
+                <span className="text-white font-mono text-base font-medium tabular-nums">{tempo}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Time */}
+          <div className="px-2.5 flex items-center">
+            <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
+          </div>
+          
+          {/* Key - placeholder */}
+          <div className="px-2.5 flex items-center">
+            <span className="text-white text-sm">Cmin</span>
+          </div>
+          
+          {/* Time Signature */}
+          <div className="px-2 flex items-center">
+            <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+              <SelectTrigger className="h-full w-11 bg-transparent border-0 text-white text-sm font-medium px-0 hover:bg-transparent focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                {TIME_SIGNATURES.map(ts => (
+                  <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
+                    {ts.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* BPM box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
-          {isEditingBpm ? (
-            <input
-              type="number"
-              value={bpmInputValue}
-              onChange={(e) => setBpmInputValue(e.target.value)}
-              onBlur={handleBpmInputBlur}
-              onKeyDown={handleBpmInputKeyDown}
-              autoFocus
-              className="bg-transparent border-0 px-2 text-white font-mono text-lg font-bold w-16 text-center outline-none"
-              min={20}
-              max={455}
-            />
-          ) : (
-            <div
-              ref={bpmRef}
-              onMouseDown={handleBpmMouseDown}
-              onDoubleClick={handleBpmDoubleClick}
-              className={`px-2 cursor-ew-resize select-none ${isDragging ? 'text-[#D4AF37]' : ''}`}
-              title="Drag to change tempo"
-            >
-              <span className="text-white font-mono text-lg font-bold tabular-nums">{tempo}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Time Signature box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
-          <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-            <SelectTrigger className="h-full w-12 bg-transparent border-0 text-white text-sm font-medium px-2 hover:bg-transparent focus:ring-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-              {TIME_SIGNATURES.map(ts => (
-                <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
-                  {ts.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Measures box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] px-2.5 py-1.5 h-9 flex items-center">
-          <span className="text-white/60 text-xs mr-1.5">M</span>
-          <span className="text-white font-mono text-sm tabular-nums">{Math.ceil(currentBeat / timeSigConfig.beatsPerMeasure) + 1}</span>
-          <span className="text-white/40 mx-1">/</span>
-          <span className="text-white/60 font-mono text-sm tabular-nums">{Math.ceil(totalBeats / timeSigConfig.beatsPerMeasure)}</span>
-        </div>
-
-        {/* Metronome box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
+        {/* Control icons */}
+        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] p-0.5">
+          {/* Metronome */}
           <Button
             variant="ghost"
             size="sm"
             onClick={onMetronomeToggle}
-            className={`h-full w-9 p-0 rounded-none ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
+            className={`h-7 w-7 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
             title="Metronome"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L8 22h8L12 2z" />
-              <path d="M12 6v10" />
-              <circle cx="12" cy="8" r="1" fill="currentColor" />
-            </svg>
+            <Clock className="w-4 h-4" />
           </Button>
-        </div>
-
-        {/* Loop box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
+          
+          {/* Loop */}
           <Button
             variant="ghost"
             size="sm"
             onClick={onLoopToggle}
-            className={`h-full w-9 p-0 rounded-none ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
+            className={`h-7 w-7 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
             title="Loop"
           >
             <Repeat className="w-4 h-4" />
