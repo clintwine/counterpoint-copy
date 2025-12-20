@@ -1299,10 +1299,11 @@ export default function NoteGrid({
                                 return (
                                   <div 
                                     key={measureIndex}
-                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold pointer-events-none relative ${
-                                      inLoopRegion ? 'bg-amber-500/30' : ''
-                                    } ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
-                                    style={{ width: CELL_WIDTH * beatsPerMeasure }}
+                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold pointer-events-none relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
+                                    style={{ 
+                                      width: CELL_WIDTH * beatsPerMeasure,
+                                      backgroundColor: inLoopRegion && isLooping ? '#D4A574' : '#C8A570'
+                                    }}
                                   >
                                     <span className="text-slate-900 font-bold">
                                       {measureIndex + 1}
