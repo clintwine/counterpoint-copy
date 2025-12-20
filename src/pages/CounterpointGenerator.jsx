@@ -525,8 +525,9 @@ export default function CounterpointGenerator() {
       const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
       const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
       const instrument = voices[voiceIndex]?.instrument || 'organ';
+      const pitchBend = note.pitchBend ?? 0;
       // Make velocity more pronounced: square it to increase dynamic range
-      playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument);
+      playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument, pitchBend);
     });
 
     // Metronome click
