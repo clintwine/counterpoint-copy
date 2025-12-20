@@ -1250,7 +1250,7 @@ export default function NoteGrid({
           <div className="flex-shrink-0">
             {/* Beat numbers header */}
                             <div 
-                              className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800"
+                              className="flex h-7 border-b border-slate-600 select-none sticky top-0 z-10 bg-slate-800 relative"
                               onMouseDown={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
@@ -1293,18 +1293,20 @@ export default function NoteGrid({
                                 return (
                                   <div 
                                     key={beat}
-                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none ${
+                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none relative ${
                                       beat % beatsPerMeasure === 0 
-                                        ? 'border-r-slate-500 bg-slate-700/50 text-amber-400' 
-                                        : 'border-r-slate-700 text-white/60'
+                                        ? 'border-r-slate-500 bg-slate-700/50' 
+                                        : 'border-r-slate-700'
                                     } ${inLoopRegion ? 'bg-amber-500/30' : ''}`}
                                     style={{ width: CELL_WIDTH }}
                                   >
-                                    {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
+                                    <span className={`relative z-10 ${beat % beatsPerMeasure === 0 ? 'text-amber-400' : 'text-white/60'}`}>
+                                      {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
+                                    </span>
                                   </div>
                                 );
                               })}
-            </div>
+                            </div>
 
             {/* Virtualized Note grid rows - only render visible rows */}
             {(() => {
