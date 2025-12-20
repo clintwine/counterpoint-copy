@@ -1862,6 +1862,38 @@ export default function NoteGrid({
                 })()))}
               </span>
             </div>
+            <div className="w-px h-4 bg-slate-600" />
+            <div className="flex items-center gap-2">
+              <span className="text-white/50 text-xs">Bend:</span>
+              <Slider
+                value={[(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  return firstSelected?.pitchBend ?? 0;
+                })()]}
+                onValueChange={([value]) => {
+                  const newNotes = cantusFirmus.map(n => 
+                    selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                      ? { ...n, pitchBend: value } 
+                      : n
+                  );
+                  onNotesUpdate(newNotes);
+                }}
+                onValueCommit={([value]) => {
+                  saveToHistory(cantusFirmus);
+                }}
+                min={-12}
+                max={12}
+                step={0.1}
+                className="w-24 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+              />
+              <span className="text-white/70 text-xs w-10 text-right">
+                {(() => {
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  const bend = firstSelected?.pitchBend ?? 0;
+                  return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
+                })()}
+              </span>
+            </div>
           </>
         )}
           <ScoreMinimap
