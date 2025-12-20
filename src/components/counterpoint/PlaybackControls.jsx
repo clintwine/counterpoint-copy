@@ -136,7 +136,7 @@ export default function PlaybackControls({
   return (
     <>
       {/* Transport controls and tempo */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-center">
         {/* Transport controls */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5">
           <Button
