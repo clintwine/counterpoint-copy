@@ -68,6 +68,7 @@ export default function CounterpointGenerator() {
   const [isRecording, setIsRecording] = useState(false);
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeats, setCountInBeats] = useState(4);
+  const [masterVolume, setMasterVolume] = useState(80);
   const recordedNotesRef = useRef([]);
   
   const [activeTab, setActiveTab] = useState('compose');
