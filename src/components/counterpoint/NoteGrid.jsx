@@ -311,9 +311,6 @@ export default function NoteGrid({
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
 
-  // Use pre-generated pitches
-  const pitches = ALL_PITCHES;
-
   // Update piano highlights based on interaction state
   useEffect(() => {
     if (!onPressedNotesChange) return;
