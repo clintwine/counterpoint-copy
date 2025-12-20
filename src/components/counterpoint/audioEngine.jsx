@@ -46,13 +46,14 @@ async function createReverb() {
   
   const convolver = audioContext.createConvolver();
   const sampleRate = audioContext.sampleRate;
-  const length = sampleRate * 2; // 2 second reverb
+  const length = sampleRate * 1.5; // Shorter reverb to reduce CPU load
   const impulse = audioContext.createBuffer(2, length, sampleRate);
   
   for (let channel = 0; channel < 2; channel++) {
     const channelData = impulse.getChannelData(channel);
     for (let i = 0; i < length; i++) {
-      channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+      // Softer decay curve to prevent buildup and crackling
+      channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 3) * 0.4;
     }
   }
   
@@ -100,8 +101,19 @@ function createChorus() {
 export async function initAudio() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Add compressor to prevent clipping and crackling
+    const compressor = audioContext.createDynamicsCompressor();
+    compressor.threshold.value = -24;
+    compressor.knee.value = 30;
+    compressor.ratio.value = 12;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+    
     masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.4;
+    masterGain.gain.value = 0.35; // Lower to prevent clipping with reverb
+    masterGain.connect(compressor);
+    compressor.connect(audioContext.destination);
     
     // Create effect nodes
     reverbNode = await createReverb();
@@ -122,19 +134,19 @@ export async function initAudio() {
     if (reverbNode) {
       masterGain.connect(reverbNode);
       reverbNode.connect(reverbGain);
-      reverbGain.connect(audioContext.destination);
+      reverbGain.connect(compressor);
     }
     
     if (delayNode) {
       masterGain.connect(delayNode);
       delayNode.connect(delayGain);
-      delayGain.connect(audioContext.destination);
+      delayGain.connect(compressor);
     }
     
     if (chorusNode) {
       masterGain.connect(chorusNode);
       chorusNode.connect(chorusGain);
-      chorusGain.connect(audioContext.destination);
+      chorusGain.connect(compressor);
     }
   }
   // Resume context if suspended (browser autoplay policy)
@@ -468,7 +480,7 @@ function createDistortion(amount) {
 
 // Active oscillators tracking to prevent too many at once
 let activeOscillatorCount = 0;
-const MAX_CONCURRENT_NOTES = 128;
+const MAX_CONCURRENT_NOTES = 60; // Lower limit to prevent crackling
 
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
