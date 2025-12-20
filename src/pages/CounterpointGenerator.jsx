@@ -1123,7 +1123,7 @@ export default function CounterpointGenerator() {
                                   onClick={() => setShowPiano(!showPiano)}
                                   className="text-amber-400 h-7 px-2"
                                 >
-                                  {showPiano ? 'Hide' : 'Show'}
+                                  {showPiano ? 'Hide Piano' : 'Show Piano'}
                                 </Button>
                               </div>
 
