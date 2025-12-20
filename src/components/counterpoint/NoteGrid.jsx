@@ -463,9 +463,9 @@ export default function NoteGrid({
 
     const newNotes = cantusFirmus.map(n => {
       if (selectedNotes.size === 0 || selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-        // Snap to nearest grid value
-        const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
-        return { ...n, beat: quantizedBeat };
+        // Snap to nearest grid value - use proper rounding for triplets
+        const quantizedBeat = Math.round(n.beat / gridValue * 1000) / 1000 * gridValue;
+        return { ...n, beat: Math.max(0, quantizedBeat) };
       }
       return n;
     }).sort((a, b) => a.beat - b.beat);
@@ -474,8 +474,8 @@ export default function NoteGrid({
     if (selectedNotes.size > 0) {
       const newSelectedKeys = new Set(
         notesToQuantize.map(n => {
-          const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
-          return getNoteKey(n.pitch, quantizedBeat);
+          const quantizedBeat = Math.round(n.beat / gridValue * 1000) / 1000 * gridValue;
+          return getNoteKey(n.pitch, Math.max(0, quantizedBeat));
         })
       );
       setSelectedNotes(newSelectedKeys);
@@ -632,15 +632,15 @@ export default function NoteGrid({
         setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
+      } else if (e.key === 'q' && selectedNotes.size > 0) {
+        e.preventDefault();
+        quantize();
       } else if (e.key === 'v') {
         setTool('select');
       } else if (e.key === 'm') {
         setTool('marquee');
       } else if (e.key === 'b') {
         setTool('draw');
-      } else if (e.key === 'q' && selectedNotes.size > 0) {
-        e.preventDefault();
-        quantize();
       }
     };
 
