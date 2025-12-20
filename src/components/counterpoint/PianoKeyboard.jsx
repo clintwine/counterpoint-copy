@@ -662,7 +662,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                               className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
                             >
                               <Waves className="w-3.5 h-3.5 mr-1" />
-                              Wave
+                              Edit Instrument
                             </Button>
             <Button
               variant="ghost"
