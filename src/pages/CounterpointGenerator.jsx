@@ -1141,6 +1141,11 @@ export default function CounterpointGenerator() {
                                     onPressedNotesChange={setPressedPianoNotes}
                                     onPopOut={() => setPianoPopout(true)}
                                     onNotePress={handleNotePress}
+                                    masterVolume={masterVolume}
+                                    onMasterVolumeChange={(vol) => {
+                                      setMasterVolume(vol);
+                                      setMasterVolume(vol / 100 * 0.4);
+                                    }}
                                   />
                                 </div>
                               )}
@@ -1208,6 +1213,11 @@ export default function CounterpointGenerator() {
                 }}
                 onPressedNotesChange={setPressedPianoNotes}
                 onNotePress={handleNotePress}
+                masterVolume={masterVolume}
+                onMasterVolumeChange={(vol) => {
+                  setMasterVolume(vol);
+                  setMasterVolume(vol / 100 * 0.4);
+                }}
               />
             </div>
             

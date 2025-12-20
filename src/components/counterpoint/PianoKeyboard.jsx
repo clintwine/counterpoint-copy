@@ -221,7 +221,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   );
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, masterVolume = 80, onMasterVolumeChange }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -433,7 +433,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
   return (
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
-      <div className="flex items-center justify-start mb-2 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
                     {onPopOut && (
@@ -612,9 +612,23 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
             </Button>
-          </div>
-        </div>
-      </div>
+            </div>
+
+            {/* Master Volume - Vertical Slider */}
+            <div className="flex flex-col items-center gap-1 bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-2 py-2">
+            <Volume2 className="w-3.5 h-3.5 text-white/60" />
+            <Slider
+              value={[masterVolume]}
+              onValueChange={([value]) => onMasterVolumeChange?.(value)}
+              max={100}
+              step={1}
+              orientation="vertical"
+              className="h-16 [&_[role=slider]]:bg-[#D4AF37] [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+            />
+            <span className="text-white/70 text-[9px] font-mono">{masterVolume}</span>
+            </div>
+            </div>
+            </div>
       
       <div className="overflow-x-auto pb-1">
                     <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
