@@ -184,10 +184,10 @@ export function getAudioContext() {
 const INSTRUMENT_CONFIGS = {
   organ: {
     waveform: 'sine',
-    harmonics: [1, 0.5, 0.25],
+    harmonics: [1, 0.8, 0.6, 0.4, 0.3, 0.2],
     attack: 0.02,
-    filterFreq: 2500,
-    filterQ: 1,
+    filterFreq: 3000,
+    filterQ: 1.2,
     distortion: 0
   },
   distortion: {
@@ -216,18 +216,18 @@ const INSTRUMENT_CONFIGS = {
   },
   strings: {
     waveform: 'sawtooth',
-    harmonics: [1, 0.3],
-    attack: 0.15,
-    filterFreq: 2000,
-    filterQ: 0.5,
+    harmonics: [1, 0.7, 0.5, 0.4, 0.2],
+    attack: 0.2,
+    filterFreq: 3200,
+    filterQ: 1.2,
     distortion: 0
   },
   flute: {
     waveform: 'sine',
-    harmonics: [1, 0.1, 0.05],
+    harmonics: [1, 0.4, 0.2, 0.1, 0.05],
     attack: 0.08,
-    filterFreq: 3500,
-    filterQ: 0.3,
+    filterFreq: 4200,
+    filterQ: 0.4,
     distortion: 0
   },
   synth: {
@@ -248,11 +248,11 @@ const INSTRUMENT_CONFIGS = {
   },
   piano: {
     waveform: 'triangle',
-    harmonics: [1, 0.5, 0.3, 0.1],
-    attack: 0.005,
-    filterFreq: 3500,
-    filterQ: 1,
-    distortion: 0
+    harmonics: [1, 0.8, 0.5, 0.3, 0.15, 0.05],
+    attack: 0.003,
+    filterFreq: 4500,
+    filterQ: 0.8,
+    distortion: 2
   },
   electric: {
     waveform: 'square',
@@ -287,11 +287,11 @@ const INSTRUMENT_CONFIGS = {
     distortion: 0
   },
   pad: {
-    waveform: 'sine',
-    harmonics: [1, 0.5, 0.4, 0.3, 0.2],
-    attack: 0.3,
-    filterFreq: 1800,
-    filterQ: 0.5,
+    waveform: 'sawtooth',
+    harmonics: [1, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2],
+    attack: 0.4,
+    filterFreq: 1500,
+    filterQ: 0.3,
     distortion: 0
   },
   pluck: {
@@ -312,11 +312,11 @@ const INSTRUMENT_CONFIGS = {
   },
   trumpet: {
     waveform: 'sawtooth',
-    harmonics: [1, 0.9, 0.7, 0.5, 0.4],
-    attack: 0.03,
-    filterFreq: 4000,
-    filterQ: 4,
-    distortion: 12
+    harmonics: [1, 0.95, 0.85, 0.7, 0.6, 0.45, 0.3],
+    attack: 0.04,
+    filterFreq: 4500,
+    filterQ: 5,
+    distortion: 18
   },
   saxophone: {
     waveform: 'sawtooth',
@@ -360,18 +360,18 @@ const INSTRUMENT_CONFIGS = {
   },
   cello: {
     waveform: 'sawtooth',
-    harmonics: [1, 0.4, 0.3, 0.2],
-    attack: 0.12,
-    filterFreq: 1500,
-    filterQ: 1,
-    distortion: 0
+    harmonics: [1, 0.6, 0.5, 0.35, 0.25, 0.15],
+    attack: 0.15,
+    filterFreq: 1800,
+    filterQ: 1.5,
+    distortion: 1
   },
   harp: {
     waveform: 'triangle',
-    harmonics: [1, 0.6, 0.4, 0.2, 0.1],
+    harmonics: [1, 0.8, 0.6, 0.4, 0.25, 0.15, 0.08],
     attack: 0.001,
-    filterFreq: 4500,
-    filterQ: 1,
+    filterFreq: 5500,
+    filterQ: 1.5,
     distortion: 0
   }
 };
