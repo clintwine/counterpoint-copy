@@ -319,21 +319,7 @@ export default function PlaybackControls({
         </Button>
       </div>
 
-      {/* Right section - Timeline scrubber */}
-      <div className="hidden sm:block flex-1 max-w-md">
-        <Slider
-          value={[currentBeat]}
-          onValueChange={([value]) => {
-            onSeek(value);
-            onScrollToBeat?.(value);
-          }}
-          min={0}
-          max={totalBeats - 1}
-          step={1}
-          className="cursor-pointer [&_[role=slider]]:bg-[#D4AF37] [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5 [&>span:first-child]:bg-[#4A4A4A]"
-          aria-label="Playhead position"
-        />
-      </div>
+
     </div>
   );
 }
