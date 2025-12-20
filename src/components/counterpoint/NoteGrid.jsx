@@ -1338,9 +1338,6 @@ export default function NoteGrid({
                             >
                               {Array.from({ length: measures }).map((_, measureIndex) => {
                                 const measureStartBeat = measureIndex * beatsPerMeasure;
-                                const measureEndBeat = measureStartBeat + beatsPerMeasure;
-                                const inLoopRegion = loopStart !== null && loopEnd !== null && 
-                                  measureStartBeat < loopEnd && measureEndBeat > loopStart;
 
                                 return (
                                   <div 
@@ -1348,18 +1345,35 @@ export default function NoteGrid({
                                     className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
                                     style={{ 
                                       width: CELL_WIDTH * beatsPerMeasure,
-                                      backgroundColor: inLoopRegion ? '#C8A570' : '#64748b'
+                                      backgroundColor: '#64748b'
                                     }}
                                   >
-                                    <span className="text-slate-900 font-bold pointer-events-none">
+                                    <span className="text-slate-900 font-bold pointer-events-none relative z-10">
                                       {measureIndex + 1}
                                     </span>
-                                    
+
+                                    {/* Individual beat backgrounds for loop highlighting */}
+                                    {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
+                                      const beat = measureStartBeat + beatIndex;
+                                      const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+                                      return (
+                                        <div
+                                          key={`bg-${beatIndex}`}
+                                          className="absolute top-0 bottom-0 pointer-events-none"
+                                          style={{
+                                            left: `${beatIndex * CELL_WIDTH}px`,
+                                            width: `${CELL_WIDTH}px`,
+                                            backgroundColor: inLoop ? '#C8A570' : 'transparent'
+                                          }}
+                                        />
+                                      );
+                                    })}
+
                                     {/* Ruler tick marks */}
                                     {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
                                       <div
                                         key={beatIndex}
-                                        className="absolute top-0 pointer-events-none"
+                                        className="absolute top-0 pointer-events-none z-10"
                                         style={{
                                           left: `${beatIndex * CELL_WIDTH}px`,
                                           width: '1px',
