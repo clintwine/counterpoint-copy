@@ -288,6 +288,36 @@ export default function NoteGrid({
       onSelectionChange(selectedNotesList);
     }
   }, [selectedNotes, cantusFirmus, onSelectionChange]);
+
+  // Update piano highlights based on interaction state
+  useEffect(() => {
+    if (!onPressedNotesChange) return;
+    
+    const highlightedNotes = new Set();
+    
+    // Highlight pending note (being added)
+    if (pendingNote) {
+      highlightedNotes.add(pendingNote.pitch);
+    }
+    
+    // Highlight notes being dragged
+    if (dragState && dragState.isDragging && originalDragNotesRef.current?.notes) {
+      const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
+      originalDragNotesRef.current.notes.forEach(note => {
+        const newPitchIdx = pitches.indexOf(note.pitch) + pitchDelta;
+        if (newPitchIdx >= 0 && newPitchIdx < pitches.length) {
+          highlightedNotes.add(pitches[newPitchIdx]);
+        }
+      });
+    }
+    
+    // Highlight hovered cell in draw mode
+    if (hoveredCell && tool === 'draw') {
+      highlightedNotes.add(hoveredCell.pitch);
+    }
+    
+    onPressedNotesChange(highlightedNotes);
+  }, [pendingNote, dragState, hoveredCell, tool, onPressedNotesChange, pitches]);
   const [dragState, setDragState] = useState(null);
   const originalDragNotesRef = useRef(null); // Store original notes when drag starts
   const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
