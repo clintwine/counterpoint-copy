@@ -845,7 +845,7 @@ export default function NoteGrid({
       const deltaX = Math.abs(marquee.endX - marquee.startX);
       const deltaY = Math.abs(marquee.endY - marquee.startY);
       
-      if (deltaX < 15 && deltaY < 15) {
+      if (deltaX < 40 && deltaY < 40) {
         // Just a click - clear selection and loop
         setSelectedNotes(new Set());
         if (onLoopChange) {
