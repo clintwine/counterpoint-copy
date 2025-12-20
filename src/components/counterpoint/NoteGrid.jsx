@@ -1356,8 +1356,8 @@ export default function NoteGrid({
                   ref={gridRef}
                   className={`overflow-auto relative select-none mx-2 sm:mx-5 ${
                     showPianoPanel 
-                      ? (selectedNotes.size > 0 ? 'max-h-[52vh] sm:max-h-[460px]' : 'max-h-[64vh] sm:max-h-[560px]')
-                      : (selectedNotes.size > 0 ? 'max-h-[72vh] sm:max-h-[620px]' : 'max-h-[84vh] sm:max-h-[740px]')
+                      ? 'max-h-[52vh] sm:max-h-[460px]'
+                      : 'max-h-[72vh] sm:max-h-[620px]'
                   }`}
                 style={{ 
                   scrollbarWidth: 'thin', 
