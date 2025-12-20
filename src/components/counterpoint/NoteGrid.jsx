@@ -1195,7 +1195,15 @@ export default function NoteGrid({
                           onCreateNew={onOpenWaveEditor}
                         />
 
-        </div>
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+
+          {/* BPM Display */}
+          <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-2 py-0.5">
+            <span className="text-white font-mono text-lg font-bold tabular-nums">{tempo}</span>
+            <span className="text-white/50 text-[10px] ml-1">BPM</span>
+          </div>
+
+          </div>
         
         {/* Zoom controls - right side */}
         <div className="flex items-center gap-2">
