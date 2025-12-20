@@ -501,7 +501,7 @@ export default function NoteGrid({
         copySelected();
       } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        paste();
+        paste(currentBeat);
       } else if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         selectAll();
