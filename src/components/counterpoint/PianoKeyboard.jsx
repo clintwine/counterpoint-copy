@@ -617,7 +617,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
       
       <div className="overflow-x-auto pb-1">
-                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 65 }}>
+                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
           {(() => {
             const keys = [];
@@ -639,7 +639,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   style={{
                                                                                                       left: whiteKeyIndex * whiteKeyWidth,
                                                                                                       width: whiteKeyWidth - 1,
-                                                                                                      height: 60,
+                                                                                                      height: 75,
                     backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                   }}
                 >
@@ -666,7 +666,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                       style={{
                                         left: whiteKeyWidth - blackKeyWidth / 2,
                                         width: blackKeyWidth,
-                                        height: 32,
+                                        height: 45,
                   backgroundColor: a0SharpPressed ? '#D4A574' : a0SharpActive !== -1 ? VOICE_COLORS[a0SharpActive] : '#1E293B',
                 }}
               />
@@ -693,7 +693,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                               style={{
                                                 left: whiteKeyIndex * whiteKeyWidth,
                                                 width: whiteKeyWidth - 1,
-                                                height: 60,
+                                                height: 75,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
                   >
@@ -724,7 +724,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                               style={{
                                                 left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
                                                 width: blackKeyWidth,
-                                                height: 32,
+                                                height: 45,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
                     }}
                   >
@@ -750,7 +750,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                                       style={{
                                         left: whiteKeyIndex * whiteKeyWidth,
                                         width: whiteKeyWidth - 1,
-                                        height: 60,
+                                        height: 75,
                   backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5',
                 }}
               >
@@ -762,10 +762,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           })()}
         </div>
       </div>
-      
-      <p className="text-white/50 text-[10px] mt-1 hidden sm:block">
-                    Hold keys to sustain • Use keyboard (Z-M, Q-P rows)
-                  </p>
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
