@@ -221,7 +221,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   );
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -314,7 +314,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       onPressedNotesChange?.(next);
       return next;
     });
-  }, [instrument, envelope, customInstruments, onPressedNotesChange]);
+    
+    // Notify parent about note press for recording
+    onNotePress?.(pitch);
+  }, [instrument, envelope, customInstruments, onPressedNotesChange, onNotePress]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {

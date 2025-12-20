@@ -626,31 +626,23 @@ export default function CounterpointGenerator() {
     }
   };
 
-  // Track when piano notes are pressed during recording
-  const prevPressedNotesRef = useRef(new Set());
-  
-  useEffect(() => {
+  // Handle note press during recording
+  const handleNotePress = useCallback((pitch) => {
     if (isRecording && currentBeat >= 0) {
-      // Detect newly pressed notes (not in previous set)
-      pressedPianoNotes.forEach(pitch => {
-        if (!prevPressedNotesRef.current.has(pitch)) {
-          // New note pressed - record it
-          const alreadyRecorded = recordedNotesRef.current.some(
-            n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
-          );
-          if (!alreadyRecorded) {
-            recordedNotesRef.current.push({
-              pitch,
-              beat: currentBeat,
-              duration: 1,
-              velocity: 0.8
-            });
-          }
-        }
-      });
+      // Check if this note at this beat already exists
+      const alreadyRecorded = recordedNotesRef.current.some(
+        n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
+      );
+      if (!alreadyRecorded) {
+        recordedNotesRef.current.push({
+          pitch,
+          beat: currentBeat,
+          duration: 1,
+          velocity: 0.8
+        });
+      }
     }
-    prevPressedNotesRef.current = new Set(pressedPianoNotes);
-  }, [isRecording, pressedPianoNotes, currentBeat]);
+  }, [isRecording, currentBeat]);
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);
@@ -1099,6 +1091,7 @@ export default function CounterpointGenerator() {
                                     }}
                                     onPressedNotesChange={setPressedPianoNotes}
                                     onPopOut={() => setPianoPopout(true)}
+                                    onNotePress={handleNotePress}
                                   />
                                 </div>
                               )}
@@ -1158,6 +1151,7 @@ export default function CounterpointGenerator() {
                   }
                 }}
                 onPressedNotesChange={setPressedPianoNotes}
+                onNotePress={handleNotePress}
               />
             </div>
           </motion.div>
