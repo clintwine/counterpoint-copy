@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3 } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
@@ -426,6 +426,36 @@ export default function NoteGrid({
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
     setSelectedNotes(allKeys);
   }, [cantusFirmus]);
+
+  const quantize = useCallback(() => {
+    const notesToQuantize = selectedNotes.size > 0 
+      ? cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)))
+      : cantusFirmus;
+    
+    if (notesToQuantize.length === 0) return;
+
+    const newNotes = cantusFirmus.map(n => {
+      if (selectedNotes.size === 0 || selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+        const quantizedBeat = Math.round(n.beat);
+        return { ...n, beat: quantizedBeat };
+      }
+      return n;
+    }).sort((a, b) => a.beat - b.beat);
+
+    // Update selection keys to new positions
+    if (selectedNotes.size > 0) {
+      const newSelectedKeys = new Set(
+        notesToQuantize.map(n => {
+          const quantizedBeat = Math.round(n.beat);
+          return getNoteKey(n.pitch, quantizedBeat);
+        })
+      );
+      setSelectedNotes(newSelectedKeys);
+    }
+
+    saveToHistory(newNotes);
+    onNotesUpdate(newNotes);
+  }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1047,7 +1077,19 @@ export default function NoteGrid({
           >
             <Trash2 className="w-4 h-4" />
           </Button>
-          
+
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={quantize}
+            className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700"
+            title="Quantize notes to grid"
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </Button>
+
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
           {/* Instrument for cantus firmus (voice being edited) */}
