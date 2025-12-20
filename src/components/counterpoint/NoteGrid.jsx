@@ -2033,7 +2033,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 gap-2">
+      <div className={`flex items-center justify-between gap-2 border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3 border-t' : 'px-2 sm:px-5 py-1'}`}>
         {/* Left side - note controls */}
         {selectedNotes.size > 0 && (
           <div className="flex-1 min-w-0">
