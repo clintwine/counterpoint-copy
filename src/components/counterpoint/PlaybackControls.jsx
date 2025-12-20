@@ -215,10 +215,11 @@ export default function PlaybackControls({
                 ref={bpmRef}
                 onMouseDown={handleBpmMouseDown}
                 onDoubleClick={handleBpmDoubleClick}
-                className={`bg-transparent border-none rounded px-2 py-0.5 cursor-ew-resize select-none hover:bg-[#2D2D2D] transition-colors w-16`}
+                className={`bg-transparent border-none rounded px-2 py-0.5 cursor-ew-resize select-none hover:bg-[#2D2D2D] transition-colors w-16 flex flex-col items-center`}
                 title="Drag to change tempo"
               >
-                <span className="text-white font-mono text-xl font-bold tabular-nums text-center block">{tempo}</span>
+                <span className="text-white font-mono text-xl font-bold tabular-nums">{tempo}</span>
+                <span className="text-white/40 text-[9px] uppercase tracking-wider">BPM</span>
               </div>
             )}
           </div>
