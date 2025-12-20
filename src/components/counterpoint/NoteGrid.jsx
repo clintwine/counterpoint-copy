@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3 } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, BookOpen } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
@@ -189,35 +189,47 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 }
 
 export default function NoteGrid({ 
-    voices, 
-    currentBeat, 
-    playheadPosition,
-    isPlaying, 
-    measures = 8, 
-    onNoteClick,
-    onNotesUpdate,
-    cantusFirmus = [],
-    onExportMidi,
-    onSeek,
-    activeVoice = 0,
-    onActiveVoiceChange,
-    onVoiceInstrumentChange,
-    onSelectionChange,
-    tempo = 80,
-    timeSignature = '4/4',
-    scrollToBeatRef,
-    pressedPianoNotes = new Set(),
-    pianoInstrument = 'organ',
-    playbackControls,
-    onOpenWaveEditor,
-    loopStart = null,
-    loopEnd = null,
-    isLooping = false,
-    onLoopChange,
-    settings = {},
-    onTogglePianoPanel,
-    showPianoPanel = true
-  }) {
+      voices, 
+      currentBeat, 
+      playheadPosition,
+      isPlaying, 
+      measures = 8, 
+      onNoteClick,
+      onNotesUpdate,
+      cantusFirmus = [],
+      onExportMidi,
+      onSeek,
+      activeVoice = 0,
+      onActiveVoiceChange,
+      onVoiceInstrumentChange,
+      onSelectionChange,
+      tempo = 80,
+      timeSignature = '4/4',
+      scrollToBeatRef,
+      pressedPianoNotes = new Set(),
+      pianoInstrument = 'organ',
+      playbackControls,
+      onOpenWaveEditor,
+      loopStart = null,
+      loopEnd = null,
+      isLooping = false,
+      onLoopChange,
+      settings = {},
+      onTogglePianoPanel,
+      showPianoPanel = true,
+      onNewProject,
+      onSaveProject,
+      onSaveSong,
+      onLoadProject,
+      onBrowseSongs,
+      onExport,
+      onAIComposer,
+      onGenerate,
+      canGenerate,
+      isGenerating,
+      onImportMidi,
+      onTheoryTools
+    }) {
     // Use smooth playhead position if available, otherwise fall back to currentBeat
     const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
   const gridRef = useRef(null);
@@ -1003,6 +1015,81 @@ export default function NoteGrid({
             {/* Toolbar */}
           <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto gap-2">
             <div className="flex items-center gap-1">
+          {/* File Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-slate-800 border-slate-700">
+              <DropdownMenuItem onClick={onNewProject} className="text-white cursor-pointer">
+                <FileText className="w-4 h-4 mr-2" />
+                New Project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onLoadProject} className="text-white cursor-pointer">
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Load Project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onSaveProject} className="text-white cursor-pointer">
+                <Save className="w-4 h-4 mr-2" />
+                Save Project
+              </DropdownMenuItem>
+              {onSaveSong && (
+                <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold">
+                  <Save className="w-4 h-4 mr-2" />
+                  Save as Song (Admin)
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer">
+                <Music className="w-4 h-4 mr-2" />
+                Browse Songs
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem onClick={onExport} className="text-white cursor-pointer">
+                <Download className="w-4 h-4 mr-2" />
+                Export JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onExportMidi} className="text-white cursor-pointer">
+                <FileAudio className="w-4 h-4 mr-2" />
+                Export MIDI
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onImportMidi} className="text-white cursor-pointer">
+                <FileAudio className="w-4 h-4 mr-2" />
+                Import MIDI
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem onClick={onTheoryTools} className="text-amber-400 cursor-pointer font-semibold">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Music Theory Tools
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Composer
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={onGenerate} 
+                disabled={!canGenerate || isGenerating}
+                className="text-amber-400 cursor-pointer font-semibold"
+              >
+                {isGenerating ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                Generate Counterpoint
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="w-px h-5 bg-slate-600 mx-1" />
+
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}
             size="sm"
@@ -1267,7 +1354,7 @@ export default function NoteGrid({
 
           <div 
                   ref={gridRef}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 ${showPianoPanel ? 'max-h-[55vh] sm:max-h-[480px]' : 'max-h-[75vh] sm:max-h-[650px]'}`}
+                  className={`overflow-auto relative select-none mx-2 sm:mx-5 ${showPianoPanel ? 'max-h-[52vh] sm:max-h-[460px]' : 'max-h-[72vh] sm:max-h-[620px]'}`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
