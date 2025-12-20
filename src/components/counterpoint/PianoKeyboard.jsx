@@ -167,14 +167,14 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-28 h-7 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+            className="w-28 h-7 justify-between bg-[#3A3A3A] border-[#4A4A4A] text-white text-xs hover:bg-[#424242]"
           >
             {selected?.label || 'Select...'}
             <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
-          <Command className="bg-slate-800">
+        <PopoverContent className="w-52 p-0 bg-[#2D2D2D] border-[#3A3A3A]">
+          <Command className="bg-[#2D2D2D]">
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
             <CommandList>
               <CommandEmpty className="text-white/50 text-xs py-2 text-center">
@@ -429,7 +429,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const totalWidth = totalWhiteKeys * whiteKeyWidth;
 
   return (
-    <div className="bg-slate-800/60 rounded-xl p-2 sm:p-3 border border-slate-600 max-w-full overflow-hidden">
+    <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
                   <div className="flex items-center gap-2 sm:gap-4 flex-wrap">

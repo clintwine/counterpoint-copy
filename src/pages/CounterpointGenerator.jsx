@@ -673,7 +673,7 @@ export default function CounterpointGenerator() {
         };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A] overflow-x-hidden">
       {/* Ambient background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
@@ -742,7 +742,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="text-white">Browse Songs</DialogTitle>
                   </DialogHeader>
