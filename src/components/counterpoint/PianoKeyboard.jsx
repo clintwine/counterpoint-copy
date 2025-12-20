@@ -152,6 +152,12 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find(i => i.value === value);
   
+  const handlePreview = (instrumentValue, e) => {
+    e.stopPropagation();
+    initAudio();
+    playNote('C4', 0.5, 0.7, 0, instrumentValue);
+  };
+  
   return (
     <div className="flex items-center gap-1.5">
       <Guitar className="w-3.5 h-3.5 text-white/60" />
@@ -167,7 +173,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
             <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-48 p-0 bg-slate-800 border-slate-700">
+        <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
           <Command className="bg-slate-800">
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
             <CommandList>
@@ -194,9 +200,16 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
                       onChange(inst.value);
                       setOpen(false);
                     }}
-                    className="text-white text-xs cursor-pointer"
+                    className="text-white text-xs cursor-pointer flex items-center justify-between group"
                   >
-                    {inst.label}
+                    <span>{inst.label}</span>
+                    <button
+                      onClick={(e) => handlePreview(inst.value, e)}
+                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                      title="Preview sound"
+                    >
+                      ▶
+                    </button>
                   </CommandItem>
                 ))}
               </CommandGroup>
