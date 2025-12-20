@@ -410,10 +410,16 @@ export default function NoteGrid({
   }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory]);
 
   // Play note sound when adding
-  const playNoteSound = useCallback((pitch) => {
+  const playNoteSound = useCallback((pitch, note = null) => {
     initAudio();
     const instrument = voices[activeVoice]?.instrument || 'organ';
-    playNote(pitch, 0.3, 0.6, 0, instrument);
+    const pitchBend = (note?.bendStart !== undefined || note?.bendEnd !== undefined) ? {
+      start: note.bendStart ?? 0,
+      end: note.bendEnd ?? 0,
+      startTime: note.bendStartTime ?? 0,
+      endTime: note.bendEndTime ?? 1
+    } : 0;
+    playNote(pitch, 0.5, 0.6, 0, instrument, pitchBend);
   }, [voices, activeVoice]);
 
   const selectAll = useCallback(() => {
@@ -1505,7 +1511,7 @@ export default function NoteGrid({
                                               const coords = getEventCoords(e);
                                               const rect = e.currentTarget.getBoundingClientRect();
                                               const clickX = coords.clientX - rect.left;
-                                              playNoteSound(pitch);
+                                              playNoteSound(pitch, note);
 
                                     if (clickX > rect.width - 10) {
                                                     const startDurations = {};
@@ -1565,7 +1571,7 @@ export default function NoteGrid({
                                                                                 const coords = { clientX: touch.clientX, clientY: touch.clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
-                                                                                playNoteSound(note.pitch);
+                                                                                playNoteSound(note.pitch, note);
 
                                                                                 if (clickX > rect.width - 10) {
                                                                                   // Resize mode
