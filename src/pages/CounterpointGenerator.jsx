@@ -60,7 +60,7 @@ export default function CounterpointGenerator() {
   const [currentBeat, setCurrentBeat] = useState(0);
   const [playheadPosition, setPlayheadPosition] = useState(0); // Smooth floating point position
   const [tempo, setTempo] = useState(80);
-  const [isLooping, setIsLooping] = useState(false);
+  const [isLooping, setIsLooping] = useState(true);
   const [loopStart, setLoopStart] = useState(0);
   const [loopEnd, setLoopEnd] = useState(null);
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
