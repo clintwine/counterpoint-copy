@@ -1746,9 +1746,9 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead triangle marker - fixed at top */}
+        {/* Playhead triangle marker - sticky at top */}
         <div
-          className="absolute cursor-ew-resize"
+          className="sticky cursor-ew-resize"
           style={{
             left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
             top: 28,
