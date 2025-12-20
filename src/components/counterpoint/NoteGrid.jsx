@@ -1359,7 +1359,6 @@ export default function NoteGrid({
                       ? (selectedNotes.size > 0 ? 'max-h-[52vh] sm:max-h-[480px]' : 'max-h-[61vh] sm:max-h-[565px]')
                       : (selectedNotes.size > 0 ? 'max-h-[72vh] sm:max-h-[640px]' : 'max-h-[81vh] sm:max-h-[725px]')
                   }`}
-                style={{ position: 'relative' }}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
@@ -2036,25 +2035,6 @@ export default function NoteGrid({
             }}
           />
         )}
-
-        {/* Score Minimap - positioned at bottom right of grid */}
-        <ScoreMinimap
-          notes={cantusFirmus}
-          totalBeats={totalBeats}
-          totalPitches={pitches.length}
-          viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
-          viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
-          viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
-          viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
-          currentBeat={currentBeat}
-          onSeek={(beat) => {
-            onSeek?.(beat);
-            if (gridRef.current) {
-              gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
-            }
-          }}
-          pitches={pitches}
-        />
         </div>
       
       <div className={`flex items-center justify-between gap-2 border-t border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3' : 'hidden'}`}>
@@ -2272,18 +2252,35 @@ export default function NoteGrid({
               </div></div>
               )}
 
-              {/* Right side - keyboard button */}
+              {/* Right side - keyboard button and minimap */}
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-              <Button
-              variant="ghost"
-              size="sm"
-              onClick={onTogglePianoPanel}
-              className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
-              title="Toggle Piano Keyboard"
-              >
-              <Keyboard className="w-4 h-4" />
-              </Button>
-              </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onTogglePianoPanel}
+            className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+            title="Toggle Piano Keyboard"
+          >
+            <Keyboard className="w-4 h-4" />
+          </Button>
+          <ScoreMinimap
+            notes={cantusFirmus}
+            totalBeats={totalBeats}
+            totalPitches={pitches.length}
+            viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
+            viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
+            viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
+            viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
+            currentBeat={currentBeat}
+            onSeek={(beat) => {
+              onSeek?.(beat);
+              if (gridRef.current) {
+                gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
+              }
+            }}
+            pitches={pitches}
+          />
+        </div>
       </div>
       </div>
       );
