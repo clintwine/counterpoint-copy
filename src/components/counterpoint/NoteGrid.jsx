@@ -1409,7 +1409,10 @@ export default function NoteGrid({
                 }}
         onMouseMove={handlePointerMove}
                       onMouseUp={handlePointerUp}
-                      onMouseLeave={handlePointerUp}
+                      onMouseLeave={(e) => {
+                        setHoveredCell(null);
+                        handlePointerUp(e);
+                      }}
                       onTouchMove={(e) => { 
                                                                                 // Handle pinch to zoom first
                                                                                 if (e.touches.length === 2) {
