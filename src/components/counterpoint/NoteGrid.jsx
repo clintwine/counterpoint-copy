@@ -2033,7 +2033,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className={`flex items-center justify-between gap-2 border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3 border-t' : 'px-2 sm:px-5 py-1'}`}>
+      <div className={`flex items-center justify-between gap-2 border-slate-700 transition-opacity ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3 border-t opacity-100' : 'px-2 sm:px-5 py-1 opacity-0 pointer-events-none'}`}>
         {/* Left side - note controls */}
         {selectedNotes.size > 0 && (
           <div className="flex-1 min-w-0">
@@ -2249,7 +2249,7 @@ export default function NoteGrid({
               )}
 
               {/* Right side - keyboard button and minimap */}
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto opacity-100 pointer-events-auto">
           <Button
             variant="ghost"
             size="sm"
