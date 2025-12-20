@@ -1359,6 +1359,7 @@ export default function NoteGrid({
                       ? (selectedNotes.size > 0 ? 'max-h-[52vh] sm:max-h-[480px]' : 'max-h-[61vh] sm:max-h-[565px]')
                       : (selectedNotes.size > 0 ? 'max-h-[72vh] sm:max-h-[640px]' : 'max-h-[81vh] sm:max-h-[725px]')
                   }`}
+                style={{ position: 'relative' }}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
