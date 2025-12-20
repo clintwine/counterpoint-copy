@@ -158,7 +158,67 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
     playNote('C4', 0.5, 0.7, 0, instrumentValue);
   };
   
-
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-32 h-7 justify-between bg-[#3A3A3A] border-[#4A4A4A] text-white text-xs hover:bg-[#424242]"
+        >
+          <div className="flex items-center gap-1.5">
+            <Guitar className="w-3.5 h-3.5 text-white/60" />
+            <span>{selected?.label || 'Select...'}</span>
+          </div>
+          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-0 bg-[#2D2D2D] border-[#3A3A3A]">
+        <Command className="bg-[#2D2D2D]">
+          <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
+          <CommandList>
+            <CommandEmpty className="text-white/50 text-xs py-2 text-center">
+              No instrument found.
+              {onCreateNew && (
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    onCreateNew();
+                  }}
+                  className="block w-full mt-2 text-amber-400 hover:text-amber-300 underline"
+                >
+                  Create new instrument
+                </button>
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {instruments.map(inst => (
+                <CommandItem
+                  key={inst.value}
+                  value={inst.label}
+                  onSelect={() => {
+                    onChange(inst.value);
+                    setOpen(false);
+                  }}
+                  className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                >
+                  <span>{inst.label}</span>
+                  <button
+                    onClick={(e) => handlePreview(inst.value, e)}
+                    className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                    title="Preview sound"
+                  >
+                    ▶
+                  </button>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress }) {
@@ -369,17 +429,23 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     };
   }, []);
 
-  // Audio visualizer
+  // Audio visualizer - Logic Pro style with more detail
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     
-    // Set canvas resolution to match display size
+    // Set canvas resolution to match display size with higher DPI
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    // Smoothing array for more fluid animation
+    const smoothingFactor = 0.7;
+    let previousData = null;
     
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
@@ -387,7 +453,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       const analyserNode = getAnalyser();
       if (!analyserNode) {
         ctx.fillStyle = '#1A1A1A';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, rect.width, rect.height);
         return;
       }
       
@@ -395,22 +461,96 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       const dataArray = new Uint8Array(bufferLength);
       analyserNode.getByteFrequencyData(dataArray);
       
-      ctx.fillStyle = '#1A1A1A';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Smooth the data
+      if (previousData) {
+        for (let i = 0; i < bufferLength; i++) {
+          dataArray[i] = previousData[i] * smoothingFactor + dataArray[i] * (1 - smoothingFactor);
+        }
+      }
+      previousData = new Uint8Array(dataArray);
       
-      const barWidth = (canvas.width / bufferLength) * 5;
-      const gap = 1;
-      let x = 0;
+      // Clear with subtle gradient background
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, rect.height);
+      bgGradient.addColorStop(0, '#1A1A1A');
+      bgGradient.addColorStop(1, '#0F0F0F');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, rect.width, rect.height);
       
-      for (let i = 0; i < bufferLength; i += 2) {
-        const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+      // More bars for higher detail (Logic Pro style)
+      const numBars = 80;
+      const barWidth = rect.width / numBars;
+      const gap = 1.5;
+      
+      for (let i = 0; i < numBars; i++) {
+        // Sample multiple frequencies for each bar for better detail
+        const startIdx = Math.floor((i / numBars) * bufferLength);
+        const endIdx = Math.floor(((i + 1) / numBars) * bufferLength);
+        let sum = 0;
+        let count = 0;
+        for (let j = startIdx; j < endIdx; j++) {
+          sum += dataArray[j];
+          count++;
+        }
+        const value = count > 0 ? sum / count : 0;
         
-        const hue = (i / bufferLength) * 60 + 30;
-        const brightness = 50 + (dataArray[i] / 255) * 40;
-        ctx.fillStyle = `hsl(${hue}, 85%, ${brightness}%)`;
+        const barHeight = (value / 255) * rect.height * 0.85;
+        const x = i * barWidth;
         
-        ctx.fillRect(x, canvas.height - barHeight, barWidth - gap, barHeight);
-        x += barWidth;
+        // Logic Pro style gradient - blue to green to yellow to red
+        const gradient = ctx.createLinearGradient(x, rect.height - barHeight, x, rect.height);
+        
+        if (barHeight < rect.height * 0.3) {
+          // Low levels - blue/cyan
+          gradient.addColorStop(0, '#00D4FF');
+          gradient.addColorStop(1, '#0088FF');
+        } else if (barHeight < rect.height * 0.6) {
+          // Mid levels - green/yellow
+          gradient.addColorStop(0, '#00FF88');
+          gradient.addColorStop(0.5, '#88FF00');
+          gradient.addColorStop(1, '#00D4FF');
+        } else if (barHeight < rect.height * 0.8) {
+          // High levels - yellow/orange
+          gradient.addColorStop(0, '#FFCC00');
+          gradient.addColorStop(0.5, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        } else {
+          // Peak levels - red/orange
+          gradient.addColorStop(0, '#FF3333');
+          gradient.addColorStop(0.3, '#FFAA00');
+          gradient.addColorStop(0.6, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        }
+        
+        ctx.fillStyle = gradient;
+        
+        // Draw bar with rounded top
+        const radius = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, rect.height);
+        ctx.lineTo(x, rect.height - barHeight + radius);
+        ctx.arcTo(x, rect.height - barHeight, x + barWidth - gap, rect.height - barHeight, radius);
+        ctx.lineTo(x + barWidth - gap, rect.height);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Add subtle glow for higher values
+        if (value > 180) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = barHeight > rect.height * 0.8 ? '#FF3333' : '#00FF88';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      
+      // Add subtle grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const y = (rect.height / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(rect.width, y);
+        ctx.stroke();
       }
     };
     
