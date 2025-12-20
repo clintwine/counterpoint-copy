@@ -289,6 +289,27 @@ export default function NoteGrid({
     }
   }, [selectedNotes, cantusFirmus, onSelectionChange]);
 
+  const [dragState, setDragState] = useState(null);
+  const originalDragNotesRef = useRef(null); // Store original notes when drag starts
+  const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
+  const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
+  const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
+  const [pendingNote, setPendingNote] = useState(null); // For draw tool - only add note on mouseup
+  const [clipboard, setClipboard] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [quantizeGrid, setQuantizeGrid] = useState(1); // 1 = 16th note (1 beat)
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const [isLoopSelecting, setIsLoopSelecting] = useState(false);
+  const [loopSelectStart, setLoopSelectStart] = useState(null);
+  const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
+  const [pinchState, setPinchState] = useState(null);
+  const lastTapRef = useRef({ key: null, time: 0 });
+  const touchStartRef = useRef(null); // Track touch start for scroll detection
+  const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
+  const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
+  const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
+
   // Update piano highlights based on interaction state
   useEffect(() => {
     if (!onPressedNotesChange) return;
@@ -318,26 +339,6 @@ export default function NoteGrid({
     
     onPressedNotesChange(highlightedNotes);
   }, [pendingNote, dragState, hoveredCell, tool, onPressedNotesChange, pitches]);
-  const [dragState, setDragState] = useState(null);
-  const originalDragNotesRef = useRef(null); // Store original notes when drag starts
-  const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
-  const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
-  const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
-  const [pendingNote, setPendingNote] = useState(null); // For draw tool - only add note on mouseup
-  const [clipboard, setClipboard] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const [quantizeGrid, setQuantizeGrid] = useState(1); // 1 = 16th note (1 beat)
-  const [isScrubbing, setIsScrubbing] = useState(false);
-  const [isLoopSelecting, setIsLoopSelecting] = useState(false);
-  const [loopSelectStart, setLoopSelectStart] = useState(null);
-  const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
-  const [pinchState, setPinchState] = useState(null);
-  const lastTapRef = useRef({ key: null, time: 0 });
-  const touchStartRef = useRef(null); // Track touch start for scroll detection
-  const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
-  const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
-  const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
 
 
   // Update viewport dimensions on mount and resize
