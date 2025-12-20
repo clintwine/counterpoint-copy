@@ -986,6 +986,7 @@ export default function CounterpointGenerator() {
                                 }
                               }}
                               onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
+                              showPianoPanel={showPianoPanel}
                             />
             
             {/* Piano toggle for mobile */}

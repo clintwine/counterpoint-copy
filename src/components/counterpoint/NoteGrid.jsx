@@ -214,7 +214,8 @@ export default function NoteGrid({
     isLooping = false,
     onLoopChange,
     settings = {},
-    onTogglePianoPanel
+    onTogglePianoPanel,
+    showPianoPanel = true
   }) {
     // Use smooth playhead position if available, otherwise fall back to currentBeat
     const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
@@ -1154,7 +1155,7 @@ export default function NoteGrid({
           ) : (
           <div 
                   ref={gridRef}
-                  className="overflow-auto max-h-[50vh] sm:max-h-[400px] relative select-none mx-2 sm:mx-5"
+                  className={`overflow-auto relative select-none mx-2 sm:mx-5 ${showPianoPanel ? 'max-h-[50vh] sm:max-h-[400px]' : 'max-h-[70vh] sm:max-h-[600px]'}`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
