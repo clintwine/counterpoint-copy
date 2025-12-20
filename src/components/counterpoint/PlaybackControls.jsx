@@ -257,25 +257,25 @@ export default function PlaybackControls({
         </div>
 
         {/* Combined info display - Logic Pro style single box */}
-        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 divide-x divide-[#3A3A3A]">
+        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] h-8 divide-x divide-[#3A3A3A]">
           {/* Measures */}
-          <div className="px-2.5 flex items-center gap-1.5">
-            <span className="text-white font-mono text-base tabular-nums">{Math.ceil(currentBeat / timeSigConfig.beatsPerMeasure) + 1}</span>
-            <span className="text-white/50 font-mono text-sm">{Math.ceil(totalBeats / timeSigConfig.beatsPerMeasure)}</span>
+          <div className="px-2 flex items-center gap-1">
+            <span className="text-white font-mono text-sm font-medium tabular-nums">{Math.ceil(currentBeat / timeSigConfig.beatsPerMeasure) + 1}</span>
+            <span className="text-white/40 font-mono text-xs">{Math.ceil(totalBeats / timeSigConfig.beatsPerMeasure)}</span>
           </div>
           
           {/* Beat position */}
-          <div className="px-2.5 flex items-center">
-            <span className="text-white font-mono text-base tabular-nums">{(currentBeat % timeSigConfig.beatsPerMeasure) + 1}</span>
+          <div className="px-2 flex items-center">
+            <span className="text-white font-mono text-sm tabular-nums">{(currentBeat % timeSigConfig.beatsPerMeasure) + 1}</span>
           </div>
           
           {/* Sub-beat */}
-          <div className="px-2.5 flex items-center">
-            <span className="text-white font-mono text-base tabular-nums">1</span>
+          <div className="px-2 flex items-center">
+            <span className="text-white font-mono text-sm tabular-nums">1</span>
           </div>
           
           {/* BPM */}
-          <div className="px-2.5 flex items-center">
+          <div className="px-2 flex items-center">
             {isEditingBpm ? (
               <input
                 type="number"
@@ -284,7 +284,7 @@ export default function PlaybackControls({
                 onBlur={handleBpmInputBlur}
                 onKeyDown={handleBpmInputKeyDown}
                 autoFocus
-                className="bg-transparent border-0 text-white font-mono text-base font-medium w-12 text-center outline-none"
+                className="bg-transparent border-0 text-white font-mono text-sm font-medium w-11 text-center outline-none"
                 min={20}
                 max={455}
               />
@@ -296,25 +296,25 @@ export default function PlaybackControls({
                 className={`cursor-ew-resize select-none ${isDragging ? 'text-[#D4AF37]' : ''}`}
                 title="Drag to change tempo"
               >
-                <span className="text-white font-mono text-base font-medium tabular-nums">{tempo}</span>
+                <span className="text-white font-mono text-sm font-medium tabular-nums">{tempo}</span>
               </div>
             )}
           </div>
           
           {/* Time */}
-          <div className="px-2.5 flex items-center">
-            <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
+          <div className="px-2 flex items-center">
+            <span className="text-white font-mono text-xs tabular-nums">{formatTime(currentBeat)}</span>
           </div>
           
           {/* Key - placeholder */}
-          <div className="px-2.5 flex items-center">
-            <span className="text-white text-sm">Cmin</span>
+          <div className="px-2 flex items-center">
+            <span className="text-white text-xs">Cmin</span>
           </div>
           
           {/* Time Signature */}
-          <div className="px-2 flex items-center">
+          <div className="px-1.5 flex items-center">
             <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-              <SelectTrigger className="h-full w-11 bg-transparent border-0 text-white text-sm font-medium px-0 hover:bg-transparent focus:ring-0">
+              <SelectTrigger className="h-full w-10 bg-transparent border-0 text-white text-xs font-medium px-0 hover:bg-transparent focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
@@ -326,31 +326,53 @@ export default function PlaybackControls({
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        {/* Control icons */}
-        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] p-0.5">
-          {/* Metronome */}
-          <Button
-            variant="ghost"
-            size="sm"
+          
+          {/* Metronome icon */}
+          <button
             onClick={onMetronomeToggle}
-            className={`h-7 w-7 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
+            className={`px-2 h-full flex items-center justify-center transition-colors ${metronomeEnabled ? 'text-[#D4AF37]' : 'text-white/50 hover:text-white/70'}`}
             title="Metronome"
           >
-            <Clock className="w-4 h-4" />
-          </Button>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 4L12 2L16 4" />
+              <path d="M12 4V20" />
+              <path d="M8 20L12 22L16 20" />
+              <path d="M6 8L12 10L18 8" />
+              <path d="M6 16L12 14L18 16" />
+            </svg>
+          </button>
           
-          {/* Loop */}
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Loop icon */}
+          <button
             onClick={onLoopToggle}
-            className={`h-7 w-7 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
+            className={`px-2 h-full flex items-center justify-center transition-colors ${isLooping ? 'text-[#D4AF37]' : 'text-white/50 hover:text-white/70'}`}
             title="Loop"
           >
-            <Repeat className="w-4 h-4" />
-          </Button>
+            <Repeat className="w-3.5 h-3.5" />
+          </button>
+          
+          {/* Settings icon */}
+          <button
+            className="px-2 h-full flex items-center justify-center text-white/50 hover:text-white/70 transition-colors"
+            title="Settings"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v6m0 6v6" />
+              <path d="M1 12h6m6 0h6" />
+            </svg>
+          </button>
+          
+          {/* User icon */}
+          <button
+            className="px-2 h-full flex items-center justify-center text-white/50 hover:text-white/70 transition-colors"
+            title="User"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </button>
         </div>
       </div>
 
