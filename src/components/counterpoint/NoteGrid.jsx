@@ -2252,8 +2252,8 @@ export default function NoteGrid({
               </div></div>
               )}
 
-              {/* Right side - keyboard button */}
-              {!showPianoPanel && (
+              {/* Right side - keyboard button - only show when piano panel is hidden */}
+              {showPianoPanel === false && (
                 <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                   <Button
                     variant="ghost"
