@@ -252,9 +252,6 @@ export default function NoteGrid({
 
   const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
   
-  // Use pre-generated pitches
-  const pitches = ALL_PITCHES;
-  
   // Memoize notes lookup for performance - filter duplicates
   const notesMap = useMemo(() => {
     const map = new Map();
@@ -387,8 +384,11 @@ export default function NoteGrid({
     }
   }, [scrollToBeatRef, CELL_WIDTH]);
 
+  // Use pre-generated pitches
+      const pitches = ALL_PITCHES;
+
   // Scroll to keep playhead visible during playback (not while scrubbing)
-  useEffect(() => {
+    useEffect(() => {
       if (gridRef.current && isPlaying && !isScrubbing) {
         if (smoothPlayhead === 0) {
           // Reset scroll to beginning

@@ -226,14 +226,10 @@ export default function PlaybackControls({
 
           <div className="w-px h-6 bg-[#3A3A3A]" />
 
-          {/* Time Signature - Fraction style */}
+          {/* Time Signature */}
           <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-            <SelectTrigger className="h-auto w-12 bg-transparent border-none text-white px-1 hover:bg-[#2D2D2D] [&>span]:hidden">
-              <div className="flex flex-col items-center justify-center py-0.5 leading-none">
-                <span className="text-white font-mono text-base font-semibold">{timeSignature.split('/')[0]}</span>
-                <div className="w-full h-px bg-white/40 my-0.5" />
-                <span className="text-white font-mono text-base font-semibold">{timeSignature.split('/')[1]}</span>
-              </div>
+            <SelectTrigger className="h-7 w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D]">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
               {TIME_SIGNATURES.map(ts => (
