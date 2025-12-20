@@ -30,7 +30,7 @@ import PianoKeyboard from '@/components/counterpoint/PianoKeyboard';
 import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
-import { initAudio, playNote, stopAllNotes, playMetronomeClick } from '@/components/counterpoint/audioEngine';
+import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume } from '@/components/counterpoint/audioEngine';
 
 const DEFAULT_VOICES = [
   { name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
@@ -1033,6 +1033,11 @@ export default function CounterpointGenerator() {
                                   onRecordToggle={handleRecordToggle}
                                   isCountingIn={isCountingIn}
                                   countInBeats={countInBeats}
+                                  masterVolume={masterVolume}
+                                  onMasterVolumeChange={(vol) => {
+                                    setMasterVolume(vol);
+                                    setMasterVolume(vol / 100 * 0.4);
+                                  }}
                                   />
                               }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}

@@ -699,8 +699,11 @@ export function stopAllNotes() {
 }
 
 export function setMasterVolume(volume) {
-  if (masterGain) {
-    masterGain.gain.value = volume;
+  if (masterGain && audioContext) {
+    const now = Math.max(0.01, audioContext.currentTime + 0.01);
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+    masterGain.gain.linearRampToValueAtTime(volume, now + 0.05);
   }
 }
 
