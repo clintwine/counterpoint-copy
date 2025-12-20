@@ -675,9 +675,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         </div>
       </div>
 
-      <div className="flex gap-3 items-center">
-        <div className="overflow-x-auto pb-1 flex-1">
-                    <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
+      <div className="overflow-x-auto pb-1">
+        <div className="flex gap-3 items-center">
+          <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
           {(() => {
             const keys = [];
@@ -820,17 +820,17 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             
             return keys;
             })()}
-            </div>
-            </div>
+          </div>
 
-            {/* Audio Visualizer */}
-            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-20 h-20">
-              <canvas 
-                ref={canvasRef}
-                className="rounded w-full h-full block"
-              />
-            </div>
-            </div>
+          {/* Audio Visualizer */}
+          <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-20 h-20">
+            <canvas 
+              ref={canvasRef}
+              className="rounded w-full h-full block"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
