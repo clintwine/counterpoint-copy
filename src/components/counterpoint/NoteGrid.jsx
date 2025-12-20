@@ -2037,7 +2037,7 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className={`flex items-center justify-between gap-2 border-t border-slate-700 ${selectedNotes.size > 0 || !showPianoPanel ? 'px-2 sm:px-5 py-2 sm:py-3' : 'hidden'}`}>
+      <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3">
         {/* Left side - note controls */}
         {selectedNotes.size > 0 && (<div className="flex-1 min-w-0">
           <div className="flex-1 min-w-0">
@@ -2252,29 +2252,22 @@ export default function NoteGrid({
               </div></div>
               )}
 
-              {/* Right side - keyboard button - only show when piano panel is hidden */}
-              {(() => {
-                const shouldShow = !showPianoPanel;
-                console.log('[NoteGrid Controls] showPianoPanel:', showPianoPanel, 'shouldShow keyboard button:', shouldShow, 'selectedNotes.size:', selectedNotes.size);
-                return shouldShow;
-              })() && (
-                <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-                  {console.log('[NoteGrid] RENDERING keyboard button')}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onTogglePianoPanel}
-                    className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
-                    title="Toggle Piano Keyboard"
-                  >
-                    <Keyboard className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+              {/* Right side - keyboard button */}
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onTogglePianoPanel}
+                  className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+                  title="Toggle Piano Keyboard"
+                >
+                  <Keyboard className="w-4 h-4" />
+                </Button>
+              </div>
       </div>
 
       {/* Minimap - positioned absolutely */}
-      <div className={`absolute right-2 z-50 ${showPianoPanel ? 'bottom-44' : 'bottom-2'}`}>
+      <div className={`absolute right-2 z-50 ${showPianoPanel ? 'bottom-48' : 'bottom-2'}`}>
         <ScoreMinimap
           notes={cantusFirmus}
           totalBeats={totalBeats}
