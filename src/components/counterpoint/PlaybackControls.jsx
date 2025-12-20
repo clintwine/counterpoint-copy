@@ -128,7 +128,7 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center justify-center gap-4 px-3 sm:px-4 py-1.5 bg-[#2D2D2D] border-b border-[#3A3A3A]">
+    <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-[#2D2D2D] border-b border-[#3A3A3A]">
       {/* Left section - File Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
