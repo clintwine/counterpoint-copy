@@ -1288,20 +1288,22 @@ export default function NoteGrid({
                                 setLoopSelectStart(null);
                               }}
                             >
-                              {Array.from({ length: totalBeats }).map((_, beat) => {
-                                const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat <= loopEnd;
+                              {Array.from({ length: measures }).map((_, measureIndex) => {
+                                const measureStartBeat = measureIndex * beatsPerMeasure;
+                                const measureEndBeat = measureStartBeat + beatsPerMeasure;
+                                const inLoopRegion = loopStart !== null && loopEnd !== null && 
+                                  measureStartBeat < loopEnd && measureEndBeat > loopStart;
+
                                 return (
                                   <div 
-                                    key={beat}
-                                    className={`flex-shrink-0 flex items-center justify-center text-xs font-medium border-r pointer-events-none relative ${
-                                      beat % beatsPerMeasure === 0 
-                                        ? 'border-r-slate-500 bg-slate-700/50' 
-                                        : 'border-r-slate-700'
-                                    } ${inLoopRegion ? 'bg-amber-500/30' : ''}`}
-                                    style={{ width: CELL_WIDTH }}
+                                    key={measureIndex}
+                                    className={`flex-shrink-0 flex items-center justify-center text-sm font-semibold pointer-events-none relative ${
+                                      inLoopRegion ? 'bg-amber-500/30' : ''
+                                    } ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
+                                    style={{ width: CELL_WIDTH * beatsPerMeasure }}
                                   >
-                                    <span className={`relative z-10 ${beat % beatsPerMeasure === 0 ? 'text-amber-400' : 'text-white/60'}`}>
-                                      {beat % beatsPerMeasure === 0 ? Math.floor(beat / beatsPerMeasure) + 1 : ''}
+                                    <span className="text-amber-400">
+                                      {measureIndex + 1}
                                     </span>
                                   </div>
                                 );
