@@ -435,7 +435,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
+    
+    // Set canvas resolution to match display size
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
     
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
@@ -822,10 +826,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             {/* Audio Visualizer */}
             <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-20 h-20">
               <canvas 
-                ref={canvasRef} 
-                width={80} 
-                height={80}
-                className="rounded w-full h-full"
+                ref={canvasRef}
+                className="rounded w-full h-full block"
               />
             </div>
             </div>
