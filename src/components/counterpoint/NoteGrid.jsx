@@ -1422,10 +1422,14 @@ export default function NoteGrid({
                                     }}
                               className={`flex-shrink-0 border-b relative cursor-pointer
                                 ${isBarLine ? 'border-l-2 border-l-amber-900/60' : 'border-l border-l-slate-700/40'} 
-                                ${isCLine ? 'border-b-slate-600/50 bg-slate-800/30' : isSharpLine ? 'border-b-slate-700/30 bg-slate-950/40' : 'border-b-slate-700/30'}
                                 hover:bg-slate-700/30
                               `}
-                              style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
+                              style={{ 
+                                width: CELL_WIDTH, 
+                                height: CELL_HEIGHT,
+                                backgroundColor: isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323',
+                                borderBottomColor: '#404040'
+                              }}
                             >
                               {notesAtPosition.map(({ voiceIndex, note }) => {
                                 const duration = note.duration || DEFAULT_DURATION;
