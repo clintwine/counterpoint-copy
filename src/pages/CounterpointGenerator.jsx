@@ -692,7 +692,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-slate-700">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
                   <DialogHeader>
                     <DialogTitle className="text-white">Load Project</DialogTitle>
                   </DialogHeader>
@@ -703,7 +703,7 @@ export default function CounterpointGenerator() {
                       savedProjects.map((project) => (
                         <div
                           key={project.id}
-                          className="flex items-center justify-between p-3 bg-slate-800 rounded-lg hover:bg-slate-700 cursor-pointer"
+                          className="flex items-center justify-between p-3 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer"
                           onClick={() => handleLoadProject(project)}
                         >
                           <div>
@@ -753,7 +753,7 @@ export default function CounterpointGenerator() {
                       songs.map((song) => (
                         <div
                           key={song.id}
-                          className="flex items-center justify-between p-4 bg-slate-800 rounded-lg hover:bg-slate-700 cursor-pointer border border-slate-700"
+                          className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
                           onClick={() => handleLoadSong(song)}
                         >
                           <div className="flex-1">
@@ -813,7 +813,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-slate-700">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
                   </DialogHeader>
@@ -831,7 +831,7 @@ export default function CounterpointGenerator() {
                     <Button
                       type="submit"
                       disabled={!projectName.trim() || saveProjectMutation.isPending}
-                      className="w-full bg-gold text-slate-900 hover:bg-gold/90"
+                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
                     >
                       {saveProjectMutation.isPending ? 'Saving...' : (currentProjectId ? 'Update Project' : 'Save Project')}
                     </Button>
@@ -844,7 +844,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-slate-700">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save as Song</DialogTitle>
                   </DialogHeader>
@@ -871,7 +871,7 @@ export default function CounterpointGenerator() {
                     <Button
                       type="submit"
                       disabled={!songName.trim() || saveSongMutation.isPending}
-                      className="w-full bg-amber-500 text-slate-900 hover:bg-amber-400"
+                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
                     >
                       {saveSongMutation.isPending ? 'Saving...' : 'Save Song'}
                     </Button>
