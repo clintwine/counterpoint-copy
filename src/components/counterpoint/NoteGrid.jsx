@@ -1850,27 +1850,49 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
-      <p className="text-white/50 text-xs">
-        {tool === 'select' && 'Click notes to select, drag to move • Shift+click for multi-select • Drag header to set loop'}
-        {tool === 'marquee' && 'Click and drag to select multiple notes • Drag header to set loop'}
-        {tool === 'draw' && 'Click to add/remove notes • Drag header to set loop'}
-      </p>
-      <div className="flex items-center gap-3 flex-wrap">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onTogglePianoPanel}
-          className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
-          title="Toggle Piano Keyboard"
-        >
-          <Keyboard className="w-4 h-4" />
-        </Button>
+      <div className="px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-white/50 text-xs flex-shrink-0">
+            {tool === 'select' && 'Click notes to select, drag to move'}
+            {tool === 'marquee' && 'Drag to select multiple'}
+            {tool === 'draw' && 'Click to add/remove'}
+          </p>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onTogglePianoPanel}
+              className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+              title="Toggle Piano Keyboard"
+            >
+              <Keyboard className="w-4 h-4" />
+            </Button>
+            <ScoreMinimap
+              notes={cantusFirmus}
+              totalBeats={totalBeats}
+              totalPitches={pitches.length}
+              viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
+              viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
+              viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
+              viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
+              currentBeat={currentBeat}
+              onSeek={(beat) => {
+                onSeek?.(beat);
+                if (gridRef.current) {
+                  gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
+                }
+              }}
+              pitches={pitches}
+            />
+          </div>
+        </div>
+
+        {/* Selected note controls - separate row */}
         {selectedNotes.size > 0 && (
-          <>
-            <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
-            <div className="flex items-center gap-2">
-              <span className="text-white/50 text-xs">Velocity:</span>
+          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-slate-700/50 flex-wrap">
+            <span className="text-amber-400 text-xs flex-shrink-0">{selectedNotes.size} selected</span>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="text-white/50 text-[10px]">Vel</span>
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -1887,7 +1909,6 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
-                  // Preview velocity change
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   if (firstSelected) {
                     initAudio();
@@ -1898,18 +1919,18 @@ export default function NoteGrid({
                 min={20}
                 max={100}
                 step={5}
-                className="w-24 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
               />
-              <span className="text-white/70 text-xs w-8 text-right">
+              <span className="text-white/70 text-[10px] w-6">
                 {Math.round(((() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   return (firstSelected?.velocity ?? 0.8) * 100;
                 })()))}
               </span>
             </div>
-            <div className="w-px h-4 bg-slate-600" />
-            <div className="flex items-center gap-2">
-              <span className="text-white/50 text-xs">Bend:</span>
+            <div className="w-px h-3 bg-slate-600" />
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="text-white/50 text-[10px]">Bend</span>
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -1925,7 +1946,6 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
-                  // Preview bend change
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   if (firstSelected) {
                     initAudio();
@@ -1942,16 +1962,16 @@ export default function NoteGrid({
                 min={-12}
                 max={12}
                 step={0.1}
-                className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-14 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
               />
-              <span className="text-white/70 text-xs w-8 text-right">
+              <span className="text-white/70 text-[10px] w-7">
                 {(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   const bend = firstSelected?.bendStart ?? 0;
                   return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
                 })()}
               </span>
-              <span className="text-white/50 text-xs">→</span>
+              <span className="text-white/50 text-[10px]">→</span>
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -1967,7 +1987,6 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
-                  // Preview bend change
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   if (firstSelected) {
                     initAudio();
@@ -1984,9 +2003,9 @@ export default function NoteGrid({
                 min={-12}
                 max={12}
                 step={0.1}
-                className="w-20 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-14 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
               />
-              <span className="text-white/70 text-xs w-8 text-right">
+              <span className="text-white/70 text-[10px] w-7">
                 {(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   const bend = firstSelected?.bendEnd ?? 0;
@@ -1994,9 +2013,9 @@ export default function NoteGrid({
                 })()}
               </span>
             </div>
-            <div className="w-px h-4 bg-slate-600" />
-            <div className="flex items-center gap-2">
-              <span className="text-white/50 text-xs">Start:</span>
+            <div className="w-px h-3 bg-slate-600" />
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="text-white/50 text-[10px]">T:</span>
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -2012,7 +2031,6 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
-                  // Preview bend change
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   if (firstSelected) {
                     initAudio();
@@ -2029,15 +2047,15 @@ export default function NoteGrid({
                 min={0}
                 max={100}
                 step={5}
-                className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-12 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
               />
-              <span className="text-white/70 text-xs w-8 text-right">
+              <span className="text-white/70 text-[10px] w-6">
                 {(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                  return `${Math.round((firstSelected?.bendStartTime ?? 0) * 100)}%`;
+                  return `${Math.round((firstSelected?.bendStartTime ?? 0) * 100)}`;
                 })()}
               </span>
-              <span className="text-white/50 text-xs">End:</span>
+              <span className="text-white/50 text-[10px]">→</span>
               <Slider
                 value={[(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -2053,7 +2071,6 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
-                  // Preview bend change
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                   if (firstSelected) {
                     initAudio();
@@ -2070,35 +2087,17 @@ export default function NoteGrid({
                 min={0}
                 max={100}
                 step={5}
-                className="w-16 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2.5 [&_[role=slider]]:h-2.5"
+                className="w-12 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-2 [&_[role=slider]]:h-2"
               />
-              <span className="text-white/70 text-xs w-8 text-right">
+              <span className="text-white/70 text-[10px] w-6">
                 {(() => {
                   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                  return `${Math.round((firstSelected?.bendEndTime ?? 1) * 100)}%`;
+                  return `${Math.round((firstSelected?.bendEndTime ?? 1) * 100)}`;
                 })()}
               </span>
             </div>
-          </>
+          </div>
         )}
-          <ScoreMinimap
-            notes={cantusFirmus}
-            totalBeats={totalBeats}
-            totalPitches={pitches.length}
-            viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
-            viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
-            viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
-            viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
-            currentBeat={currentBeat}
-            onSeek={(beat) => {
-              onSeek?.(beat);
-              if (gridRef.current) {
-                gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
-              }
-            }}
-            pitches={pitches}
-          />
-        </div>
       </div>
       </div>
       );
