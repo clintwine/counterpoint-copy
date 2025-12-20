@@ -747,7 +747,7 @@ export default function CounterpointGenerator() {
         };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A] overflow-x-hidden">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A]">
       {/* Ambient background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
