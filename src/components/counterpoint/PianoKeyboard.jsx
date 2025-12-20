@@ -433,7 +433,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
   return (
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
-      <div className="flex items-center justify-start mb-2 flex-wrap gap-2 sm:gap-4">
+      <div className="flex items-center justify-start mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
                     {onPopOut && (
@@ -448,7 +448,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       </Button>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
           {/* ADSR Envelope Knobs - hidden on mobile */}
                           <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
