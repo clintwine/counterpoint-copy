@@ -307,6 +307,7 @@ export default function NoteGrid({
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
+  const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
 
 
   // Update viewport dimensions on mount and resize
