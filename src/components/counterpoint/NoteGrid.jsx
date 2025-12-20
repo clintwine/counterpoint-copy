@@ -1269,17 +1269,21 @@ export default function NoteGrid({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="w-px h-5 bg-slate-600 mx-2" />
+          {!showPianoPanel && (
+            <>
+              <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          {/* Instrument for cantus firmus (voice being edited) */}
-          <InstrumentSelect 
-            value={voices[0]?.instrument || 'organ'} 
-            onChange={(v) => onVoiceInstrumentChange?.(0, v)}
-            instruments={ALL_INSTRUMENTS}
-            onCreateNew={onOpenWaveEditor}
-          />
+              {/* Instrument for cantus firmus (voice being edited) */}
+              <InstrumentSelect 
+                value={voices[0]?.instrument || 'organ'} 
+                onChange={(v) => onVoiceInstrumentChange?.(0, v)}
+                instruments={ALL_INSTRUMENTS}
+                onCreateNew={onOpenWaveEditor}
+              />
 
-          <div className="w-px h-5 bg-slate-600 mx-2" />
+              <div className="w-px h-5 bg-slate-600 mx-2" />
+            </>
+          )}
 
           {/* Transport controls from PlaybackControls */}
           {playbackControls}
