@@ -797,7 +797,7 @@ export default function NoteGrid({
 
           console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
           // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
-          if (deltaX < 5 && deltaY < 5) {
+          if (deltaX < 15 && deltaY < 15) {
             // Check if note already exists at this position
             const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
             if (!noteExists) {
