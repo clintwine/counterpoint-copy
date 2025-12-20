@@ -1273,6 +1273,7 @@ export default function NoteGrid({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
 
 
 
