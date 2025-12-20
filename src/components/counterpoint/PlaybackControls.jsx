@@ -184,21 +184,6 @@ export default function PlaybackControls({
             Music Theory Tools
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-700" />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="text-white cursor-pointer">
-              <Layers className="w-4 h-4 mr-2" />
-              Panels
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-              <DropdownMenuItem 
-                onClick={() => onTogglePanels?.('piano')} 
-                className="text-white cursor-pointer flex items-center justify-between"
-              >
-                <span>Piano Keyboard</span>
-                <span className="text-xs text-white/50 ml-4">{showPianoPanel ? '✓' : ''}</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
           <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
             <Sparkles className="w-4 h-4 mr-2" />
             AI Composer
