@@ -470,7 +470,7 @@ function createDistortion(amount) {
 let activeOscillatorCount = 0;
 const MAX_CONCURRENT_NOTES = 128;
 
-export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ') {
+export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
   
   // Throttle to prevent audio crackling
@@ -498,6 +498,11 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
     const osc = audioContext.createOscillator();
     osc.type = config.waveform;
     osc.frequency.value = freq * (idx + 1);
+    
+    // Apply pitch bend (in cents: 100 cents = 1 semitone)
+    if (pitchBend !== 0) {
+      osc.detune.value = pitchBend * 100;
+    }
     
     const oscGain = audioContext.createGain();
     oscGain.gain.value = harmGain * 0.3;
