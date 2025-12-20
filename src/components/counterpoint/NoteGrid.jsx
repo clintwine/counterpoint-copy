@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Music2, Grid3x3, Keyboard } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
@@ -292,7 +292,7 @@ export default function NoteGrid({
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
-  const [viewMode, setViewMode] = useState('grid');
+
 
   // Update viewport dimensions on mount and resize
   useEffect(() => {
@@ -1034,30 +1034,6 @@ export default function NoteGrid({
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          {/* View mode toggle */}
-          <div className="flex items-center gap-1 bg-slate-900/50 rounded p-0.5">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className={`h-7 px-2 ${viewMode === 'grid' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-              title="Grid View"
-            >
-              <Grid3x3 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'score' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('score')}
-              className={`h-7 px-2 ${viewMode === 'score' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-              title="Score View"
-            >
-              <Music2 className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <div className="w-px h-5 bg-slate-600 mx-2" />
-
           {/* Instrument for cantus firmus (voice being edited) */}
                         <InstrumentSelect 
                           value={voices[0]?.instrument || 'organ'} 
@@ -1135,24 +1111,7 @@ export default function NoteGrid({
           </div>
           </div>
 
-          {viewMode === 'score' ? (
-            <div className="mx-2 sm:mx-5 my-4">
-              <ScoreView
-                cantusFirmus={cantusFirmus}
-                onNotesUpdate={onNotesUpdate}
-                measures={measures}
-                timeSignature={timeSignature}
-                keySignature={settings?.key || 'C'}
-                tempo={tempo}
-                currentBeat={currentBeat}
-                isPlaying={isPlaying}
-                playheadPosition={playheadPosition}
-                onSeek={onSeek}
-                voices={voices}
-                pianoInstrument={pianoInstrument}
-              />
-            </div>
-          ) : (
+
           <div 
                   ref={gridRef}
                   className={`overflow-auto relative select-none mx-2 sm:mx-5 ${showPianoPanel ? 'max-h-[50vh] sm:max-h-[400px]' : 'max-h-[70vh] sm:max-h-[600px]'}`}
@@ -1833,7 +1792,6 @@ export default function NoteGrid({
           />
         )}
         </div>
-          )}
       
       <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-t border-slate-700 flex-wrap gap-2">
       <p className="text-white/50 text-xs">
