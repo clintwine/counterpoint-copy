@@ -65,6 +65,10 @@ export default function CounterpointGenerator() {
   const [loopStart, setLoopStart] = useState(0);
   const [loopEnd, setLoopEnd] = useState(null);
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isCountingIn, setIsCountingIn] = useState(false);
+  const [countInBeats, setCountInBeats] = useState(4);
+  const recordedNotesRef = useRef([]);
   
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -571,11 +575,76 @@ export default function CounterpointGenerator() {
 
   const handleStop = () => {
     setIsPlaying(false);
+    setIsRecording(false);
+    setIsCountingIn(false);
     stopAllNotes();
     setCurrentBeat(0);
     setPlayheadPosition(0);
     lastPlayedBeatRef.current = -1;
   };
+
+  const handleRecordToggle = () => {
+    if (isRecording) {
+      // Stop recording
+      setIsRecording(false);
+      setIsPlaying(false);
+      setIsCountingIn(false);
+      stopAllNotes();
+      
+      // Save recorded notes
+      if (recordedNotesRef.current.length > 0) {
+        setCantusFirmus(prev => [...prev, ...recordedNotesRef.current].sort((a, b) => a.beat - b.beat));
+        recordedNotesRef.current = [];
+      }
+    } else {
+      // Start count-in
+      ensureAudio();
+      setIsCountingIn(true);
+      setCountInBeats(4);
+      setCurrentBeat(-4);
+      setPlayheadPosition(-4);
+      recordedNotesRef.current = [];
+      
+      // Count down
+      let count = 4;
+      const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+      const sixteenthNoteDuration = (60 / tempo) / 4;
+      const countInterval = setInterval(() => {
+        playMetronomeClick(count === 4);
+        count--;
+        setCountInBeats(count);
+        
+        if (count === 0) {
+          clearInterval(countInterval);
+          setIsCountingIn(false);
+          setIsRecording(true);
+          setIsPlaying(true);
+          setCurrentBeat(0);
+          setPlayheadPosition(0);
+        }
+      }, sixteenthNoteDuration * (beatsPerMeasure / 4) * 1000);
+    }
+  };
+
+  // Record notes from piano during recording
+  useEffect(() => {
+    if (isRecording && pressedPianoNotes.size > 0) {
+      pressedPianoNotes.forEach(pitch => {
+        // Check if this note at this beat already exists in recorded notes
+        const alreadyRecorded = recordedNotesRef.current.some(
+          n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
+        );
+        if (!alreadyRecorded && currentBeat >= 0) {
+          recordedNotesRef.current.push({
+            pitch,
+            beat: currentBeat,
+            duration: 1,
+            velocity: 0.8
+          });
+        }
+      });
+    }
+  }, [isRecording, currentBeat, pressedPianoNotes]);
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);
@@ -960,6 +1029,10 @@ export default function CounterpointGenerator() {
                                   }}
                                   onImportMidi={handleImportMidi}
                                   onTheoryTools={() => setTheoryPanelOpen(true)}
+                                  isRecording={isRecording}
+                                  onRecordToggle={handleRecordToggle}
+                                  isCountingIn={isCountingIn}
+                                  countInBeats={countInBeats}
                                   />
                               }
                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
