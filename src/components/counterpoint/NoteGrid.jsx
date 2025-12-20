@@ -2253,7 +2253,10 @@ export default function NoteGrid({
               )}
 
               {/* Right side - keyboard button - only show when piano panel is hidden */}
-              {showPianoPanel === false && (
+              {(() => {
+                console.log('[NoteGrid] showPianoPanel:', showPianoPanel, 'type:', typeof showPianoPanel);
+                return showPianoPanel === false;
+              })() && (
                 <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
                   <Button
                     variant="ghost"
