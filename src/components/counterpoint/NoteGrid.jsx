@@ -1923,16 +1923,16 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead triangle marker - absolute positioned */}
+        {/* Playhead triangle marker - sticky at top of header */}
         <div
           className="absolute cursor-ew-resize"
           style={{
             left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-            top: 0,
+            top: 28, // Position at header level (h-7 = 28px)
             width: 0,
             height: 0,
             pointerEvents: 'auto',
-            zIndex: 50,
+            zIndex: 51,
             transform: 'translateX(-50%)'
           }}
           onMouseDown={(e) => {
@@ -1989,13 +1989,14 @@ export default function NoteGrid({
             className="absolute"
             style={{
               left: '50%',
-              top: `-${Math.max(10, 12 * zoom)}px`,
+              top: `-${Math.max(12, 14 * zoom)}px`,
               transform: 'translateX(-50%)',
               width: 0,
               height: 0,
-              borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
-              borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
-              borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`
+              borderLeft: `${Math.max(10, 12 * zoom)}px solid transparent`,
+              borderRight: `${Math.max(10, 12 * zoom)}px solid transparent`,
+              borderTop: `${Math.max(12, 14 * zoom)}px solid #ef4444`,
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
             }}
           />
         </div>

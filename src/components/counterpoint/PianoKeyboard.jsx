@@ -433,7 +433,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         }
         const value = count > 0 ? sum / count : 0;
         
-        const labelSpace = 12; // Reserve space for labels
+        const labelSpace = 16; // Reserve space for labels
         const barHeight = (value / 255) * (rect.height - labelSpace) * 0.85;
         const x = i * barWidth;
         
@@ -504,12 +504,12 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         { freq: '10kHz', pos: 0.9 }
       ];
       
-      ctx.font = '9px monospace';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '8px monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.textAlign = 'center';
       freqMarkers.forEach(marker => {
         const x = marker.pos * rect.width;
-        ctx.fillText(marker.freq, x, rect.height - 2);
+        ctx.fillText(marker.freq, x, rect.height - 4);
       });
     };
     
