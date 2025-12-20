@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
 import MusicTheoryPanel from '@/components/counterpoint/MusicTheoryPanel';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Midi } from '@tonejs/midi';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
@@ -77,6 +77,8 @@ export default function CounterpointGenerator() {
   const [songDescription, setSongDescription] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  
+  const dragControls = useDragControls();
   
   // Auto-expand measures functionality
   useEffect(() => {
@@ -1040,6 +1042,8 @@ export default function CounterpointGenerator() {
         {pianoPopout && (
           <motion.div
             drag
+            dragListener={false}
+            dragControls={dragControls}
             dragMomentum={false}
             dragElastic={0}
             dragConstraints={{ top: -window.innerHeight * 0.08, left: -window.innerWidth * 0.08, right: window.innerWidth * 0.5, bottom: window.innerHeight * 0.5 }}
@@ -1049,19 +1053,21 @@ export default function CounterpointGenerator() {
             className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
             style={{ top: '10%', left: '10%', maxWidth: '90vw' }}
           >
-            <div className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between">
+            <div 
+              className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between"
+              onPointerDown={(e) => dragControls.start(e)}
+            >
               <span className="text-white text-sm font-medium">Piano Keyboard</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setPianoPopout(false)}
-                onPointerDown={(e) => e.stopPropagation()}
                 className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="p-4" onPointerDown={(e) => e.stopPropagation()}>
+            <div className="p-4">
               <PianoKeyboard
                 activeNotes={activeNotes}
                 instrument={voices[0]?.instrument || 'organ'}
