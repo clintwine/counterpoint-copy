@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Minimize2 } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown, ExternalLink } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument } from './audioEngine';
 import WaveEditor from './WaveEditor';
@@ -221,7 +221,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   );
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -433,15 +433,15 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
-                    {onTogglePanel && (
+                    {onPopOut && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={onTogglePanel}
+                        onClick={onPopOut}
                         className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
-                        title="Hide Piano"
+                        title="Pop Out Piano"
                       >
-                        <Minimize2 className="w-3.5 h-3.5" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </Button>
                     )}
                   </div>

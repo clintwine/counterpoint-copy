@@ -92,6 +92,7 @@ export default function CounterpointGenerator() {
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
         const [showPiano, setShowPiano] = useState(true);
   const [showPianoPanel, setShowPianoPanel] = useState(true);
+  const [pianoPopout, setPianoPopout] = useState(false);
   const [previewingSongId, setPreviewingSongId] = useState(null);
   
   const playbackRef = useRef(null);
@@ -1002,7 +1003,7 @@ export default function CounterpointGenerator() {
                                 </Button>
                               </div>
 
-                              {showPianoPanel && (
+                              {showPianoPanel && !pianoPopout && (
                                 <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
                                   <PianoKeyboard
                                     activeNotes={activeNotes}
@@ -1015,7 +1016,7 @@ export default function CounterpointGenerator() {
                                       }
                                     }}
                                     onPressedNotesChange={setPressedPianoNotes}
-                                    onTogglePanel={() => setShowPianoPanel(false)}
+                                    onPopOut={() => setPianoPopout(true)}
                                   />
                                 </div>
                               )}
@@ -1032,6 +1033,27 @@ export default function CounterpointGenerator() {
         onApplyProgression={handleApplyProgression}
         onApplyScale={handleApplyScale}
       />
+
+      {/* Piano Popout Modal */}
+      <Dialog open={pianoPopout} onOpenChange={setPianoPopout}>
+        <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-6xl p-4">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-white text-sm">Piano Keyboard</DialogTitle>
+          </DialogHeader>
+          <PianoKeyboard
+            activeNotes={activeNotes}
+            instrument={voices[0]?.instrument || 'organ'}
+            onInstrumentChange={(inst) => {
+              const newVoices = [...voices];
+              if (newVoices[0]) {
+                newVoices[0] = { ...newVoices[0], instrument: inst };
+                setVoices(newVoices);
+              }
+            }}
+            onPressedNotesChange={setPressedPianoNotes}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
