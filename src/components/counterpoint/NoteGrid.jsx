@@ -1345,7 +1345,7 @@ export default function NoteGrid({
                                 return (
                                   <div 
                                     key={measureIndex}
-                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-500' : ''}`}
+                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
                                     style={{ 
                                       width: CELL_WIDTH * beatsPerMeasure,
                                       backgroundColor: inLoopRegion ? '#D4A574' : '#C8A570'
@@ -1483,7 +1483,7 @@ export default function NoteGrid({
                                       touchStartRef.current = null;
                                     }}
                               className={`flex-shrink-0 border-b relative cursor-pointer
-                                ${isBarLine ? 'border-l-2 border-l-amber-900/60' : 'border-l border-l-slate-700/40'} 
+                                ${isBarLine ? 'border-l-2 border-l-slate-600' : 'border-l border-l-slate-700/40'} 
                                 hover:bg-slate-700/30
                               `}
                               style={{ 
