@@ -1346,12 +1346,12 @@ export default function NoteGrid({
                                     {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
                                       <div
                                         key={beatIndex}
-                                        className="absolute bottom-0 pointer-events-none"
+                                        className="absolute top-0 pointer-events-none"
                                         style={{
                                           left: beatIndex * CELL_WIDTH,
-                                          width: '1px',
-                                          height: beatIndex % 4 === 0 ? '8px' : '4px',
-                                          backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                                          width: '2px',
+                                          height: beatIndex % 4 === 0 ? '12px' : '6px',
+                                          backgroundColor: 'rgba(0, 0, 0, 0.6)'
                                         }}
                                       />
                                     ))}
