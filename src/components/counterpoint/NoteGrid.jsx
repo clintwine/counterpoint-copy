@@ -1339,7 +1339,7 @@ export default function NoteGrid({
                         
                         {Array.from({ length: visibleEndBeat - visibleStartBeat }).map((_, i) => {
                           const beat = visibleStartBeat + i;
-                          const isBarLine = beat % beatsPerMeasure === 0;
+                          const isBarLine = beat % beatsPerMeasure === 0 && beat !== 0;
                           const noteKey = getNoteKey(pitch, beat);
                           const isSelected = selectedNotes.has(noteKey);
                           const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
@@ -1352,7 +1352,7 @@ export default function NoteGrid({
                                     onTouchStart={(e) => { 
                                       const touch = e.touches[0];
                                       const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
-                                      
+
                                       // For marquee tool, prevent scrolling immediately
                                       if (tool === 'marquee') {
                                         e.preventDefault();
@@ -1360,12 +1360,12 @@ export default function NoteGrid({
                                         handlePointerDown(e, pitch, beat);
                                         return;
                                       }
-                                      
+
                                       // If we have selected notes and tapping on empty cell, start drag immediately
                                       if (!hasNote && selectedNotes.size > 0 && tool === 'select') {
                                         e.preventDefault();
                                         activeTouchIdRef.current = touch.identifier;
-                                        
+
                                         // Store notes for dragging
                                         const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                                         const notesToStore = selectedNotesList.map(n => ({
@@ -1378,7 +1378,7 @@ export default function NoteGrid({
                                           keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
                                           notes: notesToStore
                                         };
-                                        
+
                                         const currentPitchIdx = pitches.indexOf(pitch);
                                         setDragState({
                                           startPitch: pitch,
@@ -1392,7 +1392,7 @@ export default function NoteGrid({
                                         });
                                         return;
                                       }
-                                      
+
                                       // Store touch start position to detect scrolling vs tapping
                                       touchStartRef.current = { 
                                         x: touch.clientX, 
@@ -1408,7 +1408,7 @@ export default function NoteGrid({
                                       const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
                                       const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
                                       const deltaTime = Date.now() - touchStartRef.current.time;
-                                      
+
                                       // Only trigger note action if it was a tap (small movement, quick touch)
                                       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
                                         e.preventDefault();
@@ -1417,8 +1417,9 @@ export default function NoteGrid({
                                       touchStartRef.current = null;
                                     }}
                               className={`flex-shrink-0 border-r border-b relative cursor-pointer
-                                ${isBarLine ? 'border-r-slate-500' : 'border-r-slate-700'} 
+                                ${isBarLine ? 'border-l-2 border-l-slate-500' : ''} 
                                 ${isCLine ? 'border-b-slate-500 bg-amber-400/5' : isSharpLine ? 'border-b-slate-700 bg-black/20' : 'border-b-slate-700'}
+                                border-r-slate-700
                                 hover:bg-slate-700/50
                               `}
                               style={{ width: CELL_WIDTH, height: CELL_HEIGHT }}
