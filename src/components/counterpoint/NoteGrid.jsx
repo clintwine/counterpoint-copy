@@ -2310,6 +2310,5 @@ export default function NoteGrid({
         />
       </div>
       </div>
-      </div>
       );
 }
