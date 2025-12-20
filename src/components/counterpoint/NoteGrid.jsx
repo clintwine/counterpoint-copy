@@ -2033,9 +2033,9 @@ export default function NoteGrid({
         )}
         </div>
       
-      <div className="flex items-center justify-between gap-2">
+      <div className={`flex items-center justify-between gap-2 border-t border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3' : 'hidden'}`}>
         {/* Left side - note controls */}
-        <div className={`transition-opacity border-slate-700 ${selectedNotes.size > 0 ? 'px-2 sm:px-5 py-2 sm:py-3 border-t opacity-100' : 'px-2 sm:px-5 py-1 opacity-0 pointer-events-none'}`}>{selectedNotes.size > 0 && (
+        {selectedNotes.size > 0 && (<div className="flex-1 min-w-0">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-amber-400 text-xs flex-shrink-0">{selectedNotes.size} selected</span>
@@ -2245,11 +2245,11 @@ export default function NoteGrid({
                 </span>
               </div>
               </div>
-              </div>
-              )}</div>
+              </div></div>
+              )}
 
               {/* Right side - keyboard button and minimap */}
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto px-2 sm:px-5 py-2">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
           <Button
             variant="ghost"
             size="sm"
