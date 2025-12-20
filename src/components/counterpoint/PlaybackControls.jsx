@@ -254,14 +254,14 @@ export default function PlaybackControls({
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
                 : isCountingIn
                 ? 'bg-amber-600 hover:bg-amber-700 text-white animate-pulse'
-                : 'bg-red-600/20 hover:bg-red-600/30 text-red-500 hover:text-red-400'
+                : 'bg-red-600/20 hover:bg-red-600/30 text-red-600 hover:text-red-600'
             }`}
             title={isRecording ? 'Stop recording' : 'Record'}
           >
             {isCountingIn ? (
               <span className="text-xs font-bold">{countInBeats}</span>
             ) : (
-              <Circle className={`w-3 h-3 ${isRecording ? 'fill-current' : ''}`} />
+              <Circle className="w-3 h-3 fill-current" />
             )}
           </Button>
         </div>
