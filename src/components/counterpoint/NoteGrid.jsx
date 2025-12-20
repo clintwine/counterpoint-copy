@@ -252,6 +252,9 @@ export default function NoteGrid({
 
   const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
   
+  // Use pre-generated pitches
+  const pitches = ALL_PITCHES;
+  
   // Memoize notes lookup for performance - filter duplicates
   const notesMap = useMemo(() => {
     const map = new Map();
