@@ -204,7 +204,7 @@ export default function PlaybackControls({
       </DropdownMenu>
 
       {/* Center section - Transport controls and tempo */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
         {/* Transport controls */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5">
           <Button
