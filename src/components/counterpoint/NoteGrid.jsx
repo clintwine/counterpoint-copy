@@ -1754,6 +1754,7 @@ export default function NoteGrid({
               const beatDelta = Math.round(deltaX / CELL_WIDTH);
               const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
               onSeek && onSeek(newBeat);
+              onScrollToBeat && onScrollToBeat(newBeat);
             };
 
             const handleMouseUp = () => {
@@ -1777,6 +1778,7 @@ export default function NoteGrid({
               const beatDelta = Math.round(deltaX / CELL_WIDTH);
               const newBeat = Math.max(0, Math.min(totalBeats - 1, startBeat + beatDelta));
               onSeek && onSeek(newBeat);
+              onScrollToBeat && onScrollToBeat(newBeat);
             };
 
             const handleTouchEnd = () => {
