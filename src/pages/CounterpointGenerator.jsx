@@ -1070,6 +1070,7 @@ export default function CounterpointGenerator() {
                               }}
                               onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
                               showPianoPanel={showPianoPanel && !pianoPopout}
+                              onPopOut={() => setPianoPopout(true)}
                               onNewProject={handleNewProject}
                               onSaveProject={() => setSaveDialogOpen(true)}
                               onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}

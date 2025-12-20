@@ -217,6 +217,7 @@ export default function NoteGrid({
       settings = {},
       onTogglePianoPanel,
       showPianoPanel = true,
+      onPopOut,
       onNewProject,
       onSaveProject,
       onSaveSong,
@@ -2050,11 +2051,11 @@ export default function NoteGrid({
               <line x1="16" y1="6" x2="16" y2="12" />
             </svg>
           </Button>
-          {showPianoPanel && (
+          {showPianoPanel && onPopOut && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open('/piano-popup', 'piano', 'width=800,height=400')}
+              onClick={onPopOut}
               className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-slate-700"
               title="Pop Out Piano"
             >
