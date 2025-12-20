@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers, Circle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,7 +56,11 @@ export default function PlaybackControls({
   onImportMidi,
   onTheoryTools,
   onTogglePanels,
-  showPianoPanel
+  showPianoPanel,
+  isRecording,
+  onRecordToggle,
+  isCountingIn,
+  countInBeats
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -237,6 +241,28 @@ export default function PlaybackControls({
             title="Stop"
           >
             <Square className="w-3 h-3 fill-current" />
+          </Button>
+
+          <div className="w-px h-5 bg-[#3A3A3A] mx-0.5" />
+
+          <Button
+            onClick={onRecordToggle}
+            size="sm"
+            disabled={isPlaying && !isRecording}
+            className={`h-7 w-7 p-0 rounded ${
+              isRecording 
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : isCountingIn
+                ? 'bg-amber-600 hover:bg-amber-700 text-white animate-pulse'
+                : 'bg-transparent hover:bg-[#2D2D2D] text-white/70 hover:text-white'
+            }`}
+            title={isRecording ? 'Stop recording' : 'Record'}
+          >
+            {isCountingIn ? (
+              <span className="text-xs font-bold">{countInBeats}</span>
+            ) : (
+              <Circle className={`w-3 h-3 ${isRecording ? 'fill-current' : ''}`} />
+            )}
           </Button>
         </div>
 
