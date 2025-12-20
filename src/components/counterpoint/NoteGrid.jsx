@@ -1927,7 +1927,7 @@ export default function NoteGrid({
           className="sticky cursor-ew-resize"
           style={{
             left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-            top: 28,
+            top: 0,
             width: 0,
             height: 0,
             pointerEvents: 'auto',
