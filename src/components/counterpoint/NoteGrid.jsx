@@ -919,15 +919,6 @@ export default function NoteGrid({
             <MousePointer2 className="w-4 h-4" />
           </Button>
           <Button
-            variant={tool === 'marquee' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('marquee')}
-            className={`h-8 px-2 ${tool === 'marquee' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-            title="Marquee (M)"
-          >
-            <Square className="w-4 h-4" />
-          </Button>
-          <Button
                         variant={tool === 'draw' ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setTool('draw')}
