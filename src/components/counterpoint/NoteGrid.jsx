@@ -1113,7 +1113,8 @@ export default function NoteGrid({
                         variant={paintMode ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setPaintMode(!paintMode)}
-                        className={`h-8 px-2 text-xs ${tool !== 'draw' ? 'invisible w-0 px-0' : paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+                        disabled={tool !== 'draw'}
+                        className={`h-8 px-2 text-xs ${paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
                         title="Paint mode - drag to add multiple notes"
                       >
                         Paint
