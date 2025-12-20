@@ -1368,7 +1368,7 @@ export default function NoteGrid({
                                     })}
 
                                     {/* Ruler tick marks */}
-                                    {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
+                                    {Array.from({ length: beatsPerMeasure + 1 }).map((_, beatIndex) => (
                                       <div
                                         key={beatIndex}
                                         className="absolute top-0 pointer-events-none z-10"
