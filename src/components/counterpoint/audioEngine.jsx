@@ -555,26 +555,27 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
       osc.frequency.value = freq * (oscConfig.harmonic || 1);
       osc.detune.value = oscConfig.detune || 0;
     
-    // Apply pitch bend envelope if provided
-    if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
-      if (typeof pitchBend === 'number') {
-        // Simple constant bend
-        osc.detune.value = pitchBend * 100;
-      } else if (pitchBend) {
-        // Envelope bend: { start, end, startTime, endTime }
-        const bendStart = (pitchBend.start ?? 0) * 100;
-        const bendEnd = (pitchBend.end ?? 0) * 100;
-        const startTime = pitchBend.startTime ?? 0; // 0-1 (percentage of note duration)
-        const endTime = pitchBend.endTime ?? 1; // 0-1
-        
-        const bendStartTimeAbs = now + (duration * startTime);
-        const bendEndTimeAbs = now + (duration * endTime);
-        
-        osc.detune.setValueAtTime(bendStart, now);
-        if (startTime > 0) {
-          osc.detune.setValueAtTime(bendStart, bendStartTimeAbs);
+      // Apply pitch bend envelope if provided
+      if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
+        if (typeof pitchBend === 'number') {
+          // Simple constant bend
+          osc.detune.value = pitchBend * 100;
+        } else if (pitchBend) {
+          // Envelope bend: { start, end, startTime, endTime }
+          const bendStart = (pitchBend.start ?? 0) * 100;
+          const bendEnd = (pitchBend.end ?? 0) * 100;
+          const startTime = pitchBend.startTime ?? 0; // 0-1 (percentage of note duration)
+          const endTime = pitchBend.endTime ?? 1; // 0-1
+          
+          const bendStartTimeAbs = now + (duration * startTime);
+          const bendEndTimeAbs = now + (duration * endTime);
+          
+          osc.detune.setValueAtTime(bendStart, now);
+          if (startTime > 0) {
+            osc.detune.setValueAtTime(bendStart, bendStartTimeAbs);
+          }
+          osc.detune.linearRampToValueAtTime(bendEnd, bendEndTimeAbs);
         }
-        osc.detune.linearRampToValueAtTime(bendEnd, bendEndTimeAbs);
       }
     
       const oscGain = audioContext.createGain();
