@@ -546,8 +546,8 @@ export default function CounterpointGenerator() {
         };
       }
       
-      // Make velocity more pronounced: square it to increase dynamic range
-      playNote(note.pitch, actualDuration, volume * (velocity * velocity), voiceIndex, instrument, pitchBend);
+      // Use velocity directly with a slight boost for expression
+      playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
     });
 
     // Metronome click

@@ -104,14 +104,14 @@ export async function initAudio() {
     
     // Add compressor to prevent clipping and crackling
     const compressor = audioContext.createDynamicsCompressor();
-    compressor.threshold.value = -24;
-    compressor.knee.value = 30;
-    compressor.ratio.value = 12;
-    compressor.attack.value = 0.003;
-    compressor.release.value = 0.25;
-    
+    compressor.threshold.value = -30;
+    compressor.knee.value = 40;
+    compressor.ratio.value = 20;
+    compressor.attack.value = 0.001;
+    compressor.release.value = 0.1;
+
     masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.35; // Lower to prevent clipping with reverb
+    masterGain.gain.value = 0.25; // Lower to prevent clipping
     masterGain.connect(compressor);
     compressor.connect(audioContext.destination);
     
@@ -481,7 +481,7 @@ function createDistortion(amount) {
 
 // Active oscillators tracking to prevent too many at once
 let activeOscillatorCount = 0;
-const MAX_CONCURRENT_NOTES = 30; // Lower limit to prevent crackling
+const MAX_CONCURRENT_NOTES = 20; // Lower limit to prevent crackling
 
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
