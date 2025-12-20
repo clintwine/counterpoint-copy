@@ -2274,7 +2274,7 @@ export default function NoteGrid({
       </div>
 
       {/* Minimap - positioned absolutely */}
-      <div className="absolute bottom-2 right-2 z-50">
+      <div className={`absolute right-2 z-50 ${showPianoPanel ? 'bottom-4' : 'bottom-2'}`}>
         <ScoreMinimap
           notes={cantusFirmus}
           totalBeats={totalBeats}
