@@ -1829,6 +1829,13 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
+                  // Preview velocity change
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  if (firstSelected) {
+                    initAudio();
+                    const instrument = voices[0]?.instrument || 'organ';
+                    playNote(firstSelected.pitch, 0.5, value / 100, 0, instrument);
+                  }
                 }}
                 min={20}
                 max={100}
@@ -1860,6 +1867,19 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
+                  // Preview bend change
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  if (firstSelected) {
+                    initAudio();
+                    const instrument = voices[0]?.instrument || 'organ';
+                    const pitchBend = {
+                      start: value,
+                      end: firstSelected?.bendEnd ?? 0,
+                      startTime: firstSelected?.bendStartTime ?? 0,
+                      endTime: firstSelected?.bendEndTime ?? 1
+                    };
+                    playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                  }
                 }}
                 min={-12}
                 max={12}
@@ -1889,6 +1909,19 @@ export default function NoteGrid({
                 }}
                 onValueCommit={([value]) => {
                   saveToHistory(cantusFirmus);
+                  // Preview bend change
+                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                  if (firstSelected) {
+                    initAudio();
+                    const instrument = voices[0]?.instrument || 'organ';
+                    const pitchBend = {
+                      start: firstSelected?.bendStart ?? 0,
+                      end: value,
+                      startTime: firstSelected?.bendStartTime ?? 0,
+                      endTime: firstSelected?.bendEndTime ?? 1
+                    };
+                    playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                  }
                 }}
                 min={-12}
                 max={12}
@@ -1902,28 +1935,6 @@ export default function NoteGrid({
                   return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
                 })()}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                  if (firstSelected) {
-                    initAudio();
-                    const instrument = voices[0]?.instrument || 'organ';
-                    const pitchBend = (firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined) ? {
-                      start: firstSelected.bendStart ?? 0,
-                      end: firstSelected.bendEnd ?? 0,
-                      startTime: firstSelected.bendStartTime ?? 0,
-                      endTime: firstSelected.bendEndTime ?? 1
-                    } : 0;
-                    playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
-                  }
-                }}
-                className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
-                title="Preview bend"
-              >
-                ▶
-              </Button>
             </div>
             <div className="w-px h-4 bg-slate-600" />
             <div className="flex items-center gap-2">
