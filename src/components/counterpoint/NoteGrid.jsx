@@ -1109,17 +1109,15 @@ export default function NoteGrid({
                         <Pencil className="w-4 h-4" />
                       </Button>
 
-                      {tool === 'draw' && (
-                        <Button
-                          variant={paintMode ? 'default' : 'ghost'}
-                          size="sm"
-                          onClick={() => setPaintMode(!paintMode)}
-                          className={`h-8 px-2 text-xs ${paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
-                          title="Paint mode - drag to add multiple notes"
-                        >
-                          Paint
-                        </Button>
-                      )}
+                      <Button
+                        variant={paintMode ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setPaintMode(!paintMode)}
+                        className={`h-8 px-2 text-xs ${tool !== 'draw' ? 'invisible w-0 px-0' : paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+                        title="Paint mode - drag to add multiple notes"
+                      >
+                        Paint
+                      </Button>
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
           
