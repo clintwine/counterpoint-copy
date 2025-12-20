@@ -281,13 +281,13 @@ export default function PlaybackControls({
         <div className="flex items-center gap-2 bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
           <Volume2 className="w-4 h-4 text-white/60" />
           <Slider
-            value={[masterVolume]}
-            onValueChange={([value]) => onMasterVolumeChange?.(value)}
+            value={[Math.round(masterVolume)]}
+            onValueChange={([value]) => onMasterVolumeChange?.(Math.round(value))}
             max={100}
             step={1}
             className="w-20 [&_[role=slider]]:bg-[#D4AF37] [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
           />
-          <span className="text-white/70 text-xs font-mono w-6 text-right">{masterVolume}</span>
+          <span className="text-white/70 text-xs font-mono w-6 text-right">{Math.round(masterVolume)}</span>
         </div>
       </div>
     </>

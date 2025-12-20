@@ -1036,8 +1036,9 @@ export default function CounterpointGenerator() {
                                   countInBeats={countInBeats}
                                   masterVolume={masterVolume}
                                   onMasterVolumeChange={(vol) => {
-                                    setMasterVolume(vol);
-                                    setMasterVolume(vol / 100 * 0.4);
+                                    const intVol = Math.round(vol);
+                                    setMasterVolume(intVol);
+                                    setMasterVolume(intVol / 100 * 0.4);
                                   }}
                                   />
                               }
