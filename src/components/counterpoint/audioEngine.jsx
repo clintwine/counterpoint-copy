@@ -417,8 +417,9 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
 
-  // Create oscillators from custom config
-  oscConfigs.forEach(oscConfig => {
+  // Create oscillators from custom config (limit to first 3 for performance)
+  const maxOscs = Math.min(3, oscConfigs.length);
+  oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
     const osc = audioContext.createOscillator();
     osc.type = oscConfig.waveform;
     osc.frequency.value = freq;
@@ -480,7 +481,7 @@ function createDistortion(amount) {
 
 // Active oscillators tracking to prevent too many at once
 let activeOscillatorCount = 0;
-const MAX_CONCURRENT_NOTES = 60; // Lower limit to prevent crackling
+const MAX_CONCURRENT_NOTES = 30; // Lower limit to prevent crackling
 
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
@@ -501,12 +502,13 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
   const sustainLevel = envelopeSettings.sustain;
   const release = envelopeSettings.release;
   
-  // Create oscillators based on harmonics
+  // Create oscillators based on harmonics (limit to first 3 for performance)
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
   
-  config.harmonics.forEach((harmGain, idx) => {
+  const maxHarmonics = Math.min(3, config.harmonics.length);
+  config.harmonics.slice(0, maxHarmonics).forEach((harmGain, idx) => {
     const osc = audioContext.createOscillator();
     osc.type = config.waveform;
     osc.frequency.value = freq * (idx + 1);
@@ -597,12 +599,13 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
   const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
-  // Create oscillators based on instrument harmonics
+  // Create oscillators based on instrument harmonics (limit to first 3 for performance)
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
   
-  config.harmonics.forEach((harmGain, idx) => {
+  const maxHarmonics = Math.min(3, config.harmonics.length);
+  config.harmonics.slice(0, maxHarmonics).forEach((harmGain, idx) => {
     const osc = audioContext.createOscillator();
     osc.type = config.waveform;
     osc.frequency.value = freq * (idx + 1);
