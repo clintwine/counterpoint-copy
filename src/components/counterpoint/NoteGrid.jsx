@@ -126,20 +126,21 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   };
   
   return (
-    <div className="flex items-center gap-2">
-      <Guitar className="w-4 h-4 text-white/60" />
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-28 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
-          >
-            {selected?.label || 'Select...'}
-            <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-32 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+        >
+          <div className="flex items-center gap-1.5">
+            <Guitar className="w-4 h-4 text-white/60" />
+            <span>{selected?.label || 'Select...'}</span>
+          </div>
+          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
         <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
           <Command className="bg-slate-800">
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
@@ -184,7 +185,6 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
           </Command>
         </PopoverContent>
       </Popover>
-    </div>
   );
 }
 
