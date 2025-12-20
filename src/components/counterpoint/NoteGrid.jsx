@@ -2031,6 +2031,12 @@ export default function NoteGrid({
       <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px]">
         {/* Left side - instrument and piano controls */}
         <div className="flex items-center gap-2">
+          <InstrumentSelect 
+            value={voices[0]?.instrument || 'organ'} 
+            onChange={(v) => onVoiceInstrumentChange?.(0, v)}
+            instruments={ALL_INSTRUMENTS}
+            onCreateNew={onOpenWaveEditor}
+          />
           <Button
             variant={showPianoPanel ? 'default' : 'ghost'}
             size="sm"
