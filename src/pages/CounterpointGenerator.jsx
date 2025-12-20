@@ -91,6 +91,7 @@ export default function CounterpointGenerator() {
           const scrollToBeatRef = useRef(null);
           const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
         const [showPiano, setShowPiano] = useState(true);
+  const [showPianoPanel, setShowPianoPanel] = useState(true);
   const [previewingSongId, setPreviewingSongId] = useState(null);
   
   const playbackRef = useRef(null);
@@ -984,6 +985,7 @@ export default function CounterpointGenerator() {
                                   setVoices(newVoices);
                                 }
                               }}
+                              onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
                             />
             
             {/* Piano toggle for mobile */}
@@ -999,20 +1001,22 @@ export default function CounterpointGenerator() {
                                 </Button>
                               </div>
 
-                              <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
-                                <PianoKeyboard
-                                  activeNotes={activeNotes}
-                                  instrument={voices[0]?.instrument || 'organ'}
-                                  onInstrumentChange={(inst) => {
-                                    const newVoices = [...voices];
-                                    if (newVoices[0]) {
-                                      newVoices[0] = { ...newVoices[0], instrument: inst };
-                                      setVoices(newVoices);
-                                    }
-                                  }}
-                                  onPressedNotesChange={setPressedPianoNotes}
-                                />
-                              </div>
+                              {showPianoPanel && (
+                                <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
+                                  <PianoKeyboard
+                                    activeNotes={activeNotes}
+                                    instrument={voices[0]?.instrument || 'organ'}
+                                    onInstrumentChange={(inst) => {
+                                      const newVoices = [...voices];
+                                      if (newVoices[0]) {
+                                        newVoices[0] = { ...newVoices[0], instrument: inst };
+                                        setVoices(newVoices);
+                                      }
+                                    }}
+                                    onPressedNotesChange={setPressedPianoNotes}
+                                  />
+                                </div>
+                              )}
           </motion.main>
           </div>
           </div>

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +51,9 @@ export default function PlaybackControls({
   isGenerating,
   onExportMidi,
   onImportMidi,
-  onTheoryTools
+  onTheoryTools,
+  onTogglePanels,
+  showPianoPanel
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -177,6 +179,17 @@ export default function PlaybackControls({
           <DropdownMenuItem onClick={onTheoryTools} className="text-amber-400 cursor-pointer font-semibold">
             <BookOpen className="w-4 h-4 mr-2" />
             Music Theory Tools
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem 
+            onClick={() => onTogglePanels?.('piano')} 
+            className="text-white cursor-pointer flex items-center justify-between"
+          >
+            <span className="flex items-center">
+              <Layers className="w-4 h-4 mr-2" />
+              Piano Keyboard
+            </span>
+            <span className="text-xs text-white/50">{showPianoPanel ? '✓' : ''}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
             <Sparkles className="w-4 h-4 mr-2" />

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Music2, Grid3x3 } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Music2, Grid3x3, Keyboard } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
@@ -213,7 +213,8 @@ export default function NoteGrid({
     loopEnd = null,
     isLooping = false,
     onLoopChange,
-    settings = {}
+    settings = {},
+    onTogglePianoPanel
   }) {
     // Use smooth playhead position if available, otherwise fall back to currentBeat
     const smoothPlayhead = playheadPosition !== undefined ? playheadPosition : currentBeat;
@@ -1837,7 +1838,16 @@ export default function NoteGrid({
         {tool === 'marquee' && 'Click and drag to select multiple notes • Drag header to set loop'}
         {tool === 'draw' && 'Click to add/remove notes • Drag header to set loop'}
       </p>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onTogglePianoPanel}
+          className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+          title="Toggle Piano Keyboard"
+        >
+          <Keyboard className="w-4 h-4" />
+        </Button>
         {selectedNotes.size > 0 && (
           <>
             <span className="text-amber-400 text-xs">{selectedNotes.size} selected</span>
