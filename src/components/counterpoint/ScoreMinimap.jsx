@@ -70,7 +70,7 @@ export default function ScoreMinimap({
   
   return (
     <div 
-      className="bg-slate-900/90 rounded border border-slate-700 cursor-pointer relative overflow-hidden"
+      className="bg-slate-900/80 rounded border border-slate-700 cursor-pointer relative overflow-hidden"
       style={{ width, height }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
