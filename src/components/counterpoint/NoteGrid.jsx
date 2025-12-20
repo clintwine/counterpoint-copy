@@ -841,25 +841,37 @@ export default function NoteGrid({
         }
     
     if (marquee) {
-      // Calculate selected notes from marquee
-      const startCell = getCellFromPosition(marquee.startX, marquee.startY);
-      const endCell = getCellFromPosition(marquee.endX, marquee.endY);
+      // Check if this was a drag or just a click
+      const deltaX = Math.abs(marquee.endX - marquee.startX);
+      const deltaY = Math.abs(marquee.endY - marquee.startY);
       
-      if (startCell && endCell) {
-        const minBeat = Math.min(startCell.beat, endCell.beat);
-        const maxBeat = Math.max(startCell.beat, endCell.beat);
-        const minPitchIdx = Math.min(startCell.pitchIndex, endCell.pitchIndex);
-        const maxPitchIdx = Math.max(startCell.pitchIndex, endCell.pitchIndex);
+      if (deltaX < 15 && deltaY < 15) {
+        // Just a click - clear selection and loop
+        setSelectedNotes(new Set());
+        if (onLoopChange) {
+          onLoopChange(null, null);
+        }
+      } else {
+        // Calculate selected notes from marquee
+        const startCell = getCellFromPosition(marquee.startX, marquee.startY);
+        const endCell = getCellFromPosition(marquee.endX, marquee.endY);
         
-        const newSelected = new Set();
-        cantusFirmus.forEach(note => {
-          const pitchIdx = pitches.indexOf(note.pitch);
-          if (note.beat >= minBeat && note.beat <= maxBeat && 
-              pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx) {
-            newSelected.add(getNoteKey(note.pitch, note.beat));
-          }
-        });
-        setSelectedNotes(newSelected);
+        if (startCell && endCell) {
+          const minBeat = Math.min(startCell.beat, endCell.beat);
+          const maxBeat = Math.max(startCell.beat, endCell.beat);
+          const minPitchIdx = Math.min(startCell.pitchIndex, endCell.pitchIndex);
+          const maxPitchIdx = Math.max(startCell.pitchIndex, endCell.pitchIndex);
+          
+          const newSelected = new Set();
+          cantusFirmus.forEach(note => {
+            const pitchIdx = pitches.indexOf(note.pitch);
+            if (note.beat >= minBeat && note.beat <= maxBeat && 
+                pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx) {
+              newSelected.add(getNoteKey(note.pitch, note.beat));
+            }
+          });
+          setSelectedNotes(newSelected);
+        }
       }
       setMarquee(null);
     } else if (dragState && originalDragNotesRef.current) {
