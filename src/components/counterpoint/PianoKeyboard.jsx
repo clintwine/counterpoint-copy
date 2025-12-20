@@ -492,6 +492,24 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         ctx.lineTo(rect.width, y);
         ctx.stroke();
       }
+      
+      // Add frequency markers (20Hz - 20kHz range)
+      const freqMarkers = [
+        { freq: '20Hz', pos: 0.02 },
+        { freq: '100Hz', pos: 0.15 },
+        { freq: '500Hz', pos: 0.35 },
+        { freq: '1kHz', pos: 0.5 },
+        { freq: '5kHz', pos: 0.75 },
+        { freq: '10kHz', pos: 0.9 }
+      ];
+      
+      ctx.font = '9px monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.textAlign = 'center';
+      freqMarkers.forEach(marker => {
+        const x = marker.pos * rect.width;
+        ctx.fillText(marker.freq, x, rect.height - 2);
+      });
     };
     
     draw();
