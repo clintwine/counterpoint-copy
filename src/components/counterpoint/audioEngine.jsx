@@ -535,7 +535,9 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
     }
     
     const oscGain = audioContext.createGain();
-    oscGain.gain.value = harmGain * 0.3;
+    // Reduce gain when reverb is active to prevent clipping
+    const effectReduction = 1 - (effectLevels.reverb * 0.4);
+    oscGain.gain.value = harmGain * 0.3 * effectReduction;
     
     osc.connect(oscGain);
     oscGain.connect(filterNode);
@@ -606,7 +608,9 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
     osc.frequency.value = freq * (idx + 1);
     
     const oscGain = audioContext.createGain();
-    oscGain.gain.value = harmGain * 0.3;
+    // Reduce gain when reverb is active to prevent clipping
+    const effectReduction = 1 - (effectLevels.reverb * 0.4);
+    oscGain.gain.value = harmGain * 0.3 * effectReduction;
     
     osc.connect(oscGain);
     oscGain.connect(filterNode);
