@@ -1283,7 +1283,7 @@ export default function NoteGrid({
             {/* Beat numbers header */}
                             <div 
                               className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-10 relative cursor-pointer"
-                              style={{ backgroundColor: '#C8A570' }}
+                              style={{ backgroundColor: '#64748b' }}
                               onMouseDown={(e) => {
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
@@ -1348,7 +1348,7 @@ export default function NoteGrid({
                                     className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
                                     style={{ 
                                       width: CELL_WIDTH * beatsPerMeasure,
-                                      backgroundColor: inLoopRegion ? '#D4A574' : '#C8A570'
+                                      backgroundColor: inLoopRegion ? '#C8A570' : '#64748b'
                                     }}
                                   >
                                     <span className="text-slate-900 font-bold pointer-events-none">
