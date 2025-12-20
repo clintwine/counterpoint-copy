@@ -626,25 +626,31 @@ export default function CounterpointGenerator() {
     }
   };
 
-  // Record notes from piano during recording
+  // Track when piano notes are pressed during recording
+  const prevPressedNotesRef = useRef(new Set());
+  
   useEffect(() => {
-    if (isRecording && pressedPianoNotes.size > 0) {
+    if (isRecording && currentBeat >= 0) {
+      // Detect newly pressed notes (not in previous set)
       pressedPianoNotes.forEach(pitch => {
-        // Check if this note at this beat already exists in recorded notes
-        const alreadyRecorded = recordedNotesRef.current.some(
-          n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
-        );
-        if (!alreadyRecorded && currentBeat >= 0) {
-          recordedNotesRef.current.push({
-            pitch,
-            beat: currentBeat,
-            duration: 1,
-            velocity: 0.8
-          });
+        if (!prevPressedNotesRef.current.has(pitch)) {
+          // New note pressed - record it
+          const alreadyRecorded = recordedNotesRef.current.some(
+            n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
+          );
+          if (!alreadyRecorded) {
+            recordedNotesRef.current.push({
+              pitch,
+              beat: currentBeat,
+              duration: 1,
+              velocity: 0.8
+            });
+          }
         }
       });
     }
-  }, [isRecording, currentBeat, pressedPianoNotes]);
+    prevPressedNotesRef.current = new Set(pressedPianoNotes);
+  }, [isRecording, pressedPianoNotes, currentBeat]);
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);

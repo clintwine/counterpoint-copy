@@ -254,7 +254,7 @@ export default function PlaybackControls({
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
                 : isCountingIn
                 ? 'bg-amber-600 hover:bg-amber-700 text-white animate-pulse'
-                : 'bg-transparent hover:bg-[#2D2D2D] text-white/70 hover:text-white'
+                : 'bg-red-600/20 hover:bg-red-600/30 text-red-500 hover:text-red-400'
             }`}
             title={isRecording ? 'Stop recording' : 'Record'}
           >
