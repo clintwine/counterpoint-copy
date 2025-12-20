@@ -1368,21 +1368,28 @@ export default function NoteGrid({
                                     })}
 
                                     {/* Ruler tick marks */}
-                                    {Array.from({ length: beatsPerMeasure + 1 }).map((_, beatIndex) => {
-                                      const isLastTick = beatIndex === beatsPerMeasure;
-                                      return (
-                                        <div
-                                          key={beatIndex}
-                                          className="absolute top-0 pointer-events-none z-10"
-                                          style={{
-                                            left: isLastTick ? `calc(100% - 1px)` : `${beatIndex * CELL_WIDTH}px`,
-                                            width: '1px',
-                                            height: beatIndex % 4 === 0 ? '12px' : '6px',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                                          }}
-                                        />
-                                      );
-                                    })}
+                                    {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
+                                      <div
+                                        key={beatIndex}
+                                        className="absolute top-0 pointer-events-none z-10"
+                                        style={{
+                                          left: `${beatIndex * CELL_WIDTH - 0.5}px`,
+                                          width: '1px',
+                                          height: beatIndex % 4 === 0 ? '12px' : '6px',
+                                          backgroundColor: 'rgba(255, 255, 255, 0.3)'
+                                        }}
+                                      />
+                                    ))}
+                                    {/* End tick */}
+                                    <div
+                                      className="absolute top-0 pointer-events-none z-10"
+                                      style={{
+                                        right: '-1px',
+                                        width: '1px',
+                                        height: '12px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.3)'
+                                      }}
+                                    />
                                   </div>
                                 );
                               })}
