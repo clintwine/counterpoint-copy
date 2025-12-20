@@ -132,8 +132,8 @@ export default function PlaybackControls({
   }, [isDragging, onTempoChange]);
 
   return (
-    <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 bg-[#2D2D2D] border-b border-[#3A3A3A]">
-      {/* Left section - File Menu */}
+    <>
+      {/* File Menu for toolbar */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -207,8 +207,8 @@ export default function PlaybackControls({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Center section - Transport controls and tempo */}
-      <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+      {/* Transport controls and tempo */}
+      <div className="flex items-center gap-2">
         {/* Transport controls */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5">
           <Button
@@ -347,9 +347,6 @@ export default function PlaybackControls({
           <Repeat className="w-4 h-4" />
         </Button>
       </div>
-
-      {/* Right section - spacer for layout balance */}
-      <div className="w-24" />
-    </div>
+    </>
   );
 }

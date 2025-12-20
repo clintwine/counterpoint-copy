@@ -1004,8 +1004,8 @@ export default function NoteGrid({
           {playbackControls}
 
           {/* Toolbar */}
-                      <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto">
-        <div className="flex items-center gap-1">
+          <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto gap-2">
+            <div className="flex items-center gap-1">
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}
             size="sm"
@@ -1188,21 +1188,17 @@ export default function NoteGrid({
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
           {/* Instrument for cantus firmus (voice being edited) */}
-                        <InstrumentSelect 
-                          value={voices[0]?.instrument || 'organ'} 
-                          onChange={(v) => onVoiceInstrumentChange?.(0, v)}
-                          instruments={ALL_INSTRUMENTS}
-                          onCreateNew={onOpenWaveEditor}
-                        />
+          <InstrumentSelect 
+            value={voices[0]?.instrument || 'organ'} 
+            onChange={(v) => onVoiceInstrumentChange?.(0, v)}
+            instruments={ALL_INSTRUMENTS}
+            onCreateNew={onOpenWaveEditor}
+          />
 
           <div className="w-px h-5 bg-slate-600 mx-2" />
 
-          {/* BPM Display */}
-          <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-2 py-0.5">
-            <span className="text-white font-mono text-lg font-bold tabular-nums">{tempo}</span>
-            <span className="text-white/50 text-[10px] ml-1">BPM</span>
-          </div>
-
+          {/* Transport controls from PlaybackControls */}
+          {playbackControls}
           </div>
         
         {/* Zoom controls - right side */}
