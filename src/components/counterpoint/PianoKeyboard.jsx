@@ -496,7 +496,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-start mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano (88 Keys)</h3>
+                    <h3 className="text-white/90 text-xs uppercase tracking-wider font-medium hidden sm:block">Piano</h3>
                     {onPopOut && (
                       <Button
                         variant="ghost"
