@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, BookOpen } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, BookOpen, ExternalLink } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNote } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
@@ -2050,6 +2050,17 @@ export default function NoteGrid({
               <line x1="16" y1="6" x2="16" y2="12" />
             </svg>
           </Button>
+          {showPianoPanel && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open('/piano-popup', 'piano', 'width=800,height=400')}
+              className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-slate-700"
+              title="Pop Out Piano"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         {/* Center - note controls */}

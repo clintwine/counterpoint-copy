@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Keyboard, Guitar, Volume2, Waves, ChevronDown, ExternalLink } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 import WaveEditor from './WaveEditor';
@@ -495,25 +495,12 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   return (
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-start mb-2 flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <InstrumentSelect
-                      value={instrument}
-                      onChange={onInstrumentChange}
-                      instruments={allInstruments}
-                      onCreateNew={() => setShowWaveEditor(true)}
-                    />
-                    {onPopOut && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onPopOut}
-                        className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
-                        title="Pop Out Piano"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </Button>
-                    )}
-                  </div>
+                  <InstrumentSelect
+                    value={instrument}
+                    onChange={onInstrumentChange}
+                    instruments={allInstruments}
+                    onCreateNew={() => setShowWaveEditor(true)}
+                  />
                   <div className="flex items-center gap-2 flex-wrap">
           {/* ADSR Envelope Knobs - hidden on mobile */}
                           <div className="hidden sm:flex items-center gap-3">
