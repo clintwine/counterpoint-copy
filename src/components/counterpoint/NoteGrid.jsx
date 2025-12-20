@@ -454,7 +454,7 @@ export default function NoteGrid({
     setSelectedNotes(allKeys);
   }, [cantusFirmus]);
 
-  const quantize = useCallback(() => {
+  const quantize = useCallback((gridValue = quantizeGrid) => {
     const notesToQuantize = selectedNotes.size > 0 
       ? cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)))
       : cantusFirmus;
@@ -464,7 +464,7 @@ export default function NoteGrid({
     const newNotes = cantusFirmus.map(n => {
       if (selectedNotes.size === 0 || selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
         // Snap to nearest grid value
-        const quantizedBeat = Math.round(n.beat / quantizeGrid) * quantizeGrid;
+        const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
         return { ...n, beat: quantizedBeat };
       }
       return n;
@@ -474,7 +474,7 @@ export default function NoteGrid({
     if (selectedNotes.size > 0) {
       const newSelectedKeys = new Set(
         notesToQuantize.map(n => {
-          const quantizedBeat = Math.round(n.beat / quantizeGrid) * quantizeGrid;
+          const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
           return getNoteKey(n.pitch, quantizedBeat);
         })
       );
@@ -638,6 +638,9 @@ export default function NoteGrid({
         setTool('marquee');
       } else if (e.key === 'b') {
         setTool('draw');
+      } else if (e.key === 'q' && selectedNotes.size > 0) {
+        e.preventDefault();
+        quantize();
       }
     };
 
@@ -1185,83 +1188,75 @@ export default function NoteGrid({
                 variant="ghost"
                 size="sm"
                 className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700"
-                title="Quantize notes to grid"
+                title="Quantize notes to grid (Q)"
               >
-                <Grid3x3 className="w-4 h-4" />
+                <span className="font-bold text-sm">Q</span>
                 <ChevronDown className="w-3 h-3 ml-1" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-slate-800 border-slate-700">
               <DropdownMenuItem 
-                onClick={quantize}
-                className="text-amber-400 cursor-pointer font-semibold"
-              >
-                <Grid3x3 className="w-3 h-3 mr-2" />
-                Quantize Now
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(0.25)}
+                onClick={() => { setQuantizeGrid(0.25); quantize(0.25); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.25 ? 'bg-slate-700' : ''}`}
               >
                 1/64 note (0.25 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(0.5)}
+                onClick={() => { setQuantizeGrid(0.5); quantize(0.5); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.5 ? 'bg-slate-700' : ''}`}
               >
                 1/32 note (0.5 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(2/3)}
+                onClick={() => { setQuantizeGrid(2/3); quantize(2/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 2/3 ? 'bg-slate-700' : ''}`}
               >
                 1/32 triplet (0.67 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(1)}
+                onClick={() => { setQuantizeGrid(1); quantize(1); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 1 ? 'bg-slate-700' : ''}`}
               >
                 1/16 note (1 beat)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(4/3)}
+                onClick={() => { setQuantizeGrid(4/3); quantize(4/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 4/3 ? 'bg-slate-700' : ''}`}
               >
                 1/16 triplet (1.33 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(2)}
+                onClick={() => { setQuantizeGrid(2); quantize(2); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 2 ? 'bg-slate-700' : ''}`}
               >
                 1/8 note (2 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(8/3)}
+                onClick={() => { setQuantizeGrid(8/3); quantize(8/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 8/3 ? 'bg-slate-700' : ''}`}
               >
                 1/8 triplet (2.67 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(4)}
+                onClick={() => { setQuantizeGrid(4); quantize(4); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 4 ? 'bg-slate-700' : ''}`}
               >
                 1/4 note (4 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(16/3)}
+                onClick={() => { setQuantizeGrid(16/3); quantize(16/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 16/3 ? 'bg-slate-700' : ''}`}
               >
                 1/4 triplet (5.33 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(8)}
+                onClick={() => { setQuantizeGrid(8); quantize(8); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 8 ? 'bg-slate-700' : ''}`}
               >
                 1/2 note (8 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => setQuantizeGrid(16)}
+                onClick={() => { setQuantizeGrid(16); quantize(16); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 16 ? 'bg-slate-700' : ''}`}
               >
                 Whole note (16 beats)
