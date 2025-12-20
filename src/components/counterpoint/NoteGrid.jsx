@@ -2253,17 +2253,19 @@ export default function NoteGrid({
               )}
 
               {/* Right side - keyboard button */}
-              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onTogglePianoPanel}
-            className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
-            title="Toggle Piano Keyboard"
-          >
-            <Keyboard className="w-4 h-4" />
-          </Button>
-        </div>
+              {!showPianoPanel && (
+                <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onTogglePianoPanel}
+                    className="h-6 px-2 text-white/70 hover:text-white hover:bg-slate-700 text-xs"
+                    title="Toggle Piano Keyboard"
+                  >
+                    <Keyboard className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
       </div>
 
       {/* Minimap - positioned absolutely */}
