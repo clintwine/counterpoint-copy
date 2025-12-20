@@ -401,8 +401,10 @@ This should sound like a REAL composition, not a simple exercise!`,
     const timeouts = [];
 
     // Play melody - use actual beat positions for timing
-    notes.forEach((note) => {
-      const startTime = (note.beat || 0) * msPerBeat;
+    notes.forEach((note, idx) => {
+      // Fallback to sequential if beat position is missing
+      const beat = note.beat !== undefined ? note.beat : idx;
+      const startTime = beat * msPerBeat;
       const timeout = setTimeout(() => {
         const duration = (note.duration || 1) * (60 / tempo) * 0.9;
         playNote(note.pitch, duration, 0.7, 0, 'organ');
@@ -412,8 +414,10 @@ This should sound like a REAL composition, not a simple exercise!`,
 
     // Play harmony if exists - use actual beat positions
     if (harmony && harmony.length > 0) {
-      harmony.forEach((note) => {
-        const startTime = (note.beat || 0) * msPerBeat;
+      harmony.forEach((note, idx) => {
+        // Fallback to sequential if beat position is missing
+        const beat = note.beat !== undefined ? note.beat : idx;
+        const startTime = beat * msPerBeat;
         const timeout = setTimeout(() => {
           const duration = (note.duration || 1) * (60 / tempo) * 0.9;
           playNote(note.pitch, duration, 0.6, 1, 'organ');
