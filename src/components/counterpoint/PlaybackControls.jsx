@@ -198,9 +198,9 @@ export default function PlaybackControls({
       </DropdownMenu>
 
       {/* Center section - Transport controls and tempo */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {/* Transport controls */}
-        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] p-0.5">
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5">
           <Button
             variant="ghost"
             size="sm"
@@ -234,15 +234,17 @@ export default function PlaybackControls({
           </Button>
         </div>
 
-        {/* Time display box */}
-        <div className="flex items-center bg-[#1A1A1A] rounded border border-[#3A3A3A] px-2.5 py-1.5 h-9">
+        {/* Time display - Logic Pro style */}
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
           <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
           <span className="text-white/40 mx-1.5">/</span>
           <span className="text-white/60 font-mono text-sm tabular-nums">{formatTime(totalBeats - 1)}</span>
         </div>
 
-        {/* BPM box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
+        <div className="w-px h-6 bg-[#3A3A3A]" />
+
+        {/* BPM - Large Logic Pro style */}
+        <div className="flex items-center gap-2">
           {isEditingBpm ? (
             <input
               type="number"
@@ -251,7 +253,7 @@ export default function PlaybackControls({
               onBlur={handleBpmInputBlur}
               onKeyDown={handleBpmInputKeyDown}
               autoFocus
-              className="bg-transparent border-0 px-2 text-white font-mono text-lg font-bold w-16 text-center outline-none"
+              className="bg-[#1A1A1A] border border-[#D4AF37] rounded px-3 py-1 text-white font-mono text-2xl font-bold w-20 text-center outline-none"
               min={20}
               max={455}
             />
@@ -260,67 +262,55 @@ export default function PlaybackControls({
               ref={bpmRef}
               onMouseDown={handleBpmMouseDown}
               onDoubleClick={handleBpmDoubleClick}
-              className={`px-2 cursor-ew-resize select-none ${isDragging ? 'text-[#D4AF37]' : ''}`}
+              className={`bg-[#1A1A1A] border ${isDragging ? 'border-[#D4AF37]' : 'border-[#3A3A3A]'} rounded px-3 py-1 cursor-ew-resize select-none hover:border-[#4A4A4A] transition-colors`}
               title="Drag to change tempo"
             >
-              <span className="text-white font-mono text-lg font-bold tabular-nums">{tempo}</span>
+              <span className="text-white font-mono text-2xl font-bold tabular-nums">{tempo}</span>
             </div>
           )}
         </div>
 
-        {/* Time Signature box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
-          <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-            <SelectTrigger className="h-full w-12 bg-transparent border-0 text-white text-sm font-medium px-2 hover:bg-transparent focus:ring-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-              {TIME_SIGNATURES.map(ts => (
-                <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
-                  {ts.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Time Signature */}
+        <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+          <SelectTrigger className="h-8 w-14 bg-[#1A1A1A] border-[#3A3A3A] text-white text-sm font-medium px-2">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+            {TIME_SIGNATURES.map(ts => (
+              <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
+                {ts.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        {/* Measures box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] px-2.5 py-1.5 h-9 flex items-center">
-          <span className="text-white/60 text-xs mr-1.5">M</span>
-          <span className="text-white font-mono text-sm tabular-nums">{Math.ceil(currentBeat / timeSigConfig.beatsPerMeasure) + 1}</span>
-          <span className="text-white/40 mx-1">/</span>
-          <span className="text-white/60 font-mono text-sm tabular-nums">{Math.ceil(totalBeats / timeSigConfig.beatsPerMeasure)}</span>
-        </div>
+        <div className="w-px h-6 bg-[#3A3A3A]" />
 
-        {/* Metronome box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onMetronomeToggle}
-            className={`h-full w-9 p-0 rounded-none ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
-            title="Metronome"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L8 22h8L12 2z" />
-              <path d="M12 6v10" />
-              <circle cx="12" cy="8" r="1" fill="currentColor" />
-            </svg>
-          </Button>
-        </div>
+        {/* Metronome */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onMetronomeToggle}
+          className={`h-8 w-8 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
+          title="Metronome"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L8 22h8L12 2z" />
+            <path d="M12 6v10" />
+            <circle cx="12" cy="8" r="1" fill="currentColor" />
+          </svg>
+        </Button>
 
-        {/* Loop box */}
-        <div className="bg-[#1A1A1A] rounded border border-[#3A3A3A] h-9 flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onLoopToggle}
-            className={`h-full w-9 p-0 rounded-none ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/10' : 'text-white/60 hover:text-white hover:bg-[#2D2D2D]'}`}
-            title="Loop"
-          >
-            <Repeat className="w-4 h-4" />
-          </Button>
-        </div>
+        {/* Loop toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onLoopToggle}
+          className={`h-8 w-8 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
+          title="Loop"
+        >
+          <Repeat className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Right section - Timeline scrubber */}
