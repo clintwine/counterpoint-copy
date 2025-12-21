@@ -582,7 +582,17 @@ export default function CounterpointGenerator() {
     const discreteBeat = Math.floor(currentPos);
     if (discreteBeat !== Math.floor(lastPos) && metronomeEnabled) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-      const subdivisionSize = beatsPerMeasure / 4;
+      
+      // Determine click subdivision based on time signature
+      let subdivisionSize;
+      switch (settings.timeSignature) {
+        case '6/8':
+          subdivisionSize = 2; // Click on eighth notes (every 2 sixteenth notes)
+          break;
+        default:
+          subdivisionSize = 4; // Click on quarter notes (every 4 sixteenth notes)
+      }
+      
       if (discreteBeat % subdivisionSize === 0) {
         // Time signature aware accent patterns
         let isAccent = false;
