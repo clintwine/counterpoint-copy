@@ -736,7 +736,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowWaveEditor(!showWaveEditor)}
-                className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}>
+                className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
 
                               <Waves className="w-3.5 h-3.5 mr-1" />
                               Edit Instrument
@@ -745,7 +745,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowKeys(!showKeys)}
-                className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}>
+                className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
 
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
