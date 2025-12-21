@@ -1336,17 +1336,22 @@ export default function NoteGrid({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 try {
+                  // Fetch directly with proper binary handling
                   const { base44 } = await import('@/api/base44Client');
-                  console.log('Invoking exportAudio with', cantusFirmus.length, 'notes');
-                  const response = await base44.functions.invoke('exportAudio', {
-                    notes: cantusFirmus,
-                    tempo
-                  });
-                  console.log('Response type:', typeof response.data, 'is ArrayBuffer:', response.data instanceof ArrayBuffer);
+                  const token = await base44.auth.getToken();
                   
-                  // response.data is already the raw binary ArrayBuffer
-                  const blob = new Blob([response.data], { type: 'audio/wav' });
-                  console.log('Created blob, size:', blob.size);
+                  const response = await fetch(`https://app.base44.com/api/apps/${base44.appId}/functions/exportAudio`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ notes: cantusFirmus, tempo })
+                  });
+                  
+                  if (!response.ok) throw new Error('Export failed');
+                  
+                  const blob = await response.blob();
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
