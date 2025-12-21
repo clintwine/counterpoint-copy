@@ -255,6 +255,13 @@ export default function NoteGrid({
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
   const totalBeats = measures * beatsPerMeasure;
 
+  // Combined instruments list with custom instruments
+  const allInstruments = [
+    ...DEFAULT_INSTRUMENTS, 
+    ...PRESET_LIBRARY,
+    ...customInstruments.map((inst, i) => ({ value: `custom_${i}`, label: inst.name }))
+  ];
+
   const [zoom, setZoom] = useState(1);
   const [zoomY, setZoomY] = useState(1);
   const CELL_WIDTH = BASE_CELL_WIDTH * zoom;
