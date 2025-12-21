@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2 } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -249,7 +249,8 @@ export default function NoteGrid({
           onPressedNotesChange,
           customInstruments = [],
           snapToGrid: snapToGridProp = true,
-          onSnapToGridChange
+          onSnapToGridChange,
+          chatbotActive = false
         }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -1332,6 +1333,7 @@ export default function NoteGrid({
               <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Composer
+                {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={onGenerate} 

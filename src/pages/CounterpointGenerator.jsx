@@ -1238,6 +1238,9 @@ export default function CounterpointGenerator() {
                               setTimeout(() => setOpenWaveEditor(false), 100);
                               }}
                               customInstruments={customInstruments}
+                              snapToGrid={snapToGrid}
+                              onSnapToGridChange={setSnapToGrid}
+                              chatbotActive={chatbotActive}
                               />
             
             {/* Piano toggle for mobile */}
