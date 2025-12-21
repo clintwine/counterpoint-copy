@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Wand2, 
-  Download, 
-  RefreshCw, 
-  Music2, 
-  Settings, 
+import {
+  Wand2,
+  Download,
+  RefreshCw,
+  Music2,
+  Settings,
   Layers,
   Save,
   FolderOpen,
   Sparkles,
   X,
   Edit2,
-  Trash2
-} from 'lucide-react';
+  Trash2 } from
+'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -34,11 +34,11 @@ import { generateCounterpoint, validateCounterpoint } from '@/components/counter
 import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument } from '@/components/counterpoint/audioEngine';
 
 const DEFAULT_VOICES = [
-  { name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
-  { name: 'Soprano', enabled: true, lowRange: 'C4', highRange: 'G5', volume: 75 },
-  { name: 'Alto', enabled: false, lowRange: 'F3', highRange: 'D5', volume: 70 },
-  { name: 'Bass', enabled: false, lowRange: 'E2', highRange: 'C4', volume: 80 },
-];
+{ name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
+{ name: 'Soprano', enabled: true, lowRange: 'C4', highRange: 'G5', volume: 75 },
+{ name: 'Alto', enabled: false, lowRange: 'F3', highRange: 'D5', volume: 70 },
+{ name: 'Bass', enabled: false, lowRange: 'E2', highRange: 'C4', volume: 80 }];
+
 
 const DEFAULT_SETTINGS = {
   species: '1st',
@@ -48,7 +48,7 @@ const DEFAULT_SETTINGS = {
   numVoices: 2,
   strictRules: true,
   showViolations: true,
-  timeSignature: '4/4',
+  timeSignature: '4/4'
 };
 
 export default function CounterpointGenerator() {
@@ -57,7 +57,7 @@ export default function CounterpointGenerator() {
   const [cantusFirmus, setCantusFirmus] = useState([]);
   const [generatedVoices, setGeneratedVoices] = useState([]);
   const [violations, setViolations] = useState([]);
-  
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [playheadPosition, setPlayheadPosition] = useState(0); // Smooth floating point position
@@ -73,7 +73,7 @@ export default function CounterpointGenerator() {
   const recordedNotesRef = useRef([]);
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
   const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
-  
+
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -87,24 +87,24 @@ export default function CounterpointGenerator() {
   const [songDescription, setSongDescription] = useState('');
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  
+
   const dragControls = useDragControls();
-  
+
   // Auto-expand measures functionality
   useEffect(() => {
     window.expandMeasures = () => {
-      setSettings(prev => ({ ...prev, measures: prev.measures + 4 }));
+      setSettings((prev) => ({ ...prev, measures: prev.measures + 4 }));
     };
-    return () => { delete window.expandMeasures; };
+    return () => {delete window.expandMeasures;};
   }, []);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [chatbotActive, setChatbotActive] = useState(false);
   const [chatbotMinimized, setChatbotMinimized] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
-          const [selectedNotes, setSelectedNotes] = useState([]);
-          const scrollToBeatRef = useRef(null);
-          const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
-        const [showPiano, setShowPiano] = useState(true);
+  const [selectedNotes, setSelectedNotes] = useState([]);
+  const scrollToBeatRef = useRef(null);
+  const [pressedPianoNotes, setPressedPianoNotes] = useState(new Set());
+  const [showPiano, setShowPiano] = useState(true);
   const [showPianoPanel, setShowPianoPanel] = useState(true);
   const [pianoPopout, setPianoPopout] = useState(false);
   const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
@@ -112,47 +112,47 @@ export default function CounterpointGenerator() {
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  
+
   const playbackRef = useRef(null);
-      const animationRef = useRef(null);
-      const lastTimeRef = useRef(null);
-      const audioInitialized = useRef(false);
-      const queryClient = useQueryClient();
+  const animationRef = useRef(null);
+  const lastTimeRef = useRef(null);
+  const audioInitialized = useRef(false);
+  const queryClient = useQueryClient();
   const previewTimeoutRef = useRef(null);
 
-      // Global spacebar handler for play/pause
-      useEffect(() => {
-        const handleKeyDown = (e) => {
-          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-          if (e.key === ' ') {
-            e.preventDefault();
-            setIsPlaying(prev => {
-              if (prev) {
-                stopAllNotes();
-              }
-              return !prev;
-            });
+  // Global spacebar handler for play/pause
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === ' ') {
+        e.preventDefault();
+        setIsPlaying((prev) => {
+          if (prev) {
+            stopAllNotes();
           }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-      }, []);
+          return !prev;
+        });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Get current user
   useEffect(() => {
-    base44.auth.me().then(user => setCurrentUser(user)).catch(() => setCurrentUser(null));
+    base44.auth.me().then((user) => setCurrentUser(user)).catch(() => setCurrentUser(null));
   }, []);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
     queryKey: ['counterpoint-projects'],
-    queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
+    queryFn: () => base44.entities.CounterpointProject.list('-created_date')
   });
 
   // Fetch songs
   const { data: songs = [] } = useQuery({
     queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-created_date'),
+    queryFn: () => base44.entities.Song.list('-created_date')
   });
 
   // Save project mutation
@@ -283,31 +283,31 @@ export default function CounterpointGenerator() {
       instrument: v.instrument || DEFAULT_VOICES[idx]?.instrument || 'organ'
     }));
     setVoices(voicesWithInstruments);
-    
+
     // Fix tempo if needed
     const loadedTempo = project.settings?.tempo || 80;
     const correctedTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
-    
+
     // Update settings with corrected tempo
     setSettings({ ...(project.settings || DEFAULT_SETTINGS), tempo: correctedTempo });
     setTempo(correctedTempo);
-    
+
     setCantusFirmus(project.cantusFirmus || []);
     setGeneratedVoices(project.generatedVoices || []);
     setProjectName(project.name);
     setCurrentProjectId(project.id);
-    
+
     // Load effects and envelope
     setEffects(project.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
-    
+
     setLoadDialogOpen(false);
   };
 
   // Stop preview when modal closes
   useEffect(() => {
     if (!songDialogOpen && previewTimeoutRef.current) {
-      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current.forEach((id) => clearTimeout(id));
       previewTimeoutRef.current = null;
       setPreviewingSongId(null);
       // Delay stopAllNotes slightly to ensure timeouts are cleared first
@@ -318,12 +318,12 @@ export default function CounterpointGenerator() {
   const handleLoadSong = (song) => {
     // Stop any preview
     if (previewTimeoutRef.current) {
-      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current.forEach((id) => clearTimeout(id));
       previewTimeoutRef.current = null;
     }
     stopAllNotes();
     setPreviewingSongId(null);
-    
+
     // Load voices and ensure each has an instrument
     const loadedVoices = song.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -331,37 +331,37 @@ export default function CounterpointGenerator() {
       instrument: v.instrument || DEFAULT_VOICES[idx]?.instrument || 'organ'
     }));
     setVoices(voicesWithInstruments);
-    
+
     // Load notes as-is (preview plays correctly, so no conversion needed)
     const loadedTempo = song.settings?.tempo || 80;
     const loadedCantusFirmus = song.cantusFirmus || [];
     const loadedGeneratedVoices = song.generatedVoices || [];
-    
+
     // Calculate required measures based on actual beat range
     const maxBeat = Math.max(
-      ...loadedCantusFirmus.map(n => n.beat + (n.duration || 1)),
-      ...loadedGeneratedVoices.flatMap(v => (v.notes || []).map(n => n.beat + (n.duration || 1))),
+      ...loadedCantusFirmus.map((n) => n.beat + (n.duration || 1)),
+      ...loadedGeneratedVoices.flatMap((v) => (v.notes || []).map((n) => n.beat + (n.duration || 1))),
       0
     );
     const beatsPerMeasure = getBeatsPerMeasure(song.settings?.timeSignature || '4/4');
-    const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || (song.settings?.measures || 8);
-    
-    setSettings({ 
-      ...(song.settings || DEFAULT_SETTINGS), 
+    const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || song.settings?.measures || 8;
+
+    setSettings({
+      ...(song.settings || DEFAULT_SETTINGS),
       tempo: loadedTempo,
-      measures: requiredMeasures 
+      measures: requiredMeasures
     });
     setTempo(loadedTempo);
-    
+
     setCantusFirmus(loadedCantusFirmus);
     setGeneratedVoices(loadedGeneratedVoices);
     setProjectName(song.name);
     setCurrentProjectId(null);
-    
+
     // Load effects and envelope
     setEffects(song.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
-    
+
     setSongDialogOpen(false);
   };
 
@@ -371,7 +371,7 @@ export default function CounterpointGenerator() {
 
     // Clear any existing preview
     if (previewTimeoutRef.current) {
-      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current.forEach((id) => clearTimeout(id));
       previewTimeoutRef.current = null;
       stopAllNotes();
     }
@@ -397,33 +397,33 @@ export default function CounterpointGenerator() {
     const timeouts = [];
     allPreviewVoices.forEach((voice, voiceIndex) => {
       const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
-      voice.notes?.forEach(note => {
-        const sixteenthNoteDuration = (60 / previewTempo) / 4; // Duration of one 16th note (our beat unit)
+      voice.notes?.forEach((note) => {
+        const sixteenthNoteDuration = 60 / previewTempo / 4; // Duration of one 16th note (our beat unit)
         const startTime = note.beat * sixteenthNoteDuration * 1000; // Convert beat to milliseconds
         const noteDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-        
+
         const timeout = setTimeout(() => {
-          if (previewTimeoutRef.current) { // Only play if preview is still active
+          if (previewTimeoutRef.current) {// Only play if preview is still active
             playNote(note.pitch, noteDuration, 0.7, voiceIndex, voiceInstrument);
           }
         }, startTime);
-        
+
         timeouts.push(timeout);
       });
     });
-    
+
     // Auto-stop after song duration
     const maxBeat = Math.max(
-      ...allPreviewVoices.flatMap(v => v.notes?.map(n => n.beat + (n.duration || 1)) || [0])
+      ...allPreviewVoices.flatMap((v) => v.notes?.map((n) => n.beat + (n.duration || 1)) || [0])
     );
-    const totalDuration = maxBeat * ((60 / previewTempo) / 4) * 1000 + 500;
-    
+    const totalDuration = maxBeat * (60 / previewTempo / 4) * 1000 + 500;
+
     const stopTimeout = setTimeout(() => {
       stopAllNotes();
       setPreviewingSongId(null);
       previewTimeoutRef.current = null;
     }, totalDuration);
-    
+
     timeouts.push(stopTimeout);
     previewTimeoutRef.current = timeouts;
   };
@@ -447,13 +447,13 @@ export default function CounterpointGenerator() {
 
   // Get all voices for display
   const allVoices = [
-    { name: 'Cantus Firmus', notes: cantusFirmus, enabled: true },
-    ...generatedVoices
-  ];
+  { name: 'Cantus Firmus', notes: cantusFirmus, enabled: true },
+  ...generatedVoices];
+
 
   // Get active notes at current beat
-  const activeNotes = allVoices.flatMap(voice => 
-    voice.notes?.filter(n => Math.floor(n.beat) === currentBeat) || []
+  const activeNotes = allVoices.flatMap((voice) =>
+  voice.notes?.filter((n) => Math.floor(n.beat) === currentBeat) || []
   );
 
   // Handle voice config update
@@ -461,31 +461,31 @@ export default function CounterpointGenerator() {
     const newVoices = [...voices];
     newVoices[index] = updatedVoice;
     setVoices(newVoices);
-    
+
     // Update numVoices based on enabled voices
-    const enabledCount = newVoices.filter(v => v.enabled).length;
+    const enabledCount = newVoices.filter((v) => v.enabled).length;
     if (enabledCount !== settings.numVoices) {
-      setSettings(prev => ({ ...prev, numVoices: enabledCount }));
+      setSettings((prev) => ({ ...prev, numVoices: enabledCount }));
     }
   };
 
   // Generate counterpoint
   const handleGenerate = async () => {
     if (cantusFirmus.length === 0) return;
-    
+
     ensureAudio();
     setIsGenerating(true);
-    
+
     // Simulate processing time for effect
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const result = generateCounterpoint(cantusFirmus, settings, voices);
     setGeneratedVoices(result.voices);
-    
+
     // Validate and get violations
     const newViolations = validateCounterpoint(result.voices, cantusFirmus);
     setViolations(newViolations);
-    
+
     setIsGenerating(false);
   };
 
@@ -499,7 +499,7 @@ export default function CounterpointGenerator() {
   useEffect(() => {
     if (isPlaying) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-      const beatsPerSecond = (tempo / 60) * 4; // 16th notes per second
+      const beatsPerSecond = tempo / 60 * 4; // 16th notes per second
       const totalBeats = settings.measures * beatsPerMeasure;
 
       const effectiveLoopEnd = loopEnd ?? totalBeats;
@@ -510,15 +510,15 @@ export default function CounterpointGenerator() {
         setIsPlaying(false);
         return;
       }
-      
+
       lastTimeRef.current = performance.now();
-      
+
       const animate = (timestamp) => {
         if (!lastTimeRef.current) lastTimeRef.current = timestamp;
         const deltaTime = (timestamp - lastTimeRef.current) / 1000; // Convert to seconds
         lastTimeRef.current = timestamp;
 
-        setPlayheadPosition(prev => {
+        setPlayheadPosition((prev) => {
           const next = prev + deltaTime * beatsPerSecond;
           if (next >= effectiveLoopEnd) {
             if (isLooping) {
@@ -532,9 +532,9 @@ export default function CounterpointGenerator() {
 
         animationRef.current = requestAnimationFrame(animate);
       };
-      
+
       animationRef.current = requestAnimationFrame(animate);
-      
+
       return () => {
         if (animationRef.current) {
           cancelAnimationFrame(animationRef.current);
@@ -563,11 +563,11 @@ export default function CounterpointGenerator() {
   // Collect all notes for fractional beat playback
   const allNotes = React.useMemo(() => {
     const notes = [];
-    cantusFirmus.forEach(note => {
+    cantusFirmus.forEach((note) => {
       if (note.beat >= 0) notes.push({ note, voiceIndex: 0 });
     });
     generatedVoices.forEach((voice, idx) => {
-      voice.notes?.forEach(note => {
+      voice.notes?.forEach((note) => {
         if (note.beat >= 0) notes.push({ note, voiceIndex: idx + 1 });
       });
     });
@@ -580,7 +580,7 @@ export default function CounterpointGenerator() {
 
     const currentPos = playheadPosition;
     const lastPos = lastPlayheadRef.current;
-    
+
     // Handle loop wraparound
     if (currentPos < lastPos) {
       playedNotesRef.current.clear();
@@ -595,15 +595,15 @@ export default function CounterpointGenerator() {
       if (instrument.startsWith('preset_')) {
         const index = parseInt(instrument.split('_')[1]);
         const PRESET_LIBRARY = [
-          { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
-          { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
-          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
-          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
-          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
-          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
-          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
-          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
-        ];
+        { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+        { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+        { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+        { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+        { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+        { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+        { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+        { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }];
+
         return PRESET_LIBRARY[index];
       }
       return null;
@@ -612,22 +612,22 @@ export default function CounterpointGenerator() {
     // Find and play all notes between last and current position
     allNotes.forEach(({ note, voiceIndex }) => {
       const noteKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
-      
+
       // Check if note should trigger (beat is in the range we just passed)
       if (note.beat >= lastPos && note.beat < currentPos && !playedNotesRef.current.has(noteKey)) {
         playedNotesRef.current.add(noteKey);
-        
+
         if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
-        
+
         const volume = (voices[voiceIndex]?.volume || 80) / 100;
         const velocity = note.velocity ?? 0.8;
-        const sixteenthNoteDuration = (60 / tempo) / 4;
+        const sixteenthNoteDuration = 60 / tempo / 4;
         const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
-        
+
         // Check if using custom instrument
         const customConfig = getCustomConfig(instrument);
-        
+
         let pitchBend = 0;
         if (note.bendStart !== undefined || note.bendEnd !== undefined) {
           pitchBend = {
@@ -637,7 +637,7 @@ export default function CounterpointGenerator() {
             endTime: note.bendEndTime ?? 1
           };
         }
-        
+
         if (customConfig) {
           // Use custom instrument playback
           import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
@@ -656,7 +656,7 @@ export default function CounterpointGenerator() {
     const discreteBeat = Math.floor(currentPos);
     if (discreteBeat !== Math.floor(lastPos) && metronomeEnabled) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-      
+
       // Determine click subdivision based on time signature
       let subdivisionSize;
       switch (settings.timeSignature) {
@@ -666,12 +666,12 @@ export default function CounterpointGenerator() {
         default:
           subdivisionSize = 4; // Click on quarter notes (every 4 sixteenth notes)
       }
-      
+
       if (discreteBeat % subdivisionSize === 0) {
         // Time signature aware accent patterns
         let isAccent = false;
         const beatInMeasure = discreteBeat % beatsPerMeasure;
-        
+
         switch (settings.timeSignature) {
           case '4/4':
             isAccent = beatInMeasure === 0; // Accent on beat 1
@@ -692,7 +692,7 @@ export default function CounterpointGenerator() {
           default:
             isAccent = beatInMeasure === 0;
         }
-        
+
         playMetronomeClick(isAccent);
       }
     }
@@ -711,7 +711,7 @@ export default function CounterpointGenerator() {
         lastPlayheadRef.current = loopStart;
         playedNotesRef.current.clear();
       } else if (selectedNotes.length > 0) {
-        const minBeat = Math.min(...selectedNotes.map(n => n.beat));
+        const minBeat = Math.min(...selectedNotes.map((n) => n.beat));
         setCurrentBeat(minBeat);
         setPlayheadPosition(minBeat);
         lastPlayheadRef.current = minBeat;
@@ -753,16 +753,16 @@ export default function CounterpointGenerator() {
       setCurrentBeat(-4);
       setPlayheadPosition(-4);
       recordedNotesRef.current = [];
-      
+
       // Count down
       let count = 4;
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-      const sixteenthNoteDuration = (60 / tempo) / 4;
+      const sixteenthNoteDuration = 60 / tempo / 4;
       const countInterval = setInterval(() => {
         playMetronomeClick(count === 4);
         count--;
         setCountInBeats(count);
-        
+
         if (count === 0) {
           clearInterval(countInterval);
           setIsCountingIn(false);
@@ -779,10 +779,10 @@ export default function CounterpointGenerator() {
   const handleNotePress = useCallback((pitch) => {
     if (isRecording && playheadPosition >= 0) {
       const recordBeat = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
-      
+
       // Check if this note at this beat already exists
       const alreadyRecorded = recordedNotesRef.current.some(
-        n => n.pitch === pitch && Math.abs(n.beat - recordBeat) < 0.5
+        (n) => n.pitch === pitch && Math.abs(n.beat - recordBeat) < 0.5
       );
       if (!alreadyRecorded) {
         const newNote = {
@@ -793,9 +793,9 @@ export default function CounterpointGenerator() {
         };
         recordedNotesRef.current.push(newNote);
         console.log('Recorded note:', newNote, 'Total recorded:', recordedNotesRef.current.length);
-        
+
         // Update cantusFirmus immediately for real-time visual feedback
-        setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
+        setCantusFirmus((prev) => [...prev, newNote].sort((a, b) => a.beat - b.beat));
       }
     }
   }, [isRecording, playheadPosition, snapToGrid]);
@@ -813,9 +813,9 @@ export default function CounterpointGenerator() {
       settings,
       cantusFirmus,
       generatedVoices,
-      voices: voices.filter(v => v.enabled)
+      voices: voices.filter((v) => v.enabled)
     };
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -833,19 +833,19 @@ export default function CounterpointGenerator() {
     input.onchange = async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      
+
       try {
         const arrayBuffer = await file.arrayBuffer();
         const midi = new Midi(arrayBuffer);
-        
+
         // Extract tempo from MIDI (convert to BPM based on quarter notes)
         const midiTempo = midi.header.tempos.length > 0 ? midi.header.tempos[0].bpm : 120;
         const midiBPM = Math.round(midiTempo);
-        
+
         // Get all notes from all tracks, sorted by time
         const allNotes = [];
-        midi.tracks.forEach(track => {
-          track.notes.forEach(note => {
+        midi.tracks.forEach((track) => {
+          track.notes.forEach((note) => {
             allNotes.push({
               pitch: note.name,
               time: note.time,
@@ -854,37 +854,37 @@ export default function CounterpointGenerator() {
             });
           });
         });
-        
+
         // Sort by time
         allNotes.sort((a, b) => a.time - b.time);
-        
+
         // Convert MIDI times (in seconds) to our 16th-note beat grid
-        const sixteenthNotesPerSecond = (midiBPM / 60) * 4;
+        const sixteenthNotesPerSecond = midiBPM / 60 * 4;
 
         // Round to 3 decimal places (millisecond precision) - preserves trills while matching playback system
-        const importedNotes = allNotes.map(n => ({
+        const importedNotes = allNotes.map((n) => ({
           pitch: n.pitch,
           beat: Math.round(n.time * sixteenthNotesPerSecond * 1000) / 1000,
-          duration: Math.max(0.0625, Math.round((n.duration * sixteenthNotesPerSecond) * 1000) / 1000),
+          duration: Math.max(0.0625, Math.round(n.duration * sixteenthNotesPerSecond * 1000) / 1000),
           velocity: n.velocity
         }));
-        
+
         // Calculate required measures based on the longest note
-        const maxBeat = Math.max(...importedNotes.map(n => n.beat + (n.duration || 1)), 0);
+        const maxBeat = Math.max(...importedNotes.map((n) => n.beat + (n.duration || 1)), 0);
         const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
         const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || 1;
 
         // Update tempo and measures to match MIDI file
         setTempo(midiBPM);
-        setSettings(prev => ({ ...prev, measures: requiredMeasures }));
+        setSettings((prev) => ({ ...prev, measures: requiredMeasures }));
         setCantusFirmus(importedNotes);
-        } catch (error) {
+      } catch (error) {
         console.error('Failed to import MIDI:', error);
         alert('Failed to import MIDI file: ' + error.message);
-        }
-        };
-        input.click();
-        };
+      }
+    };
+    input.click();
+  };
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A]">
@@ -896,11 +896,11 @@ export default function CounterpointGenerator() {
 
       <div className="relative z-10 max-w-[98vw] 2xl:max-w-[99vw] mx-auto px-1 2xl:px-0 pt-1 pb-2 overflow-x-hidden">
         {/* Header */}
-                  <motion.header 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-1"
-                  >
+                  <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-1">
+
                                 {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
                 <DialogTrigger asChild>
@@ -911,15 +911,15 @@ export default function CounterpointGenerator() {
                     <DialogTitle className="text-white">Load Project</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {savedProjects.length === 0 ? (
-                      <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p>
-                    ) : (
-                      savedProjects.map((project) => (
-                        <div
-                          key={project.id}
-                          className="flex items-center justify-between p-3 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer"
-                          onClick={() => handleLoadProject(project)}
-                        >
+                    {savedProjects.length === 0 ?
+                <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p> :
+
+                savedProjects.map((project) =>
+                <div
+                  key={project.id}
+                  className="flex items-center justify-between p-3 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer"
+                  onClick={() => handleLoadProject(project)}>
+
                           <div>
                             <p className="text-white font-medium">{project.name}</p>
                             <p className="text-white/50 text-xs">
@@ -927,25 +927,25 @@ export default function CounterpointGenerator() {
                             </p>
                           </div>
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteProjectMutation.mutate(project.id);
-                            }}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                          >
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteProjectMutation.mutate(project.id);
+                    }}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
+
                             ×
                           </Button>
                         </div>
-                      ))
-                    )}
+                )
+                }
                   </div>
                   <Button
-                    variant="outline"
-                    onClick={handleNewProject}
-                    className="w-full border-slate-600 text-white hover:bg-slate-700 hover:text-white"
-                  >
+                variant="outline"
+                onClick={handleNewProject} className="bg-background text-slate-950 px-4 py-2 text-sm font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm h-9 w-full border-slate-600 hover:bg-slate-700 hover:text-white">
+
+
                     New Project
                   </Button>
                 </DialogContent>
@@ -961,15 +961,15 @@ export default function CounterpointGenerator() {
                     <DialogTitle className="text-white">Browse Songs</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                    {songs.length === 0 ? (
-                      <p className="text-white/60 text-sm text-center py-4">No songs available</p>
-                    ) : (
-                      songs.map((song) => (
-                        <div
-                          key={song.id}
-                          className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
-                          onClick={() => handleLoadSong(song)}
-                        >
+                    {songs.length === 0 ?
+                <p className="text-white/60 text-sm text-center py-4">No songs available</p> :
+
+                songs.map((song) =>
+                <div
+                  key={song.id}
+                  className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
+                  onClick={() => handleLoadSong(song)}>
+
                           <div className="flex-1">
                             <p className="text-white font-medium text-lg">{song.name}</p>
                             <p className="text-white/70 text-sm mt-1">{song.description}</p>
@@ -987,55 +987,55 @@ export default function CounterpointGenerator() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => handlePreviewSong(song, e)}
-                              className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}
-                            >
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handlePreviewSong(song, e)}
+                      className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}>
+
                               {previewingSongId === song.id ? '⏹' : '▶'}
                             </Button>
-                            {currentUser?.role === 'admin' && (
-                              <>
+                            {currentUser?.role === 'admin' &&
+                    <>
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingSong(song);
-                                    setSongName(song.name);
-                                    setSongDescription(song.description || '');
-                                    setEditSongDialogOpen(true);
-                                  }}
-                                  className="text-white/60 hover:text-white"
-                                >
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingSong(song);
+                          setSongName(song.name);
+                          setSongDescription(song.description || '');
+                          setEditSongDialogOpen(true);
+                        }}
+                        className="text-white/60 hover:text-white">
+
                                   <Edit2 className="w-4 h-4" />
                                 </Button>
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (confirm(`Delete "${song.name}"?`)) {
-                                      deleteSongMutation.mutate(song.id);
-                                    }
-                                  }}
-                                  className="text-red-400 hover:text-red-300"
-                                >
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete "${song.name}"?`)) {
+                            deleteSongMutation.mutate(song.id);
+                          }
+                        }}
+                        className="text-red-400 hover:text-red-300">
+
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </>
-                            )}
+                    }
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-amber-400 hover:text-amber-300"
-                            >
+                      variant="ghost"
+                      size="sm"
+                      className="text-amber-400 hover:text-amber-300">
+
                               Load →
                             </Button>
                           </div>
                         </div>
-                      ))
-                    )}
+                )
+                }
                   </div>
                 </DialogContent>
               </Dialog>
@@ -1049,23 +1049,23 @@ export default function CounterpointGenerator() {
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(); }} className="space-y-4">
+                  <form onSubmit={(e) => {e.preventDefault();handleSaveProject();}} className="space-y-4">
                     <div>
                       <Label className="text-white/80">Project Name</Label>
                       <Input
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        placeholder="My Counterpoint"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder="My Counterpoint"
+                    className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
+                    autoFocus />
+
                     </div>
                     <Button
-                      type="submit"
-                      disabled={!projectName.trim() || saveProjectMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
-                      {saveProjectMutation.isPending ? 'Saving...' : (currentProjectId ? 'Update Project' : 'Save Project')}
+                  type="submit"
+                  disabled={!projectName.trim() || saveProjectMutation.isPending}
+                  className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]">
+
+                      {saveProjectMutation.isPending ? 'Saving...' : currentProjectId ? 'Update Project' : 'Save Project'}
                     </Button>
                   </form>
                 </DialogContent>
@@ -1080,31 +1080,31 @@ export default function CounterpointGenerator() {
                   <DialogHeader>
                     <DialogTitle className="text-white">Save as Song</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleSaveSong(); }} className="space-y-4">
+                  <form onSubmit={(e) => {e.preventDefault();handleSaveSong();}} className="space-y-4">
                     <div>
                       <Label className="text-white/80">Song Name</Label>
                       <Input
-                        value={songName}
-                        onChange={(e) => setSongName(e.target.value)}
-                        placeholder="My Beautiful Song"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
+                    value={songName}
+                    onChange={(e) => setSongName(e.target.value)}
+                    placeholder="My Beautiful Song"
+                    className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
+                    autoFocus />
+
                     </div>
                     <div>
                       <Label className="text-white/80">Description</Label>
                       <Input
-                        value={songDescription}
-                        onChange={(e) => setSongDescription(e.target.value)}
-                        placeholder="A brief description..."
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                      />
+                    value={songDescription}
+                    onChange={(e) => setSongDescription(e.target.value)}
+                    placeholder="A brief description..."
+                    className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1" />
+
                     </div>
                     <Button
-                      type="submit"
-                      disabled={!songName.trim() || saveSongMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
+                  type="submit"
+                  disabled={!songName.trim() || saveSongMutation.isPending}
+                  className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]">
+
                       {saveSongMutation.isPending ? 'Saving...' : 'Save Song'}
                     </Button>
                   </form>
@@ -1120,31 +1120,31 @@ export default function CounterpointGenerator() {
                   <DialogHeader>
                     <DialogTitle className="text-white">Edit Song</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleUpdateSong(); }} className="space-y-4">
+                  <form onSubmit={(e) => {e.preventDefault();handleUpdateSong();}} className="space-y-4">
                     <div>
                       <Label className="text-white/80">Song Name</Label>
                       <Input
-                        value={songName}
-                        onChange={(e) => setSongName(e.target.value)}
-                        placeholder="My Beautiful Song"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
+                    value={songName}
+                    onChange={(e) => setSongName(e.target.value)}
+                    placeholder="My Beautiful Song"
+                    className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
+                    autoFocus />
+
                     </div>
                     <div>
                       <Label className="text-white/80">Description</Label>
                       <Input
-                        value={songDescription}
-                        onChange={(e) => setSongDescription(e.target.value)}
-                        placeholder="A brief description..."
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                      />
+                    value={songDescription}
+                    onChange={(e) => setSongDescription(e.target.value)}
+                    placeholder="A brief description..."
+                    className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1" />
+
                     </div>
                     <Button
-                      type="submit"
-                      disabled={!songName.trim() || updateSongMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
+                  type="submit"
+                  disabled={!songName.trim() || updateSongMutation.isPending}
+                  className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]">
+
                       {updateSongMutation.isPending ? 'Updating...' : 'Update Song'}
                     </Button>
                   </form>
@@ -1156,276 +1156,204 @@ export default function CounterpointGenerator() {
         <div className="grid grid-cols-1 gap-6">
 
           {/* Main Area - Score & Playback - Full width */}
-          <motion.main 
+          <motion.main
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-2"
-          >
+            className="space-y-2">
+
             <NoteGrid
-                              settings={settings}
-                              playheadPosition={playheadPosition}
-                              playbackControls={
-                                <PlaybackControls
-                                  isPlaying={isPlaying}
-                                  onPlayPause={handlePlayPause}
-                                  tempo={tempo}
-                                  onTempoChange={setTempo}
-                                  currentBeat={currentBeat}
-                                  totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
-                                  onSeek={handleSeek}
-                                  onReset={handleReset}
-                                  onStop={handleStop}
-                                  loopStart={loopStart}
-                                  loopEnd={loopEnd}
-                                  onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
-                                  isLooping={isLooping}
-                                  onLoopToggle={() => setIsLooping(!isLooping)}
-                                  timeSignature={settings.timeSignature}
-                                  onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
-                                  metronomeEnabled={metronomeEnabled}
-                                  onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-                                  onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
-                                  onNewProject={handleNewProject}
-                                  onSaveProject={() => setSaveDialogOpen(true)}
-                                  onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                                  onLoadProject={() => setLoadDialogOpen(true)}
-                                  onBrowseSongs={() => setSongDialogOpen(true)}
-                                  onExport={handleExport}
-                                  onAIComposer={async () => {
-                                    const isAuth = await base44.auth.isAuthenticated();
-                                    if (!isAuth) {
-                                      base44.auth.redirectToLogin(window.location.href);
-                                      return;
-                                    }
-                                    setChatbotActive(prev => {
-                                      const newState = !prev;
-                                      if (newState) {
-                                        setChatbotOpen(true);
-                                        setChatbotMinimized(false);
-                                      } else {
-                                        setChatbotOpen(false);
-                                        setChatbotMinimized(false);
-                                      }
-                                      return newState;
-                                    });
-                                  }}
-                                  onGenerate={handleGenerate}
-                                  canGenerate={cantusFirmus.length > 0}
-                                  isGenerating={isGenerating}
-                                  onExportMidi={() => {
-                                    const midiData = {
-                                      tempo,
-                                      timeSignature: [4, 4],
-                                      tracks: allVoices.map((voice, idx) => ({
-                                        name: voice.name,
-                                        notes: voice.notes?.map(n => ({
-                                          pitch: n.pitch,
-                                          startTime: n.beat * (60 / tempo),
-                                          duration: (n.duration || 1) * (60 / tempo),
-                                          velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                        })) || []
-                                      }))
-                                    };
-                                    const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                    a.click();
-                                    URL.revokeObjectURL(url);
-                                  }}
-                                  onImportMidi={handleImportMidi}
-                                  isRecording={isRecording}
-                                  onRecordToggle={handleRecordToggle}
-                                  isCountingIn={isCountingIn}
-                                  countInBeats={countInBeats}
-                                  masterVolume={masterVolume}
-                                  onMasterVolumeChange={(vol) => {
-                                    setMasterVolume(vol);
-                                    setAudioMasterVolume(vol / 100 * 0.4);
-                                  }}
-                                  />
-                              }
-                              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
-                              currentBeat={currentBeat}
-                              isPlaying={isPlaying}
-                              measures={settings.measures}
-                              cantusFirmus={cantusFirmus}
-                              onNotesUpdate={setCantusFirmus}
-                              onSeek={handleSeek}
-                              activeVoice={activeVoice}
-                              onActiveVoiceChange={setActiveVoice}
-                              onSelectionChange={setSelectedNotes}
-                              tempo={tempo}
-                              timeSignature={settings.timeSignature}
-                              scrollToBeatRef={scrollToBeatRef}
-                              pressedPianoNotes={pressedPianoNotes}
-                              pianoInstrument={voices[0]?.instrument || 'organ'}
-                              loopStart={loopStart}
-                              loopEnd={loopEnd}
-                              isLooping={isLooping}
-                              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
-                              onVoiceInstrumentChange={(voiceIndex, instrument) => {
-                                const newVoices = [...voices];
-                                // Always update voice 0 (cantus firmus) since that's what's being edited
-                                if (newVoices[0]) {
-                                  newVoices[0] = { ...newVoices[0], instrument };
-                                  setVoices(newVoices);
-                                }
-                              }}
-                              onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
-                              showPianoPanel={showPianoPanel && !pianoPopout}
-                              onPopOut={() => setPianoPopout(true)}
-                              onNewProject={handleNewProject}
-                              onSaveProject={() => setSaveDialogOpen(true)}
-                              onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                              onLoadProject={() => setLoadDialogOpen(true)}
-                              onBrowseSongs={() => setSongDialogOpen(true)}
-                              onExport={handleExport}
-                              onAIComposer={async () => {
-                                const isAuth = await base44.auth.isAuthenticated();
-                                if (!isAuth) {
-                                  base44.auth.redirectToLogin(window.location.href);
-                                  return;
-                                }
-                                setChatbotActive(prev => {
-                                  const newState = !prev;
-                                  if (newState) {
-                                    setChatbotOpen(true);
-                                    setChatbotMinimized(false);
-                                  } else {
-                                    setChatbotOpen(false);
-                                    setChatbotMinimized(false);
-                                  }
-                                  return newState;
-                                });
-                              }}
-                              onGenerate={handleGenerate}
-                              canGenerate={cantusFirmus.length > 0}
-                              isGenerating={isGenerating}
-                              onExportMidi={() => {
-                                const midiData = {
-                                  tempo,
-                                  timeSignature: [4, 4],
-                                  tracks: allVoices.map((voice, idx) => ({
-                                    name: voice.name,
-                                    notes: voice.notes?.map(n => ({
-                                      pitch: n.pitch,
-                                      startTime: n.beat * (60 / tempo),
-                                      duration: (n.duration || 1) * (60 / tempo),
-                                      velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                    })) || []
-                                  }))
-                                };
-                                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                a.click();
-                                URL.revokeObjectURL(url);
-                              }}
-                              onImportMidi={handleImportMidi}
-                              onOpenWaveEditor={() => {
-                              setShowPianoPanel(true);
-                              setOpenWaveEditor(true);
-                              setTimeout(() => setOpenWaveEditor(false), 100);
-                              }}
-                              customInstruments={customInstruments}
-                              snapToGrid={snapToGrid}
-                              onSnapToGridChange={setSnapToGrid}
-                              chatbotActive={chatbotActive}
-                              />
+              settings={settings}
+              playheadPosition={playheadPosition}
+              playbackControls={
+              <PlaybackControls
+                isPlaying={isPlaying}
+                onPlayPause={handlePlayPause}
+                tempo={tempo}
+                onTempoChange={setTempo}
+                currentBeat={currentBeat}
+                totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
+                onSeek={handleSeek}
+                onReset={handleReset}
+                onStop={handleStop}
+                loopStart={loopStart}
+                loopEnd={loopEnd}
+                onLoopChange={(start, end) => {setLoopStart(start);setLoopEnd(end);}}
+                isLooping={isLooping}
+                onLoopToggle={() => setIsLooping(!isLooping)}
+                timeSignature={settings.timeSignature}
+                onTimeSignatureChange={(ts) => setSettings((prev) => ({ ...prev, timeSignature: ts }))}
+                metronomeEnabled={metronomeEnabled}
+                onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+                onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                onNewProject={handleNewProject}
+                onSaveProject={() => setSaveDialogOpen(true)}
+                onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+                onLoadProject={() => setLoadDialogOpen(true)}
+                onBrowseSongs={() => setSongDialogOpen(true)}
+                onExport={handleExport}
+                onAIComposer={async () => {
+                  const isAuth = await base44.auth.isAuthenticated();
+                  if (!isAuth) {
+                    base44.auth.redirectToLogin(window.location.href);
+                    return;
+                  }
+                  setChatbotActive((prev) => {
+                    const newState = !prev;
+                    if (newState) {
+                      setChatbotOpen(true);
+                      setChatbotMinimized(false);
+                    } else {
+                      setChatbotOpen(false);
+                      setChatbotMinimized(false);
+                    }
+                    return newState;
+                  });
+                }}
+                onGenerate={handleGenerate}
+                canGenerate={cantusFirmus.length > 0}
+                isGenerating={isGenerating}
+                onExportMidi={() => {
+                  const midiData = {
+                    tempo,
+                    timeSignature: [4, 4],
+                    tracks: allVoices.map((voice, idx) => ({
+                      name: voice.name,
+                      notes: voice.notes?.map((n) => ({
+                        pitch: n.pitch,
+                        startTime: n.beat * (60 / tempo),
+                        duration: (n.duration || 1) * (60 / tempo),
+                        velocity: Math.round((n.velocity ?? 0.8) * 100)
+                      })) || []
+                    }))
+                  };
+                  const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                onImportMidi={handleImportMidi}
+                isRecording={isRecording}
+                onRecordToggle={handleRecordToggle}
+                isCountingIn={isCountingIn}
+                countInBeats={countInBeats}
+                masterVolume={masterVolume}
+                onMasterVolumeChange={(vol) => {
+                  setMasterVolume(vol);
+                  setAudioMasterVolume(vol / 100 * 0.4);
+                }} />
+
+              }
+              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
+              currentBeat={currentBeat}
+              isPlaying={isPlaying}
+              measures={settings.measures}
+              cantusFirmus={cantusFirmus}
+              onNotesUpdate={setCantusFirmus}
+              onSeek={handleSeek}
+              activeVoice={activeVoice}
+              onActiveVoiceChange={setActiveVoice}
+              onSelectionChange={setSelectedNotes}
+              tempo={tempo}
+              timeSignature={settings.timeSignature}
+              scrollToBeatRef={scrollToBeatRef}
+              pressedPianoNotes={pressedPianoNotes}
+              pianoInstrument={voices[0]?.instrument || 'organ'}
+              loopStart={loopStart}
+              loopEnd={loopEnd}
+              isLooping={isLooping}
+              onLoopChange={(start, end) => {setLoopStart(start);setLoopEnd(end);}}
+              onVoiceInstrumentChange={(voiceIndex, instrument) => {
+                const newVoices = [...voices];
+                // Always update voice 0 (cantus firmus) since that's what's being edited
+                if (newVoices[0]) {
+                  newVoices[0] = { ...newVoices[0], instrument };
+                  setVoices(newVoices);
+                }
+              }}
+              onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
+              showPianoPanel={showPianoPanel && !pianoPopout}
+              onPopOut={() => setPianoPopout(true)}
+              onNewProject={handleNewProject}
+              onSaveProject={() => setSaveDialogOpen(true)}
+              onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+              onLoadProject={() => setLoadDialogOpen(true)}
+              onBrowseSongs={() => setSongDialogOpen(true)}
+              onExport={handleExport}
+              onAIComposer={async () => {
+                const isAuth = await base44.auth.isAuthenticated();
+                if (!isAuth) {
+                  base44.auth.redirectToLogin(window.location.href);
+                  return;
+                }
+                setChatbotActive((prev) => {
+                  const newState = !prev;
+                  if (newState) {
+                    setChatbotOpen(true);
+                    setChatbotMinimized(false);
+                  } else {
+                    setChatbotOpen(false);
+                    setChatbotMinimized(false);
+                  }
+                  return newState;
+                });
+              }}
+              onGenerate={handleGenerate}
+              canGenerate={cantusFirmus.length > 0}
+              isGenerating={isGenerating}
+              onExportMidi={() => {
+                const midiData = {
+                  tempo,
+                  timeSignature: [4, 4],
+                  tracks: allVoices.map((voice, idx) => ({
+                    name: voice.name,
+                    notes: voice.notes?.map((n) => ({
+                      pitch: n.pitch,
+                      startTime: n.beat * (60 / tempo),
+                      duration: (n.duration || 1) * (60 / tempo),
+                      velocity: Math.round((n.velocity ?? 0.8) * 100)
+                    })) || []
+                  }))
+                };
+                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              onImportMidi={handleImportMidi}
+              onOpenWaveEditor={() => {
+                setShowPianoPanel(true);
+                setOpenWaveEditor(true);
+                setTimeout(() => setOpenWaveEditor(false), 100);
+              }}
+              customInstruments={customInstruments}
+              snapToGrid={snapToGrid}
+              onSnapToGridChange={setSnapToGrid}
+              chatbotActive={chatbotActive} />
+
             
             {/* Piano toggle for mobile */}
                               <div className="sm:hidden flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-600">
                                 <span className="text-white/70 text-sm">Piano Keyboard</span>
                                 <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setShowPiano(!showPiano)}
-                                  className="text-amber-400 h-7 px-2"
-                                >
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPiano(!showPiano)}
+                className="text-amber-400 h-7 px-2">
+
                                   {showPiano ? 'Hide Piano' : 'Show Piano'}
                                 </Button>
                               </div>
 
-                              {showPianoPanel && !pianoPopout && (
-                                <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
+                              {showPianoPanel && !pianoPopout &&
+            <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
                                   <PianoKeyboard
-                                    activeNotes={activeNotes}
-                                    instrument={voices[0]?.instrument || 'organ'}
-                                    onInstrumentChange={(inst) => {
-                                      const newVoices = [...voices];
-                                      if (newVoices[0]) {
-                                        newVoices[0] = { ...newVoices[0], instrument: inst };
-                                        setVoices(newVoices);
-                                      }
-                                    }}
-                                    onVoiceInstrumentChange={(voiceIndex, inst) => {
-                                      const newVoices = [...voices];
-                                      if (newVoices[voiceIndex]) {
-                                        newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
-                                        setVoices(newVoices);
-                                      }
-                                    }}
-                                    onPressedNotesChange={setPressedPianoNotes}
-                                    onPopOut={() => setPianoPopout(true)}
-                                    onNotePress={handleNotePress}
-                                    effects={effects}
-                                    onEffectsChange={setEffects}
-                                    envelope={envelope}
-                                    onEnvelopeChange={setEnvelope}
-                                    openWaveEditor={openWaveEditor}
-                                    customInstruments={customInstruments}
-                                    onCustomInstrumentsChange={setCustomInstruments}
-                                  />
-                                </div>
-                              )}
-          </motion.main>
-          </div>
-          </div>
-
-      {/* Piano Popout - Draggable & Resizable Window */}
-      <AnimatePresence>
-        {pianoPopout && (
-          <motion.div
-            drag
-            dragListener={false}
-            dragControls={dragControls}
-            dragMomentum={false}
-            dragElastic={0}
-            dragConstraints={{ top: 0, left: 0, right: window.innerWidth - pianoPopoutSize.width - 20, bottom: window.innerHeight - pianoPopoutSize.height - 20 }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
-            style={{ 
-              top: '10%', 
-              left: '10%', 
-              width: `${pianoPopoutSize.width}px`,
-              height: `${pianoPopoutSize.height}px`,
-              maxWidth: '90vw',
-              maxHeight: '80vh'
-            }}
-          >
-            <div 
-              className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between"
-              onPointerDown={(e) => dragControls.start(e)}
-            >
-              <span className="text-white text-sm font-medium">Piano Keyboard</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setPianoPopout(false)}
-                className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
-              <PianoKeyboard
                 activeNotes={activeNotes}
                 instrument={voices[0]?.instrument || 'organ'}
                 onInstrumentChange={(inst) => {
@@ -1443,6 +1371,7 @@ export default function CounterpointGenerator() {
                   }
                 }}
                 onPressedNotesChange={setPressedPianoNotes}
+                onPopOut={() => setPianoPopout(true)}
                 onNotePress={handleNotePress}
                 effects={effects}
                 onEffectsChange={setEffects}
@@ -1450,122 +1379,193 @@ export default function CounterpointGenerator() {
                 onEnvelopeChange={setEnvelope}
                 openWaveEditor={openWaveEditor}
                 customInstruments={customInstruments}
-                onCustomInstrumentsChange={setCustomInstruments}
-              />
+                onCustomInstrumentsChange={setCustomInstruments} />
+
+                                </div>
+            }
+          </motion.main>
+          </div>
+          </div>
+
+      {/* Piano Popout - Draggable & Resizable Window */}
+      <AnimatePresence>
+        {pianoPopout &&
+        <motion.div
+          drag
+          dragListener={false}
+          dragControls={dragControls}
+          dragMomentum={false}
+          dragElastic={0}
+          dragConstraints={{ top: 0, left: 0, right: window.innerWidth - pianoPopoutSize.width - 20, bottom: window.innerHeight - pianoPopoutSize.height - 20 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
+          style={{
+            top: '10%',
+            left: '10%',
+            width: `${pianoPopoutSize.width}px`,
+            height: `${pianoPopoutSize.height}px`,
+            maxWidth: '90vw',
+            maxHeight: '80vh'
+          }}>
+
+            <div
+            className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between"
+            onPointerDown={(e) => dragControls.start(e)}>
+
+              <span className="text-white text-sm font-medium">Piano Keyboard</span>
+              <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPianoPopout(false)}
+              className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]">
+
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
+              <PianoKeyboard
+              activeNotes={activeNotes}
+              instrument={voices[0]?.instrument || 'organ'}
+              onInstrumentChange={(inst) => {
+                const newVoices = [...voices];
+                if (newVoices[0]) {
+                  newVoices[0] = { ...newVoices[0], instrument: inst };
+                  setVoices(newVoices);
+                }
+              }}
+              onVoiceInstrumentChange={(voiceIndex, inst) => {
+                const newVoices = [...voices];
+                if (newVoices[voiceIndex]) {
+                  newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
+                  setVoices(newVoices);
+                }
+              }}
+              onPressedNotesChange={setPressedPianoNotes}
+              onNotePress={handleNotePress}
+              effects={effects}
+              onEffectsChange={setEffects}
+              envelope={envelope}
+              onEnvelopeChange={setEnvelope}
+              openWaveEditor={openWaveEditor}
+              customInstruments={customInstruments}
+              onCustomInstrumentsChange={setCustomInstruments} />
+
             </div>
             
             {/* Resize handle - bottom right corner */}
             <div
-              className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize"
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                const startX = e.clientX;
-                const startY = e.clientY;
-                const startWidth = pianoPopoutSize.width;
-                const startHeight = pianoPopoutSize.height;
-                
-                const handleMove = (moveEvent) => {
-                  const deltaX = moveEvent.clientX - startX;
-                  const deltaY = moveEvent.clientY - startY;
-                  setPianoPopoutSize({
-                    width: Math.max(400, Math.min(window.innerWidth * 0.9, startWidth + deltaX)),
-                    height: Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + deltaY))
-                  });
-                };
-                
-                const handleUp = () => {
-                  document.removeEventListener('pointermove', handleMove);
-                  document.removeEventListener('pointerup', handleUp);
-                };
-                
-                document.addEventListener('pointermove', handleMove);
-                document.addEventListener('pointerup', handleUp);
-              }}
-            >
-              <svg 
-                className="absolute bottom-1 right-1 text-white/30"
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12"
-              >
-                <path d="M12 0 L12 12 L0 12" fill="none" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 0 L12 4" stroke="currentColor" strokeWidth="1"/>
-                <path d="M4 8 L12 8 L12 12 L4 12" fill="currentColor" opacity="0.3"/>
+            className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              const startX = e.clientX;
+              const startY = e.clientY;
+              const startWidth = pianoPopoutSize.width;
+              const startHeight = pianoPopoutSize.height;
+
+              const handleMove = (moveEvent) => {
+                const deltaX = moveEvent.clientX - startX;
+                const deltaY = moveEvent.clientY - startY;
+                setPianoPopoutSize({
+                  width: Math.max(400, Math.min(window.innerWidth * 0.9, startWidth + deltaX)),
+                  height: Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + deltaY))
+                });
+              };
+
+              const handleUp = () => {
+                document.removeEventListener('pointermove', handleMove);
+                document.removeEventListener('pointerup', handleUp);
+              };
+
+              document.addEventListener('pointermove', handleMove);
+              document.addEventListener('pointerup', handleUp);
+            }}>
+
+              <svg
+              className="absolute bottom-1 right-1 text-white/30"
+              width="12"
+              height="12"
+              viewBox="0 0 12 12">
+
+                <path d="M12 0 L12 12 L0 12" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M8 0 L12 4" stroke="currentColor" strokeWidth="1" />
+                <path d="M4 8 L12 8 L12 12 L4 12" fill="currentColor" opacity="0.3" />
               </svg>
             </div>
           </motion.div>
-        )}
+        }
       </AnimatePresence>
 
       {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
-        {chatbotOpen && (
-          <AIChatbot
-            isOpen={chatbotOpen}
-            onClose={() => {
-              setChatbotOpen(false);
-              setChatbotMinimized(true);
-            }}
-            settings={settings}
-            onSettingsChange={setSettings}
-            voices={voices}
-            onVoicesChange={setVoices}
-            currentNotes={cantusFirmus}
-            onApplyMelody={(notes) => setCantusFirmus(notes)}
-            onApplyHarmony={(notes, voiceType) => {
-              // Map voice type to voice index
-              const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
-              const voiceIndex = voiceMap[voiceType] || 1;
+        {chatbotOpen &&
+        <AIChatbot
+          isOpen={chatbotOpen}
+          onClose={() => {
+            setChatbotOpen(false);
+            setChatbotMinimized(true);
+          }}
+          settings={settings}
+          onSettingsChange={setSettings}
+          voices={voices}
+          onVoicesChange={setVoices}
+          currentNotes={cantusFirmus}
+          onApplyMelody={(notes) => setCantusFirmus(notes)}
+          onApplyHarmony={(notes, voiceType) => {
+            // Map voice type to voice index
+            const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
+            const voiceIndex = voiceMap[voiceType] || 1;
 
-              // Create or update the generated voice
-              const newVoice = {
-                name: voiceType.charAt(0).toUpperCase() + voiceType.slice(1),
-                notes: notes,
-                enabled: true
-              };
+            // Create or update the generated voice
+            const newVoice = {
+              name: voiceType.charAt(0).toUpperCase() + voiceType.slice(1),
+              notes: notes,
+              enabled: true
+            };
 
-              setGeneratedVoices(prev => {
-                const updated = [...prev];
-                // Find existing voice of same type or add new
-                const existingIdx = updated.findIndex(v => v.name.toLowerCase() === voiceType);
-                if (existingIdx >= 0) {
-                  updated[existingIdx] = newVoice;
-                } else {
-                  updated.push(newVoice);
-                }
-                return updated;
-              });
-
-              // Enable the corresponding voice in settings
-              const newVoices = [...voices];
-              if (newVoices[voiceIndex]) {
-                newVoices[voiceIndex].enabled = true;
+            setGeneratedVoices((prev) => {
+              const updated = [...prev];
+              // Find existing voice of same type or add new
+              const existingIdx = updated.findIndex((v) => v.name.toLowerCase() === voiceType);
+              if (existingIdx >= 0) {
+                updated[existingIdx] = newVoice;
+              } else {
+                updated.push(newVoice);
               }
-              setVoices(newVoices);
-            }}
-            tempo={tempo}
-          />
-        )}
+              return updated;
+            });
+
+            // Enable the corresponding voice in settings
+            const newVoices = [...voices];
+            if (newVoices[voiceIndex]) {
+              newVoices[voiceIndex].enabled = true;
+            }
+            setVoices(newVoices);
+          }}
+          tempo={tempo} />
+
+        }
       </AnimatePresence>
 
       {/* AI Chatbot Bubble - Shows when minimized */}
       <AnimatePresence>
-        {chatbotActive && chatbotMinimized && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            onClick={() => {
-              setChatbotOpen(true);
-              setChatbotMinimized(false);
-            }}
-            className="fixed bottom-6 left-6 z-[100] w-14 h-14 rounded-full bg-[#D4AF37] hover:bg-[#E5C158] shadow-2xl flex items-center justify-center transition-transform hover:scale-110"
-            title="Open AI Composer"
-          >
+        {chatbotActive && chatbotMinimized &&
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          onClick={() => {
+            setChatbotOpen(true);
+            setChatbotMinimized(false);
+          }}
+          className="fixed bottom-6 left-6 z-[100] w-14 h-14 rounded-full bg-[#D4AF37] hover:bg-[#E5C158] shadow-2xl flex items-center justify-center transition-transform hover:scale-110"
+          title="Open AI Composer">
+
             <Sparkles className="w-6 h-6 text-[#1E1E1E]" />
           </motion.button>
-        )}
+        }
       </AnimatePresence>
 
       {/* Custom styles */}
@@ -1691,6 +1691,6 @@ export default function CounterpointGenerator() {
           border-color: rgb(71, 85, 105) !important;
         }
       `}</style>
-    </div>
-  );
+    </div>);
+
 }
