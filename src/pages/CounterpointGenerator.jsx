@@ -944,7 +944,7 @@ export default function CounterpointGenerator() {
                   <Button
                     variant="outline"
                     onClick={handleNewProject}
-                    className="w-full border-slate-600 text-white hover:bg-slate-700 hover:text-white"
+                    className="w-full bg-slate-800 border-slate-600 text-white hover:bg-slate-700 hover:text-white"
                   >
                     New Project
                   </Button>
