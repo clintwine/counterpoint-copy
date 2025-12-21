@@ -148,7 +148,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-32 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+          className="w-40 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
         >
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <Guitar className="w-4 h-4 text-white/60 flex-shrink-0" />
