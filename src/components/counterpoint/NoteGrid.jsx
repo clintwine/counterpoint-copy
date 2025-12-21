@@ -2120,12 +2120,12 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Playhead triangle marker - fixed at top of grid */}
+        {/* Playhead triangle marker - fixed at header top */}
         <div
-          className="absolute cursor-ew-resize"
+          className="fixed cursor-ew-resize"
           style={{
-            left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-            top: 0,
+            left: `${gridRef.current ? gridRef.current.getBoundingClientRect().left + 56 + smoothPlayhead * CELL_WIDTH - (gridRef.current.scrollLeft) : 0}px`,
+            top: `${gridRef.current ? gridRef.current.getBoundingClientRect().top : 0}px`,
             width: 0,
             height: 0,
             pointerEvents: 'auto',
@@ -2186,7 +2186,7 @@ export default function NoteGrid({
             className="absolute"
             style={{
               left: '50%',
-              top: '28px',
+              top: '0px',
               transform: 'translateX(-50%)',
               width: 0,
               height: 0,
