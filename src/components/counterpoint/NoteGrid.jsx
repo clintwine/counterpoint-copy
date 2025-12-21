@@ -1343,6 +1343,16 @@ export default function NoteGrid({
                         Paint
                       </Button>
           
+          <Button
+            variant={snapToGrid ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setSnapToGrid(!snapToGrid)}
+            className={`h-8 px-2 ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+            title={snapToGrid ? "Snap to grid enabled" : "Free positioning"}
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </Button>
+          
           <div className="w-px h-5 bg-slate-600 mx-2" />
           
           <Button
