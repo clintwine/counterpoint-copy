@@ -174,11 +174,12 @@ export default function CounterpointGenerator() {
         generatedVoices,
         voices,
         effects,
-        envelope
+        envelope,
+        customInstruments
       });
       return;
     }
-    
+
     // Otherwise, validate and save from dialog
     if (!projectName.trim()) return;
     saveProjectMutation.mutate({
@@ -188,7 +189,8 @@ export default function CounterpointGenerator() {
       generatedVoices,
       voices,
       effects,
-      envelope
+      envelope,
+      customInstruments
     });
   }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode]);
 
@@ -327,7 +329,8 @@ export default function CounterpointGenerator() {
       generatedVoices,
       voices,
       effects,
-      envelope
+      envelope,
+      customInstruments
     });
   };
 
@@ -350,24 +353,27 @@ export default function CounterpointGenerator() {
       instrument: v.instrument || DEFAULT_VOICES[idx]?.instrument || 'organ'
     }));
     setVoices(voicesWithInstruments);
-    
+
     // Fix tempo if needed
     const loadedTempo = project.settings?.tempo || 80;
     const correctedTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
-    
+
     // Update settings with corrected tempo
     setSettings({ ...(project.settings || DEFAULT_SETTINGS), tempo: correctedTempo });
     setTempo(correctedTempo);
-    
+
     setCantusFirmus(project.cantusFirmus || []);
     setGeneratedVoices(project.generatedVoices || []);
     setProjectName(project.name);
     setCurrentProjectId(project.id);
-    
+
     // Load effects and envelope
     setEffects(project.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
-    
+
+    // Load custom instruments
+    setCustomInstruments(project.customInstruments || []);
+
     setLoadDialogOpen(false);
   };
 
@@ -428,9 +434,12 @@ export default function CounterpointGenerator() {
     // Load effects and envelope
     setEffects(song.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
-    
+
+    // Load custom instruments
+    setCustomInstruments(song.customInstruments || []);
+
     setSongDialogOpen(false);
-  };
+    };
 
   const handlePreviewSong = (song, e) => {
     e.stopPropagation();
