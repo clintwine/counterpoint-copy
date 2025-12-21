@@ -672,9 +672,9 @@ export default function WaveEditor({
                 Add Oscillator
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-3">
               {instrument.oscillators.map((osc, i) => (
-                <div key={i} className="bg-slate-700/50 rounded p-4 space-y-2.5">
+                <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-white/60 text-sm font-medium">Oscillator {i + 1}</span>
                     {instrument.oscillators.length > 1 && (
@@ -698,29 +698,27 @@ export default function WaveEditor({
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-white/40 text-xs">Harmonic</span>
-                      <Input
-                        type="number"
-                        value={osc.harmonic || 1}
-                        onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
-                        className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
-                        step="0.5"
-                        min="0.5"
-                        max="8"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-white/40 text-xs">Detune</span>
-                      <Input
-                        type="number"
-                        value={osc.detune}
-                        onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
-                        className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
-                        step="1"
-                      />
-                    </div>
+                  <div>
+                    <span className="text-white/40 text-xs">Harmonic</span>
+                    <Input
+                      type="number"
+                      value={osc.harmonic || 1}
+                      onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
+                      className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
+                      step="0.5"
+                      min="0.5"
+                      max="8"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-white/40 text-xs">Detune</span>
+                    <Input
+                      type="number"
+                      value={osc.detune}
+                      onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
+                      className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
+                      step="1"
+                    />
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
