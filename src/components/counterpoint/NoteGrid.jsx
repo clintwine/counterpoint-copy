@@ -73,7 +73,21 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
 const MIN_DURATION = 0.125; // Eighth of a beat (128th note)
-const DEFAULT_DURATION = 0.5; // Half a beat (32nd note by default)
+const DEFAULT_DURATION = 1; // 1 beat (16th note by default)
+
+const NOTE_DURATIONS = [
+  { value: 0.125, label: '128th', beats: '1/8' },
+  { value: 0.25, label: '64th', beats: '1/4' },
+  { value: 0.5, label: '32nd', beats: '1/2' },
+  { value: 1, label: '16th', beats: '1' },
+  { value: 2, label: '8th', beats: '2' },
+  { value: 3, label: '8th Trip', beats: '2.67' },
+  { value: 4, label: '1/4', beats: '4' },
+  { value: 6, label: '1/4 Trip', beats: '5.33' },
+  { value: 8, label: '1/2', beats: '8' },
+  { value: 12, label: '1/2 Trip', beats: '10.67' },
+  { value: 16, label: 'Whole', beats: '16' },
+];
 
 const DEFAULT_INSTRUMENTS = [
   { value: 'organ', label: 'Organ' },
@@ -1340,6 +1354,38 @@ export default function NoteGrid({
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
           
+          {/* Note Duration Selector */}
+          <div className="flex items-center gap-1">
+            <span className="text-white/50 text-[10px] uppercase">Dur</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700 border border-slate-600"
+                  title="Note duration"
+                >
+                  <span className="text-xs font-mono">{NOTE_DURATIONS.find(d => d.value === lastNoteDuration)?.label || '16th'}</span>
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-slate-800 border-slate-700">
+                {NOTE_DURATIONS.map(dur => (
+                  <DropdownMenuItem 
+                    key={dur.value}
+                    onClick={() => setLastNoteDuration(dur.value)}
+                    className={`text-white cursor-pointer text-xs ${lastNoteDuration === dur.value ? 'bg-slate-700' : ''}`}
+                  >
+                    <span className="font-mono w-20">{dur.label}</span>
+                    <span className="text-white/50 ml-2">({dur.beats} beats)</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="w-px h-5 bg-slate-600 mx-2" />
+          
           <Button
             variant="ghost"
             size="sm"
@@ -1397,64 +1443,64 @@ export default function NoteGrid({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-slate-800 border-slate-700">
               <DropdownMenuItem 
+                onClick={() => { setQuantizeGrid(0.125); quantize(0.125); }}
+                className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.125 ? 'bg-slate-700' : ''}`}
+              >
+                128th note (0.125 beats)
+              </DropdownMenuItem>
+              <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(0.25); quantize(0.25); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.25 ? 'bg-slate-700' : ''}`}
               >
-                1/64 note (0.25 beats)
+                64th note (0.25 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(0.5); quantize(0.5); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.5 ? 'bg-slate-700' : ''}`}
               >
-                1/32 note (0.5 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(2/3); quantize(2/3); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 2/3 ? 'bg-slate-700' : ''}`}
-              >
-                1/32 triplet (0.67 beats)
+                32nd note (0.5 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(1); quantize(1); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 1 ? 'bg-slate-700' : ''}`}
               >
-                1/16 note (1 beat)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(4/3); quantize(4/3); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 4/3 ? 'bg-slate-700' : ''}`}
-              >
-                1/16 triplet (1.33 beats)
+                16th note (1 beat)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(2); quantize(2); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 2 ? 'bg-slate-700' : ''}`}
               >
-                1/8 note (2 beats)
+                8th note (2 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(8/3); quantize(8/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 8/3 ? 'bg-slate-700' : ''}`}
               >
-                1/8 triplet (2.67 beats)
+                8th triplet (2.67 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(4); quantize(4); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 4 ? 'bg-slate-700' : ''}`}
               >
-                1/4 note (4 beats)
+                Quarter note (4 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(16/3); quantize(16/3); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 16/3 ? 'bg-slate-700' : ''}`}
               >
-                1/4 triplet (5.33 beats)
+                Quarter triplet (5.33 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(8); quantize(8); }}
                 className={`text-white cursor-pointer text-xs ${quantizeGrid === 8 ? 'bg-slate-700' : ''}`}
               >
-                1/2 note (8 beats)
+                Half note (8 beats)
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => { setQuantizeGrid(12); quantize(12); }}
+                className={`text-white cursor-pointer text-xs ${quantizeGrid === 12 ? 'bg-slate-700' : ''}`}
+              >
+                Half triplet (10.67 beats)
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => { setQuantizeGrid(16); quantize(16); }}
