@@ -104,6 +104,7 @@ export default function CounterpointGenerator() {
   const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
   const [previewingSongId, setPreviewingSongId] = useState(null);
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
+  const [customInstruments, setCustomInstruments] = useState([]);
   
   const playbackRef = useRef(null);
       const animationRef = useRef(null);
@@ -1124,11 +1125,12 @@ export default function CounterpointGenerator() {
                               }}
                               onImportMidi={handleImportMidi}
                               onOpenWaveEditor={() => {
-                                setShowPianoPanel(true);
-                                setOpenWaveEditor(true);
-                                setTimeout(() => setOpenWaveEditor(false), 100);
+                              setShowPianoPanel(true);
+                              setOpenWaveEditor(true);
+                              setTimeout(() => setOpenWaveEditor(false), 100);
                               }}
-                            />
+                              customInstruments={customInstruments}
+                              />
             
             {/* Piano toggle for mobile */}
                               <div className="sm:hidden flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-600">
@@ -1163,6 +1165,8 @@ export default function CounterpointGenerator() {
                                     envelope={envelope}
                                     onEnvelopeChange={setEnvelope}
                                     openWaveEditor={openWaveEditor}
+                                    customInstruments={customInstruments}
+                                    onCustomInstrumentsChange={setCustomInstruments}
                                   />
                                 </div>
                               )}
@@ -1225,6 +1229,8 @@ export default function CounterpointGenerator() {
                 envelope={envelope}
                 onEnvelopeChange={setEnvelope}
                 openWaveEditor={openWaveEditor}
+                customInstruments={customInstruments}
+                onCustomInstrumentsChange={setCustomInstruments}
               />
             </div>
             
