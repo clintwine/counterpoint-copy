@@ -443,7 +443,7 @@ export function getCustomInstruments() {
 }
 
 // Play note with custom instrument support
-export function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
+export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
   if (!audioContext) initAudio();
   
   const freq = NOTE_FREQUENCIES[pitch];
@@ -451,7 +451,19 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
 
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
-  // Check if this is a sampled instrument
+  // Check if this is a sampled instrument (with URL or buffer)
+  if (customConfig.audioSampleUrl && !customConfig.audioSample) {
+    // Load the audio buffer from URL if not already loaded
+    try {
+      const response = await fetch(customConfig.audioSampleUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      customConfig.audioSample = await audioContext.decodeAudioData(arrayBuffer);
+    } catch (error) {
+      console.error('Failed to load audio sample:', error);
+      return;
+    }
+  }
+  
   if (customConfig.audioSample) {
     return playSampledNote(pitch, duration, volume, customConfig);
   }

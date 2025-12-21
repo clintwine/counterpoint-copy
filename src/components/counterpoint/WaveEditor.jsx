@@ -293,23 +293,35 @@ export default function WaveEditor({
     }
   }, [instrument, isPlaying, generateStaticWaveform]);
 
-  const playPreviewForInstrument = useCallback((inst, onEnd) => {
+  const playPreviewForInstrument = useCallback(async (inst, onEnd) => {
     initAudio();
     const audioContext = getAudioContext();
     if (!audioContext) return;
 
-    // For sampled instruments, use the engine's playback directly
-    if (inst.audioSample) {
-      playNoteWithCustomInstrument('C4', 0.8, 0.5, inst);
-      const analyser = getAnalyser();
-      if (analyser) {
-        analyserRef.current = analyser;
-        drawWaveform();
+    // For sampled instruments, load and play the audio
+    if (inst.audioSampleUrl) {
+      try {
+        // Convert data URL back to AudioBuffer
+        const response = await fetch(inst.audioSampleUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        
+        // Create a temporary instrument with the decoded buffer
+        const tempInst = { ...inst, audioSample: audioBuffer };
+        playNoteWithCustomInstrument('C4', 0.8, 0.5, tempInst);
+        
+        const analyser = getAnalyser();
+        if (analyser) {
+          analyserRef.current = analyser;
+          drawWaveform();
+        }
+        setTimeout(() => {
+          if (onEnd) onEnd();
+        }, 1000);
+        return;
+      } catch (error) {
+        console.error('Failed to load audio sample:', error);
       }
-      setTimeout(() => {
-        if (onEnd) onEnd();
-      }, 1000);
-      return;
     }
 
     const analyser = audioContext.createAnalyser();
@@ -558,23 +570,18 @@ export default function WaveEditor({
       const arrayBuffer = await audioBlob.arrayBuffer();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       
-      // Store the audio sample
-      audioSampleRef.current = audioBuffer;
+      // Convert AudioBuffer to data URL for storage
+      const wavBlob = await audioBufferToWav(audioBuffer);
+      const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(wavBlob);
+      });
       
-      // Analyze to get a rough waveform shape
-      const channelData = audioBuffer.getChannelData(0);
-      const sampleRate = audioBuffer.sampleRate;
-      const periodSamples = Math.floor(sampleRate / 200); // ~200Hz period
-      const slice = channelData.slice(sampleRate * 0.5, sampleRate * 0.5 + periodSamples);
-      
-      // Normalize the slice
-      const maxVal = Math.max(...slice.map(Math.abs));
-      const normalized = Array.from(slice).map(v => v / maxVal);
-      
-      // Create instrument with custom periodic wave
+      // Create instrument with audio sample data URL
       const voiceInstrument = {
         name: 'My Voice',
-        audioSample: audioBuffer, // Store the actual recording
+        audioSampleUrl: dataUrl, // Store as data URL for persistence
         oscillators: [
           { waveform: 'sawtooth', detune: 0, gain: 0.6, harmonic: 1, phase: 0 },
           { waveform: 'sine', detune: 7, gain: 0.4, harmonic: 2, phase: 0 }
@@ -595,6 +602,51 @@ export default function WaveEditor({
       console.error('Failed to process recording:', error);
       alert('Failed to process the recording. Please try again.');
     }
+  };
+
+  // Helper function to convert AudioBuffer to WAV blob
+  const audioBufferToWav = (buffer) => {
+    const length = buffer.length * buffer.numberOfChannels * 2;
+    const arrayBuffer = new ArrayBuffer(44 + length);
+    const view = new DataView(arrayBuffer);
+    
+    // WAV header
+    const writeString = (offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+    
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + length, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, buffer.numberOfChannels, true);
+    view.setUint32(24, buffer.sampleRate, true);
+    view.setUint32(28, buffer.sampleRate * buffer.numberOfChannels * 2, true);
+    view.setUint16(32, buffer.numberOfChannels * 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, length, true);
+    
+    // Audio data
+    const channelData = [];
+    for (let i = 0; i < buffer.numberOfChannels; i++) {
+      channelData.push(buffer.getChannelData(i));
+    }
+    
+    let offset = 44;
+    for (let i = 0; i < buffer.length; i++) {
+      for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+        const sample = Math.max(-1, Math.min(1, channelData[channel][i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+        offset += 2;
+      }
+    }
+    
+    return new Blob([arrayBuffer], { type: 'audio/wav' });
   };
 
 
