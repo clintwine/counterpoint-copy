@@ -1308,11 +1308,11 @@ export default function NoteGrid({
                   notes: cantusFirmus,
                   tempo
                 });
-                const blob = new Blob([response.data], { type: 'audio/mpeg' });
+                const blob = new Blob([response.data], { type: 'audio/wav' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `composition-${Date.now()}.mp3`;
+                a.download = `composition-${Date.now()}.wav`;
                 a.click();
                 URL.revokeObjectURL(url);
               }} className="text-white cursor-pointer">
