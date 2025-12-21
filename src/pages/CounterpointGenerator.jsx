@@ -99,6 +99,10 @@ export default function CounterpointGenerator() {
     };
     return () => { delete window.expandMeasures; };
   }, []);
+  
+  const queryClient = useQueryClient();
+  const previewTimeoutRef = useRef(null);
+  
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [chatbotActive, setChatbotActive] = useState(false);
   const [chatbotMinimized, setChatbotMinimized] = useState(false);
@@ -116,13 +120,79 @@ export default function CounterpointGenerator() {
   const [snapToGrid, setSnapToGrid] = useState(true);
   
   const playbackRef = useRef(null);
-      const animationRef = useRef(null);
-      const lastTimeRef = useRef(null);
-      const audioInitialized = useRef(false);
-      const queryClient = useQueryClient();
-  const previewTimeoutRef = useRef(null);
+  const animationRef = useRef(null);
+  const lastTimeRef = useRef(null);
+  const audioInitialized = useRef(false);
 
-      // Global keyboard handlers for play/pause and save
+  // Fetch saved projects
+  const { data: savedProjects = [] } = useQuery({
+    queryKey: ['counterpoint-projects'],
+    queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
+  });
+
+  // Fetch songs
+  const { data: songs = [] } = useQuery({
+    queryKey: ['songs'],
+    queryFn: () => base44.entities.Song.list('-created_date'),
+  });
+
+  // Save project mutation
+  const saveProjectMutation = useMutation({
+    mutationFn: async (data) => {
+      // If saveAsMode, always create new even if currentProjectId exists
+      if (saveAsMode || !currentProjectId) {
+        const result = await base44.entities.CounterpointProject.create(data);
+        return result;
+      }
+      await base44.entities.CounterpointProject.update(currentProjectId, data);
+      return { id: currentProjectId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
+      if (result?.id) {
+        setCurrentProjectId(result.id);
+      }
+      setSaveDialogOpen(false);
+      setSaveAsMode(false);
+      toast.success(saveAsMode ? 'Project saved as new copy' : (currentProjectId ? 'Project updated' : 'Project saved'));
+    },
+    onError: (error) => {
+      console.error('Save failed:', error);
+      setSaveAsMode(false);
+      toast.error('Failed to save project');
+    }
+  });
+
+  // Save project handler - defined early so keyboard shortcuts can use it
+  const handleSaveProject = useCallback((skipDialog = false) => {
+    // If we have an existing project and not in save-as mode, save directly
+    if (skipDialog && currentProjectId && projectName.trim()) {
+      saveProjectMutation.mutate({
+        name: projectName,
+        settings: { ...settings, tempo },
+        cantusFirmus,
+        generatedVoices,
+        voices,
+        effects,
+        envelope
+      });
+      return;
+    }
+    
+    // Otherwise, validate and save from dialog
+    if (!projectName.trim()) return;
+    saveProjectMutation.mutate({
+      name: projectName,
+      settings: { ...settings, tempo },
+      cantusFirmus,
+      generatedVoices,
+      voices,
+      effects,
+      envelope
+    });
+  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode]);
+
+  // Global keyboard handlers for play/pause and save
       useEffect(() => {
         const handleKeyDown = (e) => {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -172,74 +242,6 @@ export default function CounterpointGenerator() {
   useEffect(() => {
     base44.auth.me().then(user => setCurrentUser(user)).catch(() => setCurrentUser(null));
   }, []);
-
-  // Save project handler - defined early so keyboard shortcuts can use it
-  const handleSaveProject = useCallback((skipDialog = false) => {
-    // If we have an existing project and not in save-as mode, save directly
-    if (skipDialog && currentProjectId && projectName.trim()) {
-      saveProjectMutation.mutate({
-        name: projectName,
-        settings: { ...settings, tempo },
-        cantusFirmus,
-        generatedVoices,
-        voices,
-        effects,
-        envelope
-      });
-      return;
-    }
-    
-    // Otherwise, validate and save from dialog
-    if (!projectName.trim()) return;
-    saveProjectMutation.mutate({
-      name: projectName,
-      settings: { ...settings, tempo },
-      cantusFirmus,
-      generatedVoices,
-      voices,
-      effects,
-      envelope
-    });
-  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode]);
-
-  // Fetch saved projects
-  const { data: savedProjects = [] } = useQuery({
-    queryKey: ['counterpoint-projects'],
-    queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
-  });
-
-  // Fetch songs
-  const { data: songs = [] } = useQuery({
-    queryKey: ['songs'],
-    queryFn: () => base44.entities.Song.list('-created_date'),
-  });
-
-  // Save project mutation
-  const saveProjectMutation = useMutation({
-    mutationFn: async (data) => {
-      // If saveAsMode, always create new even if currentProjectId exists
-      if (saveAsMode || !currentProjectId) {
-        const result = await base44.entities.CounterpointProject.create(data);
-        return result;
-      }
-      await base44.entities.CounterpointProject.update(currentProjectId, data);
-      return { id: currentProjectId };
-    },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
-      if (result?.id) {
-        setCurrentProjectId(result.id);
-      }
-      setSaveDialogOpen(false);
-      setSaveAsMode(false);
-      toast.success(saveAsMode ? 'Project saved as new copy' : (currentProjectId ? 'Project updated' : 'Project saved'));
-    },
-    onError: (error) => {
-      console.error('Save failed:', error);
-      setSaveAsMode(false);
-      toast.error('Failed to save project');
-    }
-  });
 
   // Delete project mutation
   const deleteProjectMutation = useMutation({
