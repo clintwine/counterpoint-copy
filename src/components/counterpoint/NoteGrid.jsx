@@ -232,9 +232,6 @@ export default function NoteGrid({
       onTheoryTools,
       onPressedNotesChange
     }) {
-    // Use smooth playhead position if available, otherwise fall back to currentBeat
-    // During scrubbing, use the scrub position for immediate feedback
-    const smoothPlayhead = isScrubbing && scrubPosition !== null ? scrubPosition : (playheadPosition !== undefined ? playheadPosition : currentBeat);
   const gridRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
