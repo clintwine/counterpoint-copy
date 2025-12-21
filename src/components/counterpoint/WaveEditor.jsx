@@ -652,7 +652,7 @@ export default function WaveEditor({
       {/* Bottom Row: Oscillators + Filter + Effects */}
       <div className="flex gap-4">
         {/* Oscillators */}
-        <div className="flex-1 space-y-2.5">
+        <div className="flex-[2] space-y-2.5">
           <div className="flex items-center justify-between">
             <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <Button
@@ -665,9 +665,9 @@ export default function WaveEditor({
               <Plus className="w-3.5 h-3.5" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {instrument.oscillators.map((osc, i) => (
-              <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2">
+              <div key={i} className="bg-slate-700/50 rounded p-4 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-white/60 text-xs">Osc {i + 1}</span>
                   {instrument.oscillators.length > 1 && (
@@ -744,7 +744,7 @@ export default function WaveEditor({
         </div>
 
         {/* Filter */}
-        <div className="w-48 flex-shrink-0 space-y-2.5">
+        <div className="flex-1 space-y-2.5">
           <Label className="text-white/70 text-sm uppercase tracking-wider">Filter</Label>
           <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
             <Select
@@ -788,7 +788,7 @@ export default function WaveEditor({
         </div>
 
         {/* LFO */}
-        <div className="w-48 flex-shrink-0 space-y-2.5">
+        <div className="flex-1 space-y-2.5">
           <Label className="text-white/70 text-sm uppercase tracking-wider">LFO</Label>
           <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
             <Select
@@ -832,7 +832,7 @@ export default function WaveEditor({
         </div>
 
         {/* Effects */}
-        <div className="w-48 flex-shrink-0 space-y-2.5">
+        <div className="flex-1 space-y-2.5">
           <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
           <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
             <div className="flex items-center gap-1.5">
