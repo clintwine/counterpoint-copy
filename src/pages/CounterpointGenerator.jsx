@@ -584,7 +584,9 @@ export default function CounterpointGenerator() {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const subdivisionSize = beatsPerMeasure / 4;
       if (discreteBeat % subdivisionSize === 0) {
-        const isDownbeat = discreteBeat % beatsPerMeasure === 0;
+        // Check if this is the first beat of the measure (downbeat gets accent)
+        const beatInMeasure = discreteBeat % beatsPerMeasure;
+        const isDownbeat = beatInMeasure === 0;
         playMetronomeClick(isDownbeat);
       }
     }
