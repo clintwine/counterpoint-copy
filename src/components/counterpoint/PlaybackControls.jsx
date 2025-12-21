@@ -143,7 +143,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-9 w-9 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
             title="Go to start"
           >
             <SkipBack className="w-4 h-4" />
@@ -152,7 +152,7 @@ export default function PlaybackControls({
           <Button
             onClick={onPlayPause}
             size="sm"
-            className="h-8 w-8 p-0 rounded bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E] mx-0.5"
+            className="h-9 w-9 p-0 rounded bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E] mx-0.5"
           >
             {isPlaying ? (
               <Pause className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onStop}
-            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-9 w-9 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
             title="Stop"
           >
             <Square className="w-3.5 h-3.5 fill-current" />
@@ -177,7 +177,7 @@ export default function PlaybackControls({
             onClick={onRecordToggle}
             size="sm"
             disabled={isPlaying && !isRecording}
-            className={`h-8 w-8 p-0 rounded ${
+            className={`h-9 w-9 p-0 rounded ${
               isRecording 
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
                 : isCountingIn
