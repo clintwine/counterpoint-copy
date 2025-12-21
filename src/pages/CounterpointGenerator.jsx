@@ -422,8 +422,17 @@ export default function CounterpointGenerator() {
     setEffects(project.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
 
-    // Load custom instruments
-    setCustomInstruments(project.customInstruments || []);
+    // Merge custom instruments from project with existing saved instruments
+    // Keep all instruments from database, only add project-specific ones if unique
+    const projectInstruments = project.customInstruments || [];
+    const mergedInstruments = [...savedInstruments];
+    projectInstruments.forEach(projInst => {
+      const exists = mergedInstruments.some(saved => saved.name === projInst.name);
+      if (!exists) {
+        mergedInstruments.push(projInst);
+      }
+    });
+    setCustomInstruments(mergedInstruments);
 
     setLoadDialogOpen(false);
   };
@@ -486,8 +495,17 @@ export default function CounterpointGenerator() {
     setEffects(song.effects || { reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope(song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
 
-    // Load custom instruments
-    setCustomInstruments(song.customInstruments || []);
+    // Merge custom instruments from song with existing saved instruments
+    // Keep all instruments from database, only add song-specific ones if unique
+    const songInstruments = song.customInstruments || [];
+    const mergedInstruments = [...savedInstruments];
+    songInstruments.forEach(songInst => {
+      const exists = mergedInstruments.some(saved => saved.name === songInst.name);
+      if (!exists) {
+        mergedInstruments.push(songInst);
+      }
+    });
+    setCustomInstruments(mergedInstruments);
 
     setSongDialogOpen(false);
     };
