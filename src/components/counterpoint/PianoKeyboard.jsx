@@ -210,7 +210,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onCustomInstrumentsChange, onVoiceInstrumentChange }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -222,7 +222,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const isDraggingRef = useRef(false);
   const [showWaveEditor, setShowWaveEditor] = useState(false);
   const customInstruments = externalCustomInstruments;
-  const setCustomInstruments = onCustomInstrumentsChange || (() => {});
 
   // Handle external trigger to open wave editor
   useEffect(() => {
@@ -240,23 +239,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   ...customInstruments.map((inst, i) => ({ value: `custom_${i}`, label: inst.name, custom: inst }))];
 
 
-  const handleSaveInstrument = (inst, index) => {
-    if (index >= 0) {
-      const updated = [...customInstruments];
-      updated[index] = inst;
-      setCustomInstruments(updated);
-    } else {
-      setCustomInstruments([...customInstruments, inst]);
-    }
-  };
 
-  const handleDeleteInstrument = (index) => {
-    setCustomInstruments(customInstruments.filter((_, i) => i !== index));
-    // If current instrument was deleted, switch to organ
-    if (instrument === `custom_${index}`) {
-      onInstrumentChange('organ');
-    }
-  };
 
   // Get custom/preset instrument config if selected
   const getCustomConfig = () => {
@@ -991,8 +974,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   </DialogHeader>
                   <WaveEditor
             customInstruments={customInstruments}
-            onSaveInstrument={handleSaveInstrument}
-            onDeleteInstrument={handleDeleteInstrument}
+            onSaveInstrument={onSaveInstrument}
+            onDeleteInstrument={onDeleteInstrument}
             onInstrumentChange={onInstrumentChange}
             onVoiceInstrumentChange={onVoiceInstrumentChange}
             onClose={() => setShowWaveEditor(false)}
