@@ -142,7 +142,12 @@ export default function CounterpointGenerator() {
           if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.shiftKey) {
             e.preventDefault();
             setSaveAsMode(false);
-            setSaveDialogOpen(true);
+            // If existing project, save directly without dialog
+            if (currentProjectId && projectName.trim()) {
+              handleSaveProject(true);
+            } else {
+              setSaveDialogOpen(true);
+            }
           }
 
           // Cmd/Ctrl + Shift + S for save as
@@ -279,10 +284,9 @@ export default function CounterpointGenerator() {
     }
   });
 
-  const handleSaveProject = () => {
-    if (!projectName.trim()) return;
-    // If save as mode, always create new
-    if (saveAsMode) {
+  const handleSaveProject = (skipDialog = false) => {
+    // If we have an existing project and not in save-as mode, save directly
+    if (skipDialog && currentProjectId && projectName.trim()) {
       saveProjectMutation.mutate({
         name: projectName,
         settings: { ...settings, tempo },
@@ -292,19 +296,20 @@ export default function CounterpointGenerator() {
         effects,
         envelope
       });
-      setCurrentProjectId(null); // Will be set to new ID in mutation success
-      setSaveAsMode(false);
-    } else {
-      saveProjectMutation.mutate({
-        name: projectName,
-        settings: { ...settings, tempo },
-        cantusFirmus,
-        generatedVoices,
-        voices,
-        effects,
-        envelope
-      });
+      return;
     }
+    
+    // Otherwise, validate and save from dialog
+    if (!projectName.trim()) return;
+    saveProjectMutation.mutate({
+      name: projectName,
+      settings: { ...settings, tempo },
+      cantusFirmus,
+      generatedVoices,
+      voices,
+      effects,
+      envelope
+    });
   };
 
   const handleSaveSong = () => {
@@ -1260,7 +1265,12 @@ export default function CounterpointGenerator() {
                                   onNewProject={handleNewProject}
                                   onSaveProject={() => {
                                     setSaveAsMode(false);
-                                    setSaveDialogOpen(true);
+                                    // If existing project, save directly without dialog
+                                    if (currentProjectId && projectName.trim()) {
+                                      handleSaveProject(true);
+                                    } else {
+                                      setSaveDialogOpen(true);
+                                    }
                                   }}
                                   onSaveProjectAs={() => {
                                     setSaveAsMode(true);
@@ -1358,7 +1368,12 @@ export default function CounterpointGenerator() {
                               onNewProject={handleNewProject}
                               onSaveProject={() => {
                                 setSaveAsMode(false);
-                                setSaveDialogOpen(true);
+                                // If existing project, save directly without dialog
+                                if (currentProjectId && projectName.trim()) {
+                                  handleSaveProject(true);
+                                } else {
+                                  setSaveDialogOpen(true);
+                                }
                               }}
                               onSaveProjectAs={() => {
                                 setSaveAsMode(true);
