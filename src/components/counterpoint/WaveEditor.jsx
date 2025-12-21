@@ -349,20 +349,36 @@ export default function WaveEditor({
   };
 
   const handleSave = () => {
+    // Ensure instrument has all required fields before saving
+    const instrumentToSave = {
+      ...instrument,
+      lfo: instrument.lfo || { rate: 0, amount: 0, target: 'pitch' },
+      distortion: instrument.distortion ?? 0,
+      bitcrush: instrument.bitcrush ?? 0
+    };
+    
     if (editingIndex >= 0) {
       // Updating existing instrument - keep editing it
-      onSaveInstrument(instrument, editingIndex);
+      onSaveInstrument(instrumentToSave, editingIndex);
     } else {
       // Creating new instrument - set editing index to the new position
       const newIndex = customInstruments.length;
-      onSaveInstrument(instrument, -1);
+      onSaveInstrument(instrumentToSave, -1);
       setEditingIndex(newIndex);
     }
   };
 
   const loadInstrument = (inst, index) => {
-    // Preserve the instrument's name when loading
-    setInstrument({ ...inst, name: inst.name });
+    // Load instrument with all required fields, preserving the name
+    const loadedInstrument = {
+      ...DEFAULT_INSTRUMENT,
+      ...inst,
+      name: inst.name,
+      lfo: inst.lfo || { rate: 0, amount: 0, target: 'pitch' },
+      distortion: inst.distortion ?? 0,
+      bitcrush: inst.bitcrush ?? 0
+    };
+    setInstrument(loadedInstrument);
     setEditingIndex(index);
     // Update both the piano instrument selector and the voice instrument
     const instrumentValue = `custom_${index}`;
@@ -436,7 +452,15 @@ export default function WaveEditor({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const clonedPreset = { ...preset, name: `${preset.name} Copy` };
+                    // Ensure all required fields are present
+                    const clonedPreset = {
+                      ...DEFAULT_INSTRUMENT,
+                      ...preset,
+                      name: `${preset.name} Copy`,
+                      lfo: preset.lfo || { rate: 0, amount: 0, target: 'pitch' },
+                      distortion: preset.distortion ?? 0,
+                      bitcrush: preset.bitcrush ?? 0
+                    };
                     setInstrument(clonedPreset);
                     setEditingIndex(-1);
                   }}
@@ -479,7 +503,15 @@ export default function WaveEditor({
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const clonedInstrument = { ...inst, name: `${inst.name} Copy` };
+                        // Ensure all required fields are present
+                        const clonedInstrument = {
+                          ...DEFAULT_INSTRUMENT,
+                          ...inst,
+                          name: `${inst.name} Copy`,
+                          lfo: inst.lfo || { rate: 0, amount: 0, target: 'pitch' },
+                          distortion: inst.distortion ?? 0,
+                          bitcrush: inst.bitcrush ?? 0
+                        };
                         setInstrument(clonedInstrument);
                         setEditingIndex(-1);
                       }}
