@@ -1271,42 +1271,42 @@ export default function NoteGrid({
                 <span className="font-semibold text-sm">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
-              <DropdownMenuItem onClick={onNewProject} className="text-white cursor-pointer">
+            <DropdownMenuContent align="start" className="bg-[#2D2D2D] border-[#3A3A3A] min-w-[220px]">
+              <DropdownMenuItem onClick={onNewProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FileText className="w-4 h-4 mr-2" />
                 New Project
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onLoadProject} className="text-white cursor-pointer">
+              <DropdownMenuItem onClick={onLoadProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FolderOpen className="w-4 h-4 mr-2" />
                 Load Project
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onSaveProject} className="text-white cursor-pointer">
+              <DropdownMenuItem onClick={onSaveProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Save className="w-4 h-4 mr-2" />
                 Save Project
                 <span className="ml-auto text-xs text-white/40">⌘S</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onSaveProjectAs} className="text-white cursor-pointer">
+              <DropdownMenuItem onClick={onSaveProjectAs} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FilePlus className="w-4 h-4 mr-2" />
                 Save Project As...
                 <span className="ml-auto text-xs text-white/40">⌘⇧S</span>
               </DropdownMenuItem>
               {onSaveSong && (
-                <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold">
+                <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
                   <Save className="w-4 h-4 mr-2" />
                   Save as Song (Admin)
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer">
+              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+              <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
                 <Music className="w-4 h-4 mr-2" />
                 Browse Songs
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem onClick={onExportMidi} className="text-white cursor-pointer">
+              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+              <DropdownMenuItem onClick={onExportMidi} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FileAudio className="w-4 h-4 mr-2" />
                 Export MIDI
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onImportMidi} className="text-white cursor-pointer">
+              <DropdownMenuItem onClick={onImportMidi} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FileAudio className="w-4 h-4 mr-2" />
                 Import MIDI
               </DropdownMenuItem>
@@ -1327,17 +1327,17 @@ export default function NoteGrid({
                   console.error('Export audio error:', error);
                   alert('Failed to export audio: ' + error.message);
                 }
-              }} className="text-white cursor-pointer">
+              }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Download className="w-4 h-4 mr-2" />
                 Download as Audio
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white cursor-pointer">
+              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+              <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Guitar className="w-4 h-4 mr-2" />
                 Create Instrument
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
+              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+              <DropdownMenuItem onClick={onAIComposer} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Composer
                 {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
@@ -1345,7 +1345,7 @@ export default function NoteGrid({
               <DropdownMenuItem 
                 onClick={onGenerate} 
                 disabled={!canGenerate || isGenerating}
-                className="text-amber-400 cursor-pointer font-semibold"
+                className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
