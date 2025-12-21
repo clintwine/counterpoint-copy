@@ -763,6 +763,42 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             const keys = [];
             let whiteKeyIndex = 0;
             
+            // Extra greyed out keys below A0 to fill left side
+            const extraLowKeys = ['F', 'G'];
+            extraLowKeys.forEach((note, idx) => {
+              keys.push(
+                <div
+                  key={`extra-low-${note}`}
+                  className="absolute bottom-0 border border-slate-400 rounded-b opacity-30 cursor-not-allowed flex items-end justify-center pb-0.5"
+                  style={{
+                    left: idx * whiteKeyWidth,
+                    width: whiteKeyWidth - 1,
+                    height: 75,
+                    backgroundColor: '#D0D0D0',
+                  }}
+                />
+              );
+            });
+            
+            // Extra low black keys (F#0, G#0)
+            const extraLowBlackOffsets = [86, 110]; // F#, G#
+            extraLowBlackOffsets.forEach((offset, idx) => {
+              keys.push(
+                <div
+                  key={`extra-low-black-${idx}`}
+                  className="absolute top-0 rounded-b z-10 opacity-30 cursor-not-allowed"
+                  style={{
+                    left: offset * (whiteKeyWidth / 24),
+                    width: blackKeyWidth,
+                    height: 45,
+                    backgroundColor: '#3A3A3A',
+                  }}
+                />
+              );
+            });
+            
+            whiteKeyIndex = 2; // Start real keys after the 2 extra ones
+            
             // A0, A#0, B0 (partial first octave)
             ['A', 'B'].forEach((note) => {
               const voiceIndex = isNoteActive(note, 0);
