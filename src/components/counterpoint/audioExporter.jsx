@@ -1,3 +1,5 @@
+import { instruments, customInstruments, getReverbLevel, getDelayLevel, getChorusLevel, getEnvelopeSettings } from './audioEngine';
+
 function noteToFrequency(pitch) {
   const notes = {
     'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
@@ -14,6 +16,38 @@ function noteToFrequency(pitch) {
   return 440 * Math.pow(2, (midiNote - 69) / 12);
 }
 
+function createReverb(ctx) {
+  const convolver = ctx.createConvolver();
+  const rate = ctx.sampleRate;
+  const length = rate * 2;
+  const impulse = ctx.createBuffer(2, length, rate);
+  
+  for (let channel = 0; channel < 2; channel++) {
+    const channelData = impulse.getChannelData(channel);
+    for (let i = 0; i < length; i++) {
+      channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+    }
+  }
+  convolver.buffer = impulse;
+  return convolver;
+}
+
+function createDelay(ctx) {
+  const delay = ctx.createDelay(1.0);
+  const feedback = ctx.createGain();
+  const wetGain = ctx.createGain();
+  
+  delay.delayTime.value = 0.3;
+  feedback.gain.value = 0.4;
+  wetGain.gain.value = 0.5;
+  
+  delay.connect(feedback);
+  feedback.connect(delay);
+  delay.connect(wetGain);
+  
+  return { input: delay, output: wetGain };
+}
+
 export async function renderToWav(notes, tempo, instrumentName) {
   // Calculate duration
   const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
@@ -22,34 +56,77 @@ export async function renderToWav(notes, tempo, instrumentName) {
   const sampleRate = 44100;
   const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
   
-  // Render each note with simple sine wave
+  // Get instrument config
+  const customInst = customInstruments.find(i => i.name === instrumentName);
+  const instrument = customInst || instruments[instrumentName] || instruments.organ;
+  
+  // Create effects chain
+  const masterGain = offlineCtx.createGain();
+  masterGain.gain.value = 0.8;
+  
+  const reverb = createReverb(offlineCtx);
+  const reverbGain = offlineCtx.createGain();
+  reverbGain.gain.value = getReverbLevel();
+  
+  const delayEffect = createDelay(offlineCtx);
+  const delayGain = offlineCtx.createGain();
+  delayGain.gain.value = getDelayLevel();
+  
+  masterGain.connect(reverbGain);
+  reverbGain.connect(reverb);
+  reverb.connect(offlineCtx.destination);
+  
+  masterGain.connect(delayGain);
+  delayGain.connect(delayEffect.input);
+  delayEffect.output.connect(offlineCtx.destination);
+  
+  masterGain.connect(offlineCtx.destination);
+  
+  const envelope = getEnvelopeSettings();
+  
+  // Render each note
   notes.forEach(note => {
     const frequency = noteToFrequency(note.pitch);
     const startTime = note.beat * (60 / tempo) / 4;
     const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
     const velocity = note.velocity || 0.8;
     
-    const oscillator = offlineCtx.createOscillator();
-    const gainNode = offlineCtx.createGain();
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency;
-    
-    // Apply envelope
-    const attack = 0.02;
-    const release = 0.1;
-    const sustainLevel = velocity * 0.2;
-    
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
-    gainNode.gain.setValueAtTime(sustainLevel, startTime + noteDuration - release);
-    gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(offlineCtx.destination);
-    
-    oscillator.start(startTime);
-    oscillator.stop(startTime + noteDuration);
+    // Create oscillators based on instrument
+    instrument.oscillators.forEach(osc => {
+      const oscillator = offlineCtx.createOscillator();
+      const gainNode = offlineCtx.createGain();
+      
+      oscillator.type = osc.type;
+      oscillator.frequency.value = frequency * osc.detune;
+      
+      // Apply filter if instrument has one
+      let filterNode = null;
+      if (instrument.filter) {
+        filterNode = offlineCtx.createBiquadFilter();
+        filterNode.type = instrument.filter.type;
+        filterNode.frequency.value = instrument.filter.frequency;
+        filterNode.Q.value = instrument.filter.Q;
+      }
+      
+      // Apply envelope
+      const sustainLevel = velocity * osc.gain * 0.15;
+      
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + envelope.attack);
+      gainNode.gain.setValueAtTime(sustainLevel * envelope.sustain, startTime + noteDuration - envelope.release);
+      gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
+      
+      oscillator.connect(gainNode);
+      if (filterNode) {
+        gainNode.connect(filterNode);
+        filterNode.connect(masterGain);
+      } else {
+        gainNode.connect(masterGain);
+      }
+      
+      oscillator.start(startTime);
+      oscillator.stop(startTime + noteDuration);
+    });
   });
   
   // Render
