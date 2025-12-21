@@ -1381,38 +1381,6 @@ export default function NoteGrid({
           
           <div className="w-px h-5 bg-slate-600 mx-2" />
           
-          {/* Note Duration Selector */}
-          <div className="flex items-center gap-1">
-            <span className="text-white/50 text-[10px] uppercase">Dur</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700 border border-slate-600"
-                  title="Note duration"
-                >
-                  <span className="text-xs font-mono">{NOTE_DURATIONS.find(d => d.value === lastNoteDuration)?.label || '16th'}</span>
-                  <ChevronDown className="ml-1 h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-slate-800 border-slate-700">
-                {NOTE_DURATIONS.map(dur => (
-                  <DropdownMenuItem 
-                    key={dur.value}
-                    onClick={() => setLastNoteDuration(dur.value)}
-                    className={`text-white cursor-pointer text-xs ${lastNoteDuration === dur.value ? 'bg-slate-700' : ''}`}
-                  >
-                    <span className="font-mono w-20">{dur.label}</span>
-                    <span className="text-white/50 ml-2">({dur.beats} beats)</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          <div className="w-px h-5 bg-slate-600 mx-2" />
-          
           <Button
             variant="ghost"
             size="sm"
