@@ -1493,7 +1493,13 @@ export default function CounterpointGenerator() {
                                     onEnvelopeChange={setEnvelope}
                                     openWaveEditor={openWaveEditor}
                                     customInstruments={customInstruments}
-                                    onCustomInstrumentsChange={setCustomInstruments}
+                                    onCustomInstrumentsChange={(newInstruments) => {
+                                      setCustomInstruments(newInstruments);
+                                      // Auto-save project when instruments change
+                                      if (currentProjectId && projectName.trim()) {
+                                        setTimeout(() => handleSaveProject(true), 100);
+                                      }
+                                    }}
                                   />
                                 </div>
                               )}
@@ -1564,8 +1570,14 @@ export default function CounterpointGenerator() {
                 onEnvelopeChange={setEnvelope}
                 openWaveEditor={openWaveEditor}
                 customInstruments={customInstruments}
-                onCustomInstrumentsChange={setCustomInstruments}
-              />
+                onCustomInstrumentsChange={(newInstruments) => {
+                  setCustomInstruments(newInstruments);
+                  // Auto-save project when instruments change
+                  if (currentProjectId && projectName.trim()) {
+                    setTimeout(() => handleSaveProject(true), 100);
+                  }
+                }}
+                />
             </div>
             
             {/* Resize handle - bottom right corner */}
