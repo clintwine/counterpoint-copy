@@ -812,9 +812,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               />
             );
             
-            // Full octaves 1-7
-            for (let octave = 1; octave <= 7; octave++) {
+            // Full octaves 1-8 (extended range with some greyed out)
+            for (let octave = 1; octave <= 8; octave++) {
               const octaveStartWhite = whiteKeyIndex;
+              const isExtendedRange = octave === 8; // Grey out octave 8 except C8
               
               OCTAVE_NOTES.filter(n => !n.isBlack).forEach((key) => {
                 const voiceIndex = isNoteActive(key.note, octave);
