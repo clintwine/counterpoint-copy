@@ -410,7 +410,6 @@ export default function NoteGrid({
       const numBars = 80;
       const barWidth = rect.width / numBars;
       const gap = 1.5;
-      const channelHeight = rect.height / 2;
       
       // Draw both channels separately
       for (let channel = 0; channel < 2; channel++) {
