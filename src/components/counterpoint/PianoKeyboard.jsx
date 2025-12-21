@@ -148,31 +148,9 @@ const PRESET_LIBRARY = [
 // Full 88-key piano: A0 to C8
 const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
 
-function InstrumentSelect({ value, onChange, instruments, onCreateNew, customInstruments = [] }) {
+function InstrumentSelect({ value, onChange, instruments, onCreateNew, customInstruments = [], onPreview }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find((i) => i.value === value);
-
-  const handlePreview = async (instrumentValue, e) => {
-    e.stopPropagation();
-    initAudio();
-    
-    // Check if it's a custom or preset instrument
-    if (instrumentValue.startsWith('custom_')) {
-      const index = parseInt(instrumentValue.split('_')[1]);
-      const customConfig = customInstruments[index];
-      if (customConfig) {
-        await playNoteWithCustomInstrument('C4', 0.5, 0.7, customConfig);
-      }
-    } else if (instrumentValue.startsWith('preset_')) {
-      const index = parseInt(instrumentValue.split('_')[1]);
-      const presetConfig = PRESET_LIBRARY[index];
-      if (presetConfig) {
-        await playNoteWithCustomInstrument('C4', 0.5, 0.7, presetConfig);
-      }
-    } else {
-      playNote('C4', 0.5, 0.7, 0, instrumentValue);
-    }
-  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -210,7 +188,10 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
 
                   <span>{inst.label}</span>
                   <button
-                  onClick={(e) => handlePreview(inst.value, e)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onPreview) onPreview(inst.value);
+                  }}
                   className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
                   title="Preview sound">
 
