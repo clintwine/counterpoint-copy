@@ -535,7 +535,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
   return (
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
-      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+      <div className="flex items-center justify-start mb-2 flex-wrap gap-2">
                   <InstrumentSelect
                     value={instrument}
                     onChange={onInstrumentChange}
@@ -700,19 +700,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
             </Button>
-            </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Audio Visualizer - moved to right */}
-            <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-20">
-            <canvas 
-            ref={canvasRef}
-            className="rounded w-full h-full block"
-            />
-            </div>
-            </div>
-
-            <div className="overflow-x-auto pb-1">
+      <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
           <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
@@ -857,9 +849,17 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             
             return keys;
             })()}
-            </div>
-            </div>
-            </div>
+          </div>
+          
+          {/* Audio Visualizer - positioned right after the last white key */}
+          <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-20">
+            <canvas 
+              ref={canvasRef}
+              className="rounded w-full h-full block"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
