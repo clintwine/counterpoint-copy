@@ -284,7 +284,7 @@ export default function CounterpointGenerator() {
     }
   });
 
-  const handleSaveProject = (skipDialog = false) => {
+  const handleSaveProject = useCallback((skipDialog = false) => {
     // If we have an existing project and not in save-as mode, save directly
     if (skipDialog && currentProjectId && projectName.trim()) {
       saveProjectMutation.mutate({
@@ -310,7 +310,7 @@ export default function CounterpointGenerator() {
       effects,
       envelope
     });
-  };
+  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation]);
 
   const handleSaveSong = () => {
     if (!songName.trim()) return;
