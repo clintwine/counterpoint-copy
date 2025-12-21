@@ -330,10 +330,10 @@ export default function WaveEditor({
     <div className="space-y-3">
       {/* Top Row: Presets + Name + Waveform Preview */}
       <div className="flex gap-3">
-        {/* Left: Presets List */}
+        {/* Left: Combined Library List */}
         <div className="w-36 flex-shrink-0 space-y-1">
           <Label className="text-white/70 text-[10px] uppercase tracking-wider">Library</Label>
-          <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[60px] overflow-y-auto">
+          <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[120px] overflow-y-auto">
             {PRESET_LIBRARY.map((preset, i) => (
               <div key={`lib-${i}`} className="flex items-center gap-0.5">
                 <Button
@@ -360,35 +360,33 @@ export default function WaveEditor({
                 </Button>
               </div>
             ))}
-          </div>
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">My Instruments</Label>
-          <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[50px] overflow-y-auto">
-            {customInstruments.length === 0 ? (
-              <p className="text-white/40 text-[9px] text-center py-1">None saved</p>
-            ) : (
-              customInstruments.map((inst, i) => (
-                <div key={i} className="flex items-center gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playPresetPreview(inst, `custom-${i}`);
-                    }}
-                    className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
-                  >
-                    {previewingPreset === `custom-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => loadInstrument(inst, i)}
-                    className={`flex-1 h-5 text-[9px] justify-start px-1 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
-                  >
-                    {inst.name}
-                  </Button>
-                </div>
-              ))
+            {customInstruments.length > 0 && (
+              <>
+                <div className="h-px bg-slate-600 my-1" />
+                {customInstruments.map((inst, i) => (
+                  <div key={i} className="flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playPresetPreview(inst, `custom-${i}`);
+                      }}
+                      className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                    >
+                      {previewingPreset === `custom-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => loadInstrument(inst, i)}
+                      className={`flex-1 h-5 text-[9px] justify-start px-1 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
+                    >
+                      {inst.name}
+                    </Button>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
