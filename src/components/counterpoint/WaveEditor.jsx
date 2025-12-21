@@ -100,6 +100,7 @@ export default function WaveEditor({
   onSaveInstrument, 
   onDeleteInstrument,
   onInstrumentChange,
+  onVoiceInstrumentChange,
   onClose 
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
@@ -328,9 +329,13 @@ export default function WaveEditor({
     // Preserve the instrument's name when loading
     setInstrument({ ...inst, name: inst.name });
     setEditingIndex(index);
-    // Update the instrument selector to this custom instrument
+    // Update both the piano instrument selector and the voice instrument
+    const instrumentValue = `custom_${index}`;
     if (onInstrumentChange) {
-      onInstrumentChange(`custom_${index}`);
+      onInstrumentChange(instrumentValue);
+    }
+    if (onVoiceInstrumentChange) {
+      onVoiceInstrumentChange(0, instrumentValue);
     }
   };
 
@@ -361,8 +366,12 @@ export default function WaveEditor({
                   onClick={() => {
                     setInstrument({ ...preset });
                     setEditingIndex(-1);
+                    const instrumentValue = `preset_${i}`;
                     if (onInstrumentChange) {
-                      onInstrumentChange(`preset_${i}`);
+                      onInstrumentChange(instrumentValue);
+                    }
+                    if (onVoiceInstrumentChange) {
+                      onVoiceInstrumentChange(0, instrumentValue);
                     }
                   }}
                   className="flex-1 h-5 text-[9px] justify-start px-1 text-white/60 hover:text-white hover:bg-slate-600"

@@ -1209,6 +1209,13 @@ export default function CounterpointGenerator() {
                                         setVoices(newVoices);
                                       }
                                     }}
+                                    onVoiceInstrumentChange={(voiceIndex, inst) => {
+                                      const newVoices = [...voices];
+                                      if (newVoices[voiceIndex]) {
+                                        newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
+                                        setVoices(newVoices);
+                                      }
+                                    }}
                                     onPressedNotesChange={setPressedPianoNotes}
                                     onPopOut={() => setPianoPopout(true)}
                                     onNotePress={handleNotePress}
@@ -1271,6 +1278,13 @@ export default function CounterpointGenerator() {
                   const newVoices = [...voices];
                   if (newVoices[0]) {
                     newVoices[0] = { ...newVoices[0], instrument: inst };
+                    setVoices(newVoices);
+                  }
+                }}
+                onVoiceInstrumentChange={(voiceIndex, inst) => {
+                  const newVoices = [...voices];
+                  if (newVoices[voiceIndex]) {
+                    newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
                     setVoices(newVoices);
                   }
                 }}
