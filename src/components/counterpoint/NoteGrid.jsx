@@ -862,19 +862,21 @@ export default function NoteGrid({
     return null;
   };
 
-  const getCellFromPosition = (clientX, clientY) => {
+  const getCellFromPosition = (clientX, clientY, snapToGrid = true) => {
     if (!containerRef.current || !gridRef.current) return null;
     const gridRect = gridRef.current.getBoundingClientRect();
-    
+
     // Calculate position relative to the grid viewport, accounting for scroll
     const scrollLeft = gridRef.current.scrollLeft;
     const scrollTop = gridRef.current.scrollTop;
     const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
     const y = clientY - gridRect.top - 28 + scrollTop; // 28 = header height (h-7 = 1.75rem = 28px)
-    
-    const beat = Math.floor(x / CELL_WIDTH);
+
+    // Allow fractional beat positions (snap to 1/8 beat = 0.125 for precision)
+    const exactBeat = x / CELL_WIDTH;
+    const beat = snapToGrid ? Math.floor(exactBeat) : Math.round(exactBeat * 8) / 8;
     const pitchIndex = Math.floor(y / CELL_HEIGHT);
-    
+
     if (beat >= 0 && beat < totalBeats && pitchIndex >= 0 && pitchIndex < pitches.length) {
       return { pitch: pitches[pitchIndex], beat, pitchIndex };
     }
@@ -985,7 +987,9 @@ export default function NoteGrid({
                 // Only add if not already painted in this stroke and no existing note
                 if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
                   paintedNotesRef.current.add(noteKey);
-                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
+                  // Use non-snapped position for painting
+                  const preciseCell = getCellFromPosition(coords.clientX, coords.clientY, false);
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: preciseCell?.beat || cell.beat, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   onNotesUpdate(newNotes);
                   // Play the note with proper duration for feedback
                   initAudio();
@@ -1017,9 +1021,10 @@ export default function NoteGrid({
             // Calculate delta from original click position for smooth dragging
             const deltaX = coords.clientX - dragState.clickOffsetX;
             const deltaY = coords.clientY - dragState.clickOffsetY;
-      
-      const beatDelta = Math.round(deltaX / CELL_WIDTH);
-      const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
+
+            // Allow fractional beat movements (snap to 1/8 beat)
+            const beatDelta = Math.round((deltaX / CELL_WIDTH) * 8) / 8;
+            const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
       
       const newPitchIndex = dragState.startPitchIndex + pitchDelta;
       const newBeat = dragState.startBeat + beatDelta;
@@ -1076,12 +1081,16 @@ export default function NoteGrid({
           console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
           // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
           if (deltaX < 15 && deltaY < 15) {
-            // Check if note already exists at this position
-            const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
+            // Get precise beat position (not snapped to grid)
+            const preciseCell = getCellFromPosition(pendingNote.clickX, pendingNote.clickY, false);
+            const preciseBeat = preciseCell?.beat || pendingNote.beat;
+
+            // Check if note already exists at this position (with tolerance for fractional beats)
+            const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && Math.abs(n.beat - preciseBeat) < 0.01);
             if (!noteExists) {
               const newNotes = [...cantusFirmus, { 
                 pitch: pendingNote.pitch, 
-                beat: pendingNote.beat, 
+                beat: preciseBeat, 
                 duration: lastNoteDuration, 
                 velocity: 0.8 
               }].sort((a, b) => a.beat - b.beat);
@@ -1173,7 +1182,7 @@ export default function NoteGrid({
         const movedNotes = originalNotes.map(n => {
           const origPitchIdx = pitches.indexOf(n.pitch);
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
-          const newBeat = Math.max(0, Math.min(totalBeats - 1, n.beat + beatDelta));
+          const newBeat = Math.max(0, Math.min(totalBeats - 1, Math.round((n.beat + beatDelta) * 1000) / 1000));
           return { 
             pitch: pitches[newPitchIdx], 
             beat: newBeat, 
