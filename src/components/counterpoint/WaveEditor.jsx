@@ -698,27 +698,51 @@ export default function WaveEditor({
                       ))}
                     </SelectContent>
                   </Select>
-                  <div>
-                    <span className="text-white/40 text-xs">Harmonic</span>
-                    <Input
-                      type="number"
-                      value={osc.harmonic || 1}
-                      onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
-                      className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
-                      step="0.5"
-                      min="0.5"
-                      max="8"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-white/40 text-xs">Detune</span>
-                    <Input
-                      type="number"
-                      value={osc.detune}
-                      onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
-                      className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
-                      step="1"
-                    />
+                  <div className="space-y-1">
+                    <span className="text-white/40 text-xs">Timbre</span>
+                    <div 
+                      className="relative h-24 bg-slate-800 border border-slate-600 rounded cursor-crosshair"
+                      onMouseDown={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const updateTimbre = (clientX, clientY) => {
+                          const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                          const y = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
+                          // X axis: harmonic (0.5 to 8)
+                          const harmonic = 0.5 + x * 7.5;
+                          // Y axis: detune (-50 to 50)
+                          const detune = (y - 0.5) * 100;
+                          updateOscillator(i, 'harmonic', harmonic);
+                          updateOscillator(i, 'detune', detune);
+                        };
+
+                        updateTimbre(e.clientX, e.clientY);
+
+                        const handleMove = (e) => updateTimbre(e.clientX, e.clientY);
+                        const handleUp = () => {
+                          document.removeEventListener('mousemove', handleMove);
+                          document.removeEventListener('mouseup', handleUp);
+                        };
+
+                        document.addEventListener('mousemove', handleMove);
+                        document.addEventListener('mouseup', handleUp);
+                      }}
+                    >
+                      {/* Corner labels */}
+                      <span className="absolute top-1 left-1 text-[9px] text-white/30">Soft</span>
+                      <span className="absolute top-1 right-1 text-[9px] text-white/30">Bright</span>
+                      <span className="absolute bottom-1 left-1 text-[9px] text-white/30">Warm</span>
+                      <span className="absolute bottom-1 right-1 text-[9px] text-white/30">Metallic</span>
+
+                      {/* Draggable dot */}
+                      <div 
+                        className="absolute w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-lg pointer-events-none"
+                        style={{
+                          left: `${((osc.harmonic || 1) - 0.5) / 7.5 * 100}%`,
+                          top: `${(1 - ((osc.detune || 0) / 100 + 0.5)) * 100}%`,
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
