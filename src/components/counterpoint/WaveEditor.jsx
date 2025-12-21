@@ -709,14 +709,14 @@ export default function WaveEditor({
                         const updateTimbre = (clientX, clientY) => {
                           const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
                           const y = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
-                          // X axis: harmonic (0.5 to 8)
-                          const harmonic = 0.5 + x * 7.5;
-                          // Y axis: detune (-50 to 50)
+                          // X axis: phase (0 to 360 degrees) - affects timbre without changing pitch
+                          const phase = x * 360;
+                          // Y axis: detune (-50 to 50 cents) - fine pitch adjustment
                           const detune = (y - 0.5) * 100;
 
                           // Update both values together
                           const newOscs = [...instrument.oscillators];
-                          newOscs[i] = { ...newOscs[i], harmonic, detune };
+                          newOscs[i] = { ...newOscs[i], phase, detune };
                           setInstrument({ ...instrument, oscillators: newOscs });
                         };
 
@@ -743,7 +743,7 @@ export default function WaveEditor({
                       <div 
                         className="absolute w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-lg pointer-events-none"
                         style={{
-                          left: `${((osc.harmonic || 1) - 0.5) / 7.5 * 100}%`,
+                          left: `${((osc.phase || 0) / 360) * 100}%`,
                           top: `${(1 - ((osc.detune || 0) / 100 + 0.5)) * 100}%`,
                           transform: 'translate(-50%, -50%)'
                         }}
