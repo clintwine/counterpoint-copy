@@ -408,7 +408,7 @@ export default function NoteGrid({
         const value = count > 0 ? sum / count : 0;
         
         const labelSpace = 16;
-        const barHeight = (value / 255) * (rect.height - labelSpace) * 0.85;
+        const barHeight = (value / 255) * (rect.height - labelSpace) * 1.4;
         const x = i * barWidth;
         
         const gradient = ctx.createLinearGradient(x, rect.height - barHeight, x, rect.height);
