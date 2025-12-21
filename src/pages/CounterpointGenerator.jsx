@@ -19,7 +19,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
-import MusicTheoryPanel from '@/components/counterpoint/MusicTheoryPanel';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Midi } from '@tonejs/midi';
 
@@ -95,7 +94,6 @@ export default function CounterpointGenerator() {
     return () => { delete window.expandMeasures; };
   }, []);
   const [chatbotOpen, setChatbotOpen] = useState(false);
-  const [theoryPanelOpen, setTheoryPanelOpen] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
@@ -680,20 +678,7 @@ export default function CounterpointGenerator() {
     setPlayheadPosition(beat);
   };
 
-  const handleApplyProgression = (notes) => {
-    saveToHistory(notes);
-    setCantusFirmus(notes);
-  };
 
-  const handleApplyScale = (notes) => {
-    saveToHistory(notes);
-    setCantusFirmus(notes);
-  };
-
-  const saveToHistory = (notes) => {
-    // Simple history tracking for undo/redo
-    // This can be expanded later
-  };
 
   // Export as data
   const handleExport = () => {
@@ -1056,7 +1041,6 @@ export default function CounterpointGenerator() {
                                     URL.revokeObjectURL(url);
                                   }}
                                   onImportMidi={handleImportMidi}
-                                  onTheoryTools={() => setTheoryPanelOpen(true)}
                                   isRecording={isRecording}
                                   onRecordToggle={handleRecordToggle}
                                   isCountingIn={isCountingIn}
@@ -1138,7 +1122,6 @@ export default function CounterpointGenerator() {
                                 URL.revokeObjectURL(url);
                               }}
                               onImportMidi={handleImportMidi}
-                              onTheoryTools={() => setTheoryPanelOpen(true)}
                             />
             
             {/* Piano toggle for mobile */}
@@ -1179,16 +1162,6 @@ export default function CounterpointGenerator() {
           </motion.main>
           </div>
           </div>
-
-      {/* Music Theory Panel */}
-      <MusicTheoryPanel
-        isOpen={theoryPanelOpen}
-        onClose={() => setTheoryPanelOpen(false)}
-        cantusFirmus={cantusFirmus}
-        generatedVoices={generatedVoices}
-        onApplyProgression={handleApplyProgression}
-        onApplyScale={handleApplyScale}
-      />
 
       {/* Piano Popout - Draggable & Resizable Window */}
       <AnimatePresence>
