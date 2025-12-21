@@ -450,22 +450,58 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   if (!freq) return;
 
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
-  const { oscillators: oscConfigs, envelope, filter: filterConfig } = customConfig;
+  const { oscillators: oscConfigs, envelope, filter: filterConfig, lfo, distortion, bitcrush } = customConfig;
 
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
+
+  // LFO setup
+  let lfoNode = null;
+  let lfoGain = null;
+  if (lfo && lfo.rate > 0 && lfo.amount > 0) {
+    lfoNode = audioContext.createOscillator();
+    lfoNode.frequency.value = lfo.rate;
+    lfoNode.type = 'sine';
+    lfoGain = audioContext.createGain();
+    
+    // Set LFO amount based on target
+    if (lfo.target === 'pitch') {
+      lfoGain.gain.value = lfo.amount * 50; // Vibrato depth in cents
+    } else if (lfo.target === 'filter') {
+      lfoGain.gain.value = lfo.amount * 1000; // Filter modulation depth
+    } else if (lfo.target === 'volume') {
+      lfoGain.gain.value = lfo.amount * 0.3; // Tremolo depth
+    }
+    
+    lfoNode.connect(lfoGain);
+    lfoNode.start(now);
+    lfoNode.stop(now + duration + envelope.release);
+  }
 
   // Create oscillators from custom config (limit to first 3 for performance)
   const maxOscs = Math.min(3, oscConfigs.length);
   oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
     const osc = audioContext.createOscillator();
     osc.type = oscConfig.waveform;
-    osc.frequency.value = freq;
+    
+    // Apply harmonic ratio and phase
+    const harmonic = oscConfig.harmonic || 1;
+    osc.frequency.value = freq * harmonic;
     osc.detune.value = oscConfig.detune || 0;
+    
+    // Apply LFO modulation
+    if (lfoGain && lfo.target === 'pitch') {
+      lfoGain.connect(osc.detune);
+    }
 
     const oscGain = audioContext.createGain();
     oscGain.gain.value = (oscConfig.gain || 1) * 0.3;
+    
+    // Apply LFO to volume if selected
+    if (lfoGain && lfo.target === 'volume') {
+      lfoGain.connect(oscGain.gain);
+    }
 
     osc.connect(oscGain);
     oscGain.connect(filterNode);
@@ -476,6 +512,28 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   filterNode.type = filterConfig.type || 'lowpass';
   filterNode.frequency.value = filterConfig.frequency || 2000;
   filterNode.Q.value = filterConfig.Q || 1;
+  
+  // Apply LFO to filter if selected
+  if (lfoGain && lfo.target === 'filter') {
+    lfoGain.connect(filterNode.frequency);
+  }
+
+  // Chain effects: filter -> distortion -> bitcrush -> gain
+  let outputNode = filterNode;
+  
+  // Apply distortion
+  if (distortion > 0) {
+    const distortionNode = createDistortion(distortion);
+    outputNode.connect(distortionNode);
+    outputNode = distortionNode;
+  }
+  
+  // Apply bitcrush
+  if (bitcrush > 0) {
+    const bitcrushNode = createBitcrusher(bitcrush);
+    outputNode.connect(bitcrushNode);
+    outputNode = bitcrushNode;
+  }
 
   // Envelope
   const { attack, decay, sustain, release } = envelope;
@@ -491,7 +549,7 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   gainNode.gain.setValueAtTime(volume * sustain * 0.6, releaseStartTime);
   gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
 
-  filterNode.connect(gainNode);
+  outputNode.connect(gainNode);
   gainNode.connect(masterGain);
 
   const stopTime = Math.max(now + 0.01, now + totalDuration);
@@ -502,6 +560,22 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
 
   return { oscillators, gainNode };
   }
+
+function createBitcrusher(bits) {
+  if (!audioContext) return null;
+  const bitcrush = audioContext.createWaveShaper();
+  const samples = 44100;
+  const curve = new Float32Array(samples);
+  const step = Math.pow(0.5, bits);
+  
+  for (let i = 0; i < samples; i++) {
+    const x = (i * 2) / samples - 1;
+    curve[i] = step * Math.floor(x / step + 0.5);
+  }
+  
+  bitcrush.curve = curve;
+  return bitcrush;
+}
 
 function createDistortion(amount) {
   if (!audioContext) return null;
