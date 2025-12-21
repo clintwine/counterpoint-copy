@@ -390,6 +390,23 @@ export default function NoteGrid({
       ctx.fillStyle = bgGradient;
       ctx.fillRect(0, 0, rect.width, rect.height);
       
+      // Draw channel containers (always visible like Logic Pro)
+      const channelHeight = rect.height / 2;
+      const padding = 2;
+      
+      // Left channel container
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.08)';
+      ctx.fillRect(padding, padding, rect.width - padding * 2, channelHeight - padding * 1.5);
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(padding, padding, rect.width - padding * 2, channelHeight - padding * 1.5);
+      
+      // Right channel container
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.08)';
+      ctx.fillRect(padding, channelHeight + padding * 0.5, rect.width - padding * 2, channelHeight - padding * 1.5);
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+      ctx.strokeRect(padding, channelHeight + padding * 0.5, rect.width - padding * 2, channelHeight - padding * 1.5);
+      
       const numBars = 80;
       const barWidth = rect.width / numBars;
       const gap = 1.5;
