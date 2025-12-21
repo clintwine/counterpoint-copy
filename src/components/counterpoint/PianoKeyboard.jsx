@@ -583,7 +583,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const totalWidth = totalWhiteKeys * whiteKeyWidth;
 
   return (
-    <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] w-fit overflow-hidden">
+    <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
                   <InstrumentSelect
@@ -732,6 +732,15 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
           <div className="flex items-center gap-1 sm:gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowWaveEditor(!showWaveEditor)}
+                              className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
+                            >
+                              <Waves className="w-3.5 h-3.5 mr-1" />
+                              Edit Instrument
+                            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -894,6 +903,21 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         </div>
       </div>
       </div>
+
+      {/* Wave Editor Modal */}
+              <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
+                <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl p-4">
+                  <DialogHeader className="pb-2">
+                    <DialogTitle className="text-white text-sm">Wave Editor</DialogTitle>
+                  </DialogHeader>
+                  <WaveEditor
+                    customInstruments={customInstruments}
+                    onSaveInstrument={handleSaveInstrument}
+                    onDeleteInstrument={handleDeleteInstrument}
+                    onClose={() => setShowWaveEditor(false)}
+                  />
+                </DialogContent>
+              </Dialog>
     </div>
   );
 }
