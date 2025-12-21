@@ -884,6 +884,20 @@ export default function WaveEditor({
                     className="w-full"
                   />
                 </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Width</span>
+                    <span className="text-white/60 text-xs">{Math.round((instrument.width || 0) * 100)}%</span>
+                  </div>
+                  <Slider
+                    value={[instrument.width || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, width: v })}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
