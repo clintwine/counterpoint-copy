@@ -14,6 +14,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FilePlus } from 'lucide-react';
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16, clicksPerMeasure: 4 },
@@ -45,6 +46,7 @@ export default function PlaybackControls({
   onScrollToBeat,
   onNewProject,
   onSaveProject,
+  onSaveProjectAs,
   onSaveSong,
   onLoadProject,
   onBrowseSongs,

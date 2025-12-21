@@ -77,6 +77,7 @@ export default function CounterpointGenerator() {
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveAsMode, setSaveAsMode] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [songDialogOpen, setSongDialogOpen] = useState(false);
   const [saveSongDialogOpen, setSaveSongDialogOpen] = useState(false);
@@ -137,15 +138,24 @@ export default function CounterpointGenerator() {
           }
 
           // Cmd/Ctrl + S for save project
-          if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+          if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.shiftKey) {
             e.preventDefault();
+            setSaveAsMode(false);
             setSaveDialogOpen(true);
           }
 
-          // Cmd/Ctrl + Shift + S for save as song (admin only)
-          if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's' && currentUser?.role === 'admin') {
+          // Cmd/Ctrl + Shift + S for save as
+          if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
             e.preventDefault();
-            setSaveSongDialogOpen(true);
+            // If admin, show menu to choose between save as project or song
+            if (currentUser?.role === 'admin') {
+              // For now, default to save as project (could add a modal to choose)
+              setSaveAsMode(true);
+              setSaveDialogOpen(true);
+            } else {
+              setSaveAsMode(true);
+              setSaveDialogOpen(true);
+            }
           }
         };
         window.addEventListener('keydown', handleKeyDown);
@@ -172,12 +182,13 @@ export default function CounterpointGenerator() {
   // Save project mutation
   const saveProjectMutation = useMutation({
     mutationFn: async (data) => {
-      if (currentProjectId) {
-        await base44.entities.CounterpointProject.update(currentProjectId, data);
-        return { id: currentProjectId };
+      // If saveAsMode, always create new even if currentProjectId exists
+      if (saveAsMode || !currentProjectId) {
+        const result = await base44.entities.CounterpointProject.create(data);
+        return result;
       }
-      const result = await base44.entities.CounterpointProject.create(data);
-      return result;
+      await base44.entities.CounterpointProject.update(currentProjectId, data);
+      return { id: currentProjectId };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
@@ -185,9 +196,11 @@ export default function CounterpointGenerator() {
         setCurrentProjectId(result.id);
       }
       setSaveDialogOpen(false);
+      setSaveAsMode(false);
     },
     onError: (error) => {
       console.error('Save failed:', error);
+      setSaveAsMode(false);
     }
   });
 
@@ -253,15 +266,30 @@ export default function CounterpointGenerator() {
 
   const handleSaveProject = () => {
     if (!projectName.trim()) return;
-    saveProjectMutation.mutate({
-      name: projectName,
-      settings: { ...settings, tempo },
-      cantusFirmus,
-      generatedVoices,
-      voices,
-      effects,
-      envelope
-    });
+    // If save as mode, always create new
+    if (saveAsMode) {
+      saveProjectMutation.mutate({
+        name: projectName,
+        settings: { ...settings, tempo },
+        cantusFirmus,
+        generatedVoices,
+        voices,
+        effects,
+        envelope
+      });
+      setCurrentProjectId(null); // Will be set to new ID in mutation success
+      setSaveAsMode(false);
+    } else {
+      saveProjectMutation.mutate({
+        name: projectName,
+        settings: { ...settings, tempo },
+        cantusFirmus,
+        generatedVoices,
+        voices,
+        effects,
+        envelope
+      });
+    }
   };
 
   const handleSaveSong = () => {
@@ -1057,13 +1085,18 @@ export default function CounterpointGenerator() {
               </Dialog>
 
               {/* Save Project Dialog */}
-              <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+              <Dialog open={saveDialogOpen} onOpenChange={(open) => {
+                setSaveDialogOpen(open);
+                if (!open) setSaveAsMode(false);
+              }}>
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
                 <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
                   <DialogHeader>
-                    <DialogTitle className="text-white">Save Project</DialogTitle>
+                    <DialogTitle className="text-white">
+                      {saveAsMode ? 'Save Project As' : 'Save Project'}
+                    </DialogTitle>
                   </DialogHeader>
                   <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(); }} className="space-y-4">
                     <div>
@@ -1081,7 +1114,7 @@ export default function CounterpointGenerator() {
                       disabled={!projectName.trim() || saveProjectMutation.isPending}
                       className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
                     >
-                      {saveProjectMutation.isPending ? 'Saving...' : (currentProjectId ? 'Update Project' : 'Save Project')}
+                      {saveProjectMutation.isPending ? 'Saving...' : (saveAsMode ? 'Save As New Project' : (currentProjectId ? 'Update Project' : 'Save Project'))}
                     </Button>
                   </form>
                 </DialogContent>
@@ -1203,7 +1236,14 @@ export default function CounterpointGenerator() {
                                   onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
                                   onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
                                   onNewProject={handleNewProject}
-                                  onSaveProject={() => setSaveDialogOpen(true)}
+                                  onSaveProject={() => {
+                                    setSaveAsMode(false);
+                                    setSaveDialogOpen(true);
+                                  }}
+                                  onSaveProjectAs={() => {
+                                    setSaveAsMode(true);
+                                    setSaveDialogOpen(true);
+                                  }}
                                   onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
                                   onLoadProject={() => setLoadDialogOpen(true)}
                                   onBrowseSongs={() => setSongDialogOpen(true)}
@@ -1294,7 +1334,14 @@ export default function CounterpointGenerator() {
                               showPianoPanel={showPianoPanel && !pianoPopout}
                               onPopOut={() => setPianoPopout(true)}
                               onNewProject={handleNewProject}
-                              onSaveProject={() => setSaveDialogOpen(true)}
+                              onSaveProject={() => {
+                                setSaveAsMode(false);
+                                setSaveDialogOpen(true);
+                              }}
+                              onSaveProjectAs={() => {
+                                setSaveAsMode(true);
+                                setSaveDialogOpen(true);
+                              }}
                               onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
                               onLoadProject={() => setLoadDialogOpen(true)}
                               onBrowseSongs={() => setSongDialogOpen(true)}
