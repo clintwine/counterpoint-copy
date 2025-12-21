@@ -1268,10 +1268,10 @@ export default function NoteGrid({
                 className="h-8 px-3 text-white hover:text-white hover:bg-slate-700/50 gap-2"
               >
                 <Menu className="w-4 h-4" />
-                <span className="font-semibold text-sm">Menu</span>
+                <span className="font-semibold text-sm">File</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-[#2D2D2D] border-[#3A3A3A] min-w-[220px]">
+            <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A] min-w-[220px] shadow-xl">
               <DropdownMenuItem onClick={onNewProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FileText className="w-4 h-4 mr-2" />
                 New Project
