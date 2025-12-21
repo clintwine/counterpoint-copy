@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
-import { initAudio, getAudioContext } from './audioEngine';
+import { Switch } from "@/components/ui/switch";
+import { initAudio, getAudioContext, playSustained, stopSustained } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
 
@@ -108,10 +109,12 @@ export default function WaveEditor({
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
+  const [livePreview, setLivePreview] = useState(false);
   const canvasRef = useRef(null);
   const analyserRef = useRef(null);
   const animationRef = useRef(null);
   const oscillatorsRef = useRef([]);
+  const liveNoteIdRef = useRef(null);
 
   // Draw waveform visualization
   const drawWaveform = useCallback(() => {
@@ -339,6 +342,40 @@ export default function WaveEditor({
     }
   };
 
+  // Handle live preview toggle
+  const toggleLivePreview = (enabled) => {
+    setLivePreview(enabled);
+    if (enabled) {
+      initAudio();
+      const noteId = playSustained('C4', 0.5, instrument);
+      liveNoteIdRef.current = noteId;
+    } else {
+      if (liveNoteIdRef.current) {
+        stopSustained(liveNoteIdRef.current);
+        liveNoteIdRef.current = null;
+      }
+    }
+  };
+
+  // Update live preview sound when instrument changes
+  useEffect(() => {
+    if (livePreview && liveNoteIdRef.current) {
+      // Stop current note and restart with new settings
+      stopSustained(liveNoteIdRef.current);
+      const noteId = playSustained('C4', 0.5, instrument);
+      liveNoteIdRef.current = noteId;
+    }
+  }, [instrument, livePreview]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (liveNoteIdRef.current) {
+        stopSustained(liveNoteIdRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="space-y-3">
       {/* Top Row: Presets + Name + Waveform Preview */}
@@ -477,10 +514,20 @@ export default function WaveEditor({
           </div>
         </div>
 
-        {/* Right: ADSR Knobs */}
-        <div className="flex-shrink-0">
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">Envelope</Label>
-          <div className="flex gap-2 mt-1">
+        {/* Right: ADSR Knobs + Live Preview */}
+        <div className="flex-shrink-0 space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-white/70 text-[10px] uppercase tracking-wider">Envelope</Label>
+            <div className="flex items-center gap-1.5">
+              <Label className="text-white/50 text-[9px]">Live</Label>
+              <Switch
+                checked={livePreview}
+                onCheckedChange={toggleLivePreview}
+                className="data-[state=checked]:bg-amber-500 scale-75"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
             {['attack', 'decay', 'sustain', 'release'].map(param => (
               <div key={param} className="text-center">
                 <div
