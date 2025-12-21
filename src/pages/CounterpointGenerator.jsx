@@ -516,68 +516,79 @@ export default function CounterpointGenerator() {
     }
   }, [playheadPosition, currentBeat]);
 
-  // Pre-index notes by beat for fast playback lookup
-  const notesAtBeatMap = React.useMemo(() => {
-    const map = new Map();
+  // Track last playhead position for fractional beat note triggering
+  const lastPlayheadRef = useRef(0);
+  const playedNotesRef = useRef(new Set());
+
+  // Collect all notes for fractional beat playback
+  const allNotes = React.useMemo(() => {
+    const notes = [];
     cantusFirmus.forEach(note => {
-      if (note.beat >= 0 && !map.has(note.beat)) map.set(note.beat, []);
-      if (note.beat >= 0) map.get(note.beat).push({ note, voiceIndex: 0 });
+      if (note.beat >= 0) notes.push({ note, voiceIndex: 0 });
     });
     generatedVoices.forEach((voice, idx) => {
       voice.notes?.forEach(note => {
-        if (note.beat >= 0 && !map.has(note.beat)) map.set(note.beat, []);
-        if (note.beat >= 0) map.get(note.beat).push({ note, voiceIndex: idx + 1 });
+        if (note.beat >= 0) notes.push({ note, voiceIndex: idx + 1 });
       });
     });
-    return map;
+    return notes.sort((a, b) => a.note.beat - b.note.beat);
   }, [cantusFirmus, generatedVoices]);
 
-  // Track last played beat to prevent duplicate plays
-  const lastPlayedBeatRef = useRef(-1);
-
-  // Play notes at current beat - with duplicate prevention
+  // Play notes based on fractional playhead position (supports trills/ornaments)
   useEffect(() => {
-    if (!isPlaying || currentBeat < 0) return;
+    if (!isPlaying) return;
 
-    // Prevent playing the same beat multiple times in rapid succession
-    if (lastPlayedBeatRef.current === currentBeat) return;
-    lastPlayedBeatRef.current = currentBeat;
+    const currentPos = playheadPosition;
+    const lastPos = lastPlayheadRef.current;
+    
+    // Handle loop wraparound
+    if (currentPos < lastPos) {
+      playedNotesRef.current.clear();
+    }
 
-    // Use pre-indexed map for O(1) lookup
-    const notesAtBeat = notesAtBeatMap.get(currentBeat) || [];
-    notesAtBeat.forEach(({ note, voiceIndex }) => {
-      if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
-      const volume = (voices[voiceIndex]?.volume || 80) / 100;
-      const velocity = note.velocity ?? 0.8;
-      const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note
-      const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-      const instrument = voices[voiceIndex]?.instrument || 'organ';
+    // Find and play all notes between last and current position
+    allNotes.forEach(({ note, voiceIndex }) => {
+      const noteKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
       
-      // Build pitch bend envelope if bend data exists
-      let pitchBend = 0;
-      if (note.bendStart !== undefined || note.bendEnd !== undefined) {
-        pitchBend = {
-          start: note.bendStart ?? 0,
-          end: note.bendEnd ?? 0,
-          startTime: note.bendStartTime ?? 0,
-          endTime: note.bendEndTime ?? 1
-        };
+      // Check if note should trigger (beat is in the range we just passed)
+      if (note.beat >= lastPos && note.beat < currentPos && !playedNotesRef.current.has(noteKey)) {
+        playedNotesRef.current.add(noteKey);
+        
+        if (voiceIndex > 0 && !voices[voiceIndex]?.enabled) return;
+        
+        const volume = (voices[voiceIndex]?.volume || 80) / 100;
+        const velocity = note.velocity ?? 0.8;
+        const sixteenthNoteDuration = (60 / tempo) / 4;
+        const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
+        const instrument = voices[voiceIndex]?.instrument || 'organ';
+        
+        let pitchBend = 0;
+        if (note.bendStart !== undefined || note.bendEnd !== undefined) {
+          pitchBend = {
+            start: note.bendStart ?? 0,
+            end: note.bendEnd ?? 0,
+            startTime: note.bendStartTime ?? 0,
+            endTime: note.bendEndTime ?? 1
+          };
+        }
+        
+        playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
       }
-      
-      // Use velocity directly with a slight boost for expression
-      playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
     });
 
-    // Metronome click
-    if (metronomeEnabled) {
+    lastPlayheadRef.current = currentPos;
+
+    // Metronome click (still on integer beats)
+    const discreteBeat = Math.floor(currentPos);
+    if (discreteBeat !== Math.floor(lastPos) && metronomeEnabled) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const subdivisionSize = beatsPerMeasure / 4;
-      if (currentBeat % subdivisionSize === 0) {
-        const isDownbeat = currentBeat % beatsPerMeasure === 0;
+      if (discreteBeat % subdivisionSize === 0) {
+        const isDownbeat = discreteBeat % beatsPerMeasure === 0;
         playMetronomeClick(isDownbeat);
       }
     }
-  }, [currentBeat, isPlaying, notesAtBeatMap, tempo, voices, metronomeEnabled, settings.timeSignature]);
+  }, [playheadPosition, isPlaying, allNotes, tempo, voices, metronomeEnabled, settings.timeSignature]);
 
   const handlePlayPause = () => {
     ensureAudio();
