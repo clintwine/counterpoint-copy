@@ -192,8 +192,16 @@ export default function WaveEditor({
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    
+    // Set canvas resolution for sharp rendering
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const width = rect.width;
+    const height = rect.height;
 
     ctx.fillStyle = 'rgb(30, 41, 59)';
     ctx.fillRect(0, 0, width, height);
@@ -311,32 +319,11 @@ export default function WaveEditor({
 
   const playPreview = useCallback(() => {
     setIsPlaying(true);
-    initAudio();
-    const audioContext = getAudioContext();
-    
-    // Set up analyser for waveform visualization
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
-    analyserRef.current = analyser;
-    
-    // Connect to destination for visualization
-    const masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.3;
-    masterGain.connect(analyser);
-    analyser.connect(audioContext.destination);
-    
-    // Play the note
-    playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
-    
-    // Start drawing waveform
-    drawWaveform();
-    
-    // Stop visualization after duration
-    setTimeout(() => {
-      stopPreview();
+    playPreviewForInstrument(instrument, () => {
       setIsPlaying(false);
-    }, 900);
-  }, [instrument, drawWaveform, stopPreview]);
+    });
+    drawWaveform();
+  }, [instrument, drawWaveform, playPreviewForInstrument]);
 
   const playPresetPreview = useCallback((preset, index) => {
     if (previewingPreset !== null) return;
@@ -595,12 +582,10 @@ export default function WaveEditor({
             </div>
           </div>
           <div className="relative">
-            <canvas
-              ref={canvasRef}
-              width={300}
-              height={60}
-              className="w-full rounded border border-slate-600"
-            />
+           <canvas
+             ref={canvasRef}
+             className="w-full h-[60px] rounded border border-slate-600"
+           />
             <Button
               variant="ghost"
               size="sm"
