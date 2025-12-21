@@ -1336,22 +1336,9 @@ export default function NoteGrid({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 try {
-                  const { base44 } = await import('@/api/base44Client');
-                  const response = await base44.functions.invoke('exportAudio', {
-                    notes: cantusFirmus,
-                    tempo
-                  });
+                  const { renderToWav } = await import('../counterpoint/audioExporter');
+                  const blob = await renderToWav(cantusFirmus, tempo, voices[0]?.instrument || 'organ');
                   
-                  // Convert string response to binary ArrayBuffer
-                  // SDK returns binary data as a string, need to convert each char to byte
-                  const str = response.data;
-                  const buf = new ArrayBuffer(str.length);
-                  const bufView = new Uint8Array(buf);
-                  for (let i = 0; i < str.length; i++) {
-                    bufView[i] = str.charCodeAt(i);
-                  }
-                  
-                  const blob = new Blob([buf], { type: 'audio/wav' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
