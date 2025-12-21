@@ -6,25 +6,15 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
+  const [leftLevel, setLeftLevel] = React.useState(0);
+  const [rightLevel, setRightLevel] = React.useState(0);
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const width = 140;
-    const height = 24;
-    canvas.width = width;
-    canvas.height = height;
-
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
 
       const analyserNode = getAnalyser();
       
-      // Clear background
-      ctx.fillStyle = '#334155';
-      ctx.fillRect(0, 0, width, height);
-
       if (analyserNode) {
         const bufferLength = analyserNode.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -38,71 +28,13 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         const avgValue = sum / bufferLength;
         const normalizedLevel = Math.min(1, (avgValue / 255) * 3.5); // 3.5x boost for better visualization
 
-        // Draw level bars for both channels (simulated stereo)
-        const channelHeight = 10;
-        const gap = 2;
-        
-        // Left channel (top) - with slight variation for stereo effect
-        const leftLevel = Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14));
-        const leftWidth = Math.min(width - 4, (leftLevel * (width - 4)));
-        
-        // Gradient based on level
-        const leftGradient = ctx.createLinearGradient(2, 2, width - 2, 2);
-        if (leftLevel < 0.6) {
-          leftGradient.addColorStop(0, '#10b981');
-          leftGradient.addColorStop(1, '#10b981');
-        } else if (leftLevel < 0.85) {
-          leftGradient.addColorStop(0, '#10b981');
-          leftGradient.addColorStop(0.6, '#f59e0b');
-          leftGradient.addColorStop(1, '#f59e0b');
-        } else {
-          leftGradient.addColorStop(0, '#10b981');
-          leftGradient.addColorStop(0.6, '#f59e0b');
-          leftGradient.addColorStop(0.85, '#ef4444');
-          leftGradient.addColorStop(1, '#ef4444');
-        }
-
-        ctx.fillStyle = leftGradient;
-        ctx.fillRect(2, 2, leftWidth, channelHeight);
-
-        // Right channel (bottom) - with slight variation for stereo effect
-        const rightLevel = Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14));
-        const rightWidth = Math.min(width - 4, (rightLevel * (width - 4)));
-        
-        const rightGradient = ctx.createLinearGradient(2, 2 + channelHeight + gap, width - 2, 2 + channelHeight + gap);
-        if (rightLevel < 0.6) {
-          rightGradient.addColorStop(0, '#10b981');
-          rightGradient.addColorStop(1, '#10b981');
-        } else if (rightLevel < 0.85) {
-          rightGradient.addColorStop(0, '#10b981');
-          rightGradient.addColorStop(0.6, '#f59e0b');
-          rightGradient.addColorStop(1, '#f59e0b');
-        } else {
-          rightGradient.addColorStop(0, '#10b981');
-          rightGradient.addColorStop(0.6, '#f59e0b');
-          rightGradient.addColorStop(0.85, '#ef4444');
-          rightGradient.addColorStop(1, '#ef4444');
-        }
-
-        ctx.fillStyle = rightGradient;
-        ctx.fillRect(2, 2 + channelHeight + gap, rightWidth, channelHeight);
+        // Update levels with slight variation for stereo effect
+        setLeftLevel(Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14)));
+        setRightLevel(Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14)));
+      } else {
+        setLeftLevel(0);
+        setRightLevel(0);
       }
-
-      // Draw volume slider knob position
-      const knobX = 2 + (value / 100) * (width - 24);
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillStyle = '#f1f5f9';
-      ctx.beginPath();
-      ctx.arc(knobX + 10, height / 2, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      // Inner knob highlight
-      ctx.fillStyle = '#e2e8f0';
-      ctx.beginPath();
-      ctx.arc(knobX + 10, height / 2, 6, 0, Math.PI * 2);
-      ctx.fill();
     };
 
     draw();
@@ -112,13 +44,15 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [value]);
+  }, []);
+
+  const containerRef = useRef(null);
 
   const handleMouseDown = (e) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     const updateValue = (clientX) => {
       const x = clientX - rect.left;
       const newValue = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -140,17 +74,61 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const getLevelColor = (level) => {
+    if (level < 0.6) return '#10b981';
+    if (level < 0.85) return '#f59e0b';
+    return '#ef4444';
+  };
+
+  const getLevelGradient = (level) => {
+    if (level < 0.6) {
+      return 'linear-gradient(to right, #10b981, #10b981)';
+    } else if (level < 0.85) {
+      return 'linear-gradient(to right, #10b981 0%, #10b981 60%, #f59e0b 60%, #f59e0b 100%)';
+    } else {
+      return 'linear-gradient(to right, #10b981 0%, #10b981 60%, #f59e0b 60%, #f59e0b 85%, #ef4444 85%, #ef4444 100%)';
+    }
+  };
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Volume2 className="w-4 h-4 text-white/60 flex-shrink-0" />
-      <canvas
-        ref={canvasRef}
-        width={140}
-        height={24}
-        className="cursor-pointer rounded border border-slate-600"
+      <div
+        ref={containerRef}
+        className="relative cursor-pointer rounded border border-slate-600 overflow-hidden bg-slate-700"
         onMouseDown={handleMouseDown}
         style={{ width: '140px', height: '24px' }}
-      />
+      >
+        {/* Left channel (top) */}
+        <div className="absolute top-0.5 left-0.5 right-0.5 h-[9px] bg-slate-800 rounded-sm overflow-hidden">
+          <div
+            className="h-full transition-all duration-75"
+            style={{
+              width: `${leftLevel * 100}%`,
+              background: getLevelGradient(leftLevel)
+            }}
+          />
+        </div>
+
+        {/* Right channel (bottom) */}
+        <div className="absolute bottom-0.5 left-0.5 right-0.5 h-[9px] bg-slate-800 rounded-sm overflow-hidden">
+          <div
+            className="h-full transition-all duration-75"
+            style={{
+              width: `${rightLevel * 100}%`,
+              background: getLevelGradient(rightLevel)
+            }}
+          />
+        </div>
+
+        {/* Volume slider knob */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-100 shadow-lg pointer-events-none border border-slate-300"
+          style={{ left: `calc(${value}% - 8px)` }}
+        >
+          <div className="absolute inset-1 rounded-full bg-slate-200" />
+        </div>
+      </div>
       <span className="text-xs text-white/60 w-8 text-right flex-shrink-0">{Math.round(value)}</span>
     </div>
   );
