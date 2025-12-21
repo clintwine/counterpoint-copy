@@ -1320,8 +1320,8 @@ export default function NoteGrid({
             {playbackControls}
           </div>
         
+          <div className="w-8" />
         </div>
-      </div>
 
       {/* Secondary Toolbar - Tool Controls */}
       <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525]">
