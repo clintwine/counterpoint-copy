@@ -2127,7 +2127,7 @@ export default function NoteGrid({
         <div
           className="fixed cursor-ew-resize"
           style={{
-            left: `${gridRef.current ? gridRef.current.getBoundingClientRect().left + 56 + smoothPlayhead * CELL_WIDTH - (gridRef.current.scrollLeft) : 0}px`,
+            left: `${gridRef.current ? gridRef.current.getBoundingClientRect().left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft : 0}px`,
             top: `${gridRef.current ? gridRef.current.getBoundingClientRect().top : 0}px`,
             width: 0,
             height: 0,
