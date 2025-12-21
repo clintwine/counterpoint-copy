@@ -425,6 +425,18 @@ export default function WaveEditor({
             <div className="flex items-end gap-1">
               <Button
                 size="sm"
+                onClick={() => {
+                  setInstrument({ ...DEFAULT_INSTRUMENT });
+                  setEditingIndex(-1);
+                }}
+                variant="outline"
+                className="h-7 border-slate-600 text-white/70 hover:text-white hover:bg-slate-600 text-xs"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                New
+              </Button>
+              <Button
+                size="sm"
                 onClick={handleSave}
                 className="h-7 bg-amber-500 text-slate-900 hover:bg-amber-400 text-xs"
               >
