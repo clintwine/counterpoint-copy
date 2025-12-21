@@ -1247,9 +1247,10 @@ export default function NoteGrid({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700"
+                className="h-8 px-3 text-white hover:text-white hover:bg-slate-700/50 gap-2"
               >
-                <MoreVertical className="w-4 h-4" />
+                <Music className="w-5 h-5 text-amber-400" />
+                <span className="font-semibold text-sm">Counterpoint Studio</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-slate-800 border-slate-700">
