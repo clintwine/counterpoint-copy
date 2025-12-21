@@ -609,8 +609,8 @@ export default function CounterpointGenerator() {
             isAccent = beatInMeasure === 0; // Accent on beat 1
             break;
           case '6/8':
-            // Accent on beats 1 and 4 (compound meter)
-            isAccent = beatInMeasure === 0 || beatInMeasure === 6;
+            // Accent only on beat 1
+            isAccent = beatInMeasure === 0;
             break;
           case '2/2':
             isAccent = beatInMeasure === 0; // Accent on beat 1
