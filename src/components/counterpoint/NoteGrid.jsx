@@ -1293,6 +1293,11 @@ export default function NoteGrid({
                 Import MIDI
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-700" />
+              <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white cursor-pointer">
+                <Guitar className="w-4 h-4 mr-2" />
+                Create Instrument
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-700" />
               <DropdownMenuItem onClick={onAIComposer} className="text-white cursor-pointer">
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Composer

@@ -1122,6 +1122,10 @@ export default function CounterpointGenerator() {
                                 URL.revokeObjectURL(url);
                               }}
                               onImportMidi={handleImportMidi}
+                              onOpenWaveEditor={() => {
+                                // Open the wave editor in the piano keyboard
+                                setShowPianoPanel(true);
+                              }}
                             />
             
             {/* Piano toggle for mobile */}

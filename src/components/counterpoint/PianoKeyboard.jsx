@@ -979,7 +979,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
                 <DialogContent className="bg-slate-900 border-slate-700 max-w-3xl p-4 z-[9999]">
                   <DialogHeader className="pb-2">
-                    <DialogTitle className="text-white text-sm">Wave Editor</DialogTitle>
+                    <DialogTitle className="text-white text-sm">Instrument Editor</DialogTitle>
                   </DialogHeader>
                   <WaveEditor
             customInstruments={customInstruments}
