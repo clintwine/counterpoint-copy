@@ -9,14 +9,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { notes, tempo = 80, duration = 30 } = await req.json();
+    const { notes, tempo = 80 } = await req.json();
+
+    // Calculate actual duration based on notes
+    const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
+    const duration = (maxBeat * (60 / tempo) / 4) + 2; // Add 2 seconds for tail
 
     // Generate WAV file using Web Audio API offline context
     const sampleRate = 44100;
     const numChannels = 2;
     const numSamples = Math.floor(sampleRate * duration);
-    
-    // Create audio buffer
+
+    // Create audio buffer (interleaved stereo)
     const audioData = new Float32Array(numSamples * numChannels);
     
     // Generate audio for each note
@@ -77,7 +81,8 @@ function createWavBuffer(samples, sampleRate, numChannels) {
   const bytesPerSample = 2;
   const blockAlign = numChannels * bytesPerSample;
   const byteRate = sampleRate * blockAlign;
-  const dataSize = samples.length * bytesPerSample;
+  const numFrames = samples.length / numChannels;
+  const dataSize = numFrames * blockAlign;
   const bufferSize = 44 + dataSize;
   
   const buffer = new ArrayBuffer(bufferSize);
@@ -85,7 +90,7 @@ function createWavBuffer(samples, sampleRate, numChannels) {
   
   // WAV header
   writeString(view, 0, 'RIFF');
-  view.setUint32(4, bufferSize - 8, true);
+  view.setUint32(4, 36 + dataSize, true);
   writeString(view, 8, 'WAVE');
   writeString(view, 12, 'fmt ');
   view.setUint32(16, 16, true); // fmt chunk size
@@ -94,15 +99,15 @@ function createWavBuffer(samples, sampleRate, numChannels) {
   view.setUint32(24, sampleRate, true);
   view.setUint32(28, byteRate, true);
   view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bytesPerSample * 8, true);
+  view.setUint16(34, 16, true); // bits per sample
   writeString(view, 36, 'data');
   view.setUint32(40, dataSize, true);
   
-  // Audio data
+  // Audio data - interleaved stereo
   let offset = 44;
   for (let i = 0; i < samples.length; i++) {
     const sample = Math.max(-1, Math.min(1, samples[i]));
-    const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+    const intSample = Math.round(sample < 0 ? sample * 32768 : sample * 32767);
     view.setInt16(offset, intSample, true);
     offset += 2;
   }
