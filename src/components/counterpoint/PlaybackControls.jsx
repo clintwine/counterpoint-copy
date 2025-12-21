@@ -240,7 +240,7 @@ export default function PlaybackControls({
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-white/40 text-[9px] uppercase tracking-wider leading-none">SIG</span>
+            <span className="text-white/40 text-[9px] uppercase tracking-wider leading-none mt-1">SIG</span>
           </div>
         </div>
 
