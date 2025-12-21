@@ -105,6 +105,7 @@ export default function CounterpointGenerator() {
   const [previewingSongId, setPreviewingSongId] = useState(null);
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
+  const [snapToGrid, setSnapToGrid] = useState(true);
   
   const playbackRef = useRef(null);
       const animationRef = useRef(null);
@@ -703,15 +704,17 @@ export default function CounterpointGenerator() {
 
   // Handle note press during recording
   const handleNotePress = useCallback((pitch) => {
-    if (isRecording && currentBeat >= 0) {
+    if (isRecording && playheadPosition >= 0) {
+      const recordBeat = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
+      
       // Check if this note at this beat already exists
       const alreadyRecorded = recordedNotesRef.current.some(
-        n => n.pitch === pitch && Math.abs(n.beat - currentBeat) < 0.5
+        n => n.pitch === pitch && Math.abs(n.beat - recordBeat) < 0.5
       );
       if (!alreadyRecorded) {
         const newNote = {
           pitch,
-          beat: currentBeat,
+          beat: Math.round(recordBeat * 1000) / 1000, // Round to 3 decimals
           duration: 1,
           velocity: 0.8
         };
@@ -722,7 +725,7 @@ export default function CounterpointGenerator() {
         setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
       }
     }
-  }, [isRecording, currentBeat]);
+  }, [isRecording, playheadPosition, snapToGrid]);
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);

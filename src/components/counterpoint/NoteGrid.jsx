@@ -205,50 +205,52 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 }
 
 export default function NoteGrid({ 
-      voices, 
-      currentBeat, 
-      playheadPosition,
-      isPlaying, 
-      measures = 8, 
-      onNoteClick,
-      onNotesUpdate,
-      cantusFirmus = [],
-      onExportMidi,
-      onSeek,
-      activeVoice = 0,
-      onActiveVoiceChange,
-      onVoiceInstrumentChange,
-      onSelectionChange,
-      tempo = 80,
-      timeSignature = '4/4',
-      scrollToBeatRef,
-      pressedPianoNotes = new Set(),
-      pianoInstrument = 'organ',
-      playbackControls,
-      onOpenWaveEditor,
-      loopStart = null,
-      loopEnd = null,
-      isLooping = false,
-      onLoopChange,
-      settings = {},
-      onTogglePianoPanel,
-      showPianoPanel = true,
-      onPopOut,
-      onNewProject,
-      onSaveProject,
-      onSaveSong,
-      onLoadProject,
-      onBrowseSongs,
-      onExport,
-      onAIComposer,
-      onGenerate,
-      canGenerate,
-      isGenerating,
-      onImportMidi,
-      onTheoryTools,
-      onPressedNotesChange,
-      customInstruments = []
-    }) {
+          voices, 
+          currentBeat, 
+          playheadPosition,
+          isPlaying, 
+          measures = 8, 
+          onNoteClick,
+          onNotesUpdate,
+          cantusFirmus = [],
+          onExportMidi,
+          onSeek,
+          activeVoice = 0,
+          onActiveVoiceChange,
+          onVoiceInstrumentChange,
+          onSelectionChange,
+          tempo = 80,
+          timeSignature = '4/4',
+          scrollToBeatRef,
+          pressedPianoNotes = new Set(),
+          pianoInstrument = 'organ',
+          playbackControls,
+          onOpenWaveEditor,
+          loopStart = null,
+          loopEnd = null,
+          isLooping = false,
+          onLoopChange,
+          settings = {},
+          onTogglePianoPanel,
+          showPianoPanel = true,
+          onPopOut,
+          onNewProject,
+          onSaveProject,
+          onSaveSong,
+          onLoadProject,
+          onBrowseSongs,
+          onExport,
+          onAIComposer,
+          onGenerate,
+          canGenerate,
+          isGenerating,
+          onImportMidi,
+          onTheoryTools,
+          onPressedNotesChange,
+          customInstruments = [],
+          snapToGrid: snapToGridProp = true,
+          onSnapToGridChange
+        }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
@@ -325,7 +327,7 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [quantizeGrid, setQuantizeGrid] = useState(1); // 1 = 16th note (1 beat)
-  const [snapToGrid, setSnapToGrid] = useState(true); // Toggle for snapping
+  const snapToGrid = snapToGridProp; // Use prop for snap to grid
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubPosition, setScrubPosition] = useState(null);
   const [isLoopSelecting, setIsLoopSelecting] = useState(false);
@@ -1390,7 +1392,7 @@ export default function NoteGrid({
           <Button
             variant={snapToGrid ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setSnapToGrid(!snapToGrid)}
+            onClick={() => onSnapToGridChange?.(!snapToGrid)}
             className={`h-7 px-2 ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
             title={snapToGrid ? "Snap to grid enabled" : "Free positioning"}
           >
