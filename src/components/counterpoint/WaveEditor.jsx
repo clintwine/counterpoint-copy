@@ -426,7 +426,8 @@ export default function WaveEditor({
               <Button
                 size="sm"
                 onClick={() => {
-                  setInstrument({ ...DEFAULT_INSTRUMENT });
+                  const nextNumber = customInstruments.length + 1;
+                  setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
                   setEditingIndex(-1);
                 }}
                 className="h-7 bg-slate-600 text-white hover:bg-slate-500 text-xs"
