@@ -92,11 +92,12 @@ Deno.serve(async (req) => {
       let leftVal = Math.max(-1, Math.min(1, leftChannel[i]));
       let rightVal = Math.max(-1, Math.min(1, rightChannel[i]));
       
-      leftVal = leftVal < 0 ? leftVal * 32768 : leftVal * 32767;
-      rightVal = rightVal < 0 ? rightVal * 32768 : rightVal * 32767;
+      // Proper conversion: multiply then round
+      const leftInt = Math.round(leftVal * (leftVal < 0 ? 32768 : 32767));
+      const rightInt = Math.round(rightVal * (rightVal < 0 ? 32768 : 32767));
       
-      view.setInt16(offset, leftVal, true);
-      view.setInt16(offset + 2, rightVal, true);
+      view.setInt16(offset, leftInt, true);
+      view.setInt16(offset + 2, rightInt, true);
       offset += 4;
     }
     
