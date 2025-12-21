@@ -936,20 +936,28 @@ export default function CounterpointGenerator() {
 
   // Export as data
   const handleExport = () => {
-    const data = {
-      settings,
-      cantusFirmus,
-      generatedVoices,
-      voices: voices.filter(v => v.enabled)
-    };
+    toast.loading('Exporting project...', { id: 'export' });
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `counterpoint-${settings.key}-${settings.species}-species.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const data = {
+        settings,
+        cantusFirmus,
+        generatedVoices,
+        voices: voices.filter(v => v.enabled)
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `counterpoint-${settings.key}-${settings.species}-species.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast.success('Project exported successfully', { id: 'export' });
+    } catch (error) {
+      toast.error('Failed to export project', { id: 'export' });
+    }
   };
 
   // Import MIDI
@@ -960,6 +968,8 @@ export default function CounterpointGenerator() {
     input.onchange = async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      
+      toast.loading('Importing MIDI file...', { id: 'import-midi' });
       
       try {
         const arrayBuffer = await file.arrayBuffer();
@@ -1005,9 +1015,10 @@ export default function CounterpointGenerator() {
         setTempo(midiBPM);
         setSettings(prev => ({ ...prev, measures: requiredMeasures }));
         setCantusFirmus(importedNotes);
+        toast.success('MIDI file imported successfully', { id: 'import-midi' });
         } catch (error) {
         console.error('Failed to import MIDI:', error);
-        alert('Failed to import MIDI file: ' + error.message);
+        toast.error('Failed to import MIDI file: ' + error.message, { id: 'import-midi' });
         }
         };
         input.click();
@@ -1367,26 +1378,32 @@ export default function CounterpointGenerator() {
                                   canGenerate={cantusFirmus.length > 0}
                                   isGenerating={isGenerating}
                                   onExportMidi={() => {
-                                    const midiData = {
-                                      tempo,
-                                      timeSignature: [4, 4],
-                                      tracks: allVoices.map((voice, idx) => ({
-                                        name: voice.name,
-                                        notes: voice.notes?.map(n => ({
-                                          pitch: n.pitch,
-                                          startTime: n.beat * (60 / tempo),
-                                          duration: (n.duration || 1) * (60 / tempo),
-                                          velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                        })) || []
-                                      }))
-                                    };
-                                    const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                    a.click();
-                                    URL.revokeObjectURL(url);
+                                    toast.loading('Exporting MIDI...', { id: 'export-midi' });
+                                    try {
+                                      const midiData = {
+                                        tempo,
+                                        timeSignature: [4, 4],
+                                        tracks: allVoices.map((voice, idx) => ({
+                                          name: voice.name,
+                                          notes: voice.notes?.map(n => ({
+                                            pitch: n.pitch,
+                                            startTime: n.beat * (60 / tempo),
+                                            duration: (n.duration || 1) * (60 / tempo),
+                                            velocity: Math.round((n.velocity ?? 0.8) * 100)
+                                          })) || []
+                                        }))
+                                      };
+                                      const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                                      const url = URL.createObjectURL(blob);
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                                      a.click();
+                                      URL.revokeObjectURL(url);
+                                      toast.success('MIDI exported successfully', { id: 'export-midi' });
+                                    } catch (error) {
+                                      toast.error('Failed to export MIDI', { id: 'export-midi' });
+                                    }
                                   }}
                                   onImportMidi={handleImportMidi}
                                   isRecording={isRecording}
@@ -1470,26 +1487,32 @@ export default function CounterpointGenerator() {
                               canGenerate={cantusFirmus.length > 0}
                               isGenerating={isGenerating}
                               onExportMidi={() => {
-                                const midiData = {
-                                  tempo,
-                                  timeSignature: [4, 4],
-                                  tracks: allVoices.map((voice, idx) => ({
-                                    name: voice.name,
-                                    notes: voice.notes?.map(n => ({
-                                      pitch: n.pitch,
-                                      startTime: n.beat * (60 / tempo),
-                                      duration: (n.duration || 1) * (60 / tempo),
-                                      velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                    })) || []
-                                  }))
-                                };
-                                const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                a.click();
-                                URL.revokeObjectURL(url);
+                                toast.loading('Exporting MIDI...', { id: 'export-midi' });
+                                try {
+                                  const midiData = {
+                                    tempo,
+                                    timeSignature: [4, 4],
+                                    tracks: allVoices.map((voice, idx) => ({
+                                      name: voice.name,
+                                      notes: voice.notes?.map(n => ({
+                                        pitch: n.pitch,
+                                        startTime: n.beat * (60 / tempo),
+                                        duration: (n.duration || 1) * (60 / tempo),
+                                        velocity: Math.round((n.velocity ?? 0.8) * 100)
+                                      })) || []
+                                    }))
+                                  };
+                                  const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                  toast.success('MIDI exported successfully', { id: 'export-midi' });
+                                } catch (error) {
+                                  toast.error('Failed to export MIDI', { id: 'export-midi' });
+                                }
                               }}
                               onImportMidi={handleImportMidi}
                               onOpenWaveEditor={() => {
