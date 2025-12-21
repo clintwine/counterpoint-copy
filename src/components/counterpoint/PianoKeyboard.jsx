@@ -732,15 +732,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
           <div className="flex items-center gap-1 sm:gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowWaveEditor(!showWaveEditor)}
-                              className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white'}`}
-                            >
-                              <Waves className="w-3.5 h-3.5 mr-1" />
-                              Edit Instrument
-                            </Button>
             <Button
               variant="ghost"
               size="sm"
