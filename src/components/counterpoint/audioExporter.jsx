@@ -1,4 +1,4 @@
-import { instruments, customInstruments, getReverbLevel, getDelayLevel, getChorusLevel, getEnvelopeSettings } from './audioEngine';
+import { getCustomInstruments } from './audioEngine';
 
 function noteToFrequency(pitch) {
   const notes = {
@@ -15,6 +15,25 @@ function noteToFrequency(pitch) {
   
   return 440 * Math.pow(2, (midiNote - 69) / 12);
 }
+
+// Default instrument configurations
+const defaultInstruments = {
+  organ: {
+    oscillators: [
+      { type: 'sine', detune: 1, gain: 0.6 },
+      { type: 'sine', detune: 2, gain: 0.3 },
+      { type: 'sine', detune: 3, gain: 0.2 }
+    ],
+    filter: null
+  },
+  piano: {
+    oscillators: [
+      { type: 'triangle', detune: 1, gain: 0.7 },
+      { type: 'sine', detune: 2, gain: 0.2 }
+    ],
+    filter: { type: 'lowpass', frequency: 3000, Q: 1 }
+  }
+};
 
 function createReverb(ctx) {
   const convolver = ctx.createConvolver();
@@ -57,8 +76,9 @@ export async function renderToWav(notes, tempo, instrumentName) {
   const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
   
   // Get instrument config
+  const customInstruments = getCustomInstruments();
   const customInst = customInstruments.find(i => i.name === instrumentName);
-  const instrument = customInst || instruments[instrumentName] || instruments.organ;
+  const instrument = customInst || defaultInstruments[instrumentName] || defaultInstruments.organ;
   
   // Create effects chain
   const masterGain = offlineCtx.createGain();
@@ -66,11 +86,11 @@ export async function renderToWav(notes, tempo, instrumentName) {
   
   const reverb = createReverb(offlineCtx);
   const reverbGain = offlineCtx.createGain();
-  reverbGain.gain.value = getReverbLevel();
+  reverbGain.gain.value = 0.3;
   
   const delayEffect = createDelay(offlineCtx);
   const delayGain = offlineCtx.createGain();
-  delayGain.gain.value = getDelayLevel();
+  delayGain.gain.value = 0.2;
   
   masterGain.connect(reverbGain);
   reverbGain.connect(reverb);
@@ -81,8 +101,6 @@ export async function renderToWav(notes, tempo, instrumentName) {
   delayEffect.output.connect(offlineCtx.destination);
   
   masterGain.connect(offlineCtx.destination);
-  
-  const envelope = getEnvelopeSettings();
   
   // Render each note
   notes.forEach(note => {
@@ -109,11 +127,13 @@ export async function renderToWav(notes, tempo, instrumentName) {
       }
       
       // Apply envelope
+      const attack = 0.02;
+      const release = 0.1;
       const sustainLevel = velocity * osc.gain * 0.15;
       
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + envelope.attack);
-      gainNode.gain.setValueAtTime(sustainLevel * envelope.sustain, startTime + noteDuration - envelope.release);
+      gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
+      gainNode.gain.setValueAtTime(sustainLevel, startTime + noteDuration - release);
       gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
       
       oscillator.connect(gainNode);
