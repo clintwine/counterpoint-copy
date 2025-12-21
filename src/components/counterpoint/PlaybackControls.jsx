@@ -252,9 +252,14 @@ export default function PlaybackControls({
 
         {/* Time display - Logic Pro style */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
-          <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
-          <span className="text-white/40 mx-1.5">/</span>
-          <span className="text-white/60 font-mono text-sm tabular-nums">{formatTime(totalBeats - 1)}</span>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center h-[28px]">
+              <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
+              <span className="text-white/40 mx-1.5">/</span>
+              <span className="text-white/60 font-mono text-sm tabular-nums">{formatTime(totalBeats - 1)}</span>
+            </div>
+            <span className="text-white/40 text-[9px] uppercase tracking-wider">TIME</span>
+          </div>
         </div>
 
         <div className="w-px h-6 bg-[#3A3A3A]" />
