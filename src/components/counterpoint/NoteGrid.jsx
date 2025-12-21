@@ -2170,13 +2170,15 @@ export default function NoteGrid({
               const gridRect = gridRef.current.getBoundingClientRect();
               const scrollLeft = gridRef.current.scrollLeft;
               const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
-              const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
-              onSeek && onSeek(beat);
-              scrollToBeatRef.current && scrollToBeatRef.current(beat);
+              const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+              setScrubPosition(beat);
+              onSeek && onSeek(Math.floor(beat));
+              scrollToBeatRef.current && scrollToBeatRef.current(Math.floor(beat));
             };
 
             const handleTouchEnd = () => {
               setIsScrubbing(false);
+              setScrubPosition(null);
               document.removeEventListener('touchmove', handleTouchMove);
               document.removeEventListener('touchend', handleTouchEnd);
             };
