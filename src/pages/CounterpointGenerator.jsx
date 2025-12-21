@@ -578,14 +578,38 @@ export default function CounterpointGenerator() {
 
     lastPlayheadRef.current = currentPos;
 
-    // Metronome click (still on integer beats)
+    // Metronome click with time signature aware accents
     const discreteBeat = Math.floor(currentPos);
     if (discreteBeat !== Math.floor(lastPos) && metronomeEnabled) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const subdivisionSize = beatsPerMeasure / 4;
       if (discreteBeat % subdivisionSize === 0) {
-        const isDownbeat = discreteBeat % beatsPerMeasure === 0;
-        playMetronomeClick(isDownbeat);
+        // Time signature aware accent patterns
+        let isAccent = false;
+        const beatInMeasure = discreteBeat % beatsPerMeasure;
+        
+        switch (settings.timeSignature) {
+          case '4/4':
+            isAccent = beatInMeasure === 0; // Accent on beat 1
+            break;
+          case '3/4':
+            isAccent = beatInMeasure === 0; // Accent on beat 1
+            break;
+          case '2/4':
+            isAccent = beatInMeasure === 0; // Accent on beat 1
+            break;
+          case '6/8':
+            // Accent on beats 1 and 4 (compound meter)
+            isAccent = beatInMeasure === 0 || beatInMeasure === 6;
+            break;
+          case '2/2':
+            isAccent = beatInMeasure === 0; // Accent on beat 1
+            break;
+          default:
+            isAccent = beatInMeasure === 0;
+        }
+        
+        playMetronomeClick(isAccent);
       }
     }
   }, [playheadPosition, isPlaying, allNotes, tempo, voices, metronomeEnabled, settings.timeSignature]);
