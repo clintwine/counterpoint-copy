@@ -459,30 +459,41 @@ export default function WaveEditor({
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        await analyzeVoice(audioBlob);
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      
       setIsRecording(true);
       setRecordingTime(0);
 
-      // Record for 2 seconds
-      const interval = setInterval(() => {
+      // Analyze audio in real-time
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const samples = [];
+      
+      const collectSamples = () => {
+        analyser.getByteFrequencyData(dataArray);
+        samples.push(new Uint8Array(dataArray));
+      };
+      
+      const sampleInterval = setInterval(collectSamples, 50);
+
+      // Record for 2 seconds then analyze
+      setTimeout(() => {
+        clearInterval(sampleInterval);
+        setIsRecording(false);
+        stream.getTracks().forEach(track => track.stop());
+        analyzeVoice(samples, analyser.frequencyBinCount);
+      }, 2000);
+
+      // Update timer
+      const timerInterval = setInterval(() => {
         setRecordingTime(prev => {
           if (prev >= 2) {
-            clearInterval(interval);
-            stopRecording();
+            clearInterval(timerInterval);
             return 2;
           }
           return prev + 0.1;
@@ -490,117 +501,70 @@ export default function WaveEditor({
       }, 100);
     } catch (error) {
       console.error('Failed to access microphone:', error);
-      alert('Could not access microphone. Please check permissions.');
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+      alert('Could not access microphone. Please grant permission and try again.');
       setIsRecording(false);
     }
   };
 
-  const analyzeVoice = async (audioBlob) => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    // Create analyser
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 8192;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    // Create offline context to analyze
-    const offlineContext = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
-    const source = offlineContext.createBufferSource();
-    source.buffer = audioBuffer;
+  const analyzeVoice = (samples, binCount) => {
+    // Average all samples
+    const avgSpectrum = new Float32Array(binCount);
+    samples.forEach(sample => {
+      for (let i = 0; i < binCount; i++) {
+        avgSpectrum[i] += sample[i];
+      }
+    });
     
-    const analyserNode = offlineContext.createAnalyser();
-    analyserNode.fftSize = 8192;
-    source.connect(analyserNode);
-    analyserNode.connect(offlineContext.destination);
-    source.start();
+    for (let i = 0; i < binCount; i++) {
+      avgSpectrum[i] /= samples.length;
+    }
 
-    await offlineContext.startRendering();
+    // Find peaks in the frequency spectrum
+    const peaks = [];
+    for (let i = 2; i < binCount - 2; i++) {
+      if (avgSpectrum[i] > avgSpectrum[i - 1] && 
+          avgSpectrum[i] > avgSpectrum[i + 1] &&
+          avgSpectrum[i] > 20) {
+        peaks.push({ index: i, magnitude: avgSpectrum[i] });
+      }
+    }
 
-    // Analyze a slice of the audio
-    const sampleData = audioBuffer.getChannelData(0);
-    const slice = sampleData.slice(audioBuffer.sampleRate * 0.5, audioBuffer.sampleRate * 1.5);
+    // Sort by magnitude and take top 4
+    peaks.sort((a, b) => b.magnitude - a.magnitude);
+    const topPeaks = peaks.slice(0, 4);
 
-    // FFT analysis to find dominant frequencies
-    const fft = performFFT(slice);
-    const peaks = findPeaks(fft, 4);
+    if (topPeaks.length === 0) {
+      alert('Could not detect voice. Please speak or sing louder.');
+      return;
+    }
 
-    // Convert peaks to oscillator settings
-    const oscillators = peaks.map((peak, idx) => ({
-      waveform: idx === 0 ? 'sine' : 'sine',
-      detune: peak.detune,
-      gain: peak.magnitude,
-      harmonic: peak.harmonic,
-      phase: 0
-    }));
+    // Convert peaks to oscillators
+    const maxMag = topPeaks[0].magnitude;
+    const oscillators = topPeaks.map((peak, idx) => {
+      // Map frequency bin to detune (rough approximation)
+      const detuneAmount = (peak.index / binCount) * 2400 - 1200;
+      
+      return {
+        waveform: idx === 0 ? 'sawtooth' : 'sine',
+        detune: Math.round(detuneAmount / 100) * 100, // Snap to 100 cent intervals
+        gain: Math.min(1.0, (peak.magnitude / maxMag) * (idx === 0 ? 1.0 : 0.6)),
+        harmonic: 1,
+        phase: 0
+      };
+    });
 
-    // Create instrument from analysis
+    // Create instrument
     setInstrument({
       name: 'My Voice',
       oscillators,
-      envelope: { attack: 0.05, decay: 0.1, sustain: 0.7, release: 0.3 },
-      filter: { type: 'lowpass', frequency: 3000, Q: 1 },
+      envelope: { attack: 0.08, decay: 0.15, sustain: 0.7, release: 0.35 },
+      filter: { type: 'lowpass', frequency: 2800, Q: 0.8 },
       lfo: { rate: 0, amount: 0, target: 'pitch' },
       distortion: 0,
-      bitcrush: 0
+      bitcrush: 0,
+      volume: 1
     });
     setEditingIndex(-1);
-  };
-
-  const performFFT = (samples) => {
-    const n = samples.length;
-    const result = new Array(n).fill(0);
-    
-    for (let k = 0; k < n / 2; k++) {
-      let real = 0;
-      let imag = 0;
-      for (let t = 0; t < n; t++) {
-        const angle = 2 * Math.PI * k * t / n;
-        real += samples[t] * Math.cos(angle);
-        imag -= samples[t] * Math.sin(angle);
-      }
-      result[k] = Math.sqrt(real * real + imag * imag) / n;
-    }
-    return result;
-  };
-
-  const findPeaks = (fft, numPeaks) => {
-    const peaks = [];
-    const sampleRate = 44100;
-    const binSize = sampleRate / fft.length;
-
-    for (let i = 20; i < fft.length / 4; i++) {
-      if (fft[i] > fft[i - 1] && fft[i] > fft[i + 1] && fft[i] > 0.01) {
-        peaks.push({
-          frequency: i * binSize,
-          magnitude: fft[i],
-          index: i
-        });
-      }
-    }
-
-    peaks.sort((a, b) => b.magnitude - a.magnitude);
-    const topPeaks = peaks.slice(0, numPeaks);
-
-    if (topPeaks.length === 0) {
-      return [{ harmonic: 1, detune: 0, magnitude: 1.0 }];
-    }
-
-    const fundamental = topPeaks[0].frequency;
-    
-    return topPeaks.map((peak, idx) => ({
-      harmonic: idx === 0 ? 1 : Math.round(peak.frequency / fundamental),
-      detune: idx === 0 ? 0 : ((peak.frequency / fundamental) - Math.round(peak.frequency / fundamental)) * 1200,
-      magnitude: Math.min(1.0, peak.magnitude / topPeaks[0].magnitude)
-    }));
   };
 
   const loadInstrument = (inst, index) => {
