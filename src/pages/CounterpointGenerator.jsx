@@ -738,11 +738,12 @@ export default function CounterpointGenerator() {
         // At X BPM, there are X quarter notes per minute = X/60 quarter notes per second
         // Since our beat is a 16th note, multiply by 4
         const sixteenthNotesPerSecond = (midiBPM / 60) * 4;
-        
+
+        // Preserve fractional beats for triplets - round to 3 decimal places
         const importedNotes = allNotes.map(n => ({
           pitch: n.pitch,
-          beat: Math.round(n.time * sixteenthNotesPerSecond),
-          duration: Math.max(0.25, Math.round((n.duration * sixteenthNotesPerSecond) * 4) / 4),
+          beat: Math.round(n.time * sixteenthNotesPerSecond * 1000) / 1000,
+          duration: Math.max(0.125, Math.round((n.duration * sixteenthNotesPerSecond) * 8) / 8),
           velocity: n.velocity
         }));
         
