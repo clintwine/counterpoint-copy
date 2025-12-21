@@ -401,7 +401,7 @@ export default function WaveEditor({
           <Label className="text-white/70 text-[10px] uppercase tracking-wider">Library</Label>
           <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[120px] overflow-y-auto">
             {PRESET_LIBRARY.map((preset, i) => (
-              <div key={`lib-${i}`} className="flex items-center gap-0.5">
+              <div key={`lib-${i}`} className="flex items-center gap-0.5 group">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -431,13 +431,30 @@ export default function WaveEditor({
                 >
                   {preset.name}
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const clonedPreset = { ...preset, name: `${preset.name} Copy` };
+                    setInstrument(clonedPreset);
+                    setEditingIndex(-1);
+                  }}
+                  className="h-5 w-5 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                  title="Clone"
+                >
+                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                </Button>
               </div>
             ))}
             {customInstruments.length > 0 && (
               <>
                 <div className="h-px bg-slate-600 my-1" />
                 {customInstruments.map((inst, i) => (
-                  <div key={i} className="flex items-center gap-0.5">
+                  <div key={i} className="flex items-center gap-0.5 group">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -456,6 +473,23 @@ export default function WaveEditor({
                       className={`flex-1 h-5 text-[9px] justify-start px-1 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
                     >
                       {inst.name}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const clonedInstrument = { ...inst, name: `${inst.name} Copy` };
+                        setInstrument(clonedInstrument);
+                        setEditingIndex(-1);
+                      }}
+                      className="h-5 w-5 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                      title="Clone"
+                    >
+                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
                     </Button>
                   </div>
                 ))}
