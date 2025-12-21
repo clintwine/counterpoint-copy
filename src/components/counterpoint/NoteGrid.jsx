@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -236,6 +236,7 @@ export default function NoteGrid({
           onPopOut,
           onNewProject,
           onSaveProject,
+          onSaveProjectAs,
           onSaveSong,
           onLoadProject,
           onBrowseSongs,
@@ -1282,6 +1283,12 @@ export default function NoteGrid({
               <DropdownMenuItem onClick={onSaveProject} className="text-white cursor-pointer">
                 <Save className="w-4 h-4 mr-2" />
                 Save Project
+                <span className="ml-auto text-xs text-white/40">⌘S</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onSaveProjectAs} className="text-white cursor-pointer">
+                <FilePlus className="w-4 h-4 mr-2" />
+                Save Project As...
+                <span className="ml-auto text-xs text-white/40">⌘⇧S</span>
               </DropdownMenuItem>
               {onSaveSong && (
                 <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold">
