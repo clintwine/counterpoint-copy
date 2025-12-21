@@ -912,41 +912,42 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               });
               }
             
-            // C8 already rendered in the octave loop above
-            // Add extra greyed out keys to fill space
-            const extraKeys = ['D', 'E', 'F', 'G', 'A', 'B'];
-            extraKeys.forEach((note, idx) => {
-              keys.push(
-                <div
-                  key={`extra-${note}`}
-                  className="absolute bottom-0 border border-slate-400 rounded-b opacity-30 cursor-not-allowed flex items-end justify-center pb-0.5"
-                  style={{
-                    left: (whiteKeyIndex + idx) * whiteKeyWidth,
-                    width: whiteKeyWidth - 1,
-                    height: 75,
-                    backgroundColor: '#D0D0D0',
-                  }}
-                />
-              );
-            });
+            // C8 (final key)
+            const c8Active = isNoteActive('C', 8);
+            const c8Pressed = isNotePressed('C', 8);
+            keys.push(
+              <div
+                key="8-C"
+                onMouseDown={(e) => handleMouseDown(e, 'C', 8)}
+                onMouseUp={() => handleMouseUp('C', 8)}
+                onMouseEnter={() => handleMouseEnter('C', 8)}
+                onMouseLeave={() => handleMouseLeave('C', 8)}
+                className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex items-end justify-center pb-0.5"
+                style={{
+                  left: whiteKeyIndex * whiteKeyWidth,
+                  width: whiteKeyWidth - 1,
+                  height: 75,
+                  backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5',
+                }}
+              >
+                <span className="text-[8px] text-slate-400">C8</span>
+              </div>
+            );
+            whiteKeyIndex++;
             
-            // Extra black keys
-            const extraBlackOffsets = [14, 38, 86, 110, 134]; // D#, E# (skip F#), G#, A#, B#
-            extraBlackOffsets.forEach((offset, idx) => {
-              if (idx === 1) return; // Skip E# (doesn't exist)
-              keys.push(
-                <div
-                  key={`extra-black-${idx}`}
-                  className="absolute top-0 rounded-b z-10 opacity-30 cursor-not-allowed"
-                  style={{
-                    left: whiteKeyIndex * whiteKeyWidth + offset * (whiteKeyWidth / 24),
-                    width: blackKeyWidth,
-                    height: 45,
-                    backgroundColor: '#3A3A3A',
-                  }}
-                />
-              );
-            });
+            // Add just one extra greyed out key at the end to fill space
+            keys.push(
+              <div
+                key="extra-end"
+                className="absolute bottom-0 border border-slate-400 rounded-b opacity-30 cursor-not-allowed"
+                style={{
+                  left: whiteKeyIndex * whiteKeyWidth,
+                  width: whiteKeyWidth - 1,
+                  height: 75,
+                  backgroundColor: '#D0D0D0',
+                }}
+              />
+            );
             
             return keys;
           })()}
