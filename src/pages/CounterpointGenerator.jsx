@@ -103,6 +103,7 @@ export default function CounterpointGenerator() {
   const [pianoPopout, setPianoPopout] = useState(false);
   const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
   const [previewingSongId, setPreviewingSongId] = useState(null);
+  const [openWaveEditor, setOpenWaveEditor] = useState(false);
   
   const playbackRef = useRef(null);
       const animationRef = useRef(null);
@@ -1123,8 +1124,9 @@ export default function CounterpointGenerator() {
                               }}
                               onImportMidi={handleImportMidi}
                               onOpenWaveEditor={() => {
-                                // Open the wave editor in the piano keyboard
                                 setShowPianoPanel(true);
+                                setOpenWaveEditor(true);
+                                setTimeout(() => setOpenWaveEditor(false), 100);
                               }}
                             />
             
@@ -1160,6 +1162,7 @@ export default function CounterpointGenerator() {
                                     onEffectsChange={setEffects}
                                     envelope={envelope}
                                     onEnvelopeChange={setEnvelope}
+                                    openWaveEditor={openWaveEditor}
                                   />
                                 </div>
                               )}
@@ -1221,6 +1224,7 @@ export default function CounterpointGenerator() {
                 onEffectsChange={setEffects}
                 envelope={envelope}
                 onEnvelopeChange={setEnvelope}
+                openWaveEditor={openWaveEditor}
               />
             </div>
             

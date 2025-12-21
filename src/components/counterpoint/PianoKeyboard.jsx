@@ -210,7 +210,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -222,6 +222,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const isDraggingRef = useRef(false);
   const [showWaveEditor, setShowWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
+
+  // Handle external trigger to open wave editor
+  useEffect(() => {
+    if (externalOpenWaveEditor) {
+      setShowWaveEditor(true);
+    }
+  }, [externalOpenWaveEditor]);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
