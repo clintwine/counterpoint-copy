@@ -161,12 +161,14 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
 
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
-  const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
-  const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
+  const effects = externalEffects || { reverb: 0.3, delay: 0, chorus: 0 };
+  const setEffects = externalOnEffectsChange || (() => {});
+  const envelope = externalEnvelope || { attack: 0.02, sustain: 0.7, release: 0.3 };
+  const setEnvelope = externalOnEnvelopeChange || (() => {});
   const activeOscillators = useRef({});
   const isDraggingRef = useRef(false);
   const [showWaveEditor, setShowWaveEditor] = useState(false);

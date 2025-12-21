@@ -70,6 +70,8 @@ export default function CounterpointGenerator() {
   const [countInBeats, setCountInBeats] = useState(4);
   const [masterVolume, setMasterVolume] = useState(80);
   const recordedNotesRef = useRef([]);
+  const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
+  const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
   
   const [activeTab, setActiveTab] = useState('compose');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -213,7 +215,9 @@ export default function CounterpointGenerator() {
       settings: { ...settings, tempo },
       cantusFirmus,
       generatedVoices,
-      voices
+      voices,
+      effects,
+      envelope
     });
   };
 
@@ -225,7 +229,9 @@ export default function CounterpointGenerator() {
       settings: { ...settings, tempo },
       cantusFirmus,
       generatedVoices,
-      voices
+      voices,
+      effects,
+      envelope
     });
   };
 
@@ -250,6 +256,11 @@ export default function CounterpointGenerator() {
     setGeneratedVoices(project.generatedVoices || []);
     setProjectName(project.name);
     setCurrentProjectId(project.id);
+    
+    // Load effects and envelope
+    setEffects(project.effects || { reverb: 0.3, delay: 0, chorus: 0 });
+    setEnvelope(project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
+    
     setLoadDialogOpen(false);
   };
 
@@ -306,6 +317,11 @@ export default function CounterpointGenerator() {
     setGeneratedVoices(loadedGeneratedVoices);
     setProjectName(song.name);
     setCurrentProjectId(null);
+    
+    // Load effects and envelope
+    setEffects(song.effects || { reverb: 0.3, delay: 0, chorus: 0 });
+    setEnvelope(song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
+    
     setSongDialogOpen(false);
   };
 
@@ -1142,6 +1158,10 @@ export default function CounterpointGenerator() {
                                     onPressedNotesChange={setPressedPianoNotes}
                                     onPopOut={() => setPianoPopout(true)}
                                     onNotePress={handleNotePress}
+                                    effects={effects}
+                                    onEffectsChange={setEffects}
+                                    envelope={envelope}
+                                    onEnvelopeChange={setEnvelope}
                                   />
                                 </div>
                               )}
@@ -1209,6 +1229,10 @@ export default function CounterpointGenerator() {
                 }}
                 onPressedNotesChange={setPressedPianoNotes}
                 onNotePress={handleNotePress}
+                effects={effects}
+                onEffectsChange={setEffects}
+                envelope={envelope}
+                onEnvelopeChange={setEnvelope}
               />
             </div>
             
