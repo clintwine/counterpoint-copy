@@ -29,19 +29,33 @@ Deno.serve(async (req) => {
       const startTime = note.beat * (60 / tempo) / 4;
       const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
       const velocity = note.velocity || 0.8;
-      
+
       const startSample = Math.floor(startTime * sampleRate);
       const endSample = Math.min(numSamples, Math.floor((startTime + noteDuration) * sampleRate));
-      
+
       for (let i = startSample; i < endSample; i++) {
         const t = (i - startSample) / sampleRate;
         const envelope = Math.min(1, t / 0.02) * Math.min(1, (noteDuration - t) / 0.1);
-        const sample = Math.sin(2 * Math.PI * frequency * t) * velocity * envelope * 0.3;
-        
+        const sample = Math.sin(2 * Math.PI * frequency * t) * velocity * envelope * 0.15;
+
         leftChannel[i] += sample;
         rightChannel[i] += sample;
       }
     });
+
+    // Normalize to prevent clipping
+    let maxAmplitude = 0;
+    for (let i = 0; i < numSamples; i++) {
+      maxAmplitude = Math.max(maxAmplitude, Math.abs(leftChannel[i]), Math.abs(rightChannel[i]));
+    }
+
+    if (maxAmplitude > 0.95) {
+      const scale = 0.95 / maxAmplitude;
+      for (let i = 0; i < numSamples; i++) {
+        leftChannel[i] *= scale;
+        rightChannel[i] *= scale;
+      }
+    }
 
     // Build WAV file - proper format
     const bytesPerSample = bitsPerSample / 8;
