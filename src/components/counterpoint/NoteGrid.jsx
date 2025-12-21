@@ -2144,7 +2144,7 @@ export default function NoteGrid({
                                       {note.pitch.replace(/\d/, '')}
                                     </span>
                                     {((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (
-                                      <span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">~</span>
+                                      <span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">↕</span>
                                     )}
                                     <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
                                   </div>
