@@ -423,9 +423,9 @@ export default function WaveEditor({
       {/* Top Row: Presets + Name + Waveform Preview */}
       <div className="flex gap-3">
         {/* Left: Combined Library List */}
-        <div className="w-36 flex-shrink-0 space-y-1">
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">Library</Label>
-          <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[120px] overflow-y-auto">
+        <div className="w-40 flex-shrink-0 space-y-1.5">
+          <Label className="text-white/70 text-xs uppercase tracking-wider">Library</Label>
+          <div className="bg-slate-700/50 rounded-lg p-2 space-y-1 max-h-[140px] overflow-y-auto">
             {PRESET_LIBRARY.map((preset, i) => (
               <div key={`lib-${i}`} className="flex items-center gap-0.5 group">
                 <Button
@@ -435,11 +435,11 @@ export default function WaveEditor({
                     e.stopPropagation();
                     playPresetPreview(preset, `lib-${i}`);
                   }}
-                  className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
-                >
-                  {previewingPreset === `lib-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
-                </Button>
-                <Button
+                  className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                  >
+                  {previewingPreset === `lib-${i}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                  </Button>
+                  <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
@@ -453,10 +453,10 @@ export default function WaveEditor({
                       onVoiceInstrumentChange(0, instrumentValue);
                     }
                   }}
-                  className="flex-1 h-5 text-[9px] justify-start px-1 text-white/60 hover:text-white hover:bg-slate-600"
-                >
+                  className="flex-1 h-6 text-xs justify-start px-2 text-white/60 hover:text-white hover:bg-slate-600"
+                  >
                   {preset.name}
-                </Button>
+                  </Button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -474,10 +474,10 @@ export default function WaveEditor({
                     setInstrument(clonedPreset);
                     setEditingIndex(-1);
                   }}
-                  className="h-5 w-5 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                  className="h-6 w-6 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
                   title="Clone"
-                >
-                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="9" y="9" width="13" height="13" rx="2" />
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                   </svg>
@@ -488,7 +488,7 @@ export default function WaveEditor({
               <>
                 <div className="h-px bg-slate-600 my-1" />
                 {customInstruments.map((inst, i) => (
-                  <div key={i} className="flex items-center gap-0.5 group">
+                  <div key={i} className="flex items-center gap-1 group">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -496,15 +496,15 @@ export default function WaveEditor({
                         e.stopPropagation();
                         playPresetPreview(inst, `custom-${i}`);
                       }}
-                      className="h-5 w-5 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                      className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
                     >
-                      {previewingPreset === `custom-${i}` ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                      {previewingPreset === `custom-${i}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => loadInstrument(inst, i)}
-                      className={`flex-1 h-5 text-[9px] justify-start px-1 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
+                      className={`flex-1 h-6 text-xs justify-start px-2 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
                     >
                       {inst.name}
                     </Button>
@@ -525,10 +525,10 @@ export default function WaveEditor({
                         setInstrument(clonedInstrument);
                         setEditingIndex(-1);
                       }}
-                      className="h-5 w-5 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                      className="h-6 w-6 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
                       title="Clone"
                     >
-                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="9" y="9" width="13" height="13" rx="2" />
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                       </svg>
@@ -541,17 +541,17 @@ export default function WaveEditor({
         </div>
 
         {/* Center: Name + Waveform */}
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2.5">
           <div className="flex gap-2">
             <div className="flex-1">
-              <Label className="text-white/70 text-[10px]">Name</Label>
+              <Label className="text-white/70 text-sm">Name</Label>
               <Input
                 value={instrument.name}
                 onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
-                className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
               />
             </div>
-            <div className="flex items-end gap-1">
+            <div className="flex items-end gap-2">
               <Button
                 size="sm"
                 onClick={() => {
@@ -559,17 +559,17 @@ export default function WaveEditor({
                   setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
                   setEditingIndex(-1);
                 }}
-                className="h-7 bg-slate-600 text-white hover:bg-slate-500 text-xs"
+                className="h-9 px-3 bg-slate-600 text-white hover:bg-slate-500 text-sm"
               >
-                <Plus className="w-3 h-3 mr-1" />
+                <Plus className="w-4 h-4 mr-1.5" />
                 New
               </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-7 bg-amber-500 text-slate-900 hover:bg-amber-400 text-xs"
+                className="h-9 px-3 bg-amber-500 text-slate-900 hover:bg-amber-400 text-sm"
               >
-                <Save className="w-3 h-3 mr-1" />
+                <Save className="w-4 h-4 mr-1.5" />
                 {editingIndex >= 0 ? 'Update' : 'Save'}
               </Button>
               {editingIndex >= 0 && (
@@ -581,9 +581,9 @@ export default function WaveEditor({
                     setInstrument({ ...DEFAULT_INSTRUMENT });
                     setEditingIndex(-1);
                   }}
-                  className="h-7 w-7 p-0 border-red-500/50 text-red-400 hover:bg-red-500/20"
+                  className="h-9 w-9 p-0 border-red-500/50 text-red-400 hover:bg-red-500/20"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               )}
             </div>
@@ -591,25 +591,25 @@ export default function WaveEditor({
           <div className="relative">
            <canvas
              ref={canvasRef}
-             className="w-full h-[60px] rounded border border-slate-600"
+             className="w-full h-[80px] rounded border border-slate-600"
            />
             <Button
               variant="ghost"
               size="sm"
               onClick={isPlaying ? stopPreview : playPreview}
-              className="absolute bottom-1 right-1 h-6 w-6 p-0 bg-slate-900/80 text-white hover:bg-slate-900"
+              className="absolute bottom-2 right-2 h-8 w-8 p-0 bg-slate-900/80 text-white hover:bg-slate-900"
             >
-              {isPlaying ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </Button>
           </div>
         </div>
 
         {/* Right: ADSR Knobs + Live Preview */}
-        <div className="flex-shrink-0 space-y-2">
+        <div className="flex-shrink-0 space-y-2.5">
           <div className="flex items-center justify-between">
-            <Label className="text-white/70 text-[10px] uppercase tracking-wider">Envelope</Label>
-            <div className="flex items-center gap-1.5">
-              <Label className="text-white/50 text-[9px]">Live</Label>
+            <Label className="text-white/70 text-xs uppercase tracking-wider">Envelope</Label>
+            <div className="flex items-center gap-2">
+              <Label className="text-white/50 text-xs">Live</Label>
               <Switch
                 checked={livePreview}
                 onCheckedChange={toggleLivePreview}
@@ -617,17 +617,17 @@ export default function WaveEditor({
               />
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {['attack', 'decay', 'sustain', 'release'].map(param => (
               <div key={param} className="text-center">
                 <div
-                  className="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer"
+                  className="w-11 h-11 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer"
                   style={{
                     background: `conic-gradient(from 225deg, #10b981 ${instrument.envelope[param] * (param === 'sustain' ? 270 : 135)}deg, #334155 0deg)`
                   }}
                 >
-                  <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center">
-                    <span className="text-[7px] text-white/70">{Math.round(instrument.envelope[param] * 100)}</span>
+                  <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                    <span className="text-[9px] text-white/70">{Math.round(instrument.envelope[param] * 100)}</span>
                   </div>
                   <input
                     type="range"
@@ -642,7 +642,7 @@ export default function WaveEditor({
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
-                <span className="text-[8px] text-white/50 uppercase">{param.charAt(0)}</span>
+                <span className="text-[10px] text-white/50 uppercase">{param.charAt(0)}</span>
               </div>
             ))}
           </div>
@@ -650,73 +650,73 @@ export default function WaveEditor({
       </div>
 
       {/* Bottom Row: Oscillators + Filter + Effects */}
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {/* Oscillators */}
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2.5">
           <div className="flex items-center justify-between">
-            <Label className="text-white/70 text-[10px] uppercase tracking-wider">Oscillators</Label>
+            <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <Button
               variant="ghost"
               size="sm"
               onClick={addOscillator}
               disabled={instrument.oscillators.length >= 4}
-              className="h-5 px-1 text-amber-400 hover:text-amber-300 text-[10px]"
+              className="h-6 px-2 text-amber-400 hover:text-amber-300 text-xs"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             {instrument.oscillators.map((osc, i) => (
-              <div key={i} className="bg-slate-700/50 rounded p-2 space-y-1">
+              <div key={i} className="bg-slate-700/50 rounded p-2.5 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-[10px]">Osc {i + 1}</span>
+                  <span className="text-white/60 text-xs">Osc {i + 1}</span>
                   {instrument.oscillators.length > 1 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => removeOscillator(i)}
-                      className="h-4 w-4 p-0 text-red-400 hover:text-red-300"
+                      className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
                     >
-                      <Trash2 className="w-2.5 h-2.5" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
                 <Select value={osc.waveform} onValueChange={(v) => updateOscillator(i, 'waveform', v)}>
-                  <SelectTrigger className="h-6 bg-slate-700 border-slate-600 text-white text-[10px]">
+                  <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
                     {WAVEFORMS.map(w => (
-                      <SelectItem key={w} value={w} className="text-white text-[10px] capitalize">{w}</SelectItem>
+                      <SelectItem key={w} value={w} className="text-white text-xs capitalize">{w}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-2 gap-1.5">
                   <div>
-                    <span className="text-white/40 text-[8px]">Harmonic</span>
+                    <span className="text-white/40 text-[10px]">Harmonic</span>
                     <Input
                       type="number"
                       value={osc.harmonic || 1}
                       onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
-                      className="h-5 bg-slate-700 border-slate-600 text-white text-[10px]"
+                      className="h-7 bg-slate-700 border-slate-600 text-white text-xs"
                       step="0.5"
                       min="0.5"
                       max="8"
                     />
                   </div>
                   <div>
-                    <span className="text-white/40 text-[8px]">Detune</span>
+                    <span className="text-white/40 text-[10px]">Detune</span>
                     <Input
                       type="number"
                       value={osc.detune}
                       onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
-                      className="h-5 bg-slate-700 border-slate-600 text-white text-[10px]"
+                      className="h-7 bg-slate-700 border-slate-600 text-white text-xs"
                       step="1"
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-white/40 text-[9px] w-8">Gain</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-white/40 text-xs w-10">Gain</span>
                   <Slider
                     value={[osc.gain]}
                     onValueChange={([v]) => updateOscillator(i, 'gain', v)}
@@ -726,8 +726,8 @@ export default function WaveEditor({
                     className="flex-1"
                   />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-white/40 text-[9px] w-8">Phase</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-white/40 text-xs w-10">Phase</span>
                   <Slider
                     value={[osc.phase || 0]}
                     onValueChange={([v]) => updateOscillator(i, 'phase', v)}
@@ -736,7 +736,7 @@ export default function WaveEditor({
                     step={1}
                     className="flex-1"
                   />
-                  <span className="text-white/50 text-[8px] w-6">{Math.round(osc.phase || 0)}°</span>
+                  <span className="text-white/50 text-[10px] w-8">{Math.round(osc.phase || 0)}°</span>
                 </div>
               </div>
             ))}
@@ -744,24 +744,24 @@ export default function WaveEditor({
         </div>
 
         {/* Filter */}
-        <div className="w-44 flex-shrink-0 space-y-2">
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">Filter</Label>
-          <div className="bg-slate-700/50 rounded p-2 space-y-2">
+        <div className="w-48 flex-shrink-0 space-y-2.5">
+          <Label className="text-white/70 text-sm uppercase tracking-wider">Filter</Label>
+          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
             <Select
               value={instrument.filter.type}
               onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
             >
-              <SelectTrigger className="h-6 bg-slate-700 border-slate-600 text-white text-[10px]">
+              <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
                 {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
-                  <SelectItem key={t} value={t} className="text-white text-[10px] capitalize">{t}</SelectItem>
+                  <SelectItem key={t} value={t} className="text-white text-xs capitalize">{t}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Cutoff</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Cutoff</span>
               <Slider
                 value={[instrument.filter.frequency]}
                 onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, frequency: v } })}
@@ -770,10 +770,10 @@ export default function WaveEditor({
                 step={10}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{instrument.filter.frequency}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Resonance</span>
+              <span className="text-white/50 text-xs w-10 text-right">{instrument.filter.frequency}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Resonance</span>
               <Slider
                 value={[instrument.filter.Q]}
                 onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, Q: v } })}
@@ -782,30 +782,30 @@ export default function WaveEditor({
                 step={0.1}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{instrument.filter.Q.toFixed(1)}</span>
+              <span className="text-white/50 text-xs w-10 text-right">{instrument.filter.Q.toFixed(1)}</span>
             </div>
           </div>
         </div>
 
         {/* LFO */}
-        <div className="w-44 flex-shrink-0 space-y-2">
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">LFO</Label>
-          <div className="bg-slate-700/50 rounded p-2 space-y-2">
+        <div className="w-48 flex-shrink-0 space-y-2.5">
+          <Label className="text-white/70 text-sm uppercase tracking-wider">LFO</Label>
+          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
             <Select
               value={instrument.lfo?.target || 'pitch'}
               onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
             >
-              <SelectTrigger className="h-6 bg-slate-700 border-slate-600 text-white text-[10px]">
+              <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                <SelectItem value="pitch" className="text-white text-[10px]">Pitch</SelectItem>
-                <SelectItem value="filter" className="text-white text-[10px]">Filter</SelectItem>
-                <SelectItem value="volume" className="text-white text-[10px]">Volume</SelectItem>
+                <SelectItem value="pitch" className="text-white text-xs">Pitch</SelectItem>
+                <SelectItem value="filter" className="text-white text-xs">Filter</SelectItem>
+                <SelectItem value="volume" className="text-white text-xs">Volume</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Rate</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Rate</span>
               <Slider
                 value={[instrument.lfo?.rate || 0]}
                 onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), rate: v } })}
@@ -814,10 +814,10 @@ export default function WaveEditor({
                 step={0.1}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{(instrument.lfo?.rate || 0).toFixed(1)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Depth</span>
+              <span className="text-white/50 text-xs w-10 text-right">{(instrument.lfo?.rate || 0).toFixed(1)}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Depth</span>
               <Slider
                 value={[instrument.lfo?.amount || 0]}
                 onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), amount: v } })}
@@ -826,17 +826,17 @@ export default function WaveEditor({
                 step={0.01}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{Math.round((instrument.lfo?.amount || 0) * 100)}</span>
+              <span className="text-white/50 text-xs w-10 text-right">{Math.round((instrument.lfo?.amount || 0) * 100)}</span>
             </div>
           </div>
         </div>
 
         {/* Effects */}
-        <div className="w-44 flex-shrink-0 space-y-2">
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">Effects</Label>
-          <div className="bg-slate-700/50 rounded p-2 space-y-2">
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Distortion</span>
+        <div className="w-48 flex-shrink-0 space-y-2.5">
+          <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
+          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Distortion</span>
               <Slider
                 value={[instrument.distortion || 0]}
                 onValueChange={([v]) => setInstrument({ ...instrument, distortion: v })}
@@ -845,10 +845,10 @@ export default function WaveEditor({
                 step={1}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{Math.round(instrument.distortion || 0)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-12">Bit Crush</span>
+              <span className="text-white/50 text-xs w-10 text-right">{Math.round(instrument.distortion || 0)}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-xs w-14">Bit Crush</span>
               <Slider
                 value={[instrument.bitcrush || 0]}
                 onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
@@ -857,7 +857,7 @@ export default function WaveEditor({
                 step={0.5}
                 className="flex-1"
               />
-              <span className="text-white/50 text-[9px] w-8 text-right">{(instrument.bitcrush || 0).toFixed(1)}</span>
+              <span className="text-white/50 text-xs w-10 text-right">{(instrument.bitcrush || 0).toFixed(1)}</span>
             </div>
           </div>
         </div>
