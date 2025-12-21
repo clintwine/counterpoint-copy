@@ -166,12 +166,41 @@ export default function CounterpointGenerator() {
           };
           window.addEventListener('keydown', handleKeyDown);
           return () => window.removeEventListener('keydown', handleKeyDown);
-          }, [currentUser, currentProjectId, projectName]);
+          }, [currentUser, currentProjectId, projectName, handleSaveProject]);
 
   // Get current user
   useEffect(() => {
     base44.auth.me().then(user => setCurrentUser(user)).catch(() => setCurrentUser(null));
   }, []);
+
+  // Save project handler - defined early so keyboard shortcuts can use it
+  const handleSaveProject = useCallback((skipDialog = false) => {
+    // If we have an existing project and not in save-as mode, save directly
+    if (skipDialog && currentProjectId && projectName.trim()) {
+      saveProjectMutation.mutate({
+        name: projectName,
+        settings: { ...settings, tempo },
+        cantusFirmus,
+        generatedVoices,
+        voices,
+        effects,
+        envelope
+      });
+      return;
+    }
+    
+    // Otherwise, validate and save from dialog
+    if (!projectName.trim()) return;
+    saveProjectMutation.mutate({
+      name: projectName,
+      settings: { ...settings, tempo },
+      cantusFirmus,
+      generatedVoices,
+      voices,
+      effects,
+      envelope
+    });
+  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode]);
 
   // Fetch saved projects
   const { data: savedProjects = [] } = useQuery({
@@ -284,33 +313,7 @@ export default function CounterpointGenerator() {
     }
   });
 
-  const handleSaveProject = useCallback((skipDialog = false) => {
-    // If we have an existing project and not in save-as mode, save directly
-    if (skipDialog && currentProjectId && projectName.trim()) {
-      saveProjectMutation.mutate({
-        name: projectName,
-        settings: { ...settings, tempo },
-        cantusFirmus,
-        generatedVoices,
-        voices,
-        effects,
-        envelope
-      });
-      return;
-    }
-    
-    // Otherwise, validate and save from dialog
-    if (!projectName.trim()) return;
-    saveProjectMutation.mutate({
-      name: projectName,
-      settings: { ...settings, tempo },
-      cantusFirmus,
-      generatedVoices,
-      voices,
-      effects,
-      envelope
-    });
-  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation]);
+
 
   const handleSaveSong = () => {
     if (!songName.trim()) return;
