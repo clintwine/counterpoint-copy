@@ -234,11 +234,11 @@ export default function WaveEditor({
       let y = 0;
 
       instrument.oscillators.forEach(osc => {
-        const detuneRatio = Math.pow(2, osc.detune / 1200);
+        const detuneRatio = Math.pow(2, (osc.detune || 0) / 1200);
         const phase = t * detuneRatio;
         let wave = 0;
 
-        switch (osc.waveform) {
+        switch (osc.waveform || 'sine') {
           case 'sine':
             wave = Math.sin(phase);
             break;
@@ -252,10 +252,10 @@ export default function WaveEditor({
             wave = 2 * Math.abs(2 * ((phase / (2 * Math.PI)) % 1) - 1) - 1;
             break;
         }
-        y += wave * osc.gain;
-      });
+        y += wave * (osc.gain ?? 0.5);
+        });
 
-      y = y / Math.max(1, instrument.oscillators.length);
+        y = y / Math.max(1, instrument.oscillators.length);
       
       // Apply envelope shaping
       let envelope = 1;
@@ -474,15 +474,24 @@ export default function WaveEditor({
 
   const updateOscillator = (index, key, value) => {
     const newOscs = [...instrument.oscillators];
-    newOscs[index] = { ...newOscs[index], [key]: value };
+    newOscs[index] = { 
+      waveform: 'sine', 
+      detune: 0, 
+      gain: 0.5, 
+      harmonic: 1, 
+      phase: 0,
+      ...newOscs[index], 
+      [key]: value 
+    };
     setInstrument({ ...instrument, oscillators: newOscs });
   };
 
   const addOscillator = () => {
     if (instrument.oscillators.length >= 4) return;
+    const newOsc = { waveform: 'sine', detune: 0, gain: 0.5, harmonic: 1, phase: 0 };
     setInstrument({
       ...instrument,
-      oscillators: [...instrument.oscillators, { waveform: 'sine', detune: 0, gain: 0.5, harmonic: 1, phase: 0 }]
+      oscillators: [...instrument.oscillators, newOsc]
     });
   };
 
