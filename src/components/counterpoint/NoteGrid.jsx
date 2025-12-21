@@ -301,6 +301,7 @@ export default function NoteGrid({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [quantizeGrid, setQuantizeGrid] = useState(1); // 1 = 16th note (1 beat)
   const [isScrubbing, setIsScrubbing] = useState(false);
+  const [scrubPosition, setScrubPosition] = useState(null);
   const [isLoopSelecting, setIsLoopSelecting] = useState(false);
   const [loopSelectStart, setLoopSelectStart] = useState(null);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
