@@ -703,6 +703,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             </Button>
             </div>
             </div>
+            </div>
 
             {/* Audio Visualizer - moved to right */}
             <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-20">
