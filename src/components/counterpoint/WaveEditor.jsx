@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { initAudio, getAudioContext, playNoteWithCustomInstrument } from './audioEngine';
+import { initAudio, getAudioContext, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
 
