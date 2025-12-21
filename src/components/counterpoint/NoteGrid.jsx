@@ -1294,10 +1294,6 @@ export default function NoteGrid({
                 Browse Songs
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-700" />
-              <DropdownMenuItem onClick={onExport} className="text-white cursor-pointer">
-                <Download className="w-4 h-4 mr-2" />
-                Export JSON
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={onExportMidi} className="text-white cursor-pointer">
                 <FileAudio className="w-4 h-4 mr-2" />
                 Export MIDI
@@ -1305,38 +1301,6 @@ export default function NoteGrid({
               <DropdownMenuItem onClick={onImportMidi} className="text-white cursor-pointer">
                 <FileAudio className="w-4 h-4 mr-2" />
                 Import MIDI
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = 'audio/*';
-                  input.onchange = async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    
-                    try {
-                      const arrayBuffer = await file.arrayBuffer();
-                      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                      
-                      const source = audioContext.createBufferSource();
-                      source.buffer = audioBuffer;
-                      source.connect(audioContext.destination);
-                      source.start(0);
-                      
-                      alert(`✓ Audio imported successfully!\n\nFile: ${file.name}\nDuration: ${audioBuffer.duration.toFixed(2)}s\nSample Rate: ${audioBuffer.sampleRate}Hz\nChannels: ${audioBuffer.numberOfChannels}`);
-                    } catch (error) {
-                      alert(`✗ Failed to import audio:\n${error.message}\n\nThis helps verify exported WAV files work correctly.`);
-                      console.error('Audio import error:', error);
-                    }
-                  };
-                  input.click();
-                }}
-                className="text-white cursor-pointer"
-              >
-                <Volume2 className="w-4 h-4 mr-2" />
-                Test Import Audio
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 try {
@@ -2179,6 +2143,9 @@ export default function NoteGrid({
                                     <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
                                       {note.pitch.replace(/\d/, '')}
                                     </span>
+                                    {((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (
+                                      <span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">~</span>
+                                    )}
                                     <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
                                   </div>
                                 );
