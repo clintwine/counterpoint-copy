@@ -1267,6 +1267,7 @@ export default function NoteGrid({
                 size="sm"
                 className="h-8 px-3 text-white hover:text-white hover:bg-slate-700/50 gap-1.5"
               >
+                <Music className="w-4 h-4 text-amber-400" />
                 <span className="font-semibold text-sm">File</span>
                 <ChevronDown className="w-3.5 h-3.5 text-white/50" />
               </Button>
