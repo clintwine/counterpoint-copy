@@ -104,15 +104,19 @@ export default function ScoreMinimap({
       {/* Notes */}
       {notes.map((note, idx) => {
         const pos = getNotePosition(note);
+        const noteVelocity = note.velocity ?? 0.8;
+        const noteColor = getVelocityColor(noteVelocity);
         return (
           <div
             key={`${note.pitch}-${note.beat}-${idx}`}
-            className="absolute bg-amber-400/80"
+            className="absolute"
             style={{
               left: pos.x,
               top: pos.y,
               width: Math.max(2, pos.width),
               height: 2,
+              backgroundColor: noteColor,
+              opacity: 0.8
             }}
           />
         );
