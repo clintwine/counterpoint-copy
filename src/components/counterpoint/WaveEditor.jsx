@@ -99,6 +99,7 @@ export default function WaveEditor({
   customInstruments = [], 
   onSaveInstrument, 
   onDeleteInstrument,
+  onInstrumentChange,
   onClose 
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
@@ -327,6 +328,10 @@ export default function WaveEditor({
     // Preserve the instrument's name when loading
     setInstrument({ ...inst, name: inst.name });
     setEditingIndex(index);
+    // Update the instrument selector to this custom instrument
+    if (onInstrumentChange) {
+      onInstrumentChange(`custom_${index}`);
+    }
   };
 
   return (
