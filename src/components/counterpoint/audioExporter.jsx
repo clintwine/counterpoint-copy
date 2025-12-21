@@ -75,9 +75,9 @@ export async function renderToWav(notes, tempo, instrumentName) {
   const sampleRate = 44100;
   const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
   
-  // Get instrument config
-  const customInstruments = getCustomInstruments() || [];
-  const customInst = customInstruments.find(i => i.name === instrumentName);
+  // Get instrument config - getCustomInstruments returns an object, not array
+  const customInstrumentsObj = getCustomInstruments() || {};
+  const customInst = customInstrumentsObj[instrumentName];
   const instrument = customInst || defaultInstruments[instrumentName] || defaultInstruments.organ;
   
   // Create effects chain
