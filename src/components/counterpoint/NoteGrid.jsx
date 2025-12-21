@@ -262,7 +262,7 @@ export default function NoteGrid({
   const [selectedNotes, setSelectedNotes] = useState(new Set());
   const [marquee, setMarquee] = useState(null);
 
-  const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
+  const getNoteKey = useCallback((pitch, beat) => `${pitch}-${Math.round(beat * 1000) / 1000}`, []);
   
   // Memoize notes lookup for performance - filter duplicates
   // Group notes by pitch and integer beat (notes can have fractional beats)
