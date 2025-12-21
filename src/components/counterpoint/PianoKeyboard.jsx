@@ -850,9 +850,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             
             return keys;
             })()}
-            </div>
-            </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Wave Editor Modal */}
               <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
