@@ -269,7 +269,7 @@ export default function WaveEditor({
     analyserRef.current = analyser;
 
     const masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.3;
+    masterGain.gain.value = (inst.volume ?? 1) * 0.3;
 
     const filter = audioContext.createBiquadFilter();
     filter.type = inst.filter.type;
@@ -280,11 +280,51 @@ export default function WaveEditor({
     const { attack, decay, sustain, release } = inst.envelope;
     const duration = 1;
 
+    // LFO setup
+    let lfoNode = null;
+    if (inst.lfo?.rate > 0 && inst.lfo?.amount > 0) {
+      lfoNode = audioContext.createOscillator();
+      lfoNode.frequency.value = inst.lfo.rate;
+      lfoNode.type = 'sine';
+      
+      const lfoGain = audioContext.createGain();
+      if (inst.lfo.target === 'pitch') {
+        lfoGain.gain.value = inst.lfo.amount * 50;
+      } else if (inst.lfo.target === 'filter') {
+        lfoGain.gain.value = inst.lfo.amount * 1000;
+      } else if (inst.lfo.target === 'volume') {
+        lfoGain.gain.value = inst.lfo.amount * 0.3;
+      }
+      
+      lfoNode.connect(lfoGain);
+      if (inst.lfo.target === 'filter') {
+        lfoGain.connect(filter.frequency);
+      } else if (inst.lfo.target === 'volume') {
+        lfoGain.connect(masterGain.gain);
+      }
+      lfoNode.start(now);
+      lfoNode.stop(now + duration + release);
+    }
+
     inst.oscillators.forEach(oscConfig => {
       const osc = audioContext.createOscillator();
       osc.type = oscConfig.waveform;
       osc.frequency.value = 440;
       osc.detune.value = oscConfig.detune;
+
+      // Apply phase offset
+      if (oscConfig.phase) {
+        const phaseOffset = (oscConfig.phase / 360) * (1 / 440);
+        osc.start(now + phaseOffset);
+      }
+
+      // Apply LFO to pitch if enabled
+      if (lfoNode && inst.lfo?.target === 'pitch') {
+        const lfoGain = audioContext.createGain();
+        lfoGain.gain.value = inst.lfo.amount * 50;
+        lfoNode.connect(lfoGain);
+        lfoGain.connect(osc.detune);
+      }
 
       const oscGain = audioContext.createGain();
       oscGain.gain.value = oscConfig.gain * 0.5;
@@ -292,17 +332,53 @@ export default function WaveEditor({
       osc.connect(oscGain);
       oscGain.connect(filter);
       oscillatorsRef.current.push({ osc, gain: oscGain });
-      osc.start(now);
+      if (!oscConfig.phase) {
+        osc.start(now);
+      }
     });
 
-    filter.connect(masterGain);
+    // Chain effects
+    let outputNode = filter;
+
+    // Distortion
+    if (inst.distortion > 0) {
+      const distortion = audioContext.createWaveShaper();
+      const amount = inst.distortion;
+      const samples = 44100;
+      const curve = new Float32Array(samples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < samples; i++) {
+        const x = (i * 2) / samples - 1;
+        curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+      }
+      distortion.curve = curve;
+      outputNode.connect(distortion);
+      outputNode = distortion;
+    }
+
+    // Bitcrush
+    if (inst.bitcrush > 0) {
+      const bitcrush = audioContext.createWaveShaper();
+      const samples = 44100;
+      const curve = new Float32Array(samples);
+      const step = Math.pow(0.5, inst.bitcrush);
+      for (let i = 0; i < samples; i++) {
+        const x = (i * 2) / samples - 1;
+        curve[i] = step * Math.floor(x / step + 0.5);
+      }
+      bitcrush.curve = curve;
+      outputNode.connect(bitcrush);
+      outputNode = bitcrush;
+    }
+
+    outputNode.connect(masterGain);
     masterGain.connect(analyser);
     analyser.connect(audioContext.destination);
 
     masterGain.gain.setValueAtTime(0, now);
-    masterGain.gain.linearRampToValueAtTime(0.3, now + attack);
-    masterGain.gain.linearRampToValueAtTime(0.3 * sustain, now + attack + decay);
-    masterGain.gain.setValueAtTime(0.3 * sustain, now + duration - release);
+    masterGain.gain.linearRampToValueAtTime((inst.volume ?? 1) * 0.3, now + attack);
+    masterGain.gain.linearRampToValueAtTime((inst.volume ?? 1) * 0.3 * sustain, now + attack + decay);
+    masterGain.gain.setValueAtTime((inst.volume ?? 1) * 0.3 * sustain, now + duration - release);
     masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
     setTimeout(() => {
