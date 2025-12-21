@@ -583,7 +583,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const totalWidth = totalWhiteKeys * whiteKeyWidth;
 
   return (
-    <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
+    <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] w-fit overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
                   <InstrumentSelect
