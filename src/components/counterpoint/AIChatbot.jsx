@@ -767,7 +767,7 @@ This should sound like a REAL composition, not a simple exercise!`,
         variant="ghost" 
         size="icon" 
         onClick={onClose} 
-        className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-slate-700 h-6 w-6"
+        className="absolute top-2 right-2 text-white/60 hover:text-white h-6 w-6"
       >
         <X className="w-4 h-4" />
       </Button>
