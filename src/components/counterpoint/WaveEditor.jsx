@@ -515,6 +515,11 @@ export default function WaveEditor({
   };
 
   const analyzeVoice = (samples, binCount) => {
+    if (samples.length === 0) {
+      alert('No audio detected. Please try again.');
+      return;
+    }
+
     // Average all samples
     const avgSpectrum = new Float32Array(binCount);
     samples.forEach(sample => {
@@ -527,36 +532,52 @@ export default function WaveEditor({
       avgSpectrum[i] /= samples.length;
     }
 
-    // Find peaks in the frequency spectrum
+    // Find peaks - focus on musical frequency range (80Hz to 4000Hz)
+    // Assuming 44.1kHz sample rate and FFT size 2048
+    const sampleRate = 44100;
+    const fftSize = 2048;
+    const binToFreq = (bin) => (bin * sampleRate) / fftSize;
+    
     const peaks = [];
-    for (let i = 2; i < binCount - 2; i++) {
+    const minBin = Math.floor((80 * fftSize) / sampleRate); // ~80 Hz
+    const maxBin = Math.floor((4000 * fftSize) / sampleRate); // ~4000 Hz
+    
+    for (let i = minBin; i < Math.min(maxBin, binCount - 2); i++) {
       if (avgSpectrum[i] > avgSpectrum[i - 1] && 
           avgSpectrum[i] > avgSpectrum[i + 1] &&
-          avgSpectrum[i] > 20) {
-        peaks.push({ index: i, magnitude: avgSpectrum[i] });
+          avgSpectrum[i] > 30) {
+        peaks.push({ 
+          bin: i, 
+          frequency: binToFreq(i),
+          magnitude: avgSpectrum[i] 
+        });
       }
+    }
+
+    if (peaks.length === 0) {
+      alert('Could not detect voice. Please speak or sing louder and closer to the microphone.');
+      return;
     }
 
     // Sort by magnitude and take top 4
     peaks.sort((a, b) => b.magnitude - a.magnitude);
     const topPeaks = peaks.slice(0, 4);
 
-    if (topPeaks.length === 0) {
-      alert('Could not detect voice. Please speak or sing louder.');
-      return;
-    }
-
-    // Convert peaks to oscillators
+    // Use the fundamental (strongest peak) as reference
+    const fundamental = topPeaks[0].frequency;
     const maxMag = topPeaks[0].magnitude;
+
+    // Create oscillators based on frequency ratios
     const oscillators = topPeaks.map((peak, idx) => {
-      // Map frequency bin to detune (rough approximation)
-      const detuneAmount = (peak.index / binCount) * 2400 - 1200;
+      const ratio = peak.frequency / fundamental;
+      const harmonic = Math.round(ratio);
+      const detuneCents = 1200 * Math.log2(ratio / harmonic);
       
       return {
         waveform: idx === 0 ? 'sawtooth' : 'sine',
-        detune: Math.round(detuneAmount / 100) * 100, // Snap to 100 cent intervals
-        gain: Math.min(1.0, (peak.magnitude / maxMag) * (idx === 0 ? 1.0 : 0.6)),
-        harmonic: 1,
+        detune: Math.round(detuneCents),
+        gain: (peak.magnitude / maxMag) * (idx === 0 ? 0.8 : 0.5),
+        harmonic: harmonic,
         phase: 0
       };
     });
@@ -573,6 +594,8 @@ export default function WaveEditor({
       volume: 1
     });
     setEditingIndex(-1);
+    
+    console.log('Voice analysis complete:', { fundamental, oscillators });
   };
 
   const loadInstrument = (inst, index) => {
