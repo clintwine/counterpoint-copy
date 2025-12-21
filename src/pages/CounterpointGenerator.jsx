@@ -166,7 +166,7 @@ export default function CounterpointGenerator() {
           };
           window.addEventListener('keydown', handleKeyDown);
           return () => window.removeEventListener('keydown', handleKeyDown);
-          }, [currentUser, currentProjectId, projectName, handleSaveProject]);
+          }, [currentUser, currentProjectId, projectName]);
 
   // Get current user
   useEffect(() => {
