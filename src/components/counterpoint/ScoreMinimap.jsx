@@ -139,10 +139,7 @@ export default function ScoreMinimap({
         style={{ left: playheadX }}
       />
       
-      {/* Label */}
-      <span className="absolute bottom-0.5 right-1 text-[8px] text-white/40 pointer-events-none">
-        MAP
-      </span>
+
     </div>
   );
 }

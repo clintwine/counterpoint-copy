@@ -726,13 +726,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
           <div className="flex items-center gap-1 sm:gap-2">
                             <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowWaveEditor(!showWaveEditor)}
-                className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowWaveEditor(!showWaveEditor)}
+                            className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
 
                               <Waves className="w-3.5 h-3.5 mr-1" />
-                              Edit Instrument
+                              Instrument Editor
                             </Button>
             <Button
                 variant="ghost"
