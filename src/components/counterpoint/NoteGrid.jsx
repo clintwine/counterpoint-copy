@@ -301,6 +301,10 @@ export default function NoteGrid({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubPosition, setScrubPosition] = useState(null);
   const [isLoopSelecting, setIsLoopSelecting] = useState(false);
+  
+  // Use smooth playhead position if available, otherwise fall back to currentBeat
+  // During scrubbing, use the scrub position for immediate feedback
+  const smoothPlayhead = isScrubbing && scrubPosition !== null ? scrubPosition : (playheadPosition !== undefined ? playheadPosition : currentBeat);
   const [loopSelectStart, setLoopSelectStart] = useState(null);
   const [viewportState, setViewportState] = useState({ scrollLeft: 0, scrollTop: 0, height: 400, width: 800 });
   const [pinchState, setPinchState] = useState(null);
