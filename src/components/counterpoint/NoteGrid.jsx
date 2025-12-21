@@ -2289,7 +2289,7 @@ export default function NoteGrid({
           <InstrumentSelect 
             value={voices[0]?.instrument || 'organ'} 
             onChange={(v) => onVoiceInstrumentChange?.(0, v)}
-            instruments={ALL_INSTRUMENTS}
+            instruments={allInstruments}
             onCreateNew={onOpenWaveEditor}
           />
           <div className="flex items-center gap-2">
