@@ -1,25 +1,26 @@
 import React from 'react';
 
-// Velocity to color gradient: blue → green → yellow → red
+// Velocity to color gradient: blue → green → yellow → red (0-125 scale)
 const getVelocityColor = (velocity) => {
   const v = Math.max(0, Math.min(1, velocity));
   
-  if (v < 0.33) {
-    const t = v / 0.33;
+  if (v < 0.4) {
+    const t = v / 0.4;
     const r = Math.round(0 + t * 0);
     const g = Math.round(100 + t * 155);
     const b = Math.round(255 - t * 55);
     return `rgb(${r}, ${g}, ${b})`;
-  } else if (v < 0.66) {
-    const t = (v - 0.33) / 0.33;
+  } else if (v < 0.7) {
+    const t = (v - 0.4) / 0.3;
     const r = Math.round(0 + t * 255);
     const g = Math.round(255);
     const b = Math.round(200 - t * 200);
     return `rgb(${r}, ${g}, ${b})`;
   } else {
-    const t = (v - 0.66) / 0.34;
+    // Yellow to Red - reaches pure red at v=1.0 (velocity 125)
+    const t = (v - 0.7) / 0.3;
     const r = Math.round(255);
-    const g = Math.round(255 - t * 100);
+    const g = Math.round(255 - t * 255);
     const b = Math.round(0);
     return `rgb(${r}, ${g}, ${b})`;
   }
