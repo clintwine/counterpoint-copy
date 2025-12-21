@@ -935,18 +935,24 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             );
             whiteKeyIndex++;
             
-            // Add 5 extra greyed out keys at the end to fill space
-            const extraHighKeys = ['C#', 'D', 'D#', 'E', 'F'];
+            // Add 8 extra greyed out keys at the end to fill space
+            const extraHighKeys = ['C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
             extraHighKeys.forEach((note, idx) => {
               const isBlack = note.includes('#');
               if (isBlack) {
-                // Black key
+                // Black key - calculate offset based on position
+                let blackOffset;
+                if (note === 'C#') blackOffset = 14;
+                else if (note === 'D#') blackOffset = 38;
+                else if (note === 'F#') blackOffset = 86;
+                else if (note === 'G#') blackOffset = 110;
+                
                 keys.push(
                   <div
                     key={`extra-high-black-${note}`}
                     className="absolute top-0 rounded-b z-10 opacity-30 cursor-not-allowed"
                     style={{
-                      left: (whiteKeyIndex - 1) * whiteKeyWidth + (note === 'C#' ? 14 : 38) * (whiteKeyWidth / 24),
+                      left: (whiteKeyIndex - 1) * whiteKeyWidth + blackOffset * (whiteKeyWidth / 24),
                       width: blackKeyWidth,
                       height: 45,
                       backgroundColor: '#3A3A3A',
