@@ -397,29 +397,43 @@ This should sound like a REAL composition, not a simple exercise!`,
     stopAllNotes();
     setPreviewPlaying(messageIndex);
 
-    const msPerBeat = (60 / tempo) * 1000;
+    // Use 16th note timing - our beat unit is 16th notes
+    const sixteenthNoteDuration = (60 / tempo) / 4; // Duration of one 16th note in seconds
+    const msPerBeat = sixteenthNoteDuration * 1000;
     const timeouts = [];
 
-    // Play melody - use actual beat positions for timing
-    notes.forEach((note, idx) => {
-      // Fallback to sequential if beat position is missing
-      const beat = note.beat !== undefined ? note.beat : idx;
-      const startTime = beat * msPerBeat;
-      const timeout = setTimeout(() => {
-        const duration = (note.duration || 1) * (60 / tempo) * 0.9;
-        playNote(note.pitch, duration, 0.7, 0, 'organ');
-      }, startTime);
-      timeouts.push(timeout);
+    // Group notes by beat to separate melody from chords
+    const notesByBeat = new Map();
+    notes.forEach((note) => {
+      const beat = note.beat !== undefined ? note.beat : 0;
+      if (!notesByBeat.has(beat)) {
+        notesByBeat.set(beat, []);
+      }
+      notesByBeat.get(beat).push(note);
+    });
+
+    // Play notes - single notes in sequence, skip simultaneous notes (chords)
+    notesByBeat.forEach((notesAtBeat, beat) => {
+      if (notesAtBeat.length === 1) {
+        // Single note - play it
+        const note = notesAtBeat[0];
+        const startTime = beat * msPerBeat;
+        const timeout = setTimeout(() => {
+          const duration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
+          playNote(note.pitch, duration, 0.7, 0, 'organ');
+        }, startTime);
+        timeouts.push(timeout);
+      }
+      // Skip chords (multiple notes at same beat) for melody preview
     });
 
     // Play harmony if exists - use actual beat positions
     if (harmony && harmony.length > 0) {
-      harmony.forEach((note, idx) => {
-        // Fallback to sequential if beat position is missing
-        const beat = note.beat !== undefined ? note.beat : idx;
+      harmony.forEach((note) => {
+        const beat = note.beat !== undefined ? note.beat : 0;
         const startTime = beat * msPerBeat;
         const timeout = setTimeout(() => {
-          const duration = (note.duration || 1) * (60 / tempo) * 0.9;
+          const duration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
           playNote(note.pitch, duration, 0.6, 1, 'organ');
         }, startTime);
         timeouts.push(timeout);
