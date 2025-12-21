@@ -613,8 +613,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
           <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
-                          {/* Effect Knobs - hidden on mobile */}
-                          <div className="hidden sm:flex items-center gap-3">
+          {/* Effect Knobs - hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[9px] text-white/50 uppercase">Reverb</span>
               <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
@@ -682,7 +682,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
           <div className="w-px h-8 bg-slate-600 hidden sm:block" />
 
-                          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -701,11 +701,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
             </Button>
-            </div>
-            </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="overflow-x-auto pb-1">
+      <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
           <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
@@ -849,9 +849,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             );
             
             return keys;
-            })()}
-          </div>
+          })()}
         </div>
+      </div>
       </div>
 
       {/* Wave Editor Modal */}
