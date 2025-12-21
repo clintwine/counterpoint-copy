@@ -429,8 +429,7 @@ export default function WaveEditor({
                   setInstrument({ ...DEFAULT_INSTRUMENT });
                   setEditingIndex(-1);
                 }}
-                variant="outline"
-                className="h-7 border-slate-600 text-white/70 hover:text-white hover:bg-slate-600 text-xs"
+                className="h-7 bg-slate-600 text-white hover:bg-slate-500 text-xs"
               >
                 <Plus className="w-3 h-3 mr-1" />
                 New

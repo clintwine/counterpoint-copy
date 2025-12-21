@@ -942,12 +942,11 @@ export default function CounterpointGenerator() {
                     )}
                   </div>
                   <Button
-                    variant="outline"
                     onClick={() => {
                       handleNewProject();
                       setLoadDialogOpen(false);
                     }}
-                    className="w-full border-amber-500/50 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+                    className="w-full bg-amber-500 text-slate-900 hover:bg-amber-400"
                   >
                     New Project
                   </Button>
