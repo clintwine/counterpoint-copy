@@ -1304,18 +1304,15 @@ export default function NoteGrid({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 const { base44 } = await import('@/api/base44Client');
-                const maxBeat = Math.max(...cantusFirmus.map(n => n.beat + (n.duration || 1)), 0);
-                const duration = maxBeat * (60 / tempo) / 4 + 2;
                 const response = await base44.functions.invoke('exportAudio', {
                   notes: cantusFirmus,
-                  tempo,
-                  duration
+                  tempo
                 });
-                const blob = new Blob([response.data], { type: 'audio/wav' });
+                const blob = new Blob([response.data], { type: 'audio/mpeg' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `composition-${Date.now()}.wav`;
+                a.download = `composition-${Date.now()}.mp3`;
                 a.click();
                 URL.revokeObjectURL(url);
               }} className="text-white cursor-pointer">

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import lamejs from 'npm:lamejs@1.2.1';
 
 Deno.serve(async (req) => {
   try {
@@ -15,7 +16,7 @@ Deno.serve(async (req) => {
     const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
     const duration = (maxBeat * (60 / tempo) / 4) + 2; // Add 2 seconds for tail
 
-    // Generate WAV file
+    // Generate audio
     const sampleRate = 44100;
     const numChannels = 2;
     const numSamples = Math.floor(sampleRate * duration);
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
     // Generate audio for each note
     notes.forEach(note => {
       const frequency = noteToFrequency(note.pitch);
-      const startTime = note.beat * (60 / tempo) / 4; // Convert beat to seconds
+      const startTime = note.beat * (60 / tempo) / 4;
       const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
       const velocity = note.velocity || 0.8;
       
@@ -40,27 +41,52 @@ Deno.serve(async (req) => {
         const envelope = Math.min(1, t / 0.02) * Math.min(1, (noteDuration - t) / 0.1);
         const sample = Math.sin(2 * Math.PI * frequency * t) * velocity * envelope * 0.3;
         
-        // Add to both channels
         leftChannel[i] += sample;
         rightChannel[i] += sample;
       }
     });
 
-    // Interleave channels for WAV format
-    const interleavedData = new Float32Array(numSamples * 2);
+    // Convert float samples to 16-bit PCM
+    const leftPCM = new Int16Array(numSamples);
+    const rightPCM = new Int16Array(numSamples);
     for (let i = 0; i < numSamples; i++) {
-      interleavedData[i * 2] = leftChannel[i];
-      interleavedData[i * 2 + 1] = rightChannel[i];
+      leftPCM[i] = Math.max(-32768, Math.min(32767, Math.round(leftChannel[i] * 32767)));
+      rightPCM[i] = Math.max(-32768, Math.min(32767, Math.round(rightChannel[i] * 32767)));
+    }
+
+    // Encode to MP3
+    const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 128);
+    const mp3Data = [];
+    const blockSize = 1152;
+    
+    for (let i = 0; i < numSamples; i += blockSize) {
+      const leftChunk = leftPCM.subarray(i, Math.min(i + blockSize, numSamples));
+      const rightChunk = rightPCM.subarray(i, Math.min(i + blockSize, numSamples));
+      const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+      if (mp3buf.length > 0) {
+        mp3Data.push(mp3buf);
+      }
     }
     
-    // Convert to WAV format
-    const wavBuffer = createWavBuffer(interleavedData, sampleRate, numChannels);
+    const mp3buf = mp3encoder.flush();
+    if (mp3buf.length > 0) {
+      mp3Data.push(mp3buf);
+    }
+
+    // Combine all MP3 chunks
+    const totalLength = mp3Data.reduce((sum, buf) => sum + buf.length, 0);
+    const mp3Buffer = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const buf of mp3Data) {
+      mp3Buffer.set(buf, offset);
+      offset += buf.length;
+    }
     
-    return new Response(wavBuffer, {
+    return new Response(mp3Buffer, {
       status: 200,
       headers: {
-        'Content-Type': 'audio/wav',
-        'Content-Disposition': `attachment; filename="composition-${Date.now()}.wav"`
+        'Content-Type': 'audio/mpeg',
+        'Content-Disposition': `attachment; filename="composition-${Date.now()}.mp3"`
       }
     });
   } catch (error) {
@@ -83,48 +109,4 @@ function noteToFrequency(pitch) {
   const midiNote = (parseInt(octave) + 1) * 12 + noteNumber;
   
   return 440 * Math.pow(2, (midiNote - 69) / 12);
-}
-
-function createWavBuffer(samples, sampleRate, numChannels) {
-  const bytesPerSample = 2;
-  const blockAlign = numChannels * bytesPerSample;
-  const byteRate = sampleRate * blockAlign;
-  const numFrames = samples.length / numChannels;
-  const dataSize = numFrames * blockAlign;
-  const bufferSize = 44 + dataSize;
-  
-  const buffer = new ArrayBuffer(bufferSize);
-  const view = new DataView(buffer);
-  
-  // WAV header
-  writeString(view, 0, 'RIFF');
-  view.setUint32(4, 36 + dataSize, true);
-  writeString(view, 8, 'WAVE');
-  writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true); // fmt chunk size
-  view.setUint16(20, 1, true); // audio format (PCM)
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, byteRate, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, 16, true); // bits per sample
-  writeString(view, 36, 'data');
-  view.setUint32(40, dataSize, true);
-  
-  // Audio data - interleaved stereo
-  let offset = 44;
-  for (let i = 0; i < samples.length; i++) {
-    const sample = Math.max(-1, Math.min(1, samples[i]));
-    const intSample = Math.round(sample < 0 ? sample * 32768 : sample * 32767);
-    view.setInt16(offset, intSample, true);
-    offset += 2;
-  }
-  
-  return buffer;
-}
-
-function writeString(view, offset, string) {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
 }
