@@ -409,10 +409,14 @@ export default function WaveEditor({
   // Update live preview sound when instrument changes
   useEffect(() => {
     if (livePreview) {
-      // Play preview on each change
-      playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
+      // Play preview on each change with animation
+      setIsPlaying(true);
+      playPreviewForInstrument(instrument, () => {
+        setIsPlaying(false);
+      });
+      drawWaveform();
     }
-  }, [instrument, livePreview]);
+  }, [instrument, livePreview, playPreviewForInstrument, drawWaveform]);
 
   return (
     <div className="space-y-3">
