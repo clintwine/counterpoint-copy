@@ -594,8 +594,23 @@ export default function CounterpointGenerator() {
     ensureAudio();
     if (isPlaying) {
       stopAllNotes();
+      setIsPlaying(false);
+    } else {
+      // When starting playback, jump to loop start or first selected note
+      if (loopStart !== null) {
+        setCurrentBeat(loopStart);
+        setPlayheadPosition(loopStart);
+        lastPlayheadRef.current = loopStart;
+        playedNotesRef.current.clear();
+      } else if (selectedNotes.length > 0) {
+        const minBeat = Math.min(...selectedNotes.map(n => n.beat));
+        setCurrentBeat(minBeat);
+        setPlayheadPosition(minBeat);
+        lastPlayheadRef.current = minBeat;
+        playedNotesRef.current.clear();
+      }
+      setIsPlaying(true);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleReset = () => {
