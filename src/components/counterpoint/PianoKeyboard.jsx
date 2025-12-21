@@ -239,7 +239,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
 
   // Get custom/preset instrument config if selected
-  const getCustomConfig = () => {
+  const getCustomConfig = useCallback(() => {
     if (instrument.startsWith('custom_')) {
       const index = parseInt(instrument.split('_')[1]);
       return customInstruments[index];
@@ -249,7 +249,28 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       return PRESET_LIBRARY[index];
     }
     return null;
-  };
+  }, [instrument, customInstruments]);
+
+  const handlePreview = useCallback(async (instrumentValue) => {
+    initAudio();
+    
+    // Check if it's a custom or preset instrument
+    if (instrumentValue.startsWith('custom_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      const customConfig = customInstruments[index];
+      if (customConfig) {
+        await playNoteWithCustomInstrument('C4', 0.5, 0.7, customConfig);
+      }
+    } else if (instrumentValue.startsWith('preset_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      const presetConfig = PRESET_LIBRARY[index];
+      if (presetConfig) {
+        await playNoteWithCustomInstrument('C4', 0.5, 0.7, presetConfig);
+      }
+    } else {
+      playNote('C4', 0.5, 0.7, 0, instrumentValue);
+    }
+  }, [customInstruments]);
 
   const handleEffectChange = (effect, value) => {
     const numValue = parseFloat(value);
