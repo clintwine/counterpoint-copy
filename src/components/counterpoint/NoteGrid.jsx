@@ -2148,7 +2148,6 @@ export default function NoteGrid({
               const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
               setScrubPosition(beat);
               onSeek && onSeek(Math.floor(beat));
-              scrollToBeatRef.current && scrollToBeatRef.current(Math.floor(beat));
             };
 
             const handleMouseUp = () => {
@@ -2174,7 +2173,6 @@ export default function NoteGrid({
               const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
               setScrubPosition(beat);
               onSeek && onSeek(Math.floor(beat));
-              scrollToBeatRef.current && scrollToBeatRef.current(Math.floor(beat));
             };
 
             const handleTouchEnd = () => {
