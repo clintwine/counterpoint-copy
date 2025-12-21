@@ -311,14 +311,14 @@ export default function WaveEditor({
   const playPreview = useCallback(() => {
     setIsPlaying(true);
     initAudio();
-    // Use the same playback method as live preview for consistency
-    playNoteWithCustomInstrument('A4', 1.0, 0.6, instrument);
+    // Use exact same parameters as live preview for consistency
+    playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
     drawWaveform();
     // Stop visualization after duration
     setTimeout(() => {
       stopPreview();
       setIsPlaying(false);
-    }, 1100);
+    }, 900);
   }, [instrument, drawWaveform, stopPreview]);
 
   const playPresetPreview = useCallback((preset, index) => {
