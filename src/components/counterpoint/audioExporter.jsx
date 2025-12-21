@@ -1,4 +1,18 @@
-import { getInstrument, noteToFreq } from './audioEngine';
+function noteToFrequency(pitch) {
+  const notes = {
+    'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
+  };
+  
+  const match = pitch.match(/([A-G]#?)(\d)/);
+  if (!match) return 440;
+  
+  const [, note, octave] = match;
+  const noteNumber = notes[note];
+  const midiNote = (parseInt(octave) + 1) * 12 + noteNumber;
+  
+  return 440 * Math.pow(2, (midiNote - 69) / 12);
+}
 
 export async function renderToWav(notes, tempo, instrumentName) {
   // Calculate duration
@@ -8,40 +22,34 @@ export async function renderToWav(notes, tempo, instrumentName) {
   const sampleRate = 44100;
   const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
   
-  // Get instrument config
-  const instrument = getInstrument(instrumentName);
-  
-  // Render each note
+  // Render each note with simple sine wave
   notes.forEach(note => {
-    const frequency = noteToFreq(note.pitch);
+    const frequency = noteToFrequency(note.pitch);
     const startTime = note.beat * (60 / tempo) / 4;
     const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
     const velocity = note.velocity || 0.8;
     
-    // Create oscillators based on instrument
-    instrument.oscillators.forEach(osc => {
-      const oscillator = offlineCtx.createOscillator();
-      const gainNode = offlineCtx.createGain();
-      
-      oscillator.type = osc.type;
-      oscillator.frequency.value = frequency * osc.detune;
-      
-      // Apply envelope
-      const attack = 0.02;
-      const release = 0.1;
-      const sustainLevel = velocity * osc.gain * 0.3; // Reduced overall gain
-      
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
-      gainNode.gain.setValueAtTime(sustainLevel, startTime + noteDuration - release);
-      gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(offlineCtx.destination);
-      
-      oscillator.start(startTime);
-      oscillator.stop(startTime + noteDuration);
-    });
+    const oscillator = offlineCtx.createOscillator();
+    const gainNode = offlineCtx.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency;
+    
+    // Apply envelope
+    const attack = 0.02;
+    const release = 0.1;
+    const sustainLevel = velocity * 0.2;
+    
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
+    gainNode.gain.setValueAtTime(sustainLevel, startTime + noteDuration - release);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(offlineCtx.destination);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + noteDuration);
   });
   
   // Render
