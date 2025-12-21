@@ -2144,13 +2144,15 @@ export default function NoteGrid({
               const gridRect = gridRef.current.getBoundingClientRect();
               const scrollLeft = gridRef.current.scrollLeft;
               const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
-              const beat = Math.max(0, Math.min(totalBeats - 1, Math.floor(x / CELL_WIDTH)));
-              onSeek && onSeek(beat);
-              scrollToBeatRef.current && scrollToBeatRef.current(beat);
+              const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+              setScrubPosition(beat);
+              onSeek && onSeek(Math.floor(beat));
+              scrollToBeatRef.current && scrollToBeatRef.current(Math.floor(beat));
             };
 
             const handleMouseUp = () => {
               setIsScrubbing(false);
+              setScrubPosition(null);
               document.removeEventListener('mousemove', handleMouseMove);
               document.removeEventListener('mouseup', handleMouseUp);
             };
