@@ -483,7 +483,7 @@ export default function NoteGrid({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, []);
+  }, [canvasRef.current]);
 
   // Update piano highlights based on interaction state
   useEffect(() => {
