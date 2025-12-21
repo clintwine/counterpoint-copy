@@ -946,7 +946,7 @@ export default function CounterpointGenerator() {
                       handleNewProject();
                       setLoadDialogOpen(false);
                     }}
-                    className="w-full bg-amber-500 text-slate-900 hover:bg-amber-400"
+                    className="w-full bg-slate-600 text-white hover:bg-slate-500"
                   >
                     New Project
                   </Button>
