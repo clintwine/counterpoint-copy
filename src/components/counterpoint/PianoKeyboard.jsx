@@ -838,9 +838,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 onMouseUp={() => handleMouseUp('A#', 0)}
                 onMouseEnter={() => handleMouseEnter('A#', 0)}
                 onMouseLeave={() => handleMouseLeave('A#', 0)}
-                className="absolute top-0 rounded-b z-10 cursor-pointer"
+                className="absolute top-0 rounded-b z-10 cursor-pointer flex items-end justify-center pb-1"
                                       style={{
-                                        left: whiteKeyWidth - blackKeyWidth / 2,
+                                        left: (whiteKeyIndex - 2) * whiteKeyWidth + 134 * (whiteKeyWidth / 24),
                                         width: blackKeyWidth,
                                         height: 45,
                   backgroundColor: a0SharpPressed ? '#D4A574' : a0SharpActive !== -1 ? VOICE_COLORS[a0SharpActive] : '#1E293B',
