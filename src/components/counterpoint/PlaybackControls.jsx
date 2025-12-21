@@ -138,46 +138,46 @@ export default function PlaybackControls({
       {/* Transport controls and tempo */}
       <div className="flex items-center gap-2 justify-center">
         {/* Transport controls */}
-        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5">
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
             title="Go to start"
           >
-            <SkipBack className="w-3.5 h-3.5" />
+            <SkipBack className="w-4 h-4" />
           </Button>
-          
+
           <Button
             onClick={onPlayPause}
             size="sm"
-            className="h-7 w-7 p-0 rounded bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E] mx-0.5"
+            className="h-8 w-8 p-0 rounded bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E] mx-0.5"
           >
             {isPlaying ? (
-              <Pause className="w-3.5 h-3.5" />
+              <Pause className="w-4 h-4" />
             ) : (
-              <Play className="w-3.5 h-3.5 ml-0.5" />
+              <Play className="w-4 h-4 ml-0.5" />
             )}
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
             onClick={onStop}
-            className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
             title="Stop"
           >
-            <Square className="w-3 h-3 fill-current" />
+            <Square className="w-3.5 h-3.5 fill-current" />
           </Button>
 
-          <div className="w-px h-5 bg-[#3A3A3A] mx-0.5" />
+          <div className="w-px h-6 bg-[#3A3A3A] mx-0.5" />
 
           <Button
             onClick={onRecordToggle}
             size="sm"
             disabled={isPlaying && !isRecording}
-            className={`h-7 w-7 p-0 rounded ${
+            className={`h-8 w-8 p-0 rounded ${
               isRecording 
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
                 : isCountingIn
@@ -189,7 +189,7 @@ export default function PlaybackControls({
             {isCountingIn ? (
               <span className="text-xs font-bold">{countInBeats}</span>
             ) : (
-              <Circle className="w-3 h-3 fill-current" />
+              <Circle className="w-3.5 h-3.5 fill-current" />
             )}
           </Button>
         </div>
