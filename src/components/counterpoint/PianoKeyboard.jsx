@@ -148,14 +148,30 @@ const PRESET_LIBRARY = [
 // Full 88-key piano: A0 to C8
 const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
 
-function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
+function InstrumentSelect({ value, onChange, instruments, onCreateNew, customInstruments = [] }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find((i) => i.value === value);
 
   const handlePreview = (instrumentValue, e) => {
     e.stopPropagation();
     initAudio();
-    playNote('C4', 0.5, 0.7, 0, instrumentValue);
+    
+    // Check if it's a custom or preset instrument
+    if (instrumentValue.startsWith('custom_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      const customConfig = customInstruments[index];
+      if (customConfig) {
+        playNoteWithCustomInstrument('C4', 0.5, 0.7, customConfig);
+      }
+    } else if (instrumentValue.startsWith('preset_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      const presetConfig = PRESET_LIBRARY[index];
+      if (presetConfig) {
+        playNoteWithCustomInstrument('C4', 0.5, 0.7, presetConfig);
+      }
+    } else {
+      playNote('C4', 0.5, 0.7, 0, instrumentValue);
+    }
   };
 
   return (
