@@ -935,8 +935,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             );
             whiteKeyIndex++;
             
-            // Add 8 extra greyed out keys at the end to fill space
-            const extraHighKeys = ['C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+            // Add 9 extra greyed out keys at the end to fill space
+            const extraHighKeys = ['C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A'];
             extraHighKeys.forEach((note, idx) => {
               const isBlack = note.includes('#');
               if (isBlack) {
