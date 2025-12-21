@@ -853,30 +853,31 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 const voiceIndex = isNoteActive(key.note, octave);
                 const isActive = voiceIndex !== -1;
                 const isPressed = isNotePressed(key.note, octave);
-                
+                const isDisabled = isExtendedRange;
+
                 const blackKeyLabel = getKeyLabel(key.note, octave);
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
-                    onMouseDown={(e) => handleMouseDown(e, key.note, octave)}
-                    onMouseUp={() => handleMouseUp(key.note, octave)}
-                    onMouseEnter={() => handleMouseEnter(key.note, octave)}
-                    onMouseLeave={() => handleMouseLeave(key.note, octave)}
-                    className="absolute top-0 rounded-b z-10 cursor-pointer flex items-end justify-center pb-1"
-                                              style={{
-                                                left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
-                                                width: blackKeyWidth,
-                                                height: 45,
-                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
+                    onMouseDown={isDisabled ? undefined : (e) => handleMouseDown(e, key.note, octave)}
+                    onMouseUp={isDisabled ? undefined : () => handleMouseUp(key.note, octave)}
+                    onMouseEnter={isDisabled ? undefined : () => handleMouseEnter(key.note, octave)}
+                    onMouseLeave={isDisabled ? undefined : () => handleMouseLeave(key.note, octave)}
+                    className={`absolute top-0 rounded-b z-10 flex items-end justify-center pb-1 ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                                          style={{
+                                            left: octaveStartWhite * whiteKeyWidth + key.offset * (whiteKeyWidth / 24),
+                                            width: blackKeyWidth,
+                                            height: 45,
+                      backgroundColor: isDisabled ? '#3A3A3A' : isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B',
                     }}
                   >
-                    {showKeys && blackKeyLabel && (
+                    {showKeys && blackKeyLabel && !isDisabled && (
                       <span className="text-[7px] font-bold text-white/70">{blackKeyLabel}</span>
                     )}
                   </div>
                 );
               });
-            }
+              }
             
             // C8 (final key)
             const c8Active = isNoteActive('C', 8);
