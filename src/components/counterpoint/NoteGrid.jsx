@@ -129,7 +129,7 @@ const PRESET_LIBRARY = [
   { value: 'preset_7', label: 'Flutey' },
 ];
 
-const ALL_INSTRUMENTS = [...DEFAULT_INSTRUMENTS, ...PRESET_LIBRARY];
+
 
 function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
@@ -246,7 +246,8 @@ export default function NoteGrid({
       isGenerating,
       onImportMidi,
       onTheoryTools,
-      onPressedNotesChange
+      onPressedNotesChange,
+      customInstruments = []
     }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
