@@ -227,9 +227,9 @@ export default function PlaybackControls({
           <div className="w-px h-6 bg-[#3A3A3A]" />
 
           {/* Time Signature */}
-          <div className="flex flex-col items-start justify-center pt-2">
+          <div className="flex flex-col items-start justify-center">
             <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-              <SelectTrigger className="h-auto w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D] py-0">
+              <SelectTrigger className="h-auto w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D] py-0 -mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
