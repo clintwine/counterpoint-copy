@@ -361,6 +361,9 @@ export default function WaveEditor({
                   onClick={() => {
                     setInstrument({ ...preset });
                     setEditingIndex(-1);
+                    if (onInstrumentChange) {
+                      onInstrumentChange(`preset_${i}`);
+                    }
                   }}
                   className="flex-1 h-5 text-[9px] justify-start px-1 text-white/60 hover:text-white hover:bg-slate-600"
                 >
