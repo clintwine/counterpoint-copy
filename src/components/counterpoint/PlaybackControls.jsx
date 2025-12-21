@@ -231,18 +231,20 @@ export default function PlaybackControls({
           {/* Time Signature */}
           <div className="flex items-center">
             <div className="w-12 flex flex-col items-center">
-              <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-                <SelectTrigger className="h-auto w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D] py-0.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-                  {TIME_SIGNATURES.map(ts => (
-                    <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
-                      {ts.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="w-12 flex items-center justify-center">
+                <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+                  <SelectTrigger className="h-auto w-12 bg-transparent border-none text-white text-xl font-bold px-2 py-0.5 hover:bg-[#2D2D2D]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                    {TIME_SIGNATURES.map(ts => (
+                      <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
+                        {ts.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <span className="text-white/40 text-[9px] uppercase tracking-wider">SIG</span>
             </div>
           </div>
