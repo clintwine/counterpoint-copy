@@ -15,13 +15,14 @@ Deno.serve(async (req) => {
     const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
     const duration = (maxBeat * (60 / tempo) / 4) + 2; // Add 2 seconds for tail
 
-    // Generate WAV file using Web Audio API offline context
+    // Generate WAV file
     const sampleRate = 44100;
     const numChannels = 2;
     const numSamples = Math.floor(sampleRate * duration);
 
-    // Create audio buffer (interleaved stereo)
-    const audioData = new Float32Array(numSamples * numChannels);
+    // Create separate left/right channel buffers
+    const leftChannel = new Float32Array(numSamples);
+    const rightChannel = new Float32Array(numSamples);
     
     // Generate audio for each note
     notes.forEach(note => {
@@ -39,14 +40,21 @@ Deno.serve(async (req) => {
         const envelope = Math.min(1, t / 0.02) * Math.min(1, (noteDuration - t) / 0.1);
         const sample = Math.sin(2 * Math.PI * frequency * t) * velocity * envelope * 0.3;
         
-        // Stereo output
-        audioData[i * 2] += sample;
-        audioData[i * 2 + 1] += sample;
+        // Add to both channels
+        leftChannel[i] += sample;
+        rightChannel[i] += sample;
       }
     });
 
+    // Interleave channels for WAV format
+    const interleavedData = new Float32Array(numSamples * 2);
+    for (let i = 0; i < numSamples; i++) {
+      interleavedData[i * 2] = leftChannel[i];
+      interleavedData[i * 2 + 1] = rightChannel[i];
+    }
+    
     // Convert to WAV format
-    const wavBuffer = createWavBuffer(audioData, sampleRate, numChannels);
+    const wavBuffer = createWavBuffer(interleavedData, sampleRate, numChannels);
     
     return new Response(wavBuffer, {
       status: 200,
