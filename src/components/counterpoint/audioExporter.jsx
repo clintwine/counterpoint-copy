@@ -82,7 +82,7 @@ export async function renderToWav(notes, tempo, instrumentName) {
   
   // Create effects chain
   const masterGain = offlineCtx.createGain();
-  masterGain.gain.value = 0.8;
+  masterGain.gain.value = 1.5;
   
   const reverb = createReverb(offlineCtx);
   const reverbGain = offlineCtx.createGain();
@@ -129,7 +129,7 @@ export async function renderToWav(notes, tempo, instrumentName) {
       // Apply envelope
       const attack = 0.02;
       const release = 0.1;
-      const sustainLevel = velocity * osc.gain * 0.15;
+      const sustainLevel = velocity * osc.gain * 0.3;
       
       gainNode.gain.setValueAtTime(0, startTime);
       gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
