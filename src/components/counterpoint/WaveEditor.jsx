@@ -346,44 +346,19 @@ export default function WaveEditor({
   const toggleLivePreview = (enabled) => {
     setLivePreview(enabled);
     if (enabled) {
+      // Play a short preview when enabled
       initAudio();
-      const noteObj = playNoteWithCustomInstrument('C4', 999, 0.5, instrument);
-      liveNoteIdRef.current = noteObj;
-    } else {
-      if (liveNoteIdRef.current) {
-        const { oscillators } = liveNoteIdRef.current;
-        oscillators?.forEach(osc => {
-          try { osc.stop(); } catch (e) {}
-        });
-        liveNoteIdRef.current = null;
-      }
+      playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
     }
   };
 
   // Update live preview sound when instrument changes
   useEffect(() => {
-    if (livePreview && liveNoteIdRef.current) {
-      // Stop current note and restart with new settings
-      const { oscillators } = liveNoteIdRef.current;
-      oscillators?.forEach(osc => {
-        try { osc.stop(); } catch (e) {}
-      });
-      const noteObj = playNoteWithCustomInstrument('C4', 999, 0.5, instrument);
-      liveNoteIdRef.current = noteObj;
+    if (livePreview) {
+      // Play preview on each change
+      playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
     }
   }, [instrument, livePreview]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (liveNoteIdRef.current) {
-        const { oscillators } = liveNoteIdRef.current;
-        oscillators?.forEach(osc => {
-          try { osc.stop(); } catch (e) {}
-        });
-      }
-    };
-  }, []);
 
   return (
     <div className="space-y-3">
