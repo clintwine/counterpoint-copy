@@ -297,6 +297,17 @@ export default function WaveEditor({
     }, duration * 1000 + 100);
   }, []);
 
+  const stopPreview = useCallback(() => {
+    oscillatorsRef.current.forEach(({ osc }) => {
+      try { osc.stop(); } catch (e) {}
+    });
+    oscillatorsRef.current = [];
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    setIsPlaying(false);
+  }, []);
+
   const playPreview = useCallback(() => {
     setIsPlaying(true);
     initAudio();
@@ -315,17 +326,6 @@ export default function WaveEditor({
     setPreviewingPreset(index);
     playPreviewForInstrument(preset, () => setPreviewingPreset(null));
   }, [previewingPreset, playPreviewForInstrument]);
-
-  const stopPreview = useCallback(() => {
-    oscillatorsRef.current.forEach(({ osc }) => {
-      try { osc.stop(); } catch (e) {}
-    });
-    oscillatorsRef.current = [];
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-    setIsPlaying(false);
-  }, []);
 
   const updateOscillator = (index, key, value) => {
     const newOscs = [...instrument.oscillators];
