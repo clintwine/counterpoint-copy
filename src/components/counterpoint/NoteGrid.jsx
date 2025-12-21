@@ -6,6 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, BookOpen, ExternalLink } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 
@@ -2289,15 +2291,15 @@ export default function NoteGrid({
             instruments={ALL_INSTRUMENTS}
             onCreateNew={onOpenWaveEditor}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onTogglePianoPanel}
-            className={`h-8 w-8 p-0 ${showPianoPanel ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white hover:bg-slate-700'}`}
-            title={showPianoPanel ? "Hide Piano Keyboard" : "Show Piano Keyboard"}
-          >
-            <Keyboard className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="piano-toggle" className="text-xs text-white/70">Piano</Label>
+            <Switch
+              id="piano-toggle"
+              checked={showPianoPanel}
+              onCheckedChange={onTogglePianoPanel}
+              className="data-[state=checked]:bg-amber-500"
+            />
+          </div>
           {showPianoPanel && onPopOut && (
             <Button
               variant="ghost"
