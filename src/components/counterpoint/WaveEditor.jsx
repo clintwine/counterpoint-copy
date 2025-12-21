@@ -750,20 +750,9 @@ export default function WaveEditor({
 
         <TabsContent value="oscillators" className="mt-0">
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={addOscillator}
-                disabled={instrument.oscillators.length >= 4}
-                className="h-6 px-2 text-amber-400 hover:text-amber-300 text-xs"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Add Oscillator
-              </Button>
-            </div>
+            <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <div className="grid grid-cols-4 gap-3">
+              {/* Existing oscillators */}
               {instrument.oscillators.map((osc, i) => (
                 <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -869,10 +858,24 @@ export default function WaveEditor({
                     />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
+                ))}
+
+                {/* Empty slots for remaining oscillators */}
+                {[...Array(4 - instrument.oscillators.length)].map((_, i) => (
+                <button
+                  key={`empty-${i}`}
+                  onClick={addOscillator}
+                  className="bg-slate-700/30 border-2 border-dashed border-slate-600 rounded p-3 flex items-center justify-center min-h-[200px] hover:border-amber-500/50 hover:bg-slate-700/40 transition-colors group"
+                >
+                  <div className="flex flex-col items-center gap-2 text-white/40 group-hover:text-amber-400/70">
+                    <Plus className="w-6 h-6" />
+                    <span className="text-xs">Add Oscillator</span>
+                  </div>
+                </button>
+                ))}
+                </div>
+                </div>
+                </TabsContent>
 
         <TabsContent value="processing" className="mt-0">
           <div className="space-y-2.5">
