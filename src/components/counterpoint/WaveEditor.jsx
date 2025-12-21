@@ -361,7 +361,7 @@ export default function WaveEditor({
               </div>
             ))}
           </div>
-          <Label className="text-white/70 text-[10px] uppercase tracking-wider">My Presets</Label>
+          <Label className="text-white/70 text-[10px] uppercase tracking-wider">My Instruments</Label>
           <div className="bg-slate-700/50 rounded-lg p-1.5 space-y-0.5 max-h-[50px] overflow-y-auto">
             {customInstruments.length === 0 ? (
               <p className="text-white/40 text-[9px] text-center py-1">None saved</p>
