@@ -36,7 +36,9 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
           sum += dataArray[i];
         }
         const avgValue = sum / bufferLength;
-        const normalizedLevel = Math.min(1, (avgValue / 255) * 3.5); // 3.5x boost for better visualization
+        const normalized = avgValue / 255;
+        const boosted = Math.pow(normalized, 0.6); // Power scaling for better visual range
+        const normalizedLevel = Math.min(1, boosted * 5); // 5x boost for better visualization
 
         // Draw level bars for both channels (simulated stereo)
         const channelHeight = 10;
