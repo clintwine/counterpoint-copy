@@ -112,8 +112,6 @@ export default function WaveEditor({
   const analyserRef = useRef(null);
   const animationRef = useRef(null);
   const oscillatorsRef = useRef([]);
-  const previewTimeoutRef = useRef(null);
-  const initialLoadRef = useRef(true);
 
   // Draw waveform visualization
   const drawWaveform = useCallback(() => {
@@ -294,33 +292,6 @@ export default function WaveEditor({
     }
     setIsPlaying(false);
   }, []);
-
-  // Auto-preview on instrument changes
-  useEffect(() => {
-    // Skip preview on initial mount
-    if (initialLoadRef.current) {
-      initialLoadRef.current = false;
-      return;
-    }
-
-    // Clear any pending preview
-    if (previewTimeoutRef.current) {
-      clearTimeout(previewTimeoutRef.current);
-    }
-
-    // Debounce preview by 300ms
-    previewTimeoutRef.current = setTimeout(() => {
-      if (!isPlaying && !previewingPreset) {
-        playPreview();
-      }
-    }, 300);
-
-    return () => {
-      if (previewTimeoutRef.current) {
-        clearTimeout(previewTimeoutRef.current);
-      }
-    };
-  }, [instrument, isPlaying, previewingPreset, playPreview]);
 
   const updateOscillator = (index, key, value) => {
     const newOscs = [...instrument.oscillators];
