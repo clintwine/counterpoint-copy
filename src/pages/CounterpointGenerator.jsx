@@ -906,7 +906,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/80 [&>button]:hover:text-white [&>button]:hover:bg-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Load Project</DialogTitle>
                   </DialogHeader>
@@ -956,7 +956,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-2xl">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-2xl [&>button]:text-white/80 [&>button]:hover:text-white [&>button]:hover:bg-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Browse Songs</DialogTitle>
                   </DialogHeader>
@@ -1045,7 +1045,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/80 [&>button]:hover:text-white [&>button]:hover:bg-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save Project</DialogTitle>
                   </DialogHeader>
@@ -1076,7 +1076,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/80 [&>button]:hover:text-white [&>button]:hover:bg-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Save as Song</DialogTitle>
                   </DialogHeader>
@@ -1116,7 +1116,7 @@ export default function CounterpointGenerator() {
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/80 [&>button]:hover:text-white [&>button]:hover:bg-slate-700">
                   <DialogHeader>
                     <DialogTitle className="text-white">Edit Song</DialogTitle>
                   </DialogHeader>
