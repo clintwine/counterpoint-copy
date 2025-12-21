@@ -1238,7 +1238,7 @@ export default function NoteGrid({
 
   return (
           <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
-            {/* Toolbar */}
+            {/* Main Toolbar */}
           <div className="flex items-center justify-between px-2 sm:px-5 py-2 sm:py-3 border-b border-[#3A3A3A] overflow-x-auto gap-2">
             <div className="flex items-center gap-1">
           {/* File Menu */}
@@ -1314,206 +1314,11 @@ export default function NoteGrid({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="w-px h-5 bg-slate-600 mx-1" />
-
-          <Button
-            variant={tool === 'select' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setTool('select')}
-            className={`h-8 px-2 ${tool === 'select' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-            title="Select (V)"
-          >
-            <MousePointer2 className="w-4 h-4" />
-          </Button>
-          <Button
-                        variant={tool === 'draw' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setTool('draw')}
-                        className={`h-8 px-2 ${tool === 'draw' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
-                        title="Draw (B)"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-
-                      <Button
-                        variant={paintMode ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setPaintMode(!paintMode)}
-                        disabled={tool !== 'draw'}
-                        className={`h-8 px-2 text-xs ${paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
-                        title="Paint mode - drag to add multiple notes"
-                      >
-                        Paint
-                      </Button>
-          
-          <Button
-            variant={snapToGrid ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setSnapToGrid(!snapToGrid)}
-            className={`h-8 px-2 ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
-            title={snapToGrid ? "Snap to grid enabled" : "Free positioning"}
-          >
-            <Grid3x3 className="w-4 h-4" />
-          </Button>
-          
-          <div className="w-px h-5 bg-slate-600 mx-2" />
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={undo}
-            disabled={historyIndex <= 0}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={redo}
-            disabled={historyIndex >= history.length - 1}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Redo (Ctrl+Shift+Z)"
-          >
-            <Redo className="w-4 h-4" />
-          </Button>
-          
-          <div className="w-px h-5 bg-slate-600 mx-2" />
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={copySelected}
-            disabled={selectedNotes.size === 0}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Copy (Ctrl+C)"
-          >
-            <Copy className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => paste()}
-            disabled={clipboard.length === 0}
-            className="h-8 px-2 text-white/70 disabled:opacity-30"
-            title="Paste (Ctrl+V)"
-          >
-            <ClipboardPaste className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={deleteSelected}
-            disabled={selectedNotes.size === 0}
-            className="h-8 px-2 text-white/70 hover:text-red-400 disabled:opacity-30"
-            title="Delete (Del)"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-
-          <div className="w-px h-5 bg-slate-600 mx-2" />
-
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => quantize()}
-              disabled={cantusFirmus.length === 0}
-              className="h-8 px-2 text-white/70 hover:text-white hover:bg-slate-700 rounded-r-none border-r border-slate-600 disabled:opacity-30"
-              title={selectedNotes.size > 0 ? "Quantize selected notes (Q)" : "Quantize all notes (Q)"}
-            >
-              <span className="font-bold text-sm">Q</span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-1 text-white/70 hover:text-white hover:bg-slate-700 rounded-l-none"
-                  title="Quantize grid settings"
-                >
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-slate-800 border-slate-700">
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(0.125); quantize(0.125); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.125 ? 'bg-slate-700' : ''}`}
-              >
-                128th note (0.125 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(0.25); quantize(0.25); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.25 ? 'bg-slate-700' : ''}`}
-              >
-                64th note (0.25 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(0.5); quantize(0.5); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.5 ? 'bg-slate-700' : ''}`}
-              >
-                32nd note (0.5 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(1); quantize(1); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 1 ? 'bg-slate-700' : ''}`}
-              >
-                16th note (1 beat)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(2); quantize(2); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 2 ? 'bg-slate-700' : ''}`}
-              >
-                8th note (2 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(8/3); quantize(8/3); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 8/3 ? 'bg-slate-700' : ''}`}
-              >
-                8th triplet (2.67 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(4); quantize(4); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 4 ? 'bg-slate-700' : ''}`}
-              >
-                Quarter note (4 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(16/3); quantize(16/3); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 16/3 ? 'bg-slate-700' : ''}`}
-              >
-                Quarter triplet (5.33 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(8); quantize(8); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 8 ? 'bg-slate-700' : ''}`}
-              >
-                Half note (8 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(12); quantize(12); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 12 ? 'bg-slate-700' : ''}`}
-              >
-                Half triplet (10.67 beats)
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => { setQuantizeGrid(16); quantize(16); }}
-                className={`text-white cursor-pointer text-xs ${quantizeGrid === 16 ? 'bg-slate-700' : ''}`}
-              >
-                Whole note (16 beats)
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          </div>
-
-
-
           {/* Transport controls from PlaybackControls */}
           {playbackControls}
           </div>
         
-        {/* Zoom controls - right side */}
+        {/* Zoom controls */}
         <div className="flex items-center gap-2">
           <span className="text-white/50 text-[10px] uppercase">W</span>
           <Button
@@ -1576,6 +1381,202 @@ export default function NoteGrid({
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
+        </div>
+      </div>
+
+      {/* Secondary Toolbar - Tool Controls */}
+      <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525]">
+        <div className="flex items-center gap-1">
+          <Button
+            variant={tool === 'select' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setTool('select')}
+            className={`h-7 px-2 ${tool === 'select' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
+            title="Select (V)"
+          >
+            <MousePointer2 className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant={tool === 'draw' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setTool('draw')}
+            className={`h-7 px-2 ${tool === 'draw' ? 'bg-amber-500 text-slate-900' : 'text-white/70'}`}
+            title="Draw (B)"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+
+          <Button
+            variant={paintMode ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setPaintMode(!paintMode)}
+            disabled={tool !== 'draw'}
+            className={`h-7 px-2 text-xs ${paintMode ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+            title="Paint mode - drag to add multiple notes"
+          >
+            Paint
+          </Button>
+          
+          <Button
+            variant={snapToGrid ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setSnapToGrid(!snapToGrid)}
+            className={`h-7 px-2 ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+            title={snapToGrid ? "Snap to grid enabled" : "Free positioning"}
+          >
+            <Grid3x3 className="w-3.5 h-3.5" />
+          </Button>
+          
+          <div className="w-px h-4 bg-slate-600 mx-1.5" />
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={undo}
+            disabled={historyIndex <= 0}
+            className="h-7 px-2 text-white/70 disabled:opacity-30"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={redo}
+            disabled={historyIndex >= history.length - 1}
+            className="h-7 px-2 text-white/70 disabled:opacity-30"
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo className="w-3.5 h-3.5" />
+          </Button>
+          
+          <div className="w-px h-4 bg-slate-600 mx-1.5" />
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={copySelected}
+            disabled={selectedNotes.size === 0}
+            className="h-7 px-2 text-white/70 disabled:opacity-30"
+            title="Copy (Ctrl+C)"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => paste()}
+            disabled={clipboard.length === 0}
+            className="h-7 px-2 text-white/70 disabled:opacity-30"
+            title="Paste (Ctrl+V)"
+          >
+            <ClipboardPaste className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={deleteSelected}
+            disabled={selectedNotes.size === 0}
+            className="h-7 px-2 text-white/70 hover:text-red-400 disabled:opacity-30"
+            title="Delete (Del)"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
+
+          <div className="w-px h-4 bg-slate-600 mx-1.5" />
+
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => quantize()}
+              disabled={cantusFirmus.length === 0}
+              className="h-7 px-2 text-white/70 hover:text-white hover:bg-slate-700 rounded-r-none border-r border-slate-600 disabled:opacity-30"
+              title={selectedNotes.size > 0 ? "Quantize selected notes (Q)" : "Quantize all notes (Q)"}
+            >
+              <span className="font-bold text-xs">Q</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-1 text-white/70 hover:text-white hover:bg-slate-700 rounded-l-none"
+                  title="Quantize grid settings"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-slate-800 border-slate-700">
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(0.125); quantize(0.125); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.125 ? 'bg-slate-700' : ''}`}
+                >
+                  128th note (0.125 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(0.25); quantize(0.25); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.25 ? 'bg-slate-700' : ''}`}
+                >
+                  64th note (0.25 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(0.5); quantize(0.5); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 0.5 ? 'bg-slate-700' : ''}`}
+                >
+                  32nd note (0.5 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(1); quantize(1); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 1 ? 'bg-slate-700' : ''}`}
+                >
+                  16th note (1 beat)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(2); quantize(2); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 2 ? 'bg-slate-700' : ''}`}
+                >
+                  8th note (2 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(8/3); quantize(8/3); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 8/3 ? 'bg-slate-700' : ''}`}
+                >
+                  8th triplet (2.67 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(4); quantize(4); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 4 ? 'bg-slate-700' : ''}`}
+                >
+                  Quarter note (4 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(16/3); quantize(16/3); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 16/3 ? 'bg-slate-700' : ''}`}
+                >
+                  Quarter triplet (5.33 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(8); quantize(8); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 8 ? 'bg-slate-700' : ''}`}
+                >
+                  Half note (8 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(12); quantize(12); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 12 ? 'bg-slate-700' : ''}`}
+                >
+                  Half triplet (10.67 beats)
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setQuantizeGrid(16); quantize(16); }}
+                  className={`text-white cursor-pointer text-xs ${quantizeGrid === 16 ? 'bg-slate-700' : ''}`}
+                >
+                  Whole note (16 beats)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
