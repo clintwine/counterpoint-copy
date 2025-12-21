@@ -2186,7 +2186,7 @@ export default function NoteGrid({
             className="absolute"
             style={{
               left: '50%',
-              top: `-${Math.max(12, 14 * zoom)}px`,
+              top: '28px',
               transform: 'translateX(-50%)',
               width: 0,
               height: 0,
