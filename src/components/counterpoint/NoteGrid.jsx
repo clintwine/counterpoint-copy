@@ -312,6 +312,7 @@ export default function NoteGrid({
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [quantizeGrid, setQuantizeGrid] = useState(1); // 1 = 16th note (1 beat)
+  const [snapToGrid, setSnapToGrid] = useState(true); // Toggle for snapping
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubPosition, setScrubPosition] = useState(null);
   const [isLoopSelecting, setIsLoopSelecting] = useState(false);
@@ -865,17 +866,23 @@ export default function NoteGrid({
   const getCellFromPosition = (clientX, clientY) => {
     if (!containerRef.current || !gridRef.current) return null;
     const gridRect = gridRef.current.getBoundingClientRect();
-    
+
     // Calculate position relative to the grid viewport, accounting for scroll
     const scrollLeft = gridRef.current.scrollLeft;
     const scrollTop = gridRef.current.scrollTop;
     const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
     const y = clientY - gridRect.top - 28 + scrollTop; // 28 = header height (h-7 = 1.75rem = 28px)
-    
-    const beat = Math.floor(x / CELL_WIDTH);
+
+    // Support fractional beats - snap only if snapToGrid is enabled
+    let beat = x / CELL_WIDTH;
+    if (snapToGrid) {
+      beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+    }
+    beat = Math.max(0, Math.min(totalBeats - 0.125, beat));
+
     const pitchIndex = Math.floor(y / CELL_HEIGHT);
-    
-    if (beat >= 0 && beat < totalBeats && pitchIndex >= 0 && pitchIndex < pitches.length) {
+
+    if (pitchIndex >= 0 && pitchIndex < pitches.length) {
       return { pitch: pitches[pitchIndex], beat, pitchIndex };
     }
     return null;
@@ -1018,9 +1025,13 @@ export default function NoteGrid({
             const deltaX = coords.clientX - dragState.clickOffsetX;
             const deltaY = coords.clientY - dragState.clickOffsetY;
       
-      const beatDelta = Math.round(deltaX / CELL_WIDTH);
+      // Support fractional beats when snap is off
+      let beatDelta = deltaX / CELL_WIDTH;
+      if (snapToGrid) {
+        beatDelta = Math.round(beatDelta / quantizeGrid) * quantizeGrid;
+      }
       const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
-      
+
       const newPitchIndex = dragState.startPitchIndex + pitchDelta;
       const newBeat = dragState.startBeat + beatDelta;
       
@@ -1173,7 +1184,10 @@ export default function NoteGrid({
         const movedNotes = originalNotes.map(n => {
           const origPitchIdx = pitches.indexOf(n.pitch);
           const newPitchIdx = Math.max(0, Math.min(pitches.length - 1, origPitchIdx + pitchDelta));
-          const newBeat = Math.max(0, Math.min(totalBeats - 1, n.beat + beatDelta));
+          let newBeat = n.beat + beatDelta;
+          // Round to 3 decimal places to avoid floating point errors
+          newBeat = Math.round(newBeat * 1000) / 1000;
+          newBeat = Math.max(0, Math.min(totalBeats - 0.125, newBeat));
           return { 
             pitch: pitches[newPitchIdx], 
             beat: newBeat, 
@@ -1971,7 +1985,7 @@ export default function NoteGrid({
                                 
                                 return (
                                   <div
-                                    key={`${voiceIndex}-${note.beat}-${note.pitch}`}
+                                    key={`${voiceIndex}-${note.beat.toFixed(3)}-${note.pitch}`}
                                     onMouseDown={(e) => {
                                               e.stopPropagation();
                                               console.log('[NoteGrid] Existing note mousedown', { pitch, beat, hasPendingNote: !!pendingNote });
@@ -2097,6 +2111,7 @@ export default function NoteGrid({
                                       selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : noteInLoop && isLooping ? 'ring-2 ring-amber-400/60' : ''
                                     }`}
                                     style={{ 
+                                      left: `${(note.beat - Math.floor(note.beat)) * CELL_WIDTH + 2}px`,
                                       width: noteWidth,
                                       minWidth: 20,
                                       backgroundColor: velocityColor,
