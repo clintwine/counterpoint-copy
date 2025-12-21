@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers, Circle, Volume2 } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers, Circle } from 'lucide-react';
+import VolumeSlider from './VolumeSlider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -293,16 +294,11 @@ export default function PlaybackControls({
         <div className="w-px h-6 bg-[#3A3A3A]" />
 
         {/* Master Volume */}
-        <div className="flex items-center gap-2 bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
-          <Volume2 className="w-4 h-4 text-white/60" />
-          <Slider
-            value={[Math.round(masterVolume)]}
-            onValueChange={([value]) => onMasterVolumeChange?.(Math.round(value))}
-            max={100}
-            step={1}
-            className="w-20 [&_[role=slider]]:bg-[#D4AF37] [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+        <div className="bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
+          <VolumeSlider
+            value={masterVolume}
+            onChange={onMasterVolumeChange}
           />
-          <span className="text-white/70 text-xs font-mono w-6 text-right">{Math.round(masterVolume)}</span>
         </div>
       </div>
     </>
