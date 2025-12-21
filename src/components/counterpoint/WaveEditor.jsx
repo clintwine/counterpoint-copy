@@ -385,7 +385,7 @@ export default function WaveEditor({
       stopPreview();
       if (onEnd) onEnd();
     }, duration * 1000 + 100);
-  }, []);
+  }, [stopPreview]);
 
   const stopPreview = useCallback(() => {
     oscillatorsRef.current.forEach(({ osc }) => {
