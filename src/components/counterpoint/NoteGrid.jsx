@@ -1335,18 +1335,30 @@ export default function NoteGrid({
                 Test Import Audio
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
-                const { base44 } = await import('@/api/base44Client');
-                const response = await base44.functions.invoke('exportAudio', {
-                  notes: cantusFirmus,
-                  tempo
-                });
-                const blob = new Blob([response.data], { type: 'audio/wav' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `composition-${Date.now()}.wav`;
-                a.click();
-                URL.revokeObjectURL(url);
+                try {
+                  const { base44 } = await import('@/api/base44Client');
+                  console.log('Invoking exportAudio with', cantusFirmus.length, 'notes');
+                  const response = await base44.functions.invoke('exportAudio', {
+                    notes: cantusFirmus,
+                    tempo
+                  });
+                  console.log('Response type:', typeof response.data, 'is ArrayBuffer:', response.data instanceof ArrayBuffer);
+                  
+                  // response.data is already the raw binary ArrayBuffer
+                  const blob = new Blob([response.data], { type: 'audio/wav' });
+                  console.log('Created blob, size:', blob.size);
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `composition-${Date.now()}.wav`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error('Export audio error:', error);
+                  alert('Failed to export audio: ' + error.message);
+                }
               }} className="text-white cursor-pointer">
                 <Download className="w-4 h-4 mr-2" />
                 Download as Audio
