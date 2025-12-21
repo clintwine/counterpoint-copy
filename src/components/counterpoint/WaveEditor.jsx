@@ -220,6 +220,15 @@ export default function WaveEditor({
     ctx.beginPath();
 
     const samples = 200;
+    const { attack, decay, sustain, release } = instrument.envelope;
+    
+    // Calculate envelope phases in sample space
+    const totalTime = attack + decay + 0.3 + release; // 0.3s for sustain display
+    const attackSamples = (attack / totalTime) * samples;
+    const decaySamples = (decay / totalTime) * samples;
+    const sustainSamples = (0.3 / totalTime) * samples;
+    const releaseSamples = (release / totalTime) * samples;
+    
     for (let i = 0; i < samples; i++) {
       const t = (i / samples) * Math.PI * 4;
       let y = 0;
@@ -247,6 +256,27 @@ export default function WaveEditor({
       });
 
       y = y / Math.max(1, instrument.oscillators.length);
+      
+      // Apply envelope shaping
+      let envelope = 1;
+      if (i < attackSamples) {
+        // Attack phase
+        envelope = i / attackSamples;
+      } else if (i < attackSamples + decaySamples) {
+        // Decay phase
+        const decayProgress = (i - attackSamples) / decaySamples;
+        envelope = 1 - (1 - sustain) * decayProgress;
+      } else if (i < attackSamples + decaySamples + sustainSamples) {
+        // Sustain phase
+        envelope = sustain;
+      } else {
+        // Release phase
+        const releaseProgress = (i - attackSamples - decaySamples - sustainSamples) / releaseSamples;
+        envelope = sustain * (1 - releaseProgress);
+      }
+      
+      y *= envelope;
+      
       const px = (i / samples) * width;
       const py = height / 2 - (y * height * 0.4);
 
