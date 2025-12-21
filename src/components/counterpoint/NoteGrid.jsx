@@ -2472,14 +2472,21 @@ export default function NoteGrid({
                     const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                     return `${Math.round((firstSelected?.bendEndTime ?? 1) * 100)}`;
                   })()}
-                </span>
-              </div>
-              </div>
-              </div></div>
-              )}
+                  </span>
+                  </div>
+                  </div>
+                  </div></div>
+                  )}
+                  </div>
 
-
-      </div>
+                  {/* Audio Visualizer - right side */}
+                  <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-16">
+                  <canvas 
+                  ref={canvasRef}
+                  className="rounded w-full h-full block"
+                  />
+                  </div>
+                  </div>
 
       {/* Minimap - positioned absolutely */}
       <div className={`absolute right-8 z-50 ${showPianoPanel ? 'bottom-[263px]' : 'bottom-[79px]'}`}>
