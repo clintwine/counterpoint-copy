@@ -298,6 +298,20 @@ export default function WaveEditor({
     const audioContext = getAudioContext();
     if (!audioContext) return;
 
+    // For sampled instruments, use the engine's playback directly
+    if (inst.audioSample) {
+      playNoteWithCustomInstrument('C4', 0.8, 0.5, inst);
+      const analyser = getAnalyser();
+      if (analyser) {
+        analyserRef.current = analyser;
+        drawWaveform();
+      }
+      setTimeout(() => {
+        if (onEnd) onEnd();
+      }, 1000);
+      return;
+    }
+
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyserRef.current = analyser;
