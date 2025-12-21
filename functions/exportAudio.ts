@@ -48,42 +48,48 @@ Deno.serve(async (req) => {
     const blockAlign = numChannels * bytesPerSample;
     const byteRate = sampleRate * blockAlign;
     const dataSize = numSamples * blockAlign;
+    const fileSize = 44 + dataSize;
     
-    const wav = new Uint8Array(44 + dataSize);
-    const view = new DataView(wav.buffer);
+    const buffer = new ArrayBuffer(fileSize);
+    const view = new DataView(buffer);
     
     // RIFF chunk descriptor
     writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + dataSize, true);
+    view.setUint32(4, fileSize - 8, true); // File size minus 8 bytes
     writeString(view, 8, 'WAVE');
     
     // fmt sub-chunk
     writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, byteRate, true);
-    view.setUint16(32, blockAlign, true);
-    view.setUint16(34, bitsPerSample, true);
+    view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+    view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+    view.setUint16(22, numChannels, true); // NumChannels
+    view.setUint32(24, sampleRate, true); // SampleRate
+    view.setUint32(28, byteRate, true); // ByteRate
+    view.setUint16(32, blockAlign, true); // BlockAlign
+    view.setUint16(34, bitsPerSample, true); // BitsPerSample
     
     // data sub-chunk
     writeString(view, 36, 'data');
-    view.setUint32(40, dataSize, true);
+    view.setUint32(40, dataSize, true); // Subchunk2Size
     
-    // Write PCM samples (interleaved stereo)
+    // Write PCM samples (interleaved stereo, little-endian)
     let offset = 44;
     for (let i = 0; i < numSamples; i++) {
-      const left = Math.max(-1, Math.min(1, leftChannel[i]));
-      const right = Math.max(-1, Math.min(1, rightChannel[i]));
+      // Clamp and convert to 16-bit signed integer
+      const leftSample = Math.max(-1, Math.min(1, leftChannel[i]));
+      const rightSample = Math.max(-1, Math.min(1, rightChannel[i]));
       
-      view.setInt16(offset, Math.round(left * 32767), true);
+      // Convert to 16-bit signed: -1.0 to 1.0 maps to -32768 to 32767
+      const leftInt16 = leftSample < 0 ? Math.floor(leftSample * 32768) : Math.floor(leftSample * 32767);
+      const rightInt16 = rightSample < 0 ? Math.floor(rightSample * 32768) : Math.floor(rightSample * 32767);
+      
+      view.setInt16(offset, leftInt16, true);
       offset += 2;
-      view.setInt16(offset, Math.round(right * 32767), true);
+      view.setInt16(offset, rightInt16, true);
       offset += 2;
     }
     
-    return new Response(wav.buffer, {
+    return new Response(buffer, {
       status: 200,
       headers: {
         'Content-Type': 'audio/wav',
