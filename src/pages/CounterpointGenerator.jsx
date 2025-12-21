@@ -11,7 +11,9 @@ import {
   Save,
   FolderOpen,
   Sparkles,
-  X
+  X,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -78,6 +80,8 @@ export default function CounterpointGenerator() {
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [songDialogOpen, setSongDialogOpen] = useState(false);
   const [saveSongDialogOpen, setSaveSongDialogOpen] = useState(false);
+  const [editSongDialogOpen, setEditSongDialogOpen] = useState(false);
+  const [editingSong, setEditingSong] = useState(null);
   const [projectName, setProjectName] = useState('');
   const [songName, setSongName] = useState('');
   const [songDescription, setSongDescription] = useState('');
@@ -211,6 +215,28 @@ export default function CounterpointGenerator() {
     }
   });
 
+  // Update song mutation (admin only)
+  const updateSongMutation = useMutation({
+    mutationFn: async ({ id, data }) => {
+      await base44.entities.Song.update(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['songs'] });
+      setEditSongDialogOpen(false);
+      setEditingSong(null);
+      setSongName('');
+      setSongDescription('');
+    }
+  });
+
+  // Delete song mutation (admin only)
+  const deleteSongMutation = useMutation({
+    mutationFn: (id) => base44.entities.Song.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['songs'] });
+    }
+  });
+
   const handleSaveProject = () => {
     if (!projectName.trim()) return;
     saveProjectMutation.mutate({
@@ -235,6 +261,17 @@ export default function CounterpointGenerator() {
       voices,
       effects,
       envelope
+    });
+  };
+
+  const handleUpdateSong = () => {
+    if (!songName.trim() || !editingSong) return;
+    updateSongMutation.mutate({
+      id: editingSong.id,
+      data: {
+        name: songName,
+        description: songDescription
+      }
     });
   };
 
@@ -958,17 +995,35 @@ export default function CounterpointGenerator() {
                               {previewingSongId === song.id ? '⏹' : '▶'}
                             </Button>
                             {currentUser?.role === 'admin' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  cloneSongMutation.mutate(song);
-                                }}
-                                className="text-blue-400 hover:text-blue-300"
-                              >
-                                Clone
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingSong(song);
+                                    setSongName(song.name);
+                                    setSongDescription(song.description || '');
+                                    setEditSongDialogOpen(true);
+                                  }}
+                                  className="text-white/60 hover:text-white"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`Delete "${song.name}"?`)) {
+                                      deleteSongMutation.mutate(song.id);
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </>
                             )}
                             <Button
                               variant="ghost"
@@ -1051,6 +1106,46 @@ export default function CounterpointGenerator() {
                       className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
                     >
                       {saveSongMutation.isPending ? 'Saving...' : 'Save Song'}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              {/* Edit Song Dialog (Admin Only) */}
+              <Dialog open={editSongDialogOpen} onOpenChange={setEditSongDialogOpen}>
+                <DialogTrigger asChild>
+                  <div style={{ display: 'none' }} />
+                </DialogTrigger>
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Edit Song</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); handleUpdateSong(); }} className="space-y-4">
+                    <div>
+                      <Label className="text-white/80">Song Name</Label>
+                      <Input
+                        value={songName}
+                        onChange={(e) => setSongName(e.target.value)}
+                        placeholder="My Beautiful Song"
+                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-white/80">Description</Label>
+                      <Input
+                        value={songDescription}
+                        onChange={(e) => setSongDescription(e.target.value)}
+                        placeholder="A brief description..."
+                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!songName.trim() || updateSongMutation.isPending}
+                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
+                    >
+                      {updateSongMutation.isPending ? 'Updating...' : 'Update Song'}
                     </Button>
                   </form>
                 </DialogContent>
