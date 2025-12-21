@@ -2480,7 +2480,7 @@ export default function NoteGrid({
                   </div>
 
                   {/* Audio Visualizer - right side */}
-                  <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-16">
+                  <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-10">
                   <canvas 
                   ref={canvasRef}
                   className="rounded w-full h-full block"
