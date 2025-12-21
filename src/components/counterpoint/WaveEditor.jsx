@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { initAudio, getAudioContext, playNoteWithCustomInstrument } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
@@ -649,219 +650,247 @@ export default function WaveEditor({
         </div>
       </div>
 
-      {/* Bottom Row: Oscillators + Filter + Effects */}
-      <div className="flex gap-4">
-        {/* Oscillators */}
-        <div className="flex-[2] space-y-2.5">
-          <div className="flex items-center justify-between">
-            <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={addOscillator}
-              disabled={instrument.oscillators.length >= 4}
-              className="h-6 px-2 text-amber-400 hover:text-amber-300 text-xs"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {instrument.oscillators.map((osc, i) => (
-              <div key={i} className="bg-slate-700/50 rounded p-4 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-xs">Osc {i + 1}</span>
-                  {instrument.oscillators.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeOscillator(i)}
-                      className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  )}
+      {/* Bottom Row: Tabbed Interface */}
+      <Tabs defaultValue="oscillators" className="w-full">
+        <TabsList className="bg-slate-700/50 mb-3">
+          <TabsTrigger value="oscillators" className="text-sm">Oscillators</TabsTrigger>
+          <TabsTrigger value="processing" className="text-sm">Filter & Effects</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="oscillators" className="mt-0">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={addOscillator}
+                disabled={instrument.oscillators.length >= 4}
+                className="h-6 px-2 text-amber-400 hover:text-amber-300 text-xs"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Add Oscillator
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {instrument.oscillators.map((osc, i) => (
+                <div key={i} className="bg-slate-700/50 rounded p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60 text-sm font-medium">Oscillator {i + 1}</span>
+                    {instrument.oscillators.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeOscillator(i)}
+                        className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                  <Select value={osc.waveform} onValueChange={(v) => updateOscillator(i, 'waveform', v)}>
+                    <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                      {WAVEFORMS.map(w => (
+                        <SelectItem key={w} value={w} className="text-white text-sm capitalize">{w}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-white/40 text-xs">Harmonic</span>
+                      <Input
+                        type="number"
+                        value={osc.harmonic || 1}
+                        onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
+                        className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
+                        step="0.5"
+                        min="0.5"
+                        max="8"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-white/40 text-xs">Detune</span>
+                      <Input
+                        type="number"
+                        value={osc.detune}
+                        onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
+                        className="h-8 bg-slate-700 border-slate-600 text-white text-sm mt-1"
+                        step="1"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/40 text-xs">Gain</span>
+                      <span className="text-white/60 text-xs">{Math.round(osc.gain * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[osc.gain]}
+                      onValueChange={([v]) => updateOscillator(i, 'gain', v)}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/40 text-xs">Phase</span>
+                      <span className="text-white/60 text-xs">{Math.round(osc.phase || 0)}°</span>
+                    </div>
+                    <Slider
+                      value={[osc.phase || 0]}
+                      onValueChange={([v]) => updateOscillator(i, 'phase', v)}
+                      min={0}
+                      max={360}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
-                <Select value={osc.waveform} onValueChange={(v) => updateOscillator(i, 'waveform', v)}>
-                  <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="processing" className="mt-0">
+          <div className="grid grid-cols-3 gap-4">
+            {/* Filter */}
+            <div className="space-y-2.5">
+              <Label className="text-white/70 text-sm uppercase tracking-wider">Filter</Label>
+              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+                <Select
+                  value={instrument.filter.type}
+                  onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
+                >
+                  <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                    {WAVEFORMS.map(w => (
-                      <SelectItem key={w} value={w} className="text-white text-xs capitalize">{w}</SelectItem>
+                    {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
+                      <SelectItem key={t} value={t} className="text-white text-sm capitalize">{t}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div>
-                    <span className="text-white/40 text-[10px]">Harmonic</span>
-                    <Input
-                      type="number"
-                      value={osc.harmonic || 1}
-                      onChange={(e) => updateOscillator(i, 'harmonic', parseFloat(e.target.value) || 1)}
-                      className="h-7 bg-slate-700 border-slate-600 text-white text-xs"
-                      step="0.5"
-                      min="0.5"
-                      max="8"
-                    />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Cutoff</span>
+                    <span className="text-white/60 text-xs">{instrument.filter.frequency} Hz</span>
                   </div>
-                  <div>
-                    <span className="text-white/40 text-[10px]">Detune</span>
-                    <Input
-                      type="number"
-                      value={osc.detune}
-                      onChange={(e) => updateOscillator(i, 'detune', parseFloat(e.target.value) || 0)}
-                      className="h-7 bg-slate-700 border-slate-600 text-white text-xs"
-                      step="1"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-white/40 text-xs w-10">Gain</span>
                   <Slider
-                    value={[osc.gain]}
-                    onValueChange={([v]) => updateOscillator(i, 'gain', v)}
+                    value={[instrument.filter.frequency]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, frequency: v } })}
+                    min={100}
+                    max={8000}
+                    step={10}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Resonance</span>
+                    <span className="text-white/60 text-xs">{instrument.filter.Q.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    value={[instrument.filter.Q]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, Q: v } })}
+                    min={0.1}
+                    max={20}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* LFO */}
+            <div className="space-y-2.5">
+              <Label className="text-white/70 text-sm uppercase tracking-wider">LFO</Label>
+              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+                <Select
+                  value={instrument.lfo?.target || 'pitch'}
+                  onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
+                >
+                  <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                    <SelectItem value="pitch" className="text-white text-sm">Pitch</SelectItem>
+                    <SelectItem value="filter" className="text-white text-sm">Filter</SelectItem>
+                    <SelectItem value="volume" className="text-white text-sm">Volume</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Rate</span>
+                    <span className="text-white/60 text-xs">{(instrument.lfo?.rate || 0).toFixed(1)} Hz</span>
+                  </div>
+                  <Slider
+                    value={[instrument.lfo?.rate || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), rate: v } })}
+                    min={0}
+                    max={20}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Depth</span>
+                    <span className="text-white/60 text-xs">{Math.round((instrument.lfo?.amount || 0) * 100)}%</span>
+                  </div>
+                  <Slider
+                    value={[instrument.lfo?.amount || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), amount: v } })}
                     min={0}
                     max={1}
                     step={0.01}
-                    className="flex-1"
+                    className="w-full"
                   />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-white/40 text-xs w-10">Phase</span>
+              </div>
+            </div>
+
+            {/* Effects */}
+            <div className="space-y-2.5">
+              <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
+              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Distortion</span>
+                    <span className="text-white/60 text-xs">{Math.round(instrument.distortion || 0)}</span>
+                  </div>
                   <Slider
-                    value={[osc.phase || 0]}
-                    onValueChange={([v]) => updateOscillator(i, 'phase', v)}
+                    value={[instrument.distortion || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, distortion: v })}
                     min={0}
-                    max={360}
+                    max={100}
                     step={1}
-                    className="flex-1"
+                    className="w-full"
                   />
-                  <span className="text-white/50 text-[10px] w-8">{Math.round(osc.phase || 0)}°</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Bit Crush</span>
+                    <span className="text-white/60 text-xs">{(instrument.bitcrush || 0).toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    value={[instrument.bitcrush || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
+                    min={0}
+                    max={16}
+                    step={0.5}
+                    className="w-full"
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Filter */}
-        <div className="flex-1 space-y-2.5">
-          <Label className="text-white/70 text-sm uppercase tracking-wider">Filter</Label>
-          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
-            <Select
-              value={instrument.filter.type}
-              onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
-            >
-              <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
-                  <SelectItem key={t} value={t} className="text-white text-xs capitalize">{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Cutoff</span>
-              <Slider
-                value={[instrument.filter.frequency]}
-                onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, frequency: v } })}
-                min={100}
-                max={8000}
-                step={10}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{instrument.filter.frequency}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Resonance</span>
-              <Slider
-                value={[instrument.filter.Q]}
-                onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, Q: v } })}
-                min={0.1}
-                max={20}
-                step={0.1}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{instrument.filter.Q.toFixed(1)}</span>
             </div>
           </div>
-        </div>
-
-        {/* LFO */}
-        <div className="flex-1 space-y-2.5">
-          <Label className="text-white/70 text-sm uppercase tracking-wider">LFO</Label>
-          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
-            <Select
-              value={instrument.lfo?.target || 'pitch'}
-              onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
-            >
-              <SelectTrigger className="h-8 bg-slate-700 border-slate-600 text-white text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                <SelectItem value="pitch" className="text-white text-xs">Pitch</SelectItem>
-                <SelectItem value="filter" className="text-white text-xs">Filter</SelectItem>
-                <SelectItem value="volume" className="text-white text-xs">Volume</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Rate</span>
-              <Slider
-                value={[instrument.lfo?.rate || 0]}
-                onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), rate: v } })}
-                min={0}
-                max={20}
-                step={0.1}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{(instrument.lfo?.rate || 0).toFixed(1)}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Depth</span>
-              <Slider
-                value={[instrument.lfo?.amount || 0]}
-                onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), amount: v } })}
-                min={0}
-                max={1}
-                step={0.01}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{Math.round((instrument.lfo?.amount || 0) * 100)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Effects */}
-        <div className="flex-1 space-y-2.5">
-          <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
-          <div className="bg-slate-700/50 rounded p-2.5 space-y-2.5">
-            <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Distortion</span>
-              <Slider
-                value={[instrument.distortion || 0]}
-                onValueChange={([v]) => setInstrument({ ...instrument, distortion: v })}
-                min={0}
-                max={100}
-                step={1}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{Math.round(instrument.distortion || 0)}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-xs w-14">Bit Crush</span>
-              <Slider
-                value={[instrument.bitcrush || 0]}
-                onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
-                min={0}
-                max={16}
-                step={0.5}
-                className="flex-1"
-              />
-              <span className="text-white/50 text-xs w-10 text-right">{(instrument.bitcrush || 0).toFixed(1)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
