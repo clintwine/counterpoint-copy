@@ -406,9 +406,13 @@ export default function NoteGrid({
           count++;
         }
         const value = count > 0 ? sum / count : 0;
-        
+
+        // Apply non-linear scaling for better visual representation
+        const normalized = value / 255;
+        const boosted = Math.pow(normalized, 0.7) * 255; // Power scaling
+
         const labelSpace = 16;
-        const barHeight = (value / 255) * (rect.height - labelSpace) * 1.4;
+        const barHeight = (boosted / 255) * (rect.height - labelSpace) * 1.8;
         const x = i * barWidth;
         
         const gradient = ctx.createLinearGradient(x, rect.height - barHeight, x, rect.height);
