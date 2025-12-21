@@ -36,14 +36,14 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
           sum += dataArray[i];
         }
         const avgValue = sum / bufferLength;
-        const normalizedLevel = (avgValue / 255) * (value / 100); // Scale by master volume
+        const normalizedLevel = Math.min(1, (avgValue / 255) * 3.5); // 3.5x boost for better visualization
 
         // Draw level bars for both channels (simulated stereo)
         const channelHeight = 10;
         const gap = 2;
         
-        // Left channel (top)
-        const leftLevel = normalizedLevel * (0.95 + Math.random() * 0.1); // Slight variation
+        // Left channel (top) - with slight variation for stereo effect
+        const leftLevel = Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14));
         const leftWidth = Math.min(width - 4, (leftLevel * (width - 4)));
         
         // Gradient based on level
@@ -65,8 +65,8 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         ctx.fillStyle = leftGradient;
         ctx.fillRect(2, 2, leftWidth, channelHeight);
 
-        // Right channel (bottom)
-        const rightLevel = normalizedLevel * (0.95 + Math.random() * 0.1); // Slight variation
+        // Right channel (bottom) - with slight variation for stereo effect
+        const rightLevel = Math.min(1, normalizedLevel * (0.93 + Math.random() * 0.14));
         const rightWidth = Math.min(width - 4, (rightLevel * (width - 4)));
         
         const rightGradient = ctx.createLinearGradient(2, 2 + channelHeight + gap, width - 2, 2 + channelHeight + gap);
