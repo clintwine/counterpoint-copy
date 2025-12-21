@@ -1336,16 +1336,17 @@ export default function NoteGrid({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 try {
-                  // Fetch directly with proper binary handling
                   const { base44 } = await import('@/api/base44Client');
-                  const token = await base44.auth.getToken();
                   
-                  const response = await fetch(`https://app.base44.com/api/apps/${base44.appId}/functions/exportAudio`, {
+                  // Get the function URL and use fetch directly for binary data
+                  const functionUrl = `${base44._baseUrl}/apps/${base44._appId}/functions/exportAudio`;
+                  
+                  const response = await fetch(functionUrl, {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${token}`
                     },
+                    credentials: 'include', // Include cookies for auth
                     body: JSON.stringify({ notes: cantusFirmus, tempo })
                   });
                   
