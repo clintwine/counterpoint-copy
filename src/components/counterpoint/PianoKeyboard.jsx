@@ -158,7 +158,56 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
     playNote('C4', 0.5, 0.7, 0, instrumentValue);
   };
   
-
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-32 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600"
+        >
+          <div className="flex items-center gap-1.5">
+            <Guitar className="w-4 h-4 text-white/60" />
+            <span>{selected?.label || 'Select...'}</span>
+          </div>
+          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
+        <Command className="bg-slate-800">
+          <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
+          <CommandList>
+            <CommandEmpty className="text-white/50 text-xs py-2 text-center">
+              No instrument found.
+            </CommandEmpty>
+            <CommandGroup>
+              {instruments.map(inst => (
+                <CommandItem
+                  key={inst.value}
+                  value={inst.label}
+                  onSelect={() => {
+                    onChange(inst.value);
+                    setOpen(false);
+                  }}
+                  className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                >
+                  <span>{inst.label}</span>
+                  <button
+                    onClick={(e) => handlePreview(inst.value, e)}
+                    className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                    title="Preview sound"
+                  >
+                    ▶
+                  </button>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange }) {
