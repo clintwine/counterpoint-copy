@@ -665,9 +665,9 @@ export default function WaveEditor({
               <Plus className="w-3.5 h-3.5" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-3">
             {instrument.oscillators.map((osc, i) => (
-              <div key={i} className="bg-slate-700/50 rounded p-2.5 space-y-1.5">
+              <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-white/60 text-xs">Osc {i + 1}</span>
                   {instrument.oscillators.length > 1 && (
