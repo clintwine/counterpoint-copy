@@ -701,20 +701,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
             </Button>
-          </div>
-        </div>
-      </div>
+            </div>
+            </div>
+            </div>
 
-      {/* Audio Visualizer - moved to right */}
-      <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-20">
-        <canvas 
-          ref={canvasRef}
-          className="rounded w-full h-full block"
-        />
-      </div>
-      </div>
-
-      <div className="overflow-x-auto pb-1">
+            <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
           <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
