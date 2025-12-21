@@ -697,19 +697,10 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
     // New sophisticated multi-oscillator format
     const maxOscs = Math.min(4, config.oscillators.length);
     config.oscillators.slice(0, maxOscs).forEach((oscConfig) => {
-      // Ensure oscConfig has all required properties with defaults
-      const safeConfig = {
-        waveform: oscConfig?.waveform || 'sine',
-        gain: oscConfig?.gain ?? 0.5,
-        detune: oscConfig?.detune || 0,
-        harmonic: oscConfig?.harmonic || 1,
-        phase: oscConfig?.phase || 0
-      };
-      
       const osc = audioContext.createOscillator();
-      osc.type = safeConfig.waveform;
-      osc.frequency.value = freq * safeConfig.harmonic;
-      osc.detune.value = safeConfig.detune;
+      osc.type = oscConfig?.waveform || 'sine';
+      osc.frequency.value = freq * (oscConfig?.harmonic || 1);
+      osc.detune.value = oscConfig?.detune || 0;
     
       // Apply pitch bend envelope if provided
       if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
@@ -737,7 +728,7 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
       const oscGain = audioContext.createGain();
       // Reduce gain when reverb is active to prevent clipping
       const effectReduction = 1 - (effectLevels.reverb * 0.4);
-      oscGain.gain.value = safeConfig.gain * 0.25 * effectReduction;
+      oscGain.gain.value = (oscConfig?.gain ?? 0.5) * 0.25 * effectReduction;
       
       osc.connect(oscGain);
       oscGain.connect(filterNode);
