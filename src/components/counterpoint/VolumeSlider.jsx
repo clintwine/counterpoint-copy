@@ -50,17 +50,17 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         
         // Gradient based on level
         const leftGradient = ctx.createLinearGradient(2, 2, width - 2, 2);
-        if (leftLevel < 0.5) {
+        if (leftLevel < 0.6) {
           leftGradient.addColorStop(0, '#10b981');
           leftGradient.addColorStop(1, '#10b981');
-        } else if (leftLevel < 0.7) {
+        } else if (leftLevel < 0.85) {
           leftGradient.addColorStop(0, '#10b981');
-          leftGradient.addColorStop(0.5, '#f59e0b');
+          leftGradient.addColorStop(0.6, '#f59e0b');
           leftGradient.addColorStop(1, '#f59e0b');
         } else {
           leftGradient.addColorStop(0, '#10b981');
-          leftGradient.addColorStop(0.5, '#f59e0b');
-          leftGradient.addColorStop(0.7, '#ef4444');
+          leftGradient.addColorStop(0.6, '#f59e0b');
+          leftGradient.addColorStop(0.85, '#ef4444');
           leftGradient.addColorStop(1, '#ef4444');
         }
 
@@ -72,17 +72,17 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         const rightWidth = Math.min(width - 4, (rightLevel * (width - 4)));
         
         const rightGradient = ctx.createLinearGradient(2, 2 + channelHeight + gap, width - 2, 2 + channelHeight + gap);
-        if (rightLevel < 0.5) {
+        if (rightLevel < 0.6) {
           rightGradient.addColorStop(0, '#10b981');
           rightGradient.addColorStop(1, '#10b981');
-        } else if (rightLevel < 0.7) {
+        } else if (rightLevel < 0.85) {
           rightGradient.addColorStop(0, '#10b981');
-          rightGradient.addColorStop(0.5, '#f59e0b');
+          rightGradient.addColorStop(0.6, '#f59e0b');
           rightGradient.addColorStop(1, '#f59e0b');
         } else {
           rightGradient.addColorStop(0, '#10b981');
-          rightGradient.addColorStop(0.5, '#f59e0b');
-          rightGradient.addColorStop(0.7, '#ef4444');
+          rightGradient.addColorStop(0.6, '#f59e0b');
+          rightGradient.addColorStop(0.85, '#ef4444');
           rightGradient.addColorStop(1, '#ef4444');
         }
 
