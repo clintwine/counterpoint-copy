@@ -111,6 +111,7 @@ export default function WaveEditor({
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
+  const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
 
   // Load current instrument when opening editor
   useEffect(() => {
@@ -409,15 +410,15 @@ export default function WaveEditor({
 
   // Update live preview sound when instrument changes
   useEffect(() => {
-    if (livePreview) {
-      // Play preview on each change with animation
+    if (livePreview && !isDraggingTimbre) {
+      // Play preview on each change with animation (but not while dragging)
       setIsPlaying(true);
       playPreviewForInstrument(instrument, () => {
         setIsPlaying(false);
       });
       drawWaveform();
     }
-  }, [instrument, livePreview, playPreviewForInstrument, drawWaveform]);
+  }, [instrument, livePreview, isDraggingTimbre, playPreviewForInstrument, drawWaveform]);
 
   return (
     <div className="space-y-3">
@@ -703,6 +704,7 @@ export default function WaveEditor({
                     <div 
                       className="relative h-24 bg-slate-800 border border-slate-600 rounded cursor-crosshair"
                       onMouseDown={(e) => {
+                        setIsDraggingTimbre(true);
                         const rect = e.currentTarget.getBoundingClientRect();
                         const updateTimbre = (clientX, clientY) => {
                           const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
@@ -722,6 +724,7 @@ export default function WaveEditor({
 
                         const handleMove = (e) => updateTimbre(e.clientX, e.clientY);
                         const handleUp = () => {
+                          setIsDraggingTimbre(false);
                           document.removeEventListener('mousemove', handleMove);
                           document.removeEventListener('mouseup', handleUp);
                         };
