@@ -227,18 +227,21 @@ export default function PlaybackControls({
           <div className="w-px h-6 bg-[#3A3A3A]" />
 
           {/* Time Signature */}
-          <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-            <SelectTrigger className="h-7 w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-              {TIME_SIGNATURES.map(ts => (
-                <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
-                  {ts.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col items-center">
+            <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
+              <SelectTrigger className="h-5 w-12 bg-transparent border-none text-white text-sm font-medium px-1 hover:bg-[#2D2D2D]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                {TIME_SIGNATURES.map(ts => (
+                  <SelectItem key={ts.value} value={ts.value} className="text-white text-sm">
+                    {ts.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-white/40 text-[9px] uppercase tracking-wider">SIG</span>
+          </div>
         </div>
 
         {/* Time display - Logic Pro style */}
