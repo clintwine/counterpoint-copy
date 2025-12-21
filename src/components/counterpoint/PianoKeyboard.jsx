@@ -152,7 +152,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find((i) => i.value === value);
 
-  const handlePreview = (instrumentValue, e) => {
+  const handlePreview = async (instrumentValue, e) => {
     e.stopPropagation();
     initAudio();
     
@@ -161,13 +161,13 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
       const index = parseInt(instrumentValue.split('_')[1]);
       const customConfig = customInstruments[index];
       if (customConfig) {
-        playNoteWithCustomInstrument('C4', 0.5, 0.7, customConfig);
+        await playNoteWithCustomInstrument('C4', 0.5, 0.7, customConfig);
       }
     } else if (instrumentValue.startsWith('preset_')) {
       const index = parseInt(instrumentValue.split('_')[1]);
       const presetConfig = PRESET_LIBRARY[index];
       if (presetConfig) {
-        playNoteWithCustomInstrument('C4', 0.5, 0.7, presetConfig);
+        await playNoteWithCustomInstrument('C4', 0.5, 0.7, presetConfig);
       }
     } else {
       playNote('C4', 0.5, 0.7, 0, instrumentValue);
