@@ -609,7 +609,8 @@ export default function CounterpointGenerator() {
     stopAllNotes();
     setCurrentBeat(0);
     setPlayheadPosition(0);
-    lastPlayedBeatRef.current = -1;
+    lastPlayheadRef.current = 0;
+    playedNotesRef.current.clear();
   };
 
   const handleRecordToggle = () => {
