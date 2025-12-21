@@ -136,6 +136,19 @@ export default function CounterpointGenerator() {
     queryFn: () => base44.entities.Song.list('-created_date'),
   });
 
+  // Fetch custom instruments
+  const { data: savedInstruments = [] } = useQuery({
+    queryKey: ['custom-instruments'],
+    queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
+  });
+
+  // Sync saved instruments to local state
+  useEffect(() => {
+    if (savedInstruments.length > 0) {
+      setCustomInstruments(savedInstruments);
+    }
+  }, [savedInstruments]);
+
   // Save project mutation
   const saveProjectMutation = useMutation({
     mutationFn: async (data) => {
@@ -314,6 +327,44 @@ export default function CounterpointGenerator() {
     },
     onError: () => {
       toast.error('Failed to delete song');
+    }
+  });
+
+  // Save custom instrument mutation
+  const saveInstrumentMutation = useMutation({
+    mutationFn: async ({ instrument, index }) => {
+      if (index >= 0 && savedInstruments[index]?.id) {
+        // Update existing
+        await base44.entities.CustomInstrument.update(savedInstruments[index].id, instrument);
+        return { index };
+      } else {
+        // Create new
+        const result = await base44.entities.CustomInstrument.create(instrument);
+        return { index: -1, result };
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-instruments'] });
+      toast.success('Instrument saved');
+    },
+    onError: () => {
+      toast.error('Failed to save instrument');
+    }
+  });
+
+  // Delete custom instrument mutation
+  const deleteInstrumentMutation = useMutation({
+    mutationFn: (index) => {
+      if (savedInstruments[index]?.id) {
+        return base44.entities.CustomInstrument.delete(savedInstruments[index].id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-instruments'] });
+      toast.success('Instrument deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete instrument');
     }
   });
 
@@ -1493,12 +1544,11 @@ export default function CounterpointGenerator() {
                                     onEnvelopeChange={setEnvelope}
                                     openWaveEditor={openWaveEditor}
                                     customInstruments={customInstruments}
-                                    onCustomInstrumentsChange={(newInstruments) => {
-                                      setCustomInstruments(newInstruments);
-                                      // Auto-save project when instruments change
-                                      if (currentProjectId && projectName.trim()) {
-                                        setTimeout(() => handleSaveProject(true), 100);
-                                      }
+                                    onSaveInstrument={(instrument, index) => {
+                                      saveInstrumentMutation.mutate({ instrument, index });
+                                    }}
+                                    onDeleteInstrument={(index) => {
+                                      deleteInstrumentMutation.mutate(index);
                                     }}
                                   />
                                 </div>
@@ -1570,12 +1620,11 @@ export default function CounterpointGenerator() {
                 onEnvelopeChange={setEnvelope}
                 openWaveEditor={openWaveEditor}
                 customInstruments={customInstruments}
-                onCustomInstrumentsChange={(newInstruments) => {
-                  setCustomInstruments(newInstruments);
-                  // Auto-save project when instruments change
-                  if (currentProjectId && projectName.trim()) {
-                    setTimeout(() => handleSaveProject(true), 100);
-                  }
+                onSaveInstrument={(instrument, index) => {
+                  saveInstrumentMutation.mutate({ instrument, index });
+                }}
+                onDeleteInstrument={(index) => {
+                  deleteInstrumentMutation.mutate(index);
                 }}
                 />
             </div>
