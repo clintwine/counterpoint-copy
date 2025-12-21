@@ -76,7 +76,7 @@ export async function renderToWav(notes, tempo, instrumentName) {
   const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
   
   // Get instrument config
-  const customInstruments = getCustomInstruments();
+  const customInstruments = getCustomInstruments() || [];
   const customInst = customInstruments.find(i => i.name === instrumentName);
   const instrument = customInst || defaultInstruments[instrumentName] || defaultInstruments.organ;
   
