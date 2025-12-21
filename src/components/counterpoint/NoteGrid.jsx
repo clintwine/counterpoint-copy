@@ -1336,24 +1336,22 @@ export default function NoteGrid({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
                 try {
-                  // Construct function URL from current location
-                  const functionUrl = `${window.location.origin}/api/functions/exportAudio`;
-                  
-                  const response = await fetch(functionUrl, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ notes: cantusFirmus, tempo })
+                  const { base44 } = await import('@/api/base44Client');
+                  const response = await base44.functions.invoke('exportAudio', {
+                    notes: cantusFirmus,
+                    tempo
                   });
                   
-                  if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`Export failed: ${text}`);
+                  // Convert string response to binary ArrayBuffer
+                  // SDK returns binary data as a string, need to convert each char to byte
+                  const str = response.data;
+                  const buf = new ArrayBuffer(str.length);
+                  const bufView = new Uint8Array(buf);
+                  for (let i = 0; i < str.length; i++) {
+                    bufView[i] = str.charCodeAt(i);
                   }
                   
-                  const blob = await response.blob();
+                  const blob = new Blob([buf], { type: 'audio/wav' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
