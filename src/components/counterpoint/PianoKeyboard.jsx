@@ -753,6 +753,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           </div>
         </div>
       </div>
+      </div>
 
       <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
