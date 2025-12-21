@@ -832,31 +832,7 @@ export default function WaveEditor({
               />
             </div>
             <div className="flex items-end gap-2">
-              <Button
-                size="sm"
-                onClick={startRecording}
-                disabled={isRecording}
-                className={`h-9 px-3 text-sm ${
-                  isRecording 
-                    ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' 
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
-                }`}
-              >
-                {isRecording ? (
-                  <>
-                    <span className="w-2 h-2 rounded-full bg-white mr-2" />
-                    {recordingTime.toFixed(1)}s
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                      <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
-                    </svg>
-                    Record Voice
-                  </>
-                )}
-              </Button>
+              {/* TODO: Re-enable voice recording feature later */}
               <Button
                 size="sm"
                 onClick={() => {
