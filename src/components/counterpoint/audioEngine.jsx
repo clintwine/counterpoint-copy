@@ -500,13 +500,22 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   // Create oscillators from custom config (limit to first 3 for performance)
   const maxOscs = Math.min(3, oscConfigs.length);
   oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
+    // Ensure oscConfig has all required properties with defaults
+    const safeConfig = {
+      waveform: oscConfig?.waveform || 'sine',
+      gain: oscConfig?.gain ?? 0.5,
+      detune: oscConfig?.detune || 0,
+      harmonic: oscConfig?.harmonic || 1,
+      phase: oscConfig?.phase || 0
+    };
+
     const osc = audioContext.createOscillator();
-    osc.type = oscConfig.waveform;
-    
+    osc.type = safeConfig.waveform;
+
     // Apply harmonic ratio and phase
-    const harmonic = oscConfig.harmonic || 1;
+    const harmonic = safeConfig.harmonic;
     osc.frequency.value = freq * harmonic;
-    osc.detune.value = oscConfig.detune || 0;
+    osc.detune.value = safeConfig.detune;
     
     // Apply LFO modulation
     if (lfoGain && lfo.target === 'pitch') {
@@ -514,7 +523,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
     }
 
     const oscGain = audioContext.createGain();
-    oscGain.gain.value = (oscConfig.gain || 1) * 0.3;
+    oscGain.gain.value = safeConfig.gain * 0.3;
     
     // Apply LFO to volume if selected
     if (lfoGain && lfo.target === 'volume') {

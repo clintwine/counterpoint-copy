@@ -474,13 +474,13 @@ export default function WaveEditor({
 
   const updateOscillator = (index, key, value) => {
     const newOscs = [...instrument.oscillators];
+    // Ensure oscillator always has all required properties
     newOscs[index] = { 
-      waveform: 'sine', 
-      detune: 0, 
-      gain: 0.5, 
-      harmonic: 1, 
-      phase: 0,
-      ...newOscs[index], 
+      waveform: newOscs[index]?.waveform || 'sine', 
+      detune: newOscs[index]?.detune ?? 0, 
+      gain: newOscs[index]?.gain ?? 0.5, 
+      harmonic: newOscs[index]?.harmonic ?? 1, 
+      phase: newOscs[index]?.phase ?? 0,
       [key]: value 
     };
     setInstrument({ ...instrument, oscillators: newOscs });
