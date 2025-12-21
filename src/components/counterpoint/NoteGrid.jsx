@@ -393,77 +393,60 @@ export default function NoteGrid({
       const numBars = 80;
       const barWidth = rect.width / numBars;
       const gap = 1.5;
-      const channelHeight = rect.height / 2;
       
-      // Draw both channels separately
-      for (let channel = 0; channel < 2; channel++) {
-        const channelOffset = channel * channelHeight;
-        const channelColor = channel === 0 ? '#00D4FF' : '#06b6d4'; // Left: cyan, Right: teal
+      for (let i = 0; i < numBars; i++) {
+        const startIdx = Math.floor((i / numBars) * bufferLength);
+        const endIdx = Math.floor(((i + 1) / numBars) * bufferLength);
+        let sum = 0;
+        let count = 0;
+        for (let j = startIdx; j < endIdx; j++) {
+          sum += dataArray[j];
+          count++;
+        }
+        const value = count > 0 ? sum / count : 0;
         
-        for (let i = 0; i < numBars; i++) {
-          const startIdx = Math.floor((i / numBars) * bufferLength);
-          const endIdx = Math.floor(((i + 1) / numBars) * bufferLength);
-          let sum = 0;
-          let count = 0;
-          for (let j = startIdx; j < endIdx; j++) {
-            sum += dataArray[j];
-            count++;
-          }
-          const value = count > 0 ? sum / count : 0;
-          
-          // Add slight variation between channels for stereo effect
-          const channelVariation = channel === 0 ? 1 : 0.95 + Math.random() * 0.1;
-          const barHeight = (value / 255) * channelHeight * 0.9 * channelVariation;
-          const x = i * barWidth;
-          const y = channelOffset + channelHeight - barHeight;
-          
-          const gradient = ctx.createLinearGradient(x, y, x, channelOffset + channelHeight);
-          
-          if (barHeight < channelHeight * 0.3) {
-            gradient.addColorStop(0, channelColor);
-            gradient.addColorStop(1, channel === 0 ? '#0088FF' : '#0891b2');
-          } else if (barHeight < channelHeight * 0.6) {
-            gradient.addColorStop(0, '#00FF88');
-            gradient.addColorStop(0.5, '#88FF00');
-            gradient.addColorStop(1, channelColor);
-          } else if (barHeight < channelHeight * 0.8) {
-            gradient.addColorStop(0, '#FFCC00');
-            gradient.addColorStop(0.5, '#00FF88');
-            gradient.addColorStop(1, channelColor);
-          } else {
-            gradient.addColorStop(0, '#FF3333');
-            gradient.addColorStop(0.3, '#FFAA00');
-            gradient.addColorStop(0.6, '#00FF88');
-            gradient.addColorStop(1, channelColor);
-          }
-          
-          ctx.fillStyle = gradient;
-          
-          const radius = 2;
-          ctx.beginPath();
-          ctx.moveTo(x, channelOffset + channelHeight);
-          ctx.lineTo(x, y + radius);
-          ctx.arcTo(x, y, x + barWidth - gap, y, radius);
-          ctx.lineTo(x + barWidth - gap, channelOffset + channelHeight);
-          ctx.closePath();
+        const labelSpace = 16;
+        const barHeight = (value / 255) * (rect.height - labelSpace) * 0.85;
+        const x = i * barWidth;
+        
+        const gradient = ctx.createLinearGradient(x, rect.height - barHeight, x, rect.height);
+        
+        if (barHeight < rect.height * 0.3) {
+          gradient.addColorStop(0, '#00D4FF');
+          gradient.addColorStop(1, '#0088FF');
+        } else if (barHeight < rect.height * 0.6) {
+          gradient.addColorStop(0, '#00FF88');
+          gradient.addColorStop(0.5, '#88FF00');
+          gradient.addColorStop(1, '#00D4FF');
+        } else if (barHeight < rect.height * 0.8) {
+          gradient.addColorStop(0, '#FFCC00');
+          gradient.addColorStop(0.5, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        } else {
+          gradient.addColorStop(0, '#FF3333');
+          gradient.addColorStop(0.3, '#FFAA00');
+          gradient.addColorStop(0.6, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        }
+        
+        ctx.fillStyle = gradient;
+        
+        const radius = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, rect.height);
+        ctx.lineTo(x, rect.height - barHeight + radius);
+        ctx.arcTo(x, rect.height - barHeight, x + barWidth - gap, rect.height - barHeight, radius);
+        ctx.lineTo(x + barWidth - gap, rect.height);
+        ctx.closePath();
+        ctx.fill();
+        
+        if (value > 180) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = barHeight > rect.height * 0.8 ? '#FF3333' : '#00FF88';
           ctx.fill();
-          
-          if (value > 180) {
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = barHeight > channelHeight * 0.8 ? '#FF3333' : '#00FF88';
-            ctx.fill();
-            ctx.shadowBlur = 0;
-          }
+          ctx.shadowBlur = 0;
         }
       }
-      
-      // Draw center divider line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, rect.height / 2);
-      ctx.lineTo(rect.width, rect.height / 2);
-      ctx.stroke();
       
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
