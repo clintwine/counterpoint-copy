@@ -101,6 +101,35 @@ Deno.serve(async (req) => {
       offset += 4;
     }
     
+    // Validate WAV file before sending
+    const validation = {
+      bufferSize: buffer.byteLength,
+      expectedSize: 44 + dataSize,
+      headerCheck: {
+        riff: String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3)),
+        wave: String.fromCharCode(view.getUint8(8), view.getUint8(9), view.getUint8(10), view.getUint8(11)),
+        fmt: String.fromCharCode(view.getUint8(12), view.getUint8(13), view.getUint8(14), view.getUint8(15)),
+        data: String.fromCharCode(view.getUint8(36), view.getUint8(37), view.getUint8(38), view.getUint8(39)),
+      },
+      chunkSize: view.getUint32(4, true),
+      audioFormat: view.getUint16(20, true),
+      numChannels: view.getUint16(22, true),
+      sampleRate: view.getUint32(24, true),
+      bitsPerSample: view.getUint16(34, true),
+      dataSize: view.getUint32(40, true)
+    };
+
+    console.log('WAV Validation:', JSON.stringify(validation, null, 2));
+
+    // Check if valid
+    if (validation.headerCheck.riff !== 'RIFF' || 
+        validation.headerCheck.wave !== 'WAVE' ||
+        validation.headerCheck.fmt !== 'fmt ' ||
+        validation.headerCheck.data !== 'data') {
+      console.error('Invalid WAV header!');
+      return Response.json({ error: 'Invalid WAV file generated', validation }, { status: 500 });
+    }
+
     return new Response(buffer, {
       status: 200,
       headers: {
