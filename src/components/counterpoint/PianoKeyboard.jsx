@@ -856,25 +856,24 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 const voiceIndex = isNoteActive(key.note, octave);
                 const isActive = voiceIndex !== -1;
                 const isPressed = isNotePressed(key.note, octave);
-                const isDisabled = isExtendedRange && key.note !== 'C';
 
                 const keyLabel = getKeyLabel(key.note, octave);
                 keys.push(
                   <div
                     key={`${octave}-${key.note}`}
-                    onMouseDown={isDisabled ? undefined : (e) => handleMouseDown(e, key.note, octave)}
-                    onMouseUp={isDisabled ? undefined : () => handleMouseUp(key.note, octave)}
-                    onMouseEnter={isDisabled ? undefined : () => handleMouseEnter(key.note, octave)}
-                    onMouseLeave={isDisabled ? undefined : () => handleMouseLeave(key.note, octave)}
-                    className={`absolute bottom-0 border border-slate-400 rounded-b flex flex-col items-center justify-end pb-0.5 ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer select-none'}`}
+                    onMouseDown={(e) => handleMouseDown(e, key.note, octave)}
+                    onMouseUp={() => handleMouseUp(key.note, octave)}
+                    onMouseEnter={() => handleMouseEnter(key.note, octave)}
+                    onMouseLeave={() => handleMouseLeave(key.note, octave)}
+                    className="absolute bottom-0 border border-slate-400 rounded-b cursor-pointer select-none flex flex-col items-center justify-end pb-0.5"
                                           style={{
                                             left: whiteKeyIndex * whiteKeyWidth,
                                             width: whiteKeyWidth - 1,
                                             height: 75,
-                      backgroundColor: isDisabled ? '#D0D0D0' : isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
+                      backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5',
                     }}
                   >
-                    {showKeys && keyLabel && !isDisabled && (
+                    {showKeys && keyLabel && (
                       <span className="text-[8px] font-bold text-slate-500 mb-0.5">{keyLabel}</span>
                     )}
                     {key.note === 'C' && <span className="text-[8px] text-slate-400">C{octave}</span>}
