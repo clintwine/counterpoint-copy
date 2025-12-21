@@ -163,10 +163,10 @@ export default function CounterpointGenerator() {
               setSaveDialogOpen(true);
             }
           }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-      }, [currentUser]);
+          };
+          window.addEventListener('keydown', handleKeyDown);
+          return () => window.removeEventListener('keydown', handleKeyDown);
+          }, [currentUser, currentProjectId, projectName, handleSaveProject]);
 
   // Get current user
   useEffect(() => {
