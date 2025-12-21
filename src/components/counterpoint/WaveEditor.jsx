@@ -456,6 +456,8 @@ export default function WaveEditor({
     }
   };
 
+  const recordingIntervalRef = useRef(null);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -471,7 +473,6 @@ export default function WaveEditor({
 
       // Analyze audio in real-time
       const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
       const samples = [];
       
       const collectSamples = () => {
@@ -480,25 +481,32 @@ export default function WaveEditor({
       };
       
       const sampleInterval = setInterval(collectSamples, 50);
+      const dataArray = new Uint8Array(bufferLength);
+
+      // Update timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          const next = prev + 0.1;
+          if (next >= 2) {
+            if (recordingIntervalRef.current) {
+              clearInterval(recordingIntervalRef.current);
+            }
+            return 2;
+          }
+          return next;
+        });
+      }, 100);
 
       // Record for 2 seconds then analyze
       setTimeout(() => {
         clearInterval(sampleInterval);
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
         setIsRecording(false);
         stream.getTracks().forEach(track => track.stop());
         analyzeVoice(samples, analyser.frequencyBinCount);
       }, 2000);
-
-      // Update timer
-      const timerInterval = setInterval(() => {
-        setRecordingTime(prev => {
-          if (prev >= 2) {
-            clearInterval(timerInterval);
-            return 2;
-          }
-          return prev + 0.1;
-        });
-      }, 100);
     } catch (error) {
       console.error('Failed to access microphone:', error);
       alert('Could not access microphone. Please grant permission and try again.');
@@ -747,7 +755,8 @@ export default function WaveEditor({
             <div className="flex items-end gap-2">
               <Button
                 size="sm"
-                onClick={isRecording ? stopRecording : startRecording}
+                onClick={startRecording}
+                disabled={isRecording}
                 className={`h-9 px-3 text-sm ${
                   isRecording 
                     ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' 
