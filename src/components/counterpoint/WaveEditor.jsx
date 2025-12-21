@@ -312,9 +312,25 @@ export default function WaveEditor({
   const playPreview = useCallback(() => {
     setIsPlaying(true);
     initAudio();
-    // Use exact same parameters as live preview for consistency
+    const audioContext = getAudioContext();
+    
+    // Set up analyser for waveform visualization
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    analyserRef.current = analyser;
+    
+    // Connect to destination for visualization
+    const masterGain = audioContext.createGain();
+    masterGain.gain.value = 0.3;
+    masterGain.connect(analyser);
+    analyser.connect(audioContext.destination);
+    
+    // Play the note
     playNoteWithCustomInstrument('C4', 0.8, 0.5, instrument);
+    
+    // Start drawing waveform
     drawWaveform();
+    
     // Stop visualization after duration
     setTimeout(() => {
       stopPreview();
