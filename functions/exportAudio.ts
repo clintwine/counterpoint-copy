@@ -13,18 +13,17 @@ Deno.serve(async (req) => {
 
     // Calculate actual duration based on notes
     const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
-    const duration = (maxBeat * (60 / tempo) / 4) + 2; // Add 2 seconds for tail
+    const duration = (maxBeat * (60 / tempo) / 4) + 2;
 
-    // Generate WAV file
     const sampleRate = 44100;
     const numChannels = 2;
+    const bitsPerSample = 16;
     const numSamples = Math.floor(sampleRate * duration);
 
-    // Create separate left/right channel buffers
+    // Generate audio samples
     const leftChannel = new Float32Array(numSamples);
     const rightChannel = new Float32Array(numSamples);
     
-    // Generate audio for each note
     notes.forEach(note => {
       const frequency = noteToFrequency(note.pitch);
       const startTime = note.beat * (60 / tempo) / 4;
@@ -34,7 +33,6 @@ Deno.serve(async (req) => {
       const startSample = Math.floor(startTime * sampleRate);
       const endSample = Math.min(numSamples, Math.floor((startTime + noteDuration) * sampleRate));
       
-      // Generate sine wave with envelope
       for (let i = startSample; i < endSample; i++) {
         const t = (i - startSample) / sampleRate;
         const envelope = Math.min(1, t / 0.02) * Math.min(1, (noteDuration - t) / 0.1);
@@ -45,48 +43,47 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Create WAV file
-    const bytesPerSample = 2; // 16-bit
+    // Build WAV file
+    const bytesPerSample = bitsPerSample / 8;
     const blockAlign = numChannels * bytesPerSample;
     const byteRate = sampleRate * blockAlign;
     const dataSize = numSamples * blockAlign;
-    const bufferSize = 44 + dataSize;
     
-    const buffer = new ArrayBuffer(bufferSize);
-    const view = new DataView(buffer);
+    const wav = new Uint8Array(44 + dataSize);
+    const view = new DataView(wav.buffer);
     
-    // WAV header
+    // RIFF chunk descriptor
     writeString(view, 0, 'RIFF');
     view.setUint32(4, 36 + dataSize, true);
     writeString(view, 8, 'WAVE');
+    
+    // fmt sub-chunk
     writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true); // fmt chunk size
-    view.setUint16(20, 1, true); // audio format (PCM)
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
     view.setUint16(22, numChannels, true);
     view.setUint32(24, sampleRate, true);
     view.setUint32(28, byteRate, true);
     view.setUint16(32, blockAlign, true);
-    view.setUint16(34, 16, true); // bits per sample
+    view.setUint16(34, bitsPerSample, true);
+    
+    // data sub-chunk
     writeString(view, 36, 'data');
     view.setUint32(40, dataSize, true);
     
-    // Write interleaved stereo audio data
+    // Write PCM samples (interleaved stereo)
     let offset = 44;
     for (let i = 0; i < numSamples; i++) {
-      // Left channel
-      const leftSample = Math.max(-1, Math.min(1, leftChannel[i]));
-      const leftInt = Math.round(leftSample < 0 ? leftSample * 32768 : leftSample * 32767);
-      view.setInt16(offset, leftInt, true);
-      offset += 2;
+      const left = Math.max(-1, Math.min(1, leftChannel[i]));
+      const right = Math.max(-1, Math.min(1, rightChannel[i]));
       
-      // Right channel
-      const rightSample = Math.max(-1, Math.min(1, rightChannel[i]));
-      const rightInt = Math.round(rightSample < 0 ? rightSample * 32768 : rightSample * 32767);
-      view.setInt16(offset, rightInt, true);
+      view.setInt16(offset, Math.round(left * 32767), true);
+      offset += 2;
+      view.setInt16(offset, Math.round(right * 32767), true);
       offset += 2;
     }
     
-    return new Response(buffer, {
+    return new Response(wav.buffer, {
       status: 200,
       headers: {
         'Content-Type': 'audio/wav',
