@@ -270,7 +270,7 @@ export default function PlaybackControls({
           variant="ghost"
           size="sm"
           onClick={onMetronomeToggle}
-          className={`h-8 w-8 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
+          className={`h-9 w-9 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
           title="Metronome"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -285,7 +285,7 @@ export default function PlaybackControls({
           variant="ghost"
           size="sm"
           onClick={onLoopToggle}
-          className={`h-8 w-8 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
+          className={`h-9 w-9 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
           title="Loop"
         >
           <Repeat className="w-4 h-4" />
