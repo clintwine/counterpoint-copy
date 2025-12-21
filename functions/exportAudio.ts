@@ -43,50 +43,61 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Build WAV file
+    // Build WAV file - proper format
     const bytesPerSample = bitsPerSample / 8;
     const blockAlign = numChannels * bytesPerSample;
     const byteRate = sampleRate * blockAlign;
     const dataSize = numSamples * blockAlign;
-    const fileSize = 44 + dataSize;
     
-    const buffer = new ArrayBuffer(fileSize);
+    // Create buffer
+    const buffer = new ArrayBuffer(44 + dataSize);
     const view = new DataView(buffer);
     
-    // RIFF chunk descriptor
-    writeString(view, 0, 'RIFF');
-    view.setUint32(4, fileSize - 8, true); // File size minus 8 bytes
-    writeString(view, 8, 'WAVE');
+    // Write WAV header
+    // RIFF chunk
+    view.setUint8(0, 'R'.charCodeAt(0));
+    view.setUint8(1, 'I'.charCodeAt(0));
+    view.setUint8(2, 'F'.charCodeAt(0));
+    view.setUint8(3, 'F'.charCodeAt(0));
+    view.setUint32(4, 36 + dataSize, true); // ChunkSize
+    view.setUint8(8, 'W'.charCodeAt(0));
+    view.setUint8(9, 'A'.charCodeAt(0));
+    view.setUint8(10, 'V'.charCodeAt(0));
+    view.setUint8(11, 'E'.charCodeAt(0));
     
-    // fmt sub-chunk
-    writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
-    view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+    // fmt subchunk
+    view.setUint8(12, 'f'.charCodeAt(0));
+    view.setUint8(13, 'm'.charCodeAt(0));
+    view.setUint8(14, 't'.charCodeAt(0));
+    view.setUint8(15, ' '.charCodeAt(0));
+    view.setUint32(16, 16, true); // Subchunk1Size
+    view.setUint16(20, 1, true); // AudioFormat (PCM)
     view.setUint16(22, numChannels, true); // NumChannels
     view.setUint32(24, sampleRate, true); // SampleRate
     view.setUint32(28, byteRate, true); // ByteRate
     view.setUint16(32, blockAlign, true); // BlockAlign
     view.setUint16(34, bitsPerSample, true); // BitsPerSample
     
-    // data sub-chunk
-    writeString(view, 36, 'data');
+    // data subchunk
+    view.setUint8(36, 'd'.charCodeAt(0));
+    view.setUint8(37, 'a'.charCodeAt(0));
+    view.setUint8(38, 't'.charCodeAt(0));
+    view.setUint8(39, 'a'.charCodeAt(0));
     view.setUint32(40, dataSize, true); // Subchunk2Size
     
-    // Write PCM samples (interleaved stereo, little-endian)
+    // Write audio data
     let offset = 44;
     for (let i = 0; i < numSamples; i++) {
-      // Clamp and convert to 16-bit signed integer
-      const leftSample = Math.max(-1, Math.min(1, leftChannel[i]));
-      const rightSample = Math.max(-1, Math.min(1, rightChannel[i]));
+      // Convert float samples to 16-bit integers
+      let leftVal = Math.max(-1, Math.min(1, leftChannel[i]));
+      let rightVal = Math.max(-1, Math.min(1, rightChannel[i]));
       
-      // Convert to 16-bit signed: -1.0 to 1.0 maps to -32768 to 32767
-      const leftInt16 = leftSample < 0 ? Math.floor(leftSample * 32768) : Math.floor(leftSample * 32767);
-      const rightInt16 = rightSample < 0 ? Math.floor(rightSample * 32768) : Math.floor(rightSample * 32767);
+      leftVal = leftVal < 0 ? leftVal * 32768 : leftVal * 32767;
+      rightVal = rightVal < 0 ? rightVal * 32768 : rightVal * 32767;
       
-      view.setInt16(offset, leftInt16, true);
-      offset += 2;
-      view.setInt16(offset, rightInt16, true);
-      offset += 2;
+      view.setInt16(offset, leftVal, true);
+      view.setInt16(offset + 2, rightVal, true);
+      offset += 4;
     }
     
     return new Response(buffer, {
