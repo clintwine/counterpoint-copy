@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Midi } from '@tonejs/midi';
+import toast from 'react-hot-toast';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
 import VoiceEditor from '@/components/counterpoint/VoiceEditor';
@@ -197,10 +198,12 @@ export default function CounterpointGenerator() {
       }
       setSaveDialogOpen(false);
       setSaveAsMode(false);
+      toast.success(saveAsMode ? 'Project saved as new copy' : (currentProjectId ? 'Project updated' : 'Project saved'));
     },
     onError: (error) => {
       console.error('Save failed:', error);
       setSaveAsMode(false);
+      toast.error('Failed to save project');
     }
   });
 
@@ -222,6 +225,10 @@ export default function CounterpointGenerator() {
       setSaveSongDialogOpen(false);
       setSongName('');
       setSongDescription('');
+      toast.success('Song saved to library');
+    },
+    onError: () => {
+      toast.error('Failed to save song');
     }
   });
 
@@ -253,6 +260,10 @@ export default function CounterpointGenerator() {
       setEditingSong(null);
       setSongName('');
       setSongDescription('');
+      toast.success('Song updated');
+    },
+    onError: () => {
+      toast.error('Failed to update song');
     }
   });
 
@@ -261,6 +272,10 @@ export default function CounterpointGenerator() {
     mutationFn: (id) => base44.entities.Song.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['songs'] });
+      toast.success('Song deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete song');
     }
   });
 
@@ -1161,13 +1176,20 @@ export default function CounterpointGenerator() {
               </Dialog>
 
               {/* Edit Song Dialog (Admin Only) */}
-              <Dialog open={editSongDialogOpen} onOpenChange={setEditSongDialogOpen}>
+              <Dialog open={editSongDialogOpen} onOpenChange={(open) => {
+                setEditSongDialogOpen(open);
+                if (!open) {
+                  setEditingSong(null);
+                  setSongName('');
+                  setSongDescription('');
+                }
+              }}>
                 <DialogTrigger asChild>
                   <div style={{ display: 'none' }} />
                 </DialogTrigger>
                 <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
                   <DialogHeader>
-                    <DialogTitle className="text-white">Edit Song</DialogTitle>
+                    <DialogTitle className="text-white">Edit "{editingSong?.name}"</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={(e) => { e.preventDefault(); handleUpdateSong(); }} className="space-y-4">
                     <div>

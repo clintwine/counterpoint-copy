@@ -604,7 +604,7 @@ export default function WaveEditor({
                     <SelectTrigger className="h-6 bg-slate-700 border-slate-600 text-white text-[10px] flex-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 z-[100]">
+                    <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
                       {WAVEFORMS.map(w => (
                         <SelectItem key={w} value={w} className="text-white text-[10px] capitalize">{w}</SelectItem>
                       ))}
@@ -645,7 +645,7 @@ export default function WaveEditor({
               <SelectTrigger className="h-6 bg-slate-700 border-slate-600 text-white text-[10px]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 z-[100]">
+              <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
                 {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
                   <SelectItem key={t} value={t} className="text-white text-[10px] capitalize">{t}</SelectItem>
                 ))}
