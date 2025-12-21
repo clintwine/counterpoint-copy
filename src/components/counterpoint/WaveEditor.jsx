@@ -324,7 +324,8 @@ export default function WaveEditor({
   };
 
   const loadInstrument = (inst, index) => {
-    setInstrument({ ...inst });
+    // Preserve the instrument's name when loading
+    setInstrument({ ...inst, name: inst.name });
     setEditingIndex(index);
   };
 
