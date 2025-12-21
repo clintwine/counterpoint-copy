@@ -313,12 +313,14 @@ export default function WaveEditor({
 
   const handleSave = () => {
     if (editingIndex >= 0) {
+      // Updating existing instrument - keep editing it
       onSaveInstrument(instrument, editingIndex);
     } else {
+      // Creating new instrument - set editing index to the new position
+      const newIndex = customInstruments.length;
       onSaveInstrument(instrument, -1);
+      setEditingIndex(newIndex);
     }
-    setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${customInstruments.length + 2}` });
-    setEditingIndex(-1);
   };
 
   const loadInstrument = (inst, index) => {
