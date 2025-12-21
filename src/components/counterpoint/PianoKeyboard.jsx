@@ -763,8 +763,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             const keys = [];
             let whiteKeyIndex = 0;
             
-            // Extra greyed out keys below A0 to fill left side
-            const extraLowKeys = ['F', 'G'];
+            // Extra greyed out keys below A0 to fill left side (4 more + 2 existing)
+            const extraLowKeys = ['C', 'D', 'E', 'F', 'G', 'A'];
             extraLowKeys.forEach((note, idx) => {
               keys.push(
                 <div
@@ -780,8 +780,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               );
             });
             
-            // Extra low black keys (F#0, G#0)
-            const extraLowBlackOffsets = [86, 110]; // F#, G#
+            // Extra low black keys (C#, D#, F#, G#)
+            const extraLowBlackOffsets = [14, 38, 86, 110];
             extraLowBlackOffsets.forEach((offset, idx) => {
               keys.push(
                 <div
@@ -797,7 +797,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               );
             });
             
-            whiteKeyIndex = 2; // Start real keys after the 2 extra ones
+            whiteKeyIndex = 6; // Start real keys after the 6 extra ones
             
             // A0, A#0, B0 (partial first octave)
             ['A', 'B'].forEach((note) => {
