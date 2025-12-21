@@ -589,15 +589,18 @@ export default function WaveEditor({
 
   // Update live preview sound when instrument changes
   useEffect(() => {
-    if (livePreview && !isDraggingTimbre) {
-      // Play preview on each change with animation (but not while dragging)
-      setIsPlaying(true);
-      playPreviewForInstrument(instrument, () => {
-        setIsPlaying(false);
-      });
-      drawWaveform();
+    if (livePreview && !isDraggingTimbre && !isPlaying) {
+      // Play preview on each change with animation (but not while dragging or already playing)
+      const timeoutId = setTimeout(() => {
+        setIsPlaying(true);
+        playPreviewForInstrument(instrument, () => {
+          setIsPlaying(false);
+        });
+        drawWaveform();
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
-  }, [instrument, livePreview, isDraggingTimbre, playPreviewForInstrument, drawWaveform]);
+  }, [instrument.envelope, instrument.oscillators, instrument.filter, livePreview, isDraggingTimbre]);
 
   return (
     <div className="space-y-3">
