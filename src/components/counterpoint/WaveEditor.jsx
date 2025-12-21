@@ -711,8 +711,11 @@ export default function WaveEditor({
                           const harmonic = 0.5 + x * 7.5;
                           // Y axis: detune (-50 to 50)
                           const detune = (y - 0.5) * 100;
-                          updateOscillator(i, 'harmonic', harmonic);
-                          updateOscillator(i, 'detune', detune);
+
+                          // Update both values together
+                          const newOscs = [...instrument.oscillators];
+                          newOscs[i] = { ...newOscs[i], harmonic, detune };
+                          setInstrument({ ...instrument, oscillators: newOscs });
                         };
 
                         updateTimbre(e.clientX, e.clientY);
