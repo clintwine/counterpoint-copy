@@ -148,8 +148,11 @@ export default function WaveEditor({
     if (!canvas || !analyser) return;
 
     const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    
+    // Get actual display dimensions
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
@@ -169,7 +172,7 @@ export default function WaveEditor({
 
       for (let i = 0; i < bufferLength; i++) {
         const v = dataArray[i] / 128.0;
-        const y = (v * height) / 2;
+        const y = v * height / 2;
 
         if (i === 0) {
           ctx.moveTo(x, y);
