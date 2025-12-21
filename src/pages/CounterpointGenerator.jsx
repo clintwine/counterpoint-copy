@@ -94,6 +94,8 @@ export default function CounterpointGenerator() {
     return () => { delete window.expandMeasures; };
   }, []);
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [chatbotActive, setChatbotActive] = useState(false);
+  const [chatbotMinimized, setChatbotMinimized] = useState(false);
   const [activeVoice, setActiveVoice] = useState(0);
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
@@ -1101,7 +1103,17 @@ export default function CounterpointGenerator() {
                                       base44.auth.redirectToLogin(window.location.href);
                                       return;
                                     }
-                                    setChatbotOpen(true);
+                                    setChatbotActive(prev => {
+                                      const newState = !prev;
+                                      if (newState) {
+                                        setChatbotOpen(true);
+                                        setChatbotMinimized(false);
+                                      } else {
+                                        setChatbotOpen(false);
+                                        setChatbotMinimized(false);
+                                      }
+                                      return newState;
+                                    });
                                   }}
                                   onGenerate={handleGenerate}
                                   canGenerate={cantusFirmus.length > 0}
@@ -1182,7 +1194,17 @@ export default function CounterpointGenerator() {
                                   base44.auth.redirectToLogin(window.location.href);
                                   return;
                                 }
-                                setChatbotOpen(true);
+                                setChatbotActive(prev => {
+                                  const newState = !prev;
+                                  if (newState) {
+                                    setChatbotOpen(true);
+                                    setChatbotMinimized(false);
+                                  } else {
+                                    setChatbotOpen(false);
+                                    setChatbotMinimized(false);
+                                  }
+                                  return newState;
+                                });
                               }}
                               onGenerate={handleGenerate}
                               canGenerate={cantusFirmus.length > 0}
@@ -1383,7 +1405,10 @@ export default function CounterpointGenerator() {
         {chatbotOpen && (
           <AIChatbot
             isOpen={chatbotOpen}
-            onClose={() => setChatbotOpen(false)}
+            onClose={() => {
+              setChatbotOpen(false);
+              setChatbotMinimized(true);
+            }}
             settings={settings}
             onSettingsChange={setSettings}
             voices={voices}
@@ -1423,6 +1448,25 @@ export default function CounterpointGenerator() {
             }}
             tempo={tempo}
           />
+        )}
+      </AnimatePresence>
+
+      {/* AI Chatbot Bubble - Shows when minimized */}
+      <AnimatePresence>
+        {chatbotActive && chatbotMinimized && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={() => {
+              setChatbotOpen(true);
+              setChatbotMinimized(false);
+            }}
+            className="fixed bottom-6 left-6 z-[100] w-14 h-14 rounded-full bg-[#D4AF37] hover:bg-[#E5C158] shadow-2xl flex items-center justify-center transition-transform hover:scale-110"
+            title="Open AI Composer"
+          >
+            <Sparkles className="w-6 h-6 text-[#1E1E1E]" />
+          </motion.button>
         )}
       </AnimatePresence>
 
