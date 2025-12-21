@@ -265,6 +265,7 @@ export default function NoteGrid({
   const getNoteKey = useCallback((pitch, beat) => `${pitch}-${beat}`, []);
   
   // Memoize notes lookup for performance - filter duplicates
+  // Group notes by pitch and integer beat (notes can have fractional beats)
   const notesMap = useMemo(() => {
     const map = new Map();
     const seen = new Set();
@@ -274,7 +275,8 @@ export default function NoteGrid({
       if (seen.has(uniqueKey)) return; // Skip duplicates
       seen.add(uniqueKey);
       
-      const key = `${note.pitch}-${note.beat}`;
+      const intBeat = Math.floor(note.beat);
+      const key = `${note.pitch}-${intBeat}`;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push({ voiceIndex: 0, note });
     });
@@ -286,7 +288,8 @@ export default function NoteGrid({
         if (seen.has(uniqueKey)) return; // Skip duplicates
         seen.add(uniqueKey);
         
-        const key = `${note.pitch}-${note.beat}`;
+        const intBeat = Math.floor(note.beat);
+        const key = `${note.pitch}-${intBeat}`;
         if (!map.has(key)) map.set(key, []);
         map.get(key).push({ voiceIndex, note });
       });
