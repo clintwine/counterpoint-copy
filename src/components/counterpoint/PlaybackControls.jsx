@@ -195,10 +195,10 @@ export default function PlaybackControls({
         </div>
 
         {/* BPM and Time Signature container */}
-        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-1 gap-1">
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1">
           {/* BPM - Large Logic Pro style */}
           <div className="flex items-center">
-            <div className="w-20 flex flex-col items-center">
+            <div className="w-16 flex flex-col items-center">
               {isEditingBpm ? (
                 <input
                   type="number"
@@ -207,7 +207,7 @@ export default function PlaybackControls({
                   onBlur={handleBpmInputBlur}
                   onKeyDown={handleBpmInputKeyDown}
                   autoFocus
-                  className="bg-[#0A0A0A] border border-[#D4AF37] rounded px-2 py-1 text-white font-mono text-xl font-bold w-20 h-8 text-center outline-none"
+                  className="bg-[#0A0A0A] border border-[#D4AF37] rounded px-2 py-0.5 text-white font-mono text-xl font-bold w-16 text-center outline-none"
                   min={20}
                   max={455}
                 />
@@ -216,7 +216,7 @@ export default function PlaybackControls({
                   ref={bpmRef}
                   onMouseDown={handleBpmMouseDown}
                   onDoubleClick={handleBpmDoubleClick}
-                  className="bg-transparent border-none rounded px-2 py-1 cursor-ew-resize select-none hover:bg-[#2D2D2D] transition-colors w-20 h-8 flex items-center justify-center"
+                  className="bg-transparent border-none rounded px-2 py-0.5 cursor-ew-resize select-none hover:bg-[#2D2D2D] transition-colors w-16 flex items-center justify-center"
                   title="Drag to change tempo"
                 >
                   <span className="text-white font-mono text-xl font-bold tabular-nums">{tempo}</span>
@@ -230,10 +230,10 @@ export default function PlaybackControls({
 
           {/* Time Signature */}
           <div className="flex items-center">
-            <div className="w-20 flex flex-col items-start">
-              <div className="w-20 flex items-center justify-center h-8">
+            <div className="w-16 flex flex-col items-start">
+              <div className="w-16 flex items-center justify-center h-[28px]">
                 <Select value={timeSignature} onValueChange={onTimeSignatureChange}>
-                  <SelectTrigger className="h-8 w-full bg-transparent border-none text-white text-sm font-medium px-2 py-1 hover:bg-[#2D2D2D]">
+                  <SelectTrigger className="h-auto w-full bg-transparent border-none text-white text-sm font-medium px-2 py-0.5 hover:bg-[#2D2D2D]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
