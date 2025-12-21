@@ -299,9 +299,16 @@ export default function WaveEditor({
 
   const playPreview = useCallback(() => {
     setIsPlaying(true);
-    playPreviewForInstrument(instrument, () => setIsPlaying(false));
+    initAudio();
+    // Use the same playback method as live preview for consistency
+    playNoteWithCustomInstrument('A4', 1.0, 0.6, instrument);
     drawWaveform();
-  }, [instrument, drawWaveform, playPreviewForInstrument]);
+    // Stop visualization after duration
+    setTimeout(() => {
+      stopPreview();
+      setIsPlaying(false);
+    }, 1100);
+  }, [instrument, drawWaveform, stopPreview]);
 
   const playPresetPreview = useCallback((preset, index) => {
     if (previewingPreset !== null) return;
