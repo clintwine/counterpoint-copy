@@ -112,6 +112,10 @@ export default function WaveEditor({
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   // Load current instrument when opening editor
   useEffect(() => {
@@ -452,6 +456,153 @@ export default function WaveEditor({
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        await analyzeVoice(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      // Record for 2 seconds
+      const interval = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= 2) {
+            clearInterval(interval);
+            stopRecording();
+            return 2;
+          }
+          return prev + 0.1;
+        });
+      }, 100);
+    } catch (error) {
+      console.error('Failed to access microphone:', error);
+      alert('Could not access microphone. Please check permissions.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const analyzeVoice = async (audioBlob) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // Create analyser
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 8192;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Create offline context to analyze
+    const offlineContext = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
+    const source = offlineContext.createBufferSource();
+    source.buffer = audioBuffer;
+    
+    const analyserNode = offlineContext.createAnalyser();
+    analyserNode.fftSize = 8192;
+    source.connect(analyserNode);
+    analyserNode.connect(offlineContext.destination);
+    source.start();
+
+    await offlineContext.startRendering();
+
+    // Analyze a slice of the audio
+    const sampleData = audioBuffer.getChannelData(0);
+    const slice = sampleData.slice(audioBuffer.sampleRate * 0.5, audioBuffer.sampleRate * 1.5);
+
+    // FFT analysis to find dominant frequencies
+    const fft = performFFT(slice);
+    const peaks = findPeaks(fft, 4);
+
+    // Convert peaks to oscillator settings
+    const oscillators = peaks.map((peak, idx) => ({
+      waveform: idx === 0 ? 'sine' : 'sine',
+      detune: peak.detune,
+      gain: peak.magnitude,
+      harmonic: peak.harmonic,
+      phase: 0
+    }));
+
+    // Create instrument from analysis
+    setInstrument({
+      name: 'My Voice',
+      oscillators,
+      envelope: { attack: 0.05, decay: 0.1, sustain: 0.7, release: 0.3 },
+      filter: { type: 'lowpass', frequency: 3000, Q: 1 },
+      lfo: { rate: 0, amount: 0, target: 'pitch' },
+      distortion: 0,
+      bitcrush: 0
+    });
+    setEditingIndex(-1);
+  };
+
+  const performFFT = (samples) => {
+    const n = samples.length;
+    const result = new Array(n).fill(0);
+    
+    for (let k = 0; k < n / 2; k++) {
+      let real = 0;
+      let imag = 0;
+      for (let t = 0; t < n; t++) {
+        const angle = 2 * Math.PI * k * t / n;
+        real += samples[t] * Math.cos(angle);
+        imag -= samples[t] * Math.sin(angle);
+      }
+      result[k] = Math.sqrt(real * real + imag * imag) / n;
+    }
+    return result;
+  };
+
+  const findPeaks = (fft, numPeaks) => {
+    const peaks = [];
+    const sampleRate = 44100;
+    const binSize = sampleRate / fft.length;
+
+    for (let i = 20; i < fft.length / 4; i++) {
+      if (fft[i] > fft[i - 1] && fft[i] > fft[i + 1] && fft[i] > 0.01) {
+        peaks.push({
+          frequency: i * binSize,
+          magnitude: fft[i],
+          index: i
+        });
+      }
+    }
+
+    peaks.sort((a, b) => b.magnitude - a.magnitude);
+    const topPeaks = peaks.slice(0, numPeaks);
+
+    if (topPeaks.length === 0) {
+      return [{ harmonic: 1, detune: 0, magnitude: 1.0 }];
+    }
+
+    const fundamental = topPeaks[0].frequency;
+    
+    return topPeaks.map((peak, idx) => ({
+      harmonic: idx === 0 ? 1 : Math.round(peak.frequency / fundamental),
+      detune: idx === 0 ? 0 : ((peak.frequency / fundamental) - Math.round(peak.frequency / fundamental)) * 1200,
+      magnitude: Math.min(1.0, peak.magnitude / topPeaks[0].magnitude)
+    }));
+  };
+
   const loadInstrument = (inst, index) => {
     // Load instrument with all required fields, preserving the name
     const loadedInstrument = {
@@ -630,6 +781,30 @@ export default function WaveEditor({
               />
             </div>
             <div className="flex items-end gap-2">
+              <Button
+                size="sm"
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`h-9 px-3 text-sm ${
+                  isRecording 
+                    ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' 
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+              >
+                {isRecording ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-white mr-2" />
+                    {recordingTime.toFixed(1)}s
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+                    </svg>
+                    Record Voice
+                  </>
+                )}
+              </Button>
               <Button
                 size="sm"
                 onClick={() => {
