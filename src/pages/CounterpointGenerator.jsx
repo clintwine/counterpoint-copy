@@ -120,10 +120,12 @@ export default function CounterpointGenerator() {
       const queryClient = useQueryClient();
   const previewTimeoutRef = useRef(null);
 
-      // Global spacebar handler for play/pause
+      // Global keyboard handlers for play/pause and save
       useEffect(() => {
         const handleKeyDown = (e) => {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+          // Spacebar for play/pause
           if (e.key === ' ') {
             e.preventDefault();
             setIsPlaying(prev => {
@@ -133,10 +135,22 @@ export default function CounterpointGenerator() {
               return !prev;
             });
           }
+
+          // Cmd/Ctrl + S for save project
+          if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+            e.preventDefault();
+            setSaveDialogOpen(true);
+          }
+
+          // Cmd/Ctrl + Shift + S for save as song (admin only)
+          if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's' && currentUser?.role === 'admin') {
+            e.preventDefault();
+            setSaveSongDialogOpen(true);
+          }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-      }, []);
+      }, [currentUser]);
 
   // Get current user
   useEffect(() => {
