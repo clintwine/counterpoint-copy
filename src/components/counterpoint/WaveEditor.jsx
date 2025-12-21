@@ -755,11 +755,12 @@ export default function WaveEditor({
         </TabsContent>
 
         <TabsContent value="processing" className="mt-0">
-          <div className="grid grid-cols-3 gap-4">
-            {/* Filter */}
-            <div className="space-y-2.5">
-              <Label className="text-white/70 text-sm uppercase tracking-wider">Filter</Label>
-              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+          <div className="space-y-2.5">
+            <Label className="text-white/70 text-sm uppercase tracking-wider">Processing</Label>
+            <div className="grid grid-cols-4 gap-3">
+              {/* Filter */}
+              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
+                <span className="text-white/60 text-sm font-medium">Filter</span>
                 <Select
                   value={instrument.filter.type}
                   onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
@@ -802,12 +803,10 @@ export default function WaveEditor({
                   />
                 </div>
               </div>
-            </div>
 
-            {/* LFO */}
-            <div className="space-y-2.5">
-              <Label className="text-white/70 text-sm uppercase tracking-wider">LFO</Label>
-              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+              {/* LFO */}
+              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
+                <span className="text-white/60 text-sm font-medium">LFO</span>
                 <Select
                   value={instrument.lfo?.target || 'pitch'}
                   onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
@@ -850,12 +849,10 @@ export default function WaveEditor({
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Effects */}
-            <div className="space-y-2.5">
-              <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
-              <div className="bg-slate-700/50 rounded p-3 space-y-3">
+              {/* Effects */}
+              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
+                <span className="text-white/60 text-sm font-medium">Effects</span>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-white/40 text-xs">Distortion</span>
@@ -892,6 +889,53 @@ export default function WaveEditor({
                   <Slider
                     value={[instrument.width || 0]}
                     onValueChange={([v]) => setInstrument({ ...instrument, width: v })}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Spread */}
+              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
+                <span className="text-white/60 text-sm font-medium">Spread</span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Unison</span>
+                    <span className="text-white/60 text-xs">{Math.round(instrument.unison || 1)}</span>
+                  </div>
+                  <Slider
+                    value={[instrument.unison || 1]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, unison: Math.round(v) })}
+                    min={1}
+                    max={7}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Detune</span>
+                    <span className="text-white/60 text-xs">{Math.round(instrument.unisonDetune || 0)}</span>
+                  </div>
+                  <Slider
+                    value={[instrument.unisonDetune || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, unisonDetune: v })}
+                    min={0}
+                    max={50}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Stereo</span>
+                    <span className="text-white/60 text-xs">{Math.round((instrument.stereoSpread || 0) * 100)}%</span>
+                  </div>
+                  <Slider
+                    value={[instrument.stereoSpread || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, stereoSpread: v })}
                     min={0}
                     max={1}
                     step={0.01}
