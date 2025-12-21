@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
-import { initAudio, getAudioContext, playSustained, stopSustained } from './audioEngine';
+import { initAudio, getAudioContext, playNoteWithCustomInstrument } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
 
@@ -347,11 +347,14 @@ export default function WaveEditor({
     setLivePreview(enabled);
     if (enabled) {
       initAudio();
-      const noteId = playSustained('C4', 0.5, instrument);
-      liveNoteIdRef.current = noteId;
+      const noteObj = playNoteWithCustomInstrument('C4', 999, 0.5, instrument);
+      liveNoteIdRef.current = noteObj;
     } else {
       if (liveNoteIdRef.current) {
-        stopSustained(liveNoteIdRef.current);
+        const { oscillators } = liveNoteIdRef.current;
+        oscillators?.forEach(osc => {
+          try { osc.stop(); } catch (e) {}
+        });
         liveNoteIdRef.current = null;
       }
     }
@@ -361,9 +364,12 @@ export default function WaveEditor({
   useEffect(() => {
     if (livePreview && liveNoteIdRef.current) {
       // Stop current note and restart with new settings
-      stopSustained(liveNoteIdRef.current);
-      const noteId = playSustained('C4', 0.5, instrument);
-      liveNoteIdRef.current = noteId;
+      const { oscillators } = liveNoteIdRef.current;
+      oscillators?.forEach(osc => {
+        try { osc.stop(); } catch (e) {}
+      });
+      const noteObj = playNoteWithCustomInstrument('C4', 999, 0.5, instrument);
+      liveNoteIdRef.current = noteObj;
     }
   }, [instrument, livePreview]);
 
@@ -371,7 +377,10 @@ export default function WaveEditor({
   useEffect(() => {
     return () => {
       if (liveNoteIdRef.current) {
-        stopSustained(liveNoteIdRef.current);
+        const { oscillators } = liveNoteIdRef.current;
+        oscillators?.forEach(osc => {
+          try { osc.stop(); } catch (e) {}
+        });
       }
     };
   }, []);
