@@ -450,6 +450,12 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   if (!freq) return;
 
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
+  
+  // Check if this is a sampled instrument
+  if (customConfig.audioSample) {
+    return playSampledNote(pitch, duration, volume, customConfig);
+  }
+  
   const { oscillators: oscConfigs, envelope, filter: filterConfig, lfo, distortion, bitcrush } = customConfig;
 
   const oscillators = [];
@@ -559,7 +565,52 @@ export function playNoteWithCustomInstrument(pitch, duration, volume, customConf
   });
 
   return { oscillators, gainNode };
-  }
+}
+
+// Play a sampled instrument (like recorded voice)
+function playSampledNote(pitch, duration, volume, customConfig) {
+  const freq = NOTE_FREQUENCIES[pitch];
+  const baseFreq = 440; // A4 reference
+  const playbackRate = freq / baseFreq;
+  
+  const source = audioContext.createBufferSource();
+  source.buffer = customConfig.audioSample;
+  source.playbackRate.value = playbackRate;
+  
+  const gainNode = audioContext.createGain();
+  const filterNode = audioContext.createBiquadFilter();
+  
+  // Apply filter settings
+  const { filter: filterConfig, envelope } = customConfig;
+  filterNode.type = filterConfig.type || 'lowpass';
+  filterNode.frequency.value = filterConfig.frequency || 2000;
+  filterNode.Q.value = filterConfig.Q || 1;
+  
+  // Envelope
+  const now = Math.max(0.01, audioContext.currentTime + 0.01);
+  const { attack, decay, sustain, release } = envelope;
+  const totalDuration = duration + release;
+  const attackTime = Math.max(now + 0.001, now + attack);
+  const decayTime = Math.max(attackTime + 0.001, now + attack + decay);
+  const releaseStartTime = Math.max(decayTime + 0.001, now + duration - release);
+  const releaseEndTime = Math.max(releaseStartTime + 0.001, now + totalDuration);
+  
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(volume * 0.8, attackTime);
+  gainNode.gain.linearRampToValueAtTime(volume * sustain * 0.6, decayTime);
+  gainNode.gain.setValueAtTime(volume * sustain * 0.6, releaseStartTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
+  
+  source.connect(filterNode);
+  filterNode.connect(gainNode);
+  gainNode.connect(masterGain);
+  
+  const stopTime = Math.max(now + 0.01, now + totalDuration);
+  source.start(now);
+  source.stop(stopTime);
+  
+  return { oscillators: [source], gainNode };
+}
 
 function createBitcrusher(bits) {
   if (!audioContext) return null;

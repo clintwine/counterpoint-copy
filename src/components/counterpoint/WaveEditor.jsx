@@ -457,31 +457,27 @@ export default function WaveEditor({
   };
 
   const recordingIntervalRef = useRef(null);
+  const audioSampleRef = useRef(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
       
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        stream.getTracks().forEach(track => track.stop());
+        await processRecording(audioBlob);
+      };
+
+      mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-
-      // Analyze audio in real-time
-      const bufferLength = analyser.frequencyBinCount;
-      const samples = [];
-      
-      const collectSamples = () => {
-        analyser.getByteFrequencyData(dataArray);
-        samples.push(new Uint8Array(dataArray));
-      };
-      
-      const sampleInterval = setInterval(collectSamples, 50);
-      const dataArray = new Uint8Array(bufferLength);
 
       // Update timer
       recordingIntervalRef.current = setInterval(() => {
@@ -497,15 +493,13 @@ export default function WaveEditor({
         });
       }, 100);
 
-      // Record for 2 seconds then analyze
+      // Stop recording after 2 seconds
       setTimeout(() => {
-        clearInterval(sampleInterval);
         if (recordingIntervalRef.current) {
           clearInterval(recordingIntervalRef.current);
         }
         setIsRecording(false);
-        stream.getTracks().forEach(track => track.stop());
-        analyzeVoice(samples, analyser.frequencyBinCount);
+        mediaRecorder.stop();
       }, 2000);
     } catch (error) {
       console.error('Failed to access microphone:', error);
@@ -514,89 +508,52 @@ export default function WaveEditor({
     }
   };
 
-  const analyzeVoice = (samples, binCount) => {
-    if (samples.length === 0) {
-      alert('No audio detected. Please try again.');
-      return;
-    }
-
-    // Average all samples
-    const avgSpectrum = new Float32Array(binCount);
-    samples.forEach(sample => {
-      for (let i = 0; i < binCount; i++) {
-        avgSpectrum[i] += sample[i];
-      }
-    });
-    
-    for (let i = 0; i < binCount; i++) {
-      avgSpectrum[i] /= samples.length;
-    }
-
-    // Find peaks - focus on musical frequency range (80Hz to 4000Hz)
-    // Assuming 44.1kHz sample rate and FFT size 2048
-    const sampleRate = 44100;
-    const fftSize = 2048;
-    const binToFreq = (bin) => (bin * sampleRate) / fftSize;
-    
-    const peaks = [];
-    const minBin = Math.floor((80 * fftSize) / sampleRate); // ~80 Hz
-    const maxBin = Math.floor((4000 * fftSize) / sampleRate); // ~4000 Hz
-    
-    for (let i = minBin; i < Math.min(maxBin, binCount - 2); i++) {
-      if (avgSpectrum[i] > avgSpectrum[i - 1] && 
-          avgSpectrum[i] > avgSpectrum[i + 1] &&
-          avgSpectrum[i] > 30) {
-        peaks.push({ 
-          bin: i, 
-          frequency: binToFreq(i),
-          magnitude: avgSpectrum[i] 
-        });
-      }
-    }
-
-    if (peaks.length === 0) {
-      alert('Could not detect voice. Please speak or sing louder and closer to the microphone.');
-      return;
-    }
-
-    // Sort by magnitude and take top 4
-    peaks.sort((a, b) => b.magnitude - a.magnitude);
-    const topPeaks = peaks.slice(0, 4);
-
-    // Use the fundamental (strongest peak) as reference
-    const fundamental = topPeaks[0].frequency;
-    const maxMag = topPeaks[0].magnitude;
-
-    // Create oscillators based on frequency ratios
-    const oscillators = topPeaks.map((peak, idx) => {
-      const ratio = peak.frequency / fundamental;
-      const harmonic = Math.round(ratio);
-      const detuneCents = 1200 * Math.log2(ratio / harmonic);
+  const processRecording = async (audioBlob) => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       
-      return {
-        waveform: idx === 0 ? 'sawtooth' : 'sine',
-        detune: Math.round(detuneCents),
-        gain: (peak.magnitude / maxMag) * (idx === 0 ? 0.8 : 0.5),
-        harmonic: harmonic,
-        phase: 0
+      // Store the audio sample
+      audioSampleRef.current = audioBuffer;
+      
+      // Analyze to get a rough waveform shape
+      const channelData = audioBuffer.getChannelData(0);
+      const sampleRate = audioBuffer.sampleRate;
+      const periodSamples = Math.floor(sampleRate / 200); // ~200Hz period
+      const slice = channelData.slice(sampleRate * 0.5, sampleRate * 0.5 + periodSamples);
+      
+      // Normalize the slice
+      const maxVal = Math.max(...slice.map(Math.abs));
+      const normalized = Array.from(slice).map(v => v / maxVal);
+      
+      // Create instrument with custom periodic wave
+      const voiceInstrument = {
+        name: 'My Voice',
+        audioSample: audioBuffer, // Store the actual recording
+        oscillators: [
+          { waveform: 'sawtooth', detune: 0, gain: 0.6, harmonic: 1, phase: 0 },
+          { waveform: 'sine', detune: 7, gain: 0.4, harmonic: 2, phase: 0 }
+        ],
+        envelope: { attack: 0.08, decay: 0.15, sustain: 0.7, release: 0.35 },
+        filter: { type: 'lowpass', frequency: 2800, Q: 0.8 },
+        lfo: { rate: 0, amount: 0, target: 'pitch' },
+        distortion: 0,
+        bitcrush: 0,
+        volume: 1
       };
-    });
-
-    // Create instrument
-    setInstrument({
-      name: 'My Voice',
-      oscillators,
-      envelope: { attack: 0.08, decay: 0.15, sustain: 0.7, release: 0.35 },
-      filter: { type: 'lowpass', frequency: 2800, Q: 0.8 },
-      lfo: { rate: 0, amount: 0, target: 'pitch' },
-      distortion: 0,
-      bitcrush: 0,
-      volume: 1
-    });
-    setEditingIndex(-1);
-    
-    console.log('Voice analysis complete:', { fundamental, oscillators });
+      
+      setInstrument(voiceInstrument);
+      setEditingIndex(-1);
+      
+      console.log('Voice recorded successfully:', audioBuffer.duration + 's');
+    } catch (error) {
+      console.error('Failed to process recording:', error);
+      alert('Failed to process the recording. Please try again.');
+    }
   };
+
+
 
   const loadInstrument = (inst, index) => {
     // Load instrument with all required fields, preserving the name
