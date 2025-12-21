@@ -37,8 +37,10 @@ export default function VolumeSlider({ value, onChange, className = '' }) {
         }
         const avgValue = sum / bufferLength;
         const normalized = avgValue / 255;
-        const boosted = Math.pow(normalized, 0.65); // Power scaling for better visual range
-        const normalizedLevel = Math.min(1, boosted * 4.5); // 4.5x boost to reach red levels
+        // Convert to decibels (proper audio unit)
+        const db = 20 * Math.log10(normalized + 0.0001); // Add small value to avoid log(0)
+        // Map -60dB to 0.0 and 0dB to 1.0 (red zone at ~0.85 = -9dBFS, professional metering)
+        const normalizedLevel = Math.max(0, Math.min(1, (db + 60) / 60));
 
         // Draw level bars for both channels (simulated stereo)
         const channelHeight = 10;
