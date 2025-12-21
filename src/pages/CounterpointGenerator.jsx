@@ -29,7 +29,7 @@ import PianoKeyboard from '@/components/counterpoint/PianoKeyboard';
 import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
-import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume } from '@/components/counterpoint/audioEngine';
+import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument } from '@/components/counterpoint/audioEngine';
 
 const DEFAULT_VOICES = [
   { name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
@@ -547,6 +547,29 @@ export default function CounterpointGenerator() {
       playedNotesRef.current.clear();
     }
 
+    // Get custom config for an instrument string
+    const getCustomConfig = (instrument) => {
+      if (instrument.startsWith('custom_')) {
+        const index = parseInt(instrument.split('_')[1]);
+        return customInstruments[index];
+      }
+      if (instrument.startsWith('preset_')) {
+        const index = parseInt(instrument.split('_')[1]);
+        const PRESET_LIBRARY = [
+          { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+          { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+        ];
+        return PRESET_LIBRARY[index];
+      }
+      return null;
+    };
+
     // Find and play all notes between last and current position
     allNotes.forEach(({ note, voiceIndex }) => {
       const noteKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
@@ -563,6 +586,9 @@ export default function CounterpointGenerator() {
         const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
         
+        // Check if using custom instrument
+        const customConfig = getCustomConfig(instrument);
+        
         let pitchBend = 0;
         if (note.bendStart !== undefined || note.bendEnd !== undefined) {
           pitchBend = {
@@ -573,7 +599,15 @@ export default function CounterpointGenerator() {
           };
         }
         
-        playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
+        if (customConfig) {
+          // Use custom instrument playback
+          import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
+            playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, pitchBend);
+          });
+        } else {
+          // Use built-in instrument
+          playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
+        }
       }
     });
 
@@ -623,7 +657,7 @@ export default function CounterpointGenerator() {
         playMetronomeClick(isAccent);
       }
     }
-  }, [playheadPosition, isPlaying, allNotes, tempo, voices, metronomeEnabled, settings.timeSignature]);
+  }, [playheadPosition, isPlaying, allNotes, tempo, voices, metronomeEnabled, settings.timeSignature, customInstruments]);
 
   const handlePlayPause = () => {
     ensureAudio();
