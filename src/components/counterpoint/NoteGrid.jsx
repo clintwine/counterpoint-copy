@@ -1300,6 +1300,26 @@ export default function NoteGrid({
                 <FileAudio className="w-4 h-4 mr-2" />
                 Import MIDI
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                const { base44 } = await import('@/api/base44Client');
+                const maxBeat = Math.max(...cantusFirmus.map(n => n.beat + (n.duration || 1)), 0);
+                const duration = maxBeat * (60 / tempo) / 4 + 2;
+                const response = await base44.functions.invoke('exportAudio', {
+                  notes: cantusFirmus,
+                  tempo,
+                  duration
+                });
+                const blob = new Blob([response.data], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `composition-${Date.now()}.wav`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }} className="text-white cursor-pointer">
+                <Download className="w-4 h-4 mr-2" />
+                Download as Audio
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-700" />
               <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white cursor-pointer">
                 <Guitar className="w-4 h-4 mr-2" />
