@@ -1271,7 +1271,7 @@ export default function NoteGrid({
                 <span className="font-semibold text-sm">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-800 border-slate-700">
+            <DropdownMenuContent align="start" className="bg-slate-800 border-slate-700">
               <DropdownMenuItem onClick={onNewProject} className="text-white cursor-pointer">
                 <FileText className="w-4 h-4 mr-2" />
                 New Project
