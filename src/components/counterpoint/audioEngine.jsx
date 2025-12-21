@@ -520,14 +520,15 @@ function createDistortion(amount) {
 
 // Active oscillators tracking to prevent too many at once
 let activeOscillatorCount = 0;
-const MAX_CONCURRENT_NOTES = 50; // Higher limit to accommodate notes with long release envelopes
+const MAX_CONCURRENT_NOTES = 200; // Higher limit to handle complex pieces like Bach inventions
 
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
   
-  // Throttle to prevent audio crackling
+  // Throttle to prevent audio crackling - but allow overflow for musical passages
   if (activeOscillatorCount >= MAX_CONCURRENT_NOTES) {
-    return;
+    console.warn('Max concurrent notes reached, some notes may not play');
+    // Don't return, allow it to play anyway for musical integrity
   }
   
   const freq = NOTE_FREQUENCIES[pitch];
