@@ -1403,10 +1403,10 @@ export default function NoteGrid({
             variant={snapToGrid ? 'default' : 'ghost'}
             size="sm"
             onClick={() => onSnapToGridChange?.(!snapToGrid)}
-            className={`h-7 px-2 ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
+            className={`h-7 px-2 text-xs font-semibold ${snapToGrid ? 'bg-amber-500/80 text-slate-900' : 'text-white/70 border border-slate-600'}`}
             title={snapToGrid ? "Snap to grid enabled" : "Free positioning"}
           >
-            <Grid3x3 className="w-3.5 h-3.5" />
+            SNAP
           </Button>
           
           <div className="w-px h-4 bg-slate-600 mx-1.5" />
