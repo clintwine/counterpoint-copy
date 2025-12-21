@@ -586,13 +586,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-                  <InstrumentSelect
-            value={instrument}
-            onChange={onInstrumentChange}
-            instruments={allInstruments}
-            onCreateNew={() => setShowWaveEditor(true)} />
-
-                  <div className="flex items-center gap-2 flex-wrap">
           {/* ADSR Envelope Knobs - hidden on mobile */}
                           <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
