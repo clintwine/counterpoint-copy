@@ -17,7 +17,8 @@ const DEFAULT_INSTRUMENT = {
   ],
   envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
   filter: { type: 'lowpass', frequency: 2000, Q: 1 },
-  effects: { distortion: 0 }
+  distortion: 0,
+  bitcrush: 0
 };
 
 const PRESET_LIBRARY = [
@@ -102,10 +103,33 @@ export default function WaveEditor({
   onDeleteInstrument,
   onInstrumentChange,
   onVoiceInstrumentChange,
-  onClose 
+  onClose,
+  currentInstrument = null,
+  currentInstrumentConfig = null
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
+
+  // Load current instrument when opening editor
+  useEffect(() => {
+    if (currentInstrumentConfig) {
+      // Ensure all required fields exist
+      const loadedInstrument = {
+        ...DEFAULT_INSTRUMENT,
+        ...currentInstrumentConfig,
+        filter: { ...DEFAULT_INSTRUMENT.filter, ...currentInstrumentConfig.filter }
+      };
+      setInstrument(loadedInstrument);
+      
+      // Set editing index if it's a custom instrument
+      if (currentInstrument?.startsWith('custom_')) {
+        const index = parseInt(currentInstrument.split('_')[1]);
+        setEditingIndex(index);
+      } else {
+        setEditingIndex(-1);
+      }
+    }
+  }, [currentInstrument, currentInstrumentConfig]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
@@ -543,7 +567,7 @@ export default function WaveEditor({
         </div>
       </div>
 
-      {/* Bottom Row: Oscillators + Filter */}
+      {/* Bottom Row: Oscillators + Filter + Effects */}
       <div className="flex gap-3">
         {/* Oscillators */}
         <div className="flex-1 space-y-2">
@@ -628,7 +652,7 @@ export default function WaveEditor({
               </SelectContent>
             </Select>
             <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-8">Freq</span>
+              <span className="text-white/40 text-[9px] w-12">Cutoff</span>
               <Slider
                 value={[instrument.filter.frequency]}
                 onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, frequency: v } })}
@@ -637,9 +661,10 @@ export default function WaveEditor({
                 step={10}
                 className="flex-1"
               />
+              <span className="text-white/50 text-[9px] w-8 text-right">{instrument.filter.frequency}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-white/40 text-[9px] w-8">Q</span>
+              <span className="text-white/40 text-[9px] w-12">Resonance</span>
               <Slider
                 value={[instrument.filter.Q]}
                 onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, Q: v } })}
@@ -648,6 +673,41 @@ export default function WaveEditor({
                 step={0.1}
                 className="flex-1"
               />
+              <span className="text-white/50 text-[9px] w-8 text-right">{instrument.filter.Q.toFixed(1)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Effects */}
+        <div className="w-44 flex-shrink-0 space-y-2">
+          <Label className="text-white/70 text-[10px] uppercase tracking-wider">Effects</Label>
+          <div className="bg-slate-700/50 rounded p-2 space-y-2">
+            <div className="flex items-center gap-1">
+              <span className="text-white/40 text-[9px] w-12">Distortion</span>
+              <Slider
+                value={[instrument.distortion || 0]}
+                onValueChange={([v]) => setInstrument({ ...instrument, distortion: v })}
+                min={0}
+                max={100}
+                step={1}
+                className="flex-1"
+              />
+              <span className="text-white/50 text-[9px] w-8 text-right">{Math.round(instrument.distortion || 0)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-white/40 text-[9px] w-12">Bit Crush</span>
+              <Slider
+                value={[instrument.bitcrush || 0]}
+                onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
+                min={0}
+                max={16}
+                step={0.5}
+                className="flex-1"
+              />
+              <span className="text-white/50 text-[9px] w-8 text-right">{(instrument.bitcrush || 0).toFixed(1)}</span>
+            </div>
+            <div className="text-[8px] text-white/40 mt-1">
+              Use sparingly for texture
             </div>
           </div>
         </div>

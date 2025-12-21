@@ -995,7 +995,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             onDeleteInstrument={handleDeleteInstrument}
             onInstrumentChange={onInstrumentChange}
             onVoiceInstrumentChange={onVoiceInstrumentChange}
-            onClose={() => setShowWaveEditor(false)} />
+            onClose={() => setShowWaveEditor(false)}
+            currentInstrument={instrument}
+            currentInstrumentConfig={getCustomConfig()} />
 
                 </DialogContent>
               </Dialog>
