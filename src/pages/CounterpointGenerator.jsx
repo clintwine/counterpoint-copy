@@ -1248,7 +1248,6 @@ export default function CounterpointGenerator() {
                             >
                               <div className="flex-1">
                                 <p className="text-white font-medium text-lg">{song.name}</p>
-                                <p className="text-white/70 text-sm mt-1">{song.description}</p>
                                 <div className="flex gap-2 mt-2 flex-wrap">
                                   <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded font-medium">
                                     {song.settings?.key || 'C'} {song.settings?.mode || 'major'}

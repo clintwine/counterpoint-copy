@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Send, Loader2, Sparkles, Music, Play, Square, Layers, Palette, Settings, Music2, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { initAudio, playNote, stopAllNotes } from './audioEngine';
 
 const KEY_OPTIONS = ['C', 'G', 'D', 'F', 'A', 'E', 'Bb'];
@@ -89,6 +90,12 @@ export default function AIChatbot({
   const [settingsExpanded, setSettingsExpanded] = useState(true);
   const messagesEndRef = useRef(null);
 
+  // Fetch Bach Inventions for AI training
+  const { data: songs = [] } = useQuery({
+    queryKey: ['songs-training'],
+    queryFn: () => base44.entities.Song.list('-created_date'),
+  });
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -116,11 +123,25 @@ export default function AIChatbot({
     // Build style context
     const style = COMPOSER_STYLES[selectedStyle];
     const styleContext = selectedStyle !== 'none' ? `
-COMPOSER STYLE: ${style.name}
-Style characteristics: ${style.description}
-Techniques to use: ${style.techniques}
-IMPORTANT: Emulate this composer's authentic style throughout the composition!
-` : '';
+    COMPOSER STYLE: ${style.name}
+    Style characteristics: ${style.description}
+    Techniques to use: ${style.techniques}
+    IMPORTANT: Emulate this composer's authentic style throughout the composition!
+    ` : '';
+
+    // Build training examples from Bach Inventions
+    const trainingExamples = songs.slice(0, 5).map(song => `
+    Example: ${song.name} (${song.settings?.key || 'C'} ${song.settings?.mode || 'major'})
+    Melodic characteristics: ${song.cantusFirmus?.length || 0} notes, durations vary from ${Math.min(...(song.cantusFirmus?.map(n => n.duration) || [1]))} to ${Math.max(...(song.cantusFirmus?.map(n => n.duration) || [1]))}
+    Sample notes: ${JSON.stringify(song.cantusFirmus?.slice(0, 20) || [])}
+    `).join('\n');
+
+    const trainingContext = songs.length > 0 ? `
+    TRAINING DATA - Study these Bach Invention examples for authentic counterpoint:
+    ${trainingExamples}
+
+    Apply these patterns: varied note durations, melodic sequences, motivic development, proper voice leading.
+    ` : '';
 
     // Detect if user wants a specific number of notes
           const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
@@ -138,12 +159,13 @@ IMPORTANT: Emulate this composer's authentic style throughout the composition!
         response = await base44.integrations.Core.InvokeLLM({
           prompt: `You are an expert counterpoint composer and music theorist. Generate a harmonizing voice to accompany the existing melody.
 
-Current settings:
-- Key: ${settings.key} ${settings.mode}
-- Species: ${settings.species || '1st'} species counterpoint
-- Tempo: ${tempo} BPM
-- Measures: ${settings.measures}
-${styleContext}
+        Current settings:
+        - Key: ${settings.key} ${settings.mode}
+        - Species: ${settings.species || '1st'} species counterpoint
+        - Tempo: ${tempo} BPM
+        - Measures: ${settings.measures}
+        ${styleContext}
+        ${trainingContext}
 
 Existing cantus firmus/melody:
 ${JSON.stringify(currentNotes, null, 2)}
@@ -194,12 +216,13 @@ Determine the best voice type (bass, tenor, alto) and create a musically sophist
         response = await base44.integrations.Core.InvokeLLM({
           prompt: `You are an expert counterpoint composer and music theorist. Create a complete two-voice contrapuntal composition.
 
-Current settings:
-- Key: ${settings.key} ${settings.mode}
-- Measures: ${settings.measures}
-- Species: ${settings.species || '1st'} species counterpoint
-- Tempo: ${tempo} BPM
-${styleContext}
+        Current settings:
+        - Key: ${settings.key} ${settings.mode}
+        - Measures: ${settings.measures}
+        - Species: ${settings.species || '1st'} species counterpoint
+        - Tempo: ${tempo} BPM
+        ${styleContext}
+        ${trainingContext}
 
 User request: "${userMessage}"
 
@@ -267,11 +290,12 @@ This should sound like a REAL composition, not a simple exercise!`,
                 response = await base44.integrations.Core.InvokeLLM({
                   prompt: `You are an expert composer. Create a musically compelling composition.
 
-      Current settings:
-      - Key: ${settings.key} ${settings.mode}
-      - Measures: ${settings.measures} (total beats: ${settings.measures * 4})
-      - Tempo: ${tempo} BPM
-      ${styleContext}
+                Current settings:
+                - Key: ${settings.key} ${settings.mode}
+                - Measures: ${settings.measures} (total beats: ${settings.measures * 4})
+                - Tempo: ${tempo} BPM
+                ${styleContext}
+                ${trainingContext}
 
       User request: "${userMessage}"
 
