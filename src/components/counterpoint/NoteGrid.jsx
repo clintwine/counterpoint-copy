@@ -2456,183 +2456,75 @@ export default function NoteGrid({
               <div className="w-px h-3 bg-slate-600" />
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <span className="text-white/50 text-[10px]">Bend</span>
-                <Slider
-                  value={[(() => {
+                <Select
+                  value={(() => {
                     const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return firstSelected?.bendStart ?? 0;
-                  })()]}
-                  onValueChange={([value]) => {
+                    const start = firstSelected?.bendStart ?? 0;
+                    const end = firstSelected?.bendEnd ?? 0;
+                    if (start === 0 && end === 0) return 'none';
+                    if (start === 0 && end === 1) return 'up1';
+                    if (start === 0 && end === 2) return 'up2';
+                    if (start === 0 && end === -1) return 'down1';
+                    if (start === 0 && end === -2) return 'down2';
+                    if (start === 1 && end === 0) return 'down1-return';
+                    if (start === 2 && end === 0) return 'down2-return';
+                    if (start === -1 && end === 0) return 'up1-return';
+                    if (start === -2 && end === 0) return 'up2-return';
+                    return 'none';
+                  })()}
+                  onValueChange={(value) => {
+                    const bendMap = {
+                      'none': { start: 0, end: 0 },
+                      'up1': { start: 0, end: 1 },
+                      'up2': { start: 0, end: 2 },
+                      'down1': { start: 0, end: -1 },
+                      'down2': { start: 0, end: -2 },
+                      'up1-return': { start: -1, end: 0 },
+                      'up2-return': { start: -2, end: 0 },
+                      'down1-return': { start: 1, end: 0 },
+                      'down2-return': { start: 2, end: 0 },
+                    };
+                    const bend = bendMap[value];
                     const newNotes = cantusFirmus.map(n => 
                       selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                        ? { ...n, bendStart: value } 
+                        ? { ...n, bendStart: bend.start, bendEnd: bend.end } 
                         : n
                     );
+                    saveToHistory(newNotes);
                     onNotesUpdate(newNotes);
-                  }}
-                  onValueCommit={([value]) => {
-                    saveToHistory(cantusFirmus);
+                    
                     const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
                     if (firstSelected) {
                       initAudio();
                       const instrument = voices[0]?.instrument || 'organ';
                       const pitchBend = {
-                        start: value,
-                        end: firstSelected?.bendEnd ?? 0,
+                        start: bend.start,
+                        end: bend.end,
                         startTime: firstSelected?.bendStartTime ?? 0,
                         endTime: firstSelected?.bendEndTime ?? 1
                       };
-                      // Calculate actual duration in seconds based on note duration and tempo
                       const sixteenthNoteDuration = (60 / tempo) / 4;
                       const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                       playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
                     }
                   }}
-                  min={-12}
-                  max={12}
-                  step={0.5}
-                  className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
-                />
-                <span className="text-white/70 text-[10px] w-7">
-                  {(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    const bend = firstSelected?.bendStart ?? 0;
-                    return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
-                  })()}
-                </span>
-                <span className="text-white/50 text-[10px]">→</span>
-                <Slider
-                  value={[(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return firstSelected?.bendEnd ?? 0;
-                  })()]}
-                  onValueChange={([value]) => {
-                    const newNotes = cantusFirmus.map(n => 
-                      selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                        ? { ...n, bendEnd: value } 
-                        : n
-                    );
-                    onNotesUpdate(newNotes);
-                  }}
-                  onValueCommit={([value]) => {
-                    saveToHistory(cantusFirmus);
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    if (firstSelected) {
-                      initAudio();
-                      const instrument = voices[0]?.instrument || 'organ';
-                      const pitchBend = {
-                        start: firstSelected?.bendStart ?? 0,
-                        end: value,
-                        startTime: firstSelected?.bendStartTime ?? 0,
-                        endTime: firstSelected?.bendEndTime ?? 1
-                      };
-                      // Calculate actual duration in seconds based on note duration and tempo
-                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
-                    }
-                  }}
-                  min={-12}
-                  max={12}
-                  step={0.5}
-                  className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
-                />
-                <span className="text-white/70 text-[10px] w-7">
-                  {(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    const bend = firstSelected?.bendEnd ?? 0;
-                    return bend > 0 ? `+${bend.toFixed(1)}` : bend.toFixed(1);
-                  })()}
-                </span>
+                >
+                  <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-[10px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="none" className="text-white text-xs">None</SelectItem>
+                    <SelectItem value="up1" className="text-white text-xs">↗ Up +1</SelectItem>
+                    <SelectItem value="up2" className="text-white text-xs">↗ Up +2</SelectItem>
+                    <SelectItem value="down1" className="text-white text-xs">↘ Down -1</SelectItem>
+                    <SelectItem value="down2" className="text-white text-xs">↘ Down -2</SelectItem>
+                    <SelectItem value="up1-return" className="text-white text-xs">↘↗ Return +1</SelectItem>
+                    <SelectItem value="up2-return" className="text-white text-xs">↘↗ Return +2</SelectItem>
+                    <SelectItem value="down1-return" className="text-white text-xs">↗↘ Return -1</SelectItem>
+                    <SelectItem value="down2-return" className="text-white text-xs">↗↘ Return -2</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="w-px h-3 bg-slate-600" />
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <span className="text-white/50 text-[10px]">T:</span>
-                <Slider
-                  value={[(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return (firstSelected?.bendStartTime ?? 0) * 100;
-                  })()]}
-                  onValueChange={([value]) => {
-                    const newNotes = cantusFirmus.map(n => 
-                      selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                        ? { ...n, bendStartTime: value / 100 } 
-                        : n
-                    );
-                    onNotesUpdate(newNotes);
-                  }}
-                  onValueCommit={([value]) => {
-                    saveToHistory(cantusFirmus);
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    if (firstSelected) {
-                      initAudio();
-                      const instrument = voices[0]?.instrument || 'organ';
-                      const pitchBend = {
-                        start: firstSelected?.bendStart ?? 0,
-                        end: firstSelected?.bendEnd ?? 0,
-                        startTime: value / 100,
-                        endTime: firstSelected?.bendEndTime ?? 1
-                      };
-                      // Calculate actual duration in seconds based on note duration and tempo
-                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
-                    }
-                  }}
-                  min={0}
-                  max={100}
-                  step={5}
-                  className="w-12 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
-                />
-                <span className="text-white/70 text-[10px] w-6">
-                  {(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return `${Math.round((firstSelected?.bendStartTime ?? 0) * 100)}`;
-                  })()}
-                </span>
-                <span className="text-white/50 text-[10px]">→</span>
-                <Slider
-                  value={[(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return (firstSelected?.bendEndTime ?? 1) * 100;
-                  })()]}
-                  onValueChange={([value]) => {
-                    const newNotes = cantusFirmus.map(n => 
-                      selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                        ? { ...n, bendEndTime: value / 100 } 
-                        : n
-                    );
-                    onNotesUpdate(newNotes);
-                  }}
-                  onValueCommit={([value]) => {
-                    saveToHistory(cantusFirmus);
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    if (firstSelected) {
-                      initAudio();
-                      const instrument = voices[0]?.instrument || 'organ';
-                      const pitchBend = {
-                        start: firstSelected?.bendStart ?? 0,
-                        end: firstSelected?.bendEnd ?? 0,
-                        startTime: firstSelected?.bendStartTime ?? 0,
-                        endTime: value / 100
-                      };
-                      // Calculate actual duration in seconds based on note duration and tempo
-                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
-                    }
-                  }}
-                  min={0}
-                  max={100}
-                  step={5}
-                  className="w-12 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
-                />
-                <span className="text-white/70 text-[10px] w-6">
-                  {(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    return `${Math.round((firstSelected?.bendEndTime ?? 1) * 100)}`;
-                  })()}
-                  </span>
-                  </div>
                   </div>
                   </div></div>
                   )}
