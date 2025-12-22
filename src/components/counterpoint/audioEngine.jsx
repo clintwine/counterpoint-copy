@@ -722,8 +722,8 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
   
   switch (articulation) {
     case 'staccato':
-      // Short and detached - 30% of original duration
-      return playNote(pitch, duration * 0.3, volume, voiceIndex, instrument, 0);
+      // Short and detached - 20% of original duration
+      return playNote(pitch, duration * 0.2, volume, voiceIndex, instrument, 0);
       
     case 'legato':
       // Full smooth duration
