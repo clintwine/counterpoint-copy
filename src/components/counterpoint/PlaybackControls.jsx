@@ -292,17 +292,6 @@ export default function PlaybackControls({
           </svg>
         </Button>
 
-        {/* Loop toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onLoopToggle}
-          className={`h-9 w-9 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
-          title="Loop"
-        >
-          <Repeat className="w-4 h-4" />
-        </Button>
-
         <div className="w-px h-6 bg-[#3A3A3A]" />
 
         {/* Master Volume */}
