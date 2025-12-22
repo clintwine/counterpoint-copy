@@ -153,6 +153,22 @@ export default function PlaybackControls({
           </Button>
 
           <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const currentMeasure = Math.floor(currentBeat / beatsPerMeasure);
+              const prevMeasure = Math.max(0, currentMeasure - 1);
+              onSeek(prevMeasure * beatsPerMeasure);
+            }}
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            title="Previous measure"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Button>
+
+          <Button
             onClick={onPlayPause}
             variant="ghost"
             size="sm"
@@ -163,6 +179,23 @@ export default function PlaybackControls({
             ) : (
               <Play className="w-4 h-4 ml-0.5" />
             )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const currentMeasure = Math.floor(currentBeat / beatsPerMeasure);
+              const nextMeasure = currentMeasure + 1;
+              const nextBeat = Math.min(totalBeats - 1, nextMeasure * beatsPerMeasure);
+              onSeek(nextBeat);
+            }}
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            title="Next measure"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </Button>
 
           <Button
