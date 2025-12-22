@@ -672,6 +672,69 @@ function createDistortion(amount) {
 let activeOscillatorCount = 0;
 const MAX_CONCURRENT_NOTES = 200; // Higher limit to handle complex pieces like Bach inventions
 
+// Helper to get next note in scale for trills
+function getNextScaleNote(pitch) {
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const match = pitch.match(/^([A-G]#?)(\d+)$/);
+  if (!match) return pitch;
+  
+  const [, note, octave] = match;
+  const index = notes.indexOf(note);
+  const nextIndex = (index + 2) % 12; // Whole step up
+  const nextOctave = nextIndex < index ? parseInt(octave) + 1 : parseInt(octave);
+  return notes[nextIndex] + nextOctave;
+}
+
+// Play note with articulation
+export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, instrument, articulation = 'normal', tempo = 80) {
+  if (!articulation || articulation === 'normal') {
+    return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+  }
+  
+  const sixteenthNoteDuration = (60 / tempo) / 4;
+  
+  switch (articulation) {
+    case 'staccato':
+      // Short and detached - 30% of original duration
+      return playNote(pitch, duration * 0.3, volume, voiceIndex, instrument, 0);
+      
+    case 'legato':
+      // Full smooth duration
+      return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+      
+    case 'accent':
+      // Emphasized with higher velocity
+      return playNote(pitch, duration, Math.min(1, volume * 1.5), voiceIndex, instrument, 0);
+      
+    case 'trill':
+      // Rapid alternation with upper note
+      const trillSpeed = sixteenthNoteDuration * 0.5; // 32nd notes
+      const numTrillNotes = Math.floor(duration / trillSpeed);
+      const upperNote = getNextScaleNote(pitch);
+      
+      for (let i = 0; i < numTrillNotes; i++) {
+        setTimeout(() => {
+          const notePitch = i % 2 === 0 ? pitch : upperNote;
+          playNote(notePitch, trillSpeed * 0.9, volume * 0.8, voiceIndex, instrument, 0);
+        }, i * trillSpeed * 1000);
+      }
+      return null;
+      
+    case 'grace':
+      // Quick grace note before main note
+      const graceNote = getNextScaleNote(pitch);
+      const graceDuration = sixteenthNoteDuration * 0.25; // Very quick
+      playNote(graceNote, graceDuration, volume * 0.7, voiceIndex, instrument, 0);
+      setTimeout(() => {
+        playNote(pitch, duration - graceDuration, volume, voiceIndex, instrument, 0);
+      }, graceDuration * 1000);
+      return null;
+      
+    default:
+      return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+  }
+}
+
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
   

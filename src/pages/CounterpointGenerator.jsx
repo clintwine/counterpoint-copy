@@ -996,6 +996,7 @@ export default function CounterpointGenerator() {
         const sixteenthNoteDuration = (60 / tempo) / 4;
         const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
+        const articulation = note.articulation || 'normal';
         
         // Check if using custom instrument
         const customConfig = getCustomConfig(instrument);
@@ -1016,8 +1017,15 @@ export default function CounterpointGenerator() {
             playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, pitchBend);
           });
         } else {
-          // Use built-in instrument
-          playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
+          // Check if articulation is applied
+          if (articulation !== 'normal') {
+            import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+              playNoteWithArticulation(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, articulation, tempo);
+            });
+          } else {
+            // Use built-in instrument
+            playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
+          }
         }
       }
     });

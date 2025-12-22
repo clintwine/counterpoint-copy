@@ -2560,6 +2560,85 @@ export default function NoteGrid({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-white/50 text-[10px]">Style</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-24 justify-between bg-slate-700 border-slate-600 text-white text-[10px] px-2"
+                    >
+                      {(() => {
+                        const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                        const articulation = firstSelected?.articulation || 'normal';
+                        return articulation.charAt(0).toUpperCase() + articulation.slice(1);
+                      })()}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-48">
+                    {[
+                      { value: 'normal', label: 'Normal', desc: 'Standard articulation' },
+                      { value: 'staccato', label: 'Staccato', desc: 'Short & detached' },
+                      { value: 'legato', label: 'Legato', desc: 'Smooth & connected' },
+                      { value: 'accent', label: 'Accent', desc: 'Emphasized' },
+                      { value: 'trill', label: 'Trill', desc: 'Rapid alternation' },
+                      { value: 'grace', label: 'Grace Note', desc: 'Quick ornament' },
+                    ].map((style) => (
+                      <DropdownMenuItem
+                        key={style.value}
+                        className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                        onSelect={() => {
+                          const newNotes = cantusFirmus.map(n => 
+                            selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                              ? { ...n, articulation: style.value } 
+                              : n
+                          );
+                          saveToHistory(newNotes);
+                          onNotesUpdate(newNotes);
+                          
+                          const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                          if (firstSelected) {
+                            initAudio();
+                            const instrument = voices[0]?.instrument || 'organ';
+                            const sixteenthNoteDuration = (60 / tempo) / 4;
+                            const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                            import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                              playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo);
+                            });
+                          }
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium">{style.label}</div>
+                          <div className="text-[10px] text-white/50">{style.desc}</div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                            if (firstSelected) {
+                              initAudio();
+                              const instrument = voices[0]?.instrument || 'organ';
+                              const sixteenthNoteDuration = (60 / tempo) / 4;
+                              const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                              import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                                playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo);
+                              });
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                          title="Preview"
+                        >
+                          ▶
+                        </button>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
                   </div>
                   </div></div>
                   )}
