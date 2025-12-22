@@ -860,7 +860,7 @@ export default function WaveEditor({
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.filter.frequency, instrument.filter.Q, instrument.filter.type, livePreview, isDraggingTimbre, isPlaying, playPreviewForInstrument, drawWaveform]);
+  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isDraggingTimbre, isPlaying, playPreviewForInstrument, drawWaveform]);
 
   return (
     <div className="space-y-3">
