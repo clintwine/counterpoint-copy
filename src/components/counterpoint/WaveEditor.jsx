@@ -1114,11 +1114,11 @@ export default function WaveEditor({
       </div>
 
       {/* Rename Dialog */}
-      <RenameDialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <RenameDialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white z-[10001]">
-          <RenameDialogHeader>
-            <RenameDialogTitle className="text-white">Rename Instrument</RenameDialogTitle>
-          </RenameDialogHeader>
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white z-[10001]">
+          <DialogHeader>
+            <DialogTitle className="text-white">Rename Instrument</DialogTitle>
+          </DialogHeader>
           <form onSubmit={(e) => { 
             e.preventDefault(); 
             setInstrument({ ...instrument, name: renamingName });
@@ -1148,8 +1148,8 @@ export default function WaveEditor({
               </Button>
             </div>
           </form>
-        </RenameDialogContent>
-      </RenameDialog>
+        </DialogContent>
+      </Dialog>
 
       {/* Second Row: Waveform Preview + ADSR Controls */}
       <div className="flex gap-3">
