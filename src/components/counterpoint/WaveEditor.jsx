@@ -1246,7 +1246,7 @@ export default function WaveEditor({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="oscillators" className="mt-0">
+        <TabsContent value="oscillators" className="mt-0 min-h-[280px]">
           <div className="space-y-2.5">
             <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <div className="grid grid-cols-4 gap-3">
@@ -1364,7 +1364,7 @@ export default function WaveEditor({
                 </div>
                 </TabsContent>
 
-        <TabsContent value="processing" className="mt-0">
+        <TabsContent value="processing" className="mt-0 min-h-[280px]">
           <div className="space-y-2.5">
             <Label className="text-white/70 text-sm uppercase tracking-wider">Effects Chain</Label>
             <div className="grid grid-cols-4 gap-3">
@@ -1696,7 +1696,7 @@ export default function WaveEditor({
           </div>
         </TabsContent>
 
-        <TabsContent value="eq" className="mt-0">
+        <TabsContent value="eq" className="mt-0 min-h-[280px]">
           <div className="space-y-4">
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               {/* EQ Frequency Display */}
