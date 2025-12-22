@@ -1257,7 +1257,7 @@ export default function NoteGrid({
   return (
           <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
             {/* Main Toolbar */}
-          <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 sm:py-2 border-b border-[#3A3A3A] overflow-x-auto gap-2">
+          <div className="flex items-center justify-between px-2 sm:px-5 py-1 sm:py-1.5 border-b border-[#3A3A3A] overflow-x-auto gap-2">
             {/* Left: File Menu */}
             <div className="flex items-center gap-1">
           <DropdownMenu>
