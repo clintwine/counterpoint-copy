@@ -1006,7 +1006,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                       <Button
                         onClick={() => {

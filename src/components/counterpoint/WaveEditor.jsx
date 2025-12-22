@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Square, Save, Trash2, Plus, RefreshCw, FileText, MoreVertical } from 'lucide-react';
+import { Play, Square, Save, Trash2, Plus, RefreshCw, FileText, MoreVertical, Edit2 } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
@@ -233,6 +233,8 @@ export default function WaveEditor({
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renamingName, setRenamingName] = useState('');
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -901,19 +903,8 @@ export default function WaveEditor({
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Name + Buttons + Library */}
+      {/* Top Row: Buttons + Library */}
       <div className="flex items-end gap-3">
-        {/* Name Input */}
-        <div className="flex-1 space-y-1.5">
-          <Label className="text-white/70 text-xs uppercase tracking-wider">Instrument Name</Label>
-          <Input
-            value={instrument.name}
-            onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-            placeholder="Instrument name..."
-          />
-        </div>
-
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
@@ -952,11 +943,11 @@ export default function WaveEditor({
           )}
         </div>
 
-        {/* Instrument Library Dropdown */}
-        <div className="w-64 flex-shrink-0 space-y-1.5">
+        {/* Instrument Library Dropdown + Rename */}
+        <div className="flex-1 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">INSTRUMENT</Label>
           <div className="flex gap-2">
-            <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
+            <Popover open={libraryOpen} onOpenChange={setLibraryOpen} modal={true}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -1107,9 +1098,58 @@ export default function WaveEditor({
               </Command>
             </PopoverContent>
             </Popover>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setRenamingName(instrument.name);
+                setRenameDialogOpen(true);
+              }}
+              className="h-9 w-9 p-0 bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Rename Dialog */}
+      <RenameDialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <RenameDialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white z-[10001]">
+          <RenameDialogHeader>
+            <RenameDialogTitle className="text-white">Rename Instrument</RenameDialogTitle>
+          </RenameDialogHeader>
+          <form onSubmit={(e) => { 
+            e.preventDefault(); 
+            setInstrument({ ...instrument, name: renamingName });
+            setRenameDialogOpen(false);
+          }} className="space-y-4">
+            <Input
+              value={renamingName}
+              onChange={(e) => setRenamingName(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white"
+              placeholder="Instrument name..."
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRenameDialogOpen(false)}
+                className="border-slate-600 text-white hover:bg-slate-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-900"
+              >
+                Rename
+              </Button>
+            </div>
+          </form>
+        </RenameDialogContent>
+      </RenameDialog>
 
       {/* Second Row: Waveform Preview + ADSR Controls */}
       <div className="flex gap-3">
