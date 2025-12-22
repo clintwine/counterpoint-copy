@@ -116,6 +116,8 @@ export default function CounterpointGenerator() {
   const [pianoPopout, setPianoPopout] = useState(false);
   const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
   const [previewingSongId, setPreviewingSongId] = useState(null);
+  const [librarySearchQuery, setLibrarySearchQuery] = useState('');
+  const [librarySortBy, setLibrarySortBy] = useState('updated');
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
