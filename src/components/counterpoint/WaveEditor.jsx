@@ -487,6 +487,19 @@ export default function WaveEditor({
     filter.frequency.value = filterConfig.frequency || 2000;
     filter.Q.value = filterConfig.Q || 1;
 
+    // Create EQ chain if present
+    const eqNodes = [];
+    if (inst.eq && inst.eq.length > 0) {
+      inst.eq.forEach(band => {
+        const eqFilter = audioContext.createBiquadFilter();
+        eqFilter.type = band.type || 'peaking';
+        eqFilter.frequency.value = band.frequency || 1000;
+        eqFilter.Q.value = band.Q || 1;
+        eqFilter.gain.value = band.gain || 0;
+        eqNodes.push(eqFilter);
+      });
+    }
+
     const now = audioContext.currentTime;
     const { attack, decay, sustain, release } = inst.envelope;
     const duration = 1;
@@ -583,8 +596,20 @@ export default function WaveEditor({
     }
 
     outputNode.connect(masterGain);
-    masterGain.connect(analyser);
-    analyser.connect(audioContext.destination);
+    // Chain: oscillators -> filter -> EQ -> distortion -> bitcrush -> master -> analyser
+    let outputNode = filter;
+
+    // Apply EQ after filter
+    if (eqNodes.length > 0) {
+      eqNodes.forEach(eqNode => {
+        outputNode.connect(eqNode);
+        outputNode = eqNode;
+      });
+    }
+
+    // Connect rest of effects chain
+    // Effects already connected above in new chain
+    // outputNode.connect(masterGain); (already done)
 
     masterGain.gain.setValueAtTime(0, now);
     masterGain.gain.linearRampToValueAtTime((inst.volume ?? 1) * 0.3, now + attack);

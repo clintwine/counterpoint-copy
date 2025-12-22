@@ -12,6 +12,7 @@ export default function Layout({ children }) {
             background: '#2D2D2D',
             color: '#fff',
             border: '1px solid #3A3A3A',
+            zIndex: 99999,
           },
           success: {
             iconTheme: {
