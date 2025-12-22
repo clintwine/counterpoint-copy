@@ -146,10 +146,10 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Go to start"
           >
-            <SkipBack className="w-4 h-4" />
+            <SkipBack className="w-5 h-5" />
           </Button>
 
           <Button
@@ -160,10 +160,10 @@ export default function PlaybackControls({
               const prevMeasure = Math.max(0, currentMeasure - 1);
               onSeek(prevMeasure * beatsPerMeasure);
             }}
-            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Previous measure"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M11 6l-6 6 6 6V6z" />
               <path d="M18 6l-6 6 6 6V6z" />
             </svg>
@@ -173,12 +173,12 @@ export default function PlaybackControls({
             onClick={onPlayPause}
             variant="ghost"
             size="sm"
-            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4" />
+              <Pause className="w-5 h-5 fill-current" />
             ) : (
-              <Play className="w-4 h-4 ml-0.5" />
+              <Play className="w-5 h-5 ml-0.5 fill-current" />
             )}
           </Button>
 
@@ -191,10 +191,10 @@ export default function PlaybackControls({
               const nextBeat = Math.min(totalBeats - 1, nextMeasure * beatsPerMeasure);
               onSeek(nextBeat);
             }}
-            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Next measure"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 6l6 6-6 6V6z" />
               <path d="M13 6l6 6-6 6V6z" />
             </svg>
@@ -204,10 +204,10 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onStop}
-            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Stop"
           >
-            <Square className="w-3.5 h-3.5 fill-current" />
+            <Square className="w-4.5 h-4.5 fill-current" />
           </Button>
 
           <Button
@@ -215,7 +215,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             disabled={isPlaying && !isRecording}
-            className={`h-[33px] w-[33px] p-0 rounded ${
+            className={`h-[38px] w-[38px] p-0 rounded ${
               isRecording 
                 ? 'text-red-500 hover:text-red-400 hover:bg-white/10' 
                 : isCountingIn
@@ -225,9 +225,9 @@ export default function PlaybackControls({
             title={isRecording ? 'Stop recording' : 'Record'}
           >
             {isCountingIn ? (
-              <span className="text-xs font-bold">{countInBeats}</span>
+              <span className="text-sm font-bold">{countInBeats}</span>
             ) : (
-              <Circle className="w-3.5 h-3.5 fill-current" />
+              <Circle className="w-4.5 h-4.5 fill-current" />
             )}
           </Button>
 
@@ -235,10 +235,10 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onLoopToggle}
-            className={`h-[33px] w-[33px] p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+            className={`h-[38px] w-[38px] p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
             title="Loop"
           >
-            <Repeat className="w-4 h-4" />
+            <Repeat className="w-5 h-5" />
           </Button>
           </div>
 
