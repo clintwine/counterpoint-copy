@@ -211,12 +211,23 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -300 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -300 }}
-      className="fixed left-4 top-20 bottom-4 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
-    >
+    <>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/20 z-40"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <motion.div
+        initial={{ opacity: 0, x: -300 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -300 }}
+        className="fixed left-4 top-20 bottom-4 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
+      >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -316,5 +327,6 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
