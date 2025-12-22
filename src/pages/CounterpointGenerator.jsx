@@ -1116,93 +1116,167 @@ export default function CounterpointGenerator() {
                 </DialogTrigger>
                 <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-2xl [&>button]:text-white/70 [&>button]:hover:text-white">
                   <DialogHeader>
-                    <DialogTitle className="text-white">Browse Songs</DialogTitle>
+                    <DialogTitle className="text-white">Browse Library</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                    {songs.length === 0 ? (
-                      <p className="text-white/60 text-sm text-center py-4">No songs available</p>
-                    ) : (
-                      songs.map((song) => (
-                        <div
-                          key={song.id}
-                          className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
-                          onClick={() => handleLoadSong(song)}
-                        >
-                          <div className="flex-1">
-                            <p className="text-white font-medium text-lg">{song.name}</p>
-                            <p className="text-white/70 text-sm mt-1">{song.description}</p>
-                            <div className="flex gap-2 mt-2 flex-wrap">
-                              <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
-                                {song.settings?.key || 'C'} {song.settings?.mode || 'major'}
-                              </span>
-                              <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
-                                {song.settings?.timeSignature || '4/4'}
-                              </span>
-                              <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
-                                {(() => {
-                                  const maxBeat = Math.max(...(song.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
-                                  const tempo = song.settings?.tempo || 80;
-                                  const sixteenthNoteDuration = (60 / tempo) / 4;
-                                  const totalSeconds = maxBeat * sixteenthNoteDuration;
-                                  const minutes = Math.floor(totalSeconds / 60);
-                                  const seconds = Math.floor(totalSeconds % 60);
-                                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                })()}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => handlePreviewSong(song, e)}
-                              className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}
+                  <Tabs defaultValue="songs" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-[#1A1A1A]">
+                      <TabsTrigger value="songs" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
+                        Song Library
+                      </TabsTrigger>
+                      <TabsTrigger value="projects" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
+                        My Projects
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="songs" className="mt-4">
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        {songs.length === 0 ? (
+                          <p className="text-white/60 text-sm text-center py-4">No songs available</p>
+                        ) : (
+                          songs.map((song) => (
+                            <div
+                              key={song.id}
+                              className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
+                              onClick={() => handleLoadSong(song)}
                             >
-                              {previewingSongId === song.id ? '⏹' : '▶'}
-                            </Button>
-                            {currentUser?.role === 'admin' && (
-                              <>
+                              <div className="flex-1">
+                                <p className="text-white font-medium text-lg">{song.name}</p>
+                                <p className="text-white/70 text-sm mt-1">{song.description}</p>
+                                <div className="flex gap-2 mt-2 flex-wrap">
+                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+                                    {song.settings?.key || 'C'} {song.settings?.mode || 'major'}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                                    {song.settings?.timeSignature || '4/4'}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
+                                    {(() => {
+                                      const maxBeat = Math.max(...(song.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
+                                      const tempo = song.settings?.tempo || 80;
+                                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                                      const totalSeconds = maxBeat * sixteenthNoteDuration;
+                                      const minutes = Math.floor(totalSeconds / 60);
+                                      const seconds = Math.floor(totalSeconds % 60);
+                                      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                    })()}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingSong(song);
-                                    setSongName(song.name);
-                                    setSongDescription(song.description || '');
-                                    setEditSongDialogOpen(true);
-                                  }}
-                                  className="text-white/60 hover:text-white"
+                                  onClick={(e) => handlePreviewSong(song, e)}
+                                  className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}
                                 >
-                                  <Edit2 className="w-4 h-4" />
+                                  {previewingSongId === song.id ? '⏹' : '▶'}
                                 </Button>
+                                {currentUser?.role === 'admin' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingSong(song);
+                                        setSongName(song.name);
+                                        setSongDescription(song.description || '');
+                                        setEditSongDialogOpen(true);
+                                      }}
+                                      className="text-white/60 hover:text-white"
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (confirm(`Delete "${song.name}"?`)) {
+                                          deleteSongMutation.mutate(song.id);
+                                        }
+                                      }}
+                                      className="text-red-400 hover:text-red-300"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-amber-400 hover:text-amber-300"
+                                >
+                                  Load →
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="projects" className="mt-4">
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        {savedProjects.length === 0 ? (
+                          <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p>
+                        ) : (
+                          savedProjects.map((project) => (
+                            <div
+                              key={project.id}
+                              className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
+                              onClick={() => { handleLoadProject(project); setSongDialogOpen(false); }}
+                            >
+                              <div className="flex-1">
+                                <p className="text-white font-medium text-lg">{project.name}</p>
+                                <div className="flex gap-2 mt-2 flex-wrap">
+                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+                                    {project.settings?.key || 'C'} {project.settings?.mode || 'major'}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                                    {project.settings?.timeSignature || '4/4'}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
+                                    {(() => {
+                                      const maxBeat = Math.max(...(project.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
+                                      const tempo = project.settings?.tempo || 80;
+                                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                                      const totalSeconds = maxBeat * sixteenthNoteDuration;
+                                      const minutes = Math.floor(totalSeconds / 60);
+                                      const seconds = Math.floor(totalSeconds % 60);
+                                      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                    })()}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (confirm(`Delete "${song.name}"?`)) {
-                                      deleteSongMutation.mutate(song.id);
+                                    if (confirm(`Delete "${project.name}"?`)) {
+                                      deleteProjectMutation.mutate(project.id);
                                     }
                                   }}
                                   className="text-red-400 hover:text-red-300"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
-                              </>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-amber-400 hover:text-amber-300"
-                            >
-                              Load →
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-amber-400 hover:text-amber-300"
+                                >
+                                  Load →
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </DialogContent>
               </Dialog>
 
