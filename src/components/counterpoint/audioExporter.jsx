@@ -112,8 +112,8 @@ export async function renderToWav(notes, tempo, instrumentName) {
   // Render each note
   validNotes.forEach(note => {
     const frequency = noteToFrequency(note.pitch);
-    const startTime = note.beat * (60 / tempo) / 4;
-    const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
+    const startTime = Math.max(0, note.beat * (60 / tempo) / 4);
+    const noteDuration = Math.max(0.05, (note.duration || 1) * (60 / tempo) / 4);
     const velocity = note.velocity || 0.8;
     
     // Create oscillators based on instrument
@@ -133,15 +133,19 @@ export async function renderToWav(notes, tempo, instrumentName) {
         filterNode.Q.value = instrument.filter.Q;
       }
       
-      // Apply envelope
-      const attack = 0.02;
-      const release = 0.1;
+      // Apply envelope - ensure all times are non-negative
+      const attack = Math.min(0.02, noteDuration * 0.3);
+      const release = Math.min(0.1, noteDuration * 0.3);
       const sustainLevel = velocity * osc.gain * 0.3;
       
+      const attackTime = Math.max(0, startTime + attack);
+      const releaseStartTime = Math.max(attackTime, startTime + noteDuration - release);
+      const releaseEndTime = Math.max(releaseStartTime, startTime + noteDuration);
+      
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(sustainLevel, startTime + attack);
-      gainNode.gain.setValueAtTime(sustainLevel, startTime + noteDuration - release);
-      gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
+      gainNode.gain.linearRampToValueAtTime(sustainLevel, attackTime);
+      gainNode.gain.setValueAtTime(sustainLevel, releaseStartTime);
+      gainNode.gain.linearRampToValueAtTime(0, releaseEndTime);
       
       oscillator.connect(gainNode);
       if (filterNode) {
@@ -152,7 +156,7 @@ export async function renderToWav(notes, tempo, instrumentName) {
       }
       
       oscillator.start(startTime);
-      oscillator.stop(startTime + noteDuration);
+      oscillator.stop(releaseEndTime);
     });
   });
   

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -1359,7 +1359,9 @@ export default function NoteGrid({
                 Import MIDI
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
+                const toastId = 'audio-export';
                 try {
+                  toast.loading('Generating audio file...', { id: toastId });
                   const { renderToWav } = await import('../counterpoint/audioExporter');
                   const blob = await renderToWav(cantusFirmus, tempo, voices[0]?.instrument || 'organ');
                   
@@ -1371,9 +1373,10 @@ export default function NoteGrid({
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
+                  toast.success('Audio file downloaded', { id: toastId });
                 } catch (error) {
                   console.error('Export audio error:', error);
-                  alert('Failed to export audio: ' + error.message);
+                  toast.error('Failed to export audio: ' + error.message, { id: toastId });
                 }
               }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Download className="w-4 h-4 mr-2" />
