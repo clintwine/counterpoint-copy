@@ -1785,7 +1785,7 @@ export default function NoteGrid({
                   ref={gridRef}
                   className={`overflow-auto relative select-none mx-2 sm:mx-5 ${
                     isFullscreen
-                      ? (showPianoPanel ? 'h-[calc(100vh-420px)]' : 'h-[calc(100vh-250px)]')
+                      ? (showPianoPanel ? 'h-[calc(100vh-390px)]' : 'h-[calc(100vh-220px)]')
                       : (showPianoPanel 
                           ? 'max-h-[47vh] sm:max-h-[488px]'
                           : 'max-h-[66vh] sm:max-h-[648px]')
