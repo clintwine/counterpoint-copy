@@ -161,6 +161,7 @@ export default function CounterpointGenerator() {
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const playbackRef = useRef(null);
   const animationRef = useRef(null);
