@@ -1395,6 +1395,14 @@ export default function CounterpointGenerator() {
                         onChange={(e) => setLibrarySearchQuery(e.target.value)}
                         className="w-full bg-[#1A1A1A] border border-[#3A3A3A] rounded-lg px-10 py-2 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
                       />
+                      {librarySearchQuery && (
+                        <button
+                          onClick={() => setLibrarySearchQuery('')}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                     <Select value={librarySortBy} onValueChange={setLibrarySortBy}>
                       <SelectTrigger className="w-40 bg-[#1A1A1A] border-[#3A3A3A] text-white text-sm">
@@ -1419,7 +1427,7 @@ export default function CounterpointGenerator() {
                     </TabsList>
                     
                     <TabsContent value="songs" className="mt-4">
-                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      <div className="space-y-2 max-h-[400px] min-h-[400px] overflow-y-auto">
                         {(() => {
                           const filtered = songs.filter(song => 
                             song.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
@@ -1525,7 +1533,7 @@ export default function CounterpointGenerator() {
                     </TabsContent>
 
                     <TabsContent value="projects" className="mt-4">
-                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      <div className="space-y-2 max-h-[400px] min-h-[400px] overflow-y-auto">
                         {(() => {
                           const filtered = savedProjects.filter(project => 
                             project.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
