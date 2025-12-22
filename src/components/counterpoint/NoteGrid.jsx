@@ -350,38 +350,26 @@ export default function NoteGrid({
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
 
-  // Detect fullscreen mode - check multiple vendor prefixes
+  // Detect window size changes (including fullscreen)
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      const fullscreenElement = document.fullscreenElement || 
-                                document.webkitFullscreenElement || 
-                                document.mozFullScreenElement || 
-                                document.msFullscreenElement;
-      setIsFullscreen(!!fullscreenElement);
-      console.log('[NoteGrid] Fullscreen changed:', !!fullscreenElement);
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+      console.log('[NoteGrid] Window height:', window.innerHeight);
     };
 
-    // Listen to all vendor-specific events
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Check initial
     
-    // Check initial state
-    handleFullscreenChange();
-    
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Consider fullscreen if window height is very large
+  const isFullscreen = windowHeight > 900;
 
   // Audio visualizer
   useEffect(() => {
