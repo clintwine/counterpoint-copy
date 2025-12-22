@@ -943,30 +943,28 @@ export default function NoteGrid({
             lastTapRef.current = { key: noteKey, time: now };
 
             if (!isDoubleTap) {
-              // In paint mode, add note immediately on mousedown
-              if (paintMode) {
-                const noteExists = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
-                if (!noteExists) {
-                  const newNotes = [...cantusFirmus, { 
-                    pitch, 
-                    beat, 
-                    duration: lastNoteDuration, 
-                    velocity: 0.8 
-                  }].sort((a, b) => a.beat - b.beat);
-                  onNotesUpdate(newNotes);
-                  
-                  // Play the note with proper duration for feedback
-                  initAudio();
-                  const instrument = voices[activeVoice]?.instrument || 'organ';
-                  playNote(pitch, 0.5, 0.7, 0, instrument);
-                }
+              // Add note immediately on mousedown
+              const noteExists = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
+              if (!noteExists) {
+                const newNotes = [...cantusFirmus, { 
+                  pitch, 
+                  beat, 
+                  duration: lastNoteDuration, 
+                  velocity: 0.8 
+                }].sort((a, b) => a.beat - b.beat);
+                saveToHistory(newNotes);
+                onNotesUpdate(newNotes);
                 
+                // Play the note with proper duration for feedback
+                initAudio();
+                const instrument = voices[activeVoice]?.instrument || 'organ';
+                playNote(pitch, 0.5, 0.7, 0, instrument);
+              }
+              
+              // Enable painting mode if paintMode is on
+              if (paintMode) {
                 setIsPainting(true);
                 paintedNotesRef.current = new Set([noteKey]);
-              } else {
-                // Non-paint mode: Store pending note - will be added on mouseup
-                console.log('[NoteGrid] Setting pendingNote', { pitch, beat });
-                setPendingNote({ pitch, beat, clickX: coords.clientX, clickY: coords.clientY });
               }
 
               // Clear selection and loop
