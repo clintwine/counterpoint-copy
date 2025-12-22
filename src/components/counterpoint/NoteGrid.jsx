@@ -2038,13 +2038,9 @@ export default function NoteGrid({
               const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
               const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + viewportState.height) / CELL_HEIGHT) + 5);
 
-              // Calculate visible beat range - need to look back further to catch long notes
+              // Calculate visible beat range
               const visibleStartBeat = Math.max(0, Math.floor(viewportState.scrollLeft / CELL_WIDTH) - 2);
               const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + viewportState.width) / CELL_WIDTH) + 2);
-
-              // Find max note duration to determine how far back to look for notes
-              const maxNoteDuration = Math.max(16, ...cantusFirmus.map(n => n.duration || 1));
-              const lookbackBeats = Math.ceil(maxNoteDuration);
               
               return (
                 <>
@@ -2064,31 +2060,13 @@ export default function NoteGrid({
                         {visibleStartBeat > 0 && (
                           <div style={{ width: visibleStartBeat * CELL_WIDTH, flexShrink: 0 }} />
                         )}
-
+                        
                         {Array.from({ length: visibleEndBeat - visibleStartBeat }).map((_, i) => {
                           const beat = visibleStartBeat + i;
                           const isBarLine = beat % beatsPerMeasure === 0 && beat !== 0;
                           const noteKey = getNoteKey(pitch, beat);
                           const isSelected = selectedNotes.has(noteKey);
-
-                          // Get notes at this beat AND notes that start earlier but extend into this cell
-                          const notesAtBeat = notesMap.get(`${pitch}-${beat}`) || [];
-                          const extendingNotes = [];
-                          for (let lookback = 1; lookback <= lookbackBeats; lookback++) {
-                            const earlierBeat = beat - lookback;
-                            if (earlierBeat >= 0) {
-                              const earlierNotesAtPos = notesMap.get(`${pitch}-${Math.floor(earlierBeat)}`) || [];
-                              earlierNotesAtPos.forEach(({ voiceIndex, note }) => {
-                                const noteEnd = note.beat + (note.duration || 1);
-                                // Include if note extends past this beat's start
-                                if (note.beat < beat && noteEnd > beat && Math.floor(note.beat) === earlierBeat) {
-                                  extendingNotes.push({ voiceIndex, note });
-                                }
-                              });
-                            }
-                          }
-                          const notesAtPosition = [...notesAtBeat, ...extendingNotes];
-
+                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
                           const isCurrentBeat = currentBeat === beat;
                           const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
 
