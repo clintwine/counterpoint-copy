@@ -22,6 +22,13 @@ const DEFAULT_INSTRUMENT = {
   envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
   effects: [
     { type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }
+  ],
+  eq: [
+    { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+    { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+    { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+    { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+    { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
   ]
 };
 
@@ -211,7 +218,7 @@ export default function WaveEditor({
   currentInstrumentConfig = null,
   presetLibrary = []
 }) {
-  const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
+  const [instrument, setInstrument] = useState(() => ({ ...DEFAULT_INSTRUMENT, eq: [...DEFAULT_INSTRUMENT.eq] }));
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingBuiltin, setEditingBuiltin] = useState(null);
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
@@ -1690,13 +1697,7 @@ export default function WaveEditor({
                   {/* EQ Curve */}
                   <path
                     d={(() => {
-                      const eqBands = instrument.eq || [
-                        { frequency: 60, gain: 0, Q: 1 },
-                        { frequency: 250, gain: 0, Q: 1 },
-                        { frequency: 1000, gain: 0, Q: 1 },
-                        { frequency: 4000, gain: 0, Q: 1 },
-                        { frequency: 12000, gain: 0, Q: 1 }
-                      ];
+                      const eqBands = instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq;
                       
                       const freqToX = (freq) => {
                         const logMin = Math.log10(20);
@@ -1732,13 +1733,7 @@ export default function WaveEditor({
                   />
                   
                   {/* EQ Band Markers */}
-                  {(instrument.eq || [
-                    { frequency: 60, gain: 0, Q: 1 },
-                    { frequency: 250, gain: 0, Q: 1 },
-                    { frequency: 1000, gain: 0, Q: 1 },
-                    { frequency: 4000, gain: 0, Q: 1 },
-                    { frequency: 12000, gain: 0, Q: 1 }
-                  ]).map((band, i) => {
+                  {(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq).map((band, i) => {
                     const freqToX = (freq) => {
                       const logMin = Math.log10(20);
                       const logMax = Math.log10(20000);
@@ -1765,13 +1760,7 @@ export default function WaveEditor({
               
               {/* EQ Band Controls */}
               <div className="grid grid-cols-5 gap-3">
-                {(instrument.eq || [
-                  { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
-                  { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
-                  { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
-                  { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
-                  { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
-                ]).map((band, i) => (
+                {(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq).map((band, i) => (
                   <div key={i} className="bg-slate-700/50 rounded-lg p-3 space-y-2">
                     <div className="text-center">
                       <span className="text-white/60 text-xs font-medium">
@@ -1784,8 +1773,8 @@ export default function WaveEditor({
                       <Select
                         value={band.type || 'peaking'}
                         onValueChange={(v) => {
-                          const newEq = [...(instrument.eq || [])];
-                          newEq[i] = { ...band, type: v };
+                          const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                          newEq[i] = { ...newEq[i], type: v };
                           setInstrument({ ...instrument, eq: newEq });
                         }}
                       >
@@ -1819,8 +1808,8 @@ export default function WaveEditor({
                           step="0.01"
                           value={Math.log10(band.frequency)}
                           onChange={(e) => {
-                            const newEq = [...(instrument.eq || [])];
-                            newEq[i] = { ...band, frequency: Math.round(Math.pow(10, parseFloat(e.target.value))) };
+                            const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                            newEq[i] = { ...newEq[i], frequency: Math.round(Math.pow(10, parseFloat(e.target.value))) };
                             setInstrument({ ...instrument, eq: newEq });
                           }}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -1849,8 +1838,8 @@ export default function WaveEditor({
                           step="0.5"
                           value={band.gain}
                           onChange={(e) => {
-                            const newEq = [...(instrument.eq || [])];
-                            newEq[i] = { ...band, gain: parseFloat(e.target.value) };
+                            const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                            newEq[i] = { ...newEq[i], gain: parseFloat(e.target.value) };
                             setInstrument({ ...instrument, eq: newEq });
                           }}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -1880,8 +1869,8 @@ export default function WaveEditor({
                             step="0.1"
                             value={band.Q}
                             onChange={(e) => {
-                              const newEq = [...(instrument.eq || [])];
-                              newEq[i] = { ...band, Q: parseFloat(e.target.value) };
+                              const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                              newEq[i] = { ...newEq[i], Q: parseFloat(e.target.value) };
                               setInstrument({ ...instrument, eq: newEq });
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
