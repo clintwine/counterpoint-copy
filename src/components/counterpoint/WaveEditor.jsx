@@ -107,7 +107,8 @@ export default function WaveEditor({
   onVoiceInstrumentChange,
   onClose,
   currentInstrument = null,
-  currentInstrumentConfig = null
+  currentInstrumentConfig = null,
+  presetLibrary = []
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
@@ -117,7 +118,7 @@ export default function WaveEditor({
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // Load current instrument when opening editor
+  // Load current instrument when opening editor - only run once on mount
   useEffect(() => {
     if (currentInstrumentConfig) {
       // Ensure all required fields exist
@@ -132,11 +133,17 @@ export default function WaveEditor({
       if (currentInstrument?.startsWith('custom_')) {
         const index = parseInt(currentInstrument.split('_')[1]);
         setEditingIndex(index);
+      } else if (currentInstrument?.startsWith('preset_')) {
+        setEditingIndex(-1);
       } else {
         setEditingIndex(-1);
       }
+    } else {
+      // No config provided - start fresh
+      setInstrument({ ...DEFAULT_INSTRUMENT });
+      setEditingIndex(-1);
     }
-  }, [currentInstrument, currentInstrumentConfig]);
+  }, []);
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
@@ -715,7 +722,7 @@ export default function WaveEditor({
         <div className="w-40 flex-shrink-0 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Library</Label>
           <div className="bg-slate-700/50 rounded-lg p-2 space-y-1 max-h-[140px] overflow-y-auto">
-            {PRESET_LIBRARY.map((preset, i) => (
+            {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY).map((preset, i) => (
               <div key={`lib-${i}`} className="flex items-center gap-0.5 group">
                 <Button
                   variant="ghost"
