@@ -164,8 +164,8 @@ export default function PlaybackControls({
             title="Previous measure"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 2l-7 10 7 10V2z" />
-              <path d="M18 2l-7 10 7 10V2z" />
+              <path d="M8 2l-8 10 8 10V2z" />
+              <path d="M18 2l-6 10 6 10V2z" />
             </svg>
           </Button>
 
@@ -195,8 +195,8 @@ export default function PlaybackControls({
             title="Next measure"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 2l7 10-7 10V2z" />
-              <path d="M15 2l7 10-7 10V2z" />
+              <path d="M6 2l6 10-6 10V2z" />
+              <path d="M16 2l8 10-8 10V2z" />
             </svg>
           </Button>
 
