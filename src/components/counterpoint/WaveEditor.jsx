@@ -1664,15 +1664,16 @@ export default function WaveEditor({
           <div className="space-y-4">
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               {/* EQ Frequency Display */}
-              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4">
+              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4 flex">
+                {/* Y-axis gain labels */}
+                <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-between py-1 text-[9px] text-white/50 pointer-events-none z-10">
+                  <span>+15</span>
+                  <span>+5</span>
+                  <span>0</span>
+                  <span>-5</span>
+                  <span>-15</span>
+                </div>
                 <svg className="w-full h-full" viewBox="0 0 400 192">
-                  {/* Y-axis gain labels */}
-                  <text x="5" y="8" fill="rgba(255,255,255,0.5)" fontSize="9">+15</text>
-                  <text x="5" y="52" fill="rgba(255,255,255,0.5)" fontSize="9">+5</text>
-                  <text x="5" y="100" fill="rgba(255,255,255,0.5)" fontSize="9">0</text>
-                  <text x="5" y="148" fill="rgba(255,255,255,0.5)" fontSize="9">-5</text>
-                  <text x="5" y="190" fill="rgba(255,255,255,0.5)" fontSize="9">-15</text>
-                  
                   {/* Grid lines */}
                   {[0, 48, 96, 144, 192].map((y) => (
                     <line key={`h-${y}`} x1="0" y1={y} x2="400" y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
