@@ -212,7 +212,10 @@ export default function WaveEditor({
   currentInstrumentConfig = null,
   presetLibrary = []
 }) {
-  const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
+  const [instrument, setInstrument] = useState({ 
+    ...DEFAULT_INSTRUMENT,
+    effects: [{ type: 'filter', config: { type: 'lowpass', frequency: 2000, Q: 1 } }]
+  });
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingBuiltin, setEditingBuiltin] = useState(null);
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
@@ -229,7 +232,8 @@ export default function WaveEditor({
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...currentInstrumentConfig,
-        filter: { ...DEFAULT_INSTRUMENT.filter, ...currentInstrumentConfig.filter }
+        filter: { ...DEFAULT_INSTRUMENT.filter, ...currentInstrumentConfig.filter },
+        volume: currentInstrumentConfig.volume ?? 1
       };
       setInstrument(loadedInstrument);
       
@@ -647,7 +651,8 @@ export default function WaveEditor({
       ...instrument,
       lfo: instrument.lfo || { rate: 0, amount: 0, target: 'pitch' },
       distortion: instrument.distortion ?? 0,
-      bitcrush: instrument.bitcrush ?? 0
+      bitcrush: instrument.bitcrush ?? 0,
+      volume: instrument.volume ?? 1
     };
     
     if (editingIndex >= 0) {
@@ -1294,11 +1299,13 @@ export default function WaveEditor({
 
         <TabsContent value="processing" className="mt-0">
           <div className="space-y-2.5">
-            <Label className="text-white/70 text-sm uppercase tracking-wider">Processing</Label>
+            <Label className="text-white/70 text-sm uppercase tracking-wider">Effects & Processing</Label>
             <div className="grid grid-cols-4 gap-3">
-              {/* Filter */}
+              {/* Filter Card */}
               <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <span className="text-white/60 text-sm font-medium">Filter</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-medium">Filter</span>
+                </div>
                 <Select
                   value={instrument.filter.type}
                   onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
@@ -1342,9 +1349,11 @@ export default function WaveEditor({
                 </div>
               </div>
 
-              {/* LFO */}
+              {/* LFO Card */}
               <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <span className="text-white/60 text-sm font-medium">LFO</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-medium">LFO</span>
+                </div>
                 <Select
                   value={instrument.lfo?.target || 'pitch'}
                   onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
@@ -1388,12 +1397,14 @@ export default function WaveEditor({
                 </div>
               </div>
 
-              {/* Effects */}
+              {/* Distortion Card */}
               <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <span className="text-white/60 text-sm font-medium">Effects</span>
-                <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-medium">Distortion</span>
+                </div>
+                <div className="space-y-1 pt-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Distortion</span>
+                    <span className="text-white/40 text-xs">Amount</span>
                     <span className="text-white/60 text-xs">{Math.round(instrument.distortion || 0)}</span>
                   </div>
                   <Slider
@@ -1402,20 +1413,6 @@ export default function WaveEditor({
                     min={0}
                     max={100}
                     step={1}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Bit Crush</span>
-                    <span className="text-white/60 text-xs">{(instrument.bitcrush || 0).toFixed(1)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.bitcrush || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
-                    min={0}
-                    max={16}
-                    step={0.5}
                     className="w-full"
                   />
                 </div>
@@ -1435,9 +1432,25 @@ export default function WaveEditor({
                 </div>
               </div>
 
-              {/* Spread */}
+              {/* Bitcrusher Card */}
               <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <span className="text-white/60 text-sm font-medium">Spread</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60 text-sm font-medium">Bitcrusher</span>
+                </div>
+                <div className="space-y-1 pt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs">Bit Depth</span>
+                    <span className="text-white/60 text-xs">{(instrument.bitcrush || 0).toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    value={[instrument.bitcrush || 0]}
+                    onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
+                    min={0}
+                    max={16}
+                    step={0.5}
+                    className="w-full"
+                  />
+                </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-white/40 text-xs">Unison</span>
@@ -1452,7 +1465,14 @@ export default function WaveEditor({
                     className="w-full"
                   />
                 </div>
-                <div className="space-y-1">
+              </div>
+            </div>
+
+            {/* Spread Section */}
+            <div className="pt-2">
+              <Label className="text-white/70 text-xs uppercase tracking-wider mb-2 block">Voice Spread</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-700/30 rounded p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-white/40 text-xs">Detune</span>
                     <span className="text-white/60 text-xs">{Math.round(instrument.unisonDetune || 0)}</span>
@@ -1466,9 +1486,9 @@ export default function WaveEditor({
                     className="w-full"
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="bg-slate-700/30 rounded p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Stereo</span>
+                    <span className="text-white/40 text-xs">Stereo Width</span>
                     <span className="text-white/60 text-xs">{Math.round((instrument.stereoSpread || 0) * 100)}%</span>
                   </div>
                   <Slider
