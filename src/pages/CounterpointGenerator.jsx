@@ -1842,6 +1842,7 @@ export default function CounterpointGenerator() {
                               snapToGrid={snapToGrid}
                               onSnapToGridChange={setSnapToGrid}
                               chatbotActive={chatbotActive}
+                              projectName={projectName}
                               />
             
             {/* Piano toggle for mobile */}
