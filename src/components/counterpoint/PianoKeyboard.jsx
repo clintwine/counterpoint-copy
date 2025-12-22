@@ -998,7 +998,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             onVoiceInstrumentChange={onVoiceInstrumentChange}
             onClose={() => setShowWaveEditor(false)}
             currentInstrument={instrument}
-            currentInstrumentConfig={getCustomConfig()} />
+            currentInstrumentConfig={getCustomConfig()}
+            presetLibrary={PRESET_LIBRARY} />
 
                 </DialogContent>
               </Dialog>
