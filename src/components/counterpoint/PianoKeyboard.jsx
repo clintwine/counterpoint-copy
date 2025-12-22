@@ -985,8 +985,14 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
 
       {/* Wave Editor Modal */}
-              <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor} modal={false}>
-                <DialogContent className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999]" onInteractOutside={(e) => e.preventDefault()}>
+              <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
+                <DialogContent 
+                  className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999]" 
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                  onPointerDownOutside={(e) => e.preventDefault()}
+                  onInteractOutside={(e) => e.preventDefault()}
+                >
                   <DialogHeader className="pb-3">
                     <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                   </DialogHeader>
