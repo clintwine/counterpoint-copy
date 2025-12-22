@@ -5,7 +5,7 @@ import { X, Send, Loader2, Sparkles, Play, Square, Music } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { initAudio, playNote, stopAllNotes } from './audioEngine';
+import { initAudio, playNote, stopAllNotes, playNoteWithCustomInstrument } from './audioEngine';
 
 export default function AIChatbot({ 
   isOpen, 
@@ -15,7 +15,9 @@ export default function AIChatbot({
   onApplyMelody,
   currentNotes,
   messages,
-  onMessagesChange
+  onMessagesChange,
+  instrument = 'organ',
+  customInstruments = []
 }) {
   const setMessages = onMessagesChange;
   const [input, setInput] = useState('');
@@ -236,11 +238,40 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
     const msPerBeat = sixteenthNoteDuration * 1000;
     const timeouts = [];
 
+    // Get custom config if using custom instrument
+    const getCustomConfig = () => {
+      if (instrument.startsWith('custom_')) {
+        const index = parseInt(instrument.split('_')[1]);
+        return customInstruments[index];
+      }
+      if (instrument.startsWith('preset_')) {
+        const index = parseInt(instrument.split('_')[1]);
+        const PRESET_LIBRARY = [
+          { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+          { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+        ];
+        return PRESET_LIBRARY[index];
+      }
+      return null;
+    };
+
+    const customConfig = getCustomConfig();
+
     notes.forEach((note) => {
       const startTime = (note.beat || 0) * msPerBeat;
       const timeout = setTimeout(() => {
         const duration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-        playNote(note.pitch, duration, 0.7, 0, 'organ');
+        if (customConfig) {
+          playNoteWithCustomInstrument(note.pitch, duration, 0.7, customConfig);
+        } else {
+          playNote(note.pitch, duration, 0.7, 0, instrument);
+        }
       }, startTime);
       timeouts.push(timeout);
     });

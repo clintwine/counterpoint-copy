@@ -2170,6 +2170,8 @@ export default function CounterpointGenerator() {
             messages={chatbotMessages}
             onMessagesChange={setChatbotMessages}
             onApplyMelody={(notes) => setCantusFirmus(notes)}
+            instrument={voices[0]?.instrument || 'organ'}
+            customInstruments={customInstruments}
             onApplyHarmony={(notes, voiceType) => {
               // Map voice type to voice index
               const voiceMap = { soprano: 1, alto: 2, tenor: 2, bass: 3 };
