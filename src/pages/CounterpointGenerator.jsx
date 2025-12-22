@@ -13,7 +13,8 @@ import {
   Sparkles,
   X,
   Edit2,
-  Trash2
+  Trash2,
+  Search
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
