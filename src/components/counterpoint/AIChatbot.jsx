@@ -86,8 +86,20 @@ CURRENT COMPOSITION CONTEXT:
 - Tempo: ${tempo} BPM
 - Time signature: ${settings.timeSignature || '4/4'}
 - Available beats: 0 to ${settings.measures * 16}
+${currentNotes && currentNotes.length > 0 ? `
+- EXISTING MELODY IN SCORE: ${currentNotes.length} notes
+${JSON.stringify(currentNotes.slice(0, 20))}
+${currentNotes.length > 20 ? `... (${currentNotes.length - 20} more notes)` : ''}
+
+NOTE: The user may want to edit/extend this existing melody rather than replace it.` : '- No existing melody in score (starting fresh)'}
 
 USER REQUEST: "${userMessage}"
+
+EDITING INSTRUCTIONS:
+- If the user asks to "edit", "extend", "add to", "modify", or "continue" an existing melody, incorporate the existing notes
+- For "extend" requests: start where the existing melody ends (beat = last note's beat + duration)
+- For "edit" requests: modify specific sections while keeping the rest intact
+- For "replace" or fresh generation requests: create entirely new melody starting from beat 0
 
 GENERATION REQUIREMENTS:
 

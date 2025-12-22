@@ -136,7 +136,7 @@ export default function CounterpointGenerator() {
   const [chatbotMessages, setChatbotMessages] = useState([
     { 
       role: 'assistant', 
-      content: "Hi! I'm your AI composer trained on Bach's Inventions. Tell me what kind of melody you'd like and I'll create it for you!\n\nExamples:\n• \"Create a 64-note flowing melody\"\n• \"Make a virtuosic passage with lots of sixteenth notes\"\n• \"Generate an expressive melodic line\""
+      content: "Hi! I'm your AI composer trained on Bach's Inventions. I can create new melodies or edit existing ones!\n\nExamples:\n• \"Create a 64-note flowing melody\"\n• \"Extend the current melody by 32 notes\"\n• \"Edit measures 5-8 to be more virtuosic\"\n• \"Add a contrasting section after the current melody\""
     }
   ]);
   const [activeVoice, setActiveVoice] = useState(0);
