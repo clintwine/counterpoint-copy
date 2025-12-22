@@ -119,6 +119,7 @@ export default function CounterpointGenerator() {
   const [previewingSongId, setPreviewingSongId] = useState(null);
   const [librarySearchQuery, setLibrarySearchQuery] = useState('');
   const [librarySortBy, setLibrarySortBy] = useState('updated');
+  const [libraryActiveTab, setLibraryActiveTab] = useState('songs');
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -1147,7 +1148,7 @@ export default function CounterpointGenerator() {
                     </Select>
                   </div>
 
-                  <Tabs defaultValue="songs" className="w-full">
+                  <Tabs value={libraryActiveTab} onValueChange={setLibraryActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-2 bg-[#1A1A1A]">
                       <TabsTrigger value="songs" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
                         Song Library
@@ -1514,7 +1515,7 @@ export default function CounterpointGenerator() {
                                     setSaveDialogOpen(true);
                                   }}
                                   onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                                  onLoadProject={() => setLoadDialogOpen(true)}
+                                  onLoadProject={() => { setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
                                   onBrowseSongs={() => setSongDialogOpen(true)}
                                   onExport={handleExport}
                                   onAIComposer={async () => {
@@ -1623,7 +1624,7 @@ export default function CounterpointGenerator() {
                                 setSaveDialogOpen(true);
                               }}
                               onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                              onLoadProject={() => setLoadDialogOpen(true)}
+                              onLoadProject={() => { setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
                               onBrowseSongs={() => setSongDialogOpen(true)}
                               onExport={handleExport}
                               onAIComposer={async () => {
