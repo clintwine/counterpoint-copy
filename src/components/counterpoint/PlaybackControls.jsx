@@ -164,18 +164,17 @@ export default function PlaybackControls({
 
           <Button
             onClick={onPlayPause}
-            variant="ghost"
             size="sm"
             className={`h-7 w-7 p-0 rounded ${
               isPlaying 
-                ? 'text-white/90 hover:text-white hover:bg-white/10' 
-                : 'text-green-500 hover:text-green-400 hover:bg-green-500/20'
+                ? 'bg-transparent text-white/90 hover:text-white hover:bg-white/10' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
             }`}
           >
             {isPlaying ? (
               <Pause className="w-4 h-4" />
             ) : (
-              <Play className="w-4 h-4 ml-0.5" />
+              <Play className="w-4 h-4 ml-0.5 fill-white" />
             )}
           </Button>
 
