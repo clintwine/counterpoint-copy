@@ -1006,8 +1006,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                    <div className="flex items-center gap-2">
                       <Button
                         onClick={() => {
                           const nextNumber = customInstruments.length + 1;
@@ -1032,6 +1031,21 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         <Plus className="w-3.5 h-3.5 mr-1.5" />
                         New
                       </Button>
+                      <Button
+                        onClick={() => {
+                          const editingIndex = instrument.name.startsWith('Custom') 
+                            ? customInstruments.findIndex(inst => inst.name === instrument.name)
+                            : -1;
+                          if (editingIndex >= 0 && confirm(`Delete "${instrument.name}"?`)) {
+                            onDeleteInstrument(editingIndex);
+                          }
+                        }}
+                        size="sm"
+                        className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                     </div>
                     <p id="wave-editor-description" className="sr-only">
                       Create and edit custom instruments with oscillators, filters, and effects
