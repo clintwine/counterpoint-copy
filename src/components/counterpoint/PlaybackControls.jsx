@@ -195,7 +195,17 @@ export default function PlaybackControls({
               <Circle className="w-3.5 h-3.5 fill-current" />
             )}
           </Button>
-        </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLoopToggle}
+            className={`h-7 w-7 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+            title="Loop"
+          >
+            <Repeat className="w-4 h-4" />
+          </Button>
+          </div>
 
         {/* BPM and Time Signature container */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1">
