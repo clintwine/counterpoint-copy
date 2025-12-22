@@ -2481,7 +2481,10 @@ export default function NoteGrid({
                         startTime: firstSelected?.bendStartTime ?? 0,
                         endTime: firstSelected?.bendEndTime ?? 1
                       };
-                      playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                      // Calculate actual duration in seconds based on note duration and tempo
+                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
                     }
                   }}
                   min={-12}
@@ -2522,7 +2525,10 @@ export default function NoteGrid({
                         startTime: firstSelected?.bendStartTime ?? 0,
                         endTime: firstSelected?.bendEndTime ?? 1
                       };
-                      playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                      // Calculate actual duration in seconds based on note duration and tempo
+                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
                     }
                   }}
                   min={-12}
@@ -2566,7 +2572,10 @@ export default function NoteGrid({
                         startTime: value / 100,
                         endTime: firstSelected?.bendEndTime ?? 1
                       };
-                      playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                      // Calculate actual duration in seconds based on note duration and tempo
+                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
                     }
                   }}
                   min={0}
@@ -2606,7 +2615,10 @@ export default function NoteGrid({
                         startTime: firstSelected?.bendStartTime ?? 0,
                         endTime: value / 100
                       };
-                      playNote(firstSelected.pitch, 1.5, 0.7, 0, instrument, pitchBend);
+                      // Calculate actual duration in seconds based on note duration and tempo
+                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
                     }
                   }}
                   min={0}
