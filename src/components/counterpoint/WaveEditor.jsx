@@ -885,7 +885,23 @@ export default function WaveEditor({
             <PopoverContent className="w-64 p-0 bg-slate-800 border-slate-700 z-[9999]" align="start">
               <Command className="bg-slate-800">
                 <CommandInput placeholder="Search instruments..." className="h-9 text-sm text-white [&_svg]:text-white" />
-                <CommandList className="max-h-80 !overflow-y-auto" style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                <CommandList 
+                  ref={(el) => {
+                    if (el) {
+                      console.log('CommandList element:', el);
+                      console.log('CommandList computed style:', window.getComputedStyle(el));
+                      console.log('CommandList scrollHeight:', el.scrollHeight);
+                      console.log('CommandList clientHeight:', el.clientHeight);
+                      console.log('CommandList overflow:', window.getComputedStyle(el).overflow);
+                      console.log('CommandList overflowY:', window.getComputedStyle(el).overflowY);
+                    }
+                  }}
+                  style={{ 
+                    maxHeight: '320px', 
+                    overflowY: 'auto',
+                    overscrollBehavior: 'contain'
+                  }}
+                >
                   <CommandEmpty className="text-white/50 text-sm py-4 text-center">
                     No instrument found.
                   </CommandEmpty>
