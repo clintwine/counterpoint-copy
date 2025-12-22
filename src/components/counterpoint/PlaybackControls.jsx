@@ -194,8 +194,9 @@ export default function PlaybackControls({
             className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Next measure"
           >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6" />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 6l6 6-6 6V6z" />
+              <path d="M13 6l6 6-6 6V6z" />
             </svg>
           </Button>
 
