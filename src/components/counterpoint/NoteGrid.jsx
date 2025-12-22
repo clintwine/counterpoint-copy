@@ -704,10 +704,11 @@ export default function NoteGrid({
     // Update selection keys to new positions
     if (selectedNotes.size > 0) {
       const newSelectedKeys = new Set(
-        notesToQuantize.map(n => {
-          const quantizedBeat = Math.round(n.beat / gridValue) * gridValue;
-          return getNoteKey(n.pitch, Math.max(0, Math.round(quantizedBeat * 1000) / 1000));
-        })
+        uniqueNotes.filter(n => {
+          const originalKey = getNoteKey(n.pitch, n.beat);
+          const wasSelected = notesToQuantize.some(orig => orig.pitch === n.pitch);
+          return wasSelected;
+        }).map(n => getNoteKey(n.pitch, n.beat))
       );
       setSelectedNotes(newSelectedKeys);
     }
