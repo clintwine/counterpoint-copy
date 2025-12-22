@@ -235,7 +235,7 @@ export default function PlaybackControls({
         <div className="w-px h-6 bg-[#3A3A3A]" />
 
         {/* BPM and Time Signature container */}
-        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1 ml-2">
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1">
           {/* BPM - Large Logic Pro style */}
           <div className="flex items-center">
             <div className="w-16 flex flex-col items-center">
@@ -291,7 +291,7 @@ export default function PlaybackControls({
         </div>
 
         {/* Time display - Logic Pro style */}
-        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1 mr-2">
+        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
           <div className="flex flex-col items-start">
             <div className="flex items-center h-[28px]">
               <span className="text-white font-mono text-sm tabular-nums">{formatTime(currentBeat)}</span>
