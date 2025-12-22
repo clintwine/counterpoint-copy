@@ -472,11 +472,24 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
     return playSampledNote(pitch, duration, volume, customConfig);
   }
   
-  const { oscillators: oscConfigs, envelope, filter: filterConfig, lfo, distortion, bitcrush } = customConfig;
+  const { oscillators: oscConfigs, envelope, filter: filterConfig, lfo, distortion, bitcrush, eq } = customConfig;
 
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
+
+  // Create EQ chain if present
+  const eqNodes = [];
+  if (eq && eq.length > 0) {
+    eq.forEach(band => {
+      const eqFilter = audioContext.createBiquadFilter();
+      eqFilter.type = band.type || 'peaking';
+      eqFilter.frequency.value = band.frequency || 1000;
+      eqFilter.Q.value = band.Q || 1;
+      eqFilter.gain.value = band.gain || 0;
+      eqNodes.push(eqFilter);
+    });
+  }
 
   // LFO setup
   let lfoNode = null;
@@ -549,8 +562,16 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
     lfoGain.connect(filterNode.frequency);
   }
 
-  // Chain effects: filter -> distortion -> bitcrush -> gain
+  // Chain EQ nodes after filter
   let outputNode = filterNode;
+  if (eqNodes.length > 0) {
+    eqNodes.forEach((eqNode, i) => {
+      outputNode.connect(eqNode);
+      outputNode = eqNode;
+    });
+  }
+
+  // Chain effects: filter -> EQ -> distortion -> bitcrush -> gain
   
   // Apply distortion
   if (distortion > 0) {
