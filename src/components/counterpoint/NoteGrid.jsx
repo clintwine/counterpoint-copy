@@ -355,14 +355,32 @@ export default function NoteGrid({
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
 
-  // Detect fullscreen mode
+  // Detect fullscreen mode - check multiple vendor prefixes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const fullscreenElement = document.fullscreenElement || 
+                                document.webkitFullscreenElement || 
+                                document.mozFullScreenElement || 
+                                document.msFullscreenElement;
+      setIsFullscreen(!!fullscreenElement);
+      console.log('[NoteGrid] Fullscreen changed:', !!fullscreenElement);
     };
 
+    // Listen to all vendor-specific events
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    // Check initial state
+    handleFullscreenChange();
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
   }, []);
 
   // Audio visualizer
