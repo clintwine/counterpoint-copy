@@ -910,19 +910,6 @@ export default function WaveEditor({
         <div className="flex gap-2">
           <Button
             size="sm"
-            onClick={() => {
-              const nextNumber = customInstruments.length + 1;
-              setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-              setEditingIndex(-1);
-              setEditingBuiltin(null);
-            }}
-            className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1.5" />
-            New
-          </Button>
-          <Button
-            size="sm"
             onClick={handleSave}
             className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900"
           >
@@ -1112,6 +1099,21 @@ export default function WaveEditor({
             </PopoverContent>
             </Popover>
             </div>
+
+            {/* New Button */}
+            <Button
+            size="sm"
+            onClick={() => {
+            const nextNumber = customInstruments.length + 1;
+            setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+            setEditingIndex(-1);
+            setEditingBuiltin(null);
+            }}
+            className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white self-end"
+            >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            New
+            </Button>
             </div>
 
       {/* Second Row: Waveform Preview + ADSR Controls */}
