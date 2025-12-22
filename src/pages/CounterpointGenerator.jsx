@@ -347,9 +347,13 @@ export default function CounterpointGenerator() {
           // Spacebar for play/pause
           if (e.key === ' ') {
             e.preventDefault();
+            console.log('[Keyboard] Spacebar pressed - toggling playback');
             setIsPlaying(prev => {
               if (prev) {
+                console.log('[Keyboard] Stopping via spacebar');
                 stopAllNotes();
+              } else {
+                console.log('[Keyboard] Starting via spacebar');
               }
               return !prev;
             });
@@ -1087,9 +1091,12 @@ export default function CounterpointGenerator() {
   const handlePlayPause = () => {
     ensureAudio();
     if (isPlaying) {
+      console.log('[Playback] handlePlayPause - STOPPING playback');
+      console.trace();
       stopAllNotes();
       setIsPlaying(false);
     } else {
+      console.log('[Playback] handlePlayPause - STARTING playback');
       // When starting playback, jump to loop start if set
       if (loopStart !== null) {
         setCurrentBeat(loopStart);
