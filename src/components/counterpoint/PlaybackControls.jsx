@@ -163,7 +163,7 @@ export default function PlaybackControls({
             className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Previous measure"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M11 6l-6 6 6 6V6z" />
               <path d="M18 6l-6 6 6 6V6z" />
             </svg>
@@ -194,7 +194,7 @@ export default function PlaybackControls({
             className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Next measure"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 6l6 6-6 6V6z" />
               <path d="M13 6l6 6-6 6V6z" />
             </svg>
