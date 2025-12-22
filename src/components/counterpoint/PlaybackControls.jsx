@@ -335,7 +335,7 @@ export default function PlaybackControls({
         <div className="w-px h-6 bg-[#3A3A3A]" />
 
         {/* Master Volume */}
-        <div className="bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 py-1">
+        <div className="bg-[#1A1A1A] rounded-md border border-[#3A3A3A] px-3 h-[38px] flex items-center">
           <VolumeSlider
             value={masterVolume}
             onChange={onMasterVolumeChange}
