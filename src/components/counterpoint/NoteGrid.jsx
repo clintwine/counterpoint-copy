@@ -2111,7 +2111,12 @@ export default function NoteGrid({
                                           pitch: n.pitch,
                                           beat: n.beat,
                                           duration: n.duration || DEFAULT_DURATION,
-                                          velocity: n.velocity
+                                          velocity: n.velocity,
+                                          articulation: n.articulation,
+                                          bendStart: n.bendStart,
+                                          bendEnd: n.bendEnd,
+                                          bendStartTime: n.bendStartTime,
+                                          bendEndTime: n.bendEndTime
                                         }));
                                         originalDragNotesRef.current = {
                                           keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
@@ -2214,7 +2219,12 @@ export default function NoteGrid({
                                       pitch: n.pitch,
                                       beat: n.beat,
                                       duration: n.duration || DEFAULT_DURATION,
-                                      velocity: n.velocity
+                                      velocity: n.velocity,
+                                      articulation: n.articulation,
+                                      bendStart: n.bendStart,
+                                      bendEnd: n.bendEnd,
+                                      bendStartTime: n.bendStartTime,
+                                      bendEndTime: n.bendEndTime
                                     }));
 
                                     // Store drag state with exact keys and notes
@@ -2276,7 +2286,12 @@ export default function NoteGrid({
                                                                                       pitch: n.pitch,
                                                                                       beat: n.beat,
                                                                                       duration: n.duration || DEFAULT_DURATION,
-                                                                                      velocity: n.velocity
+                                                                                      velocity: n.velocity,
+                                                                                      articulation: n.articulation,
+                                                                                      bendStart: n.bendStart,
+                                                                                      bendEnd: n.bendEnd,
+                                                                                      bendStartTime: n.bendStartTime,
+                                                                                      bendEndTime: n.bendEndTime
                                                                                     }));
 
                                                                                   // Store drag state with exact keys
