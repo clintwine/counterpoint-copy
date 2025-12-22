@@ -571,14 +571,14 @@ export default function CounterpointGenerator() {
     // Play all voices with proper timing
     const timeouts = [];
     allPreviewVoices.forEach((voice, voiceIndex) => {
-      const voiceInstrument = songVoices[voiceIndex]?.instrument || 'organ';
-      const volume = (songVoices[voiceIndex]?.volume || 80) / 100;
+      const voiceInstrument = voices[voiceIndex]?.instrument || 'organ';
+      const volume = (voices[voiceIndex]?.volume || 80) / 100;
 
       // Get custom config if it's a custom instrument
       const getCustomConfig = (instrument) => {
         if (instrument.startsWith('custom_')) {
           const index = parseInt(instrument.split('_')[1]);
-          return (song.customInstruments || customInstruments)[index];
+          return customInstruments[index];
         }
         if (instrument.startsWith('preset_')) {
           const index = parseInt(instrument.split('_')[1]);
