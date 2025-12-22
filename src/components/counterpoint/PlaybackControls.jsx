@@ -143,70 +143,67 @@ export default function PlaybackControls({
         {/* Transport controls */}
         <div className="flex items-center bg-[#595959] rounded-md p-1">
           <Button
-          variant="ghost"
-          size="sm"
-          onClick={onReset}
-          className="h-8 w-8 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
-          title="Go to start"
+            variant="ghost"
+            size="sm"
+            onClick={onReset}
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            title="Go to start"
           >
-          <SkipBack className="w-4 h-4" />
+            <SkipBack className="w-4 h-4" />
           </Button>
 
           <Button
-          variant="ghost"
-          size="sm"
-          onClick={onStop}
-          className="h-8 w-8 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
-          title="Stop"
+            onClick={onPlayPause}
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
           >
-          <Square className="w-4 h-4 fill-current" />
+            {isPlaying ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4 ml-0.5" />
+            )}
           </Button>
 
           <Button
-          onClick={onPlayPause}
-          size="sm"
-          className={`h-8 w-8 p-0 rounded ${
-          isPlaying 
-            ? 'bg-transparent text-white/90 hover:text-white hover:bg-white/10' 
-            : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
+            variant="ghost"
+            size="sm"
+            onClick={onStop}
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            title="Stop"
           >
-          {isPlaying ? (
-          <Pause className="w-4 h-4" />
-          ) : (
-          <Play className="w-4 h-4 ml-0.5 fill-white" />
-          )}
+            <Square className="w-3.5 h-3.5 fill-current" />
           </Button>
 
           <Button
-          onClick={onRecordToggle}
-          variant="ghost"
-          size="sm"
-          disabled={isPlaying && !isRecording}
-          className={`h-8 w-8 p-0 rounded ${
-          isRecording 
-            ? 'text-red-500 hover:text-red-400 hover:bg-white/10' 
-            : isCountingIn
-            ? 'text-amber-500 hover:bg-white/10 animate-pulse'
-            : 'text-red-500 hover:text-red-400 hover:bg-white/10'
-          }`}
-          title={isRecording ? 'Stop recording' : 'Record'}
+            onClick={onRecordToggle}
+            variant="ghost"
+            size="sm"
+            disabled={isPlaying && !isRecording}
+            className={`h-7 w-7 p-0 rounded ${
+              isRecording 
+                ? 'text-red-500 hover:text-red-400 hover:bg-white/10' 
+                : isCountingIn
+                ? 'text-amber-500 hover:bg-white/10 animate-pulse'
+                : 'text-red-500 hover:text-red-400 hover:bg-white/10'
+            }`}
+            title={isRecording ? 'Stop recording' : 'Record'}
           >
-          {isCountingIn ? (
-          <span className="text-xs font-bold">{countInBeats}</span>
-          ) : (
-          <Circle className="w-4 h-4 fill-current" />
-          )}
+            {isCountingIn ? (
+              <span className="text-xs font-bold">{countInBeats}</span>
+            ) : (
+              <Circle className="w-3.5 h-3.5 fill-current" />
+            )}
           </Button>
 
           <Button
-          variant="ghost"
-          size="sm"
-          onClick={onLoopToggle}
-          className={`h-8 w-8 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
-          title="Loop"
+            variant="ghost"
+            size="sm"
+            onClick={onLoopToggle}
+            className={`h-7 w-7 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+            title="Loop"
           >
-          <Repeat className="w-4 h-4" />
+            <Repeat className="w-4 h-4" />
           </Button>
           </div>
 
