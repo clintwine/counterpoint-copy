@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Square, Save, Trash2, Plus } from 'lucide-react';
+import { Play, Square, Save, Trash2, Plus, RefreshCw } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { initAudio, getAudioContext, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
@@ -21,6 +21,105 @@ const DEFAULT_INSTRUMENT = {
   lfo: { rate: 0, amount: 0, target: 'pitch' },
   distortion: 0,
   bitcrush: 0
+};
+
+// Built-in instrument configurations for editing
+const BUILTIN_INSTRUMENTS = {
+  organ: {
+    name: 'Organ',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
+      { waveform: 'sine', detune: -2, gain: 0.6, harmonic: 3 },
+      { waveform: 'sine', detune: 2, gain: 0.4, harmonic: 5 }
+    ],
+    envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.3 },
+    filter: { type: 'lowpass', frequency: 3000, Q: 1.2 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 0,
+    bitcrush: 0
+  },
+  piano: {
+    name: 'Piano',
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
+      { waveform: 'triangle', detune: -1, gain: 0.5, harmonic: 3 },
+      { waveform: 'sine', detune: 1, gain: 0.3, harmonic: 4 }
+    ],
+    envelope: { attack: 0.003, decay: 0.1, sustain: 0.6, release: 0.4 },
+    filter: { type: 'lowpass', frequency: 4500, Q: 0.8 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 2,
+    bitcrush: 0
+  },
+  strings: {
+    name: 'Strings',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.5, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 3 }
+    ],
+    envelope: { attack: 0.2, decay: 0.1, sustain: 0.8, release: 0.5 },
+    filter: { type: 'lowpass', frequency: 3200, Q: 1.2 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 0,
+    bitcrush: 0
+  },
+  harpsichord: {
+    name: 'Harpsichord',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 2 }
+    ],
+    envelope: { attack: 0.001, decay: 0.3, sustain: 0.3, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 4000, Q: 1.5 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 0,
+    bitcrush: 0
+  },
+  cello: {
+    name: 'Cello',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -3, gain: 0.6, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 3, gain: 0.6, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.4, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.25, harmonic: 3 }
+    ],
+    envelope: { attack: 0.15, decay: 0.1, sustain: 0.8, release: 0.5 },
+    filter: { type: 'lowpass', frequency: 1800, Q: 1.5 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 1,
+    bitcrush: 0
+  },
+  brass: {
+    name: 'Brass',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.8, harmonic: 1 },
+      { waveform: 'square', detune: -4, gain: 0.5, harmonic: 2 },
+      { waveform: 'sawtooth', detune: 4, gain: 0.6, harmonic: 3 }
+    ],
+    envelope: { attack: 0.05, decay: 0.1, sustain: 0.8, release: 0.3 },
+    filter: { type: 'lowpass', frequency: 3000, Q: 3 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 8,
+    bitcrush: 0
+  },
+  choir: {
+    name: 'Choir',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -7, gain: 0.4, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.4, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 7, gain: 0.4, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.3, harmonic: 2 }
+    ],
+    envelope: { attack: 0.25, decay: 0.1, sustain: 0.7, release: 0.4 },
+    filter: { type: 'lowpass', frequency: 2200, Q: 0.7 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 0,
+    bitcrush: 0
+  }
 };
 
 const PRESET_LIBRARY = [
@@ -112,16 +211,18 @@ export default function WaveEditor({
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingBuiltin, setEditingBuiltin] = useState(null);
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
   // Load current instrument when opening editor - only run once on mount
   useEffect(() => {
     if (currentInstrumentConfig) {
-      // Ensure all required fields exist
+      // Custom or preset with config provided
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...currentInstrumentConfig,
@@ -129,14 +230,16 @@ export default function WaveEditor({
       };
       setInstrument(loadedInstrument);
       
-      // Set editing index if it's a custom instrument
       if (currentInstrument?.startsWith('custom_')) {
         const index = parseInt(currentInstrument.split('_')[1]);
         setEditingIndex(index);
+        setEditingBuiltin(null);
       } else if (currentInstrument?.startsWith('preset_')) {
         setEditingIndex(-1);
+        setEditingBuiltin(null);
       } else {
         setEditingIndex(-1);
+        setEditingBuiltin(null);
       }
     } else if (currentInstrument?.startsWith('preset_')) {
       // Load preset instrument
@@ -151,11 +254,24 @@ export default function WaveEditor({
         setInstrument(loadedInstrument);
       }
       setEditingIndex(-1);
+      setEditingBuiltin(null);
+    } else if (currentInstrument && BUILTIN_INSTRUMENTS[currentInstrument]) {
+      // Load built-in instrument for editing
+      const builtinConfig = BUILTIN_INSTRUMENTS[currentInstrument];
+      const loadedInstrument = {
+        ...DEFAULT_INSTRUMENT,
+        ...builtinConfig,
+        filter: { ...DEFAULT_INSTRUMENT.filter, ...builtinConfig.filter }
+      };
+      setInstrument(loadedInstrument);
+      setEditingIndex(-1);
+      setEditingBuiltin(currentInstrument);
     } else {
-      // Built-in instrument or no instrument - show message that built-in can't be edited
+      // No instrument - create new
       const nextNumber = customInstruments.length + 1;
       setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
       setEditingIndex(-1);
+      setEditingBuiltin(null);
     }
   }, []);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -532,13 +648,26 @@ export default function WaveEditor({
     };
     
     if (editingIndex >= 0) {
-      // Updating existing instrument - keep editing it
+      // Updating existing custom instrument
       onSaveInstrument(instrumentToSave, editingIndex);
     } else {
       // Creating new instrument - set editing index to the new position
       const newIndex = customInstruments.length;
       onSaveInstrument(instrumentToSave, -1);
       setEditingIndex(newIndex);
+      setEditingBuiltin(null);
+    }
+  };
+
+  const handleRevert = () => {
+    if (editingBuiltin && BUILTIN_INSTRUMENTS[editingBuiltin]) {
+      const builtinConfig = BUILTIN_INSTRUMENTS[editingBuiltin];
+      const loadedInstrument = {
+        ...DEFAULT_INSTRUMENT,
+        ...builtinConfig,
+        filter: { ...DEFAULT_INSTRUMENT.filter, ...builtinConfig.filter }
+      };
+      setInstrument(loadedInstrument);
     }
   };
 
@@ -735,8 +864,54 @@ export default function WaveEditor({
         {/* Left: Combined Library List */}
         <div className="w-40 flex-shrink-0 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Library</Label>
-          <div className="bg-slate-700/50 rounded-lg p-2 space-y-1 max-h-[140px] overflow-y-auto">
-            {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY).map((preset, i) => (
+          <Input
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-7 bg-slate-800 border-slate-600 text-white text-xs placeholder:text-white/40"
+          />
+          <div className="bg-slate-700/50 rounded-lg p-2 space-y-1 max-h-[120px] overflow-y-auto">
+            {/* Built-in Instruments */}
+            {Object.entries(BUILTIN_INSTRUMENTS)
+              .filter(([key, config]) => config.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map(([key, config]) => (
+              <div key={`builtin-${key}`} className="flex items-center gap-0.5 group">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const builtinToPreview = { ...DEFAULT_INSTRUMENT, ...config };
+                    playPresetPreview(builtinToPreview, `builtin-${key}`);
+                  }}
+                  className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
+                >
+                  {previewingPreset === `builtin-${key}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const loadedInstrument = {
+                      ...DEFAULT_INSTRUMENT,
+                      ...config,
+                      filter: { ...DEFAULT_INSTRUMENT.filter, ...config.filter }
+                    };
+                    setInstrument(loadedInstrument);
+                    setEditingIndex(-1);
+                    setEditingBuiltin(key);
+                  }}
+                  className={`flex-1 h-6 text-xs justify-start px-2 ${editingBuiltin === key ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-600'}`}
+                >
+                  {config.name}
+                </Button>
+              </div>
+            ))}
+            
+            {/* Presets */}
+            {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY)
+              .filter(preset => preset.name.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((preset, i) => (
               <div key={`lib-${i}`} className="flex items-center gap-0.5 group">
                 <Button
                   variant="ghost"
@@ -794,10 +969,13 @@ export default function WaveEditor({
                 </Button>
               </div>
             ))}
+            {/* Custom Instruments */}
             {customInstruments.length > 0 && (
               <>
                 <div className="h-px bg-slate-600 my-1" />
-                {customInstruments.map((inst, i) => (
+                {customInstruments
+                  .filter(inst => inst.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map((inst, i) => (
                   <div key={i} className="flex items-center gap-1 group">
                     <Button
                       variant="ghost"
@@ -883,6 +1061,17 @@ export default function WaveEditor({
                 <Save className="w-4 h-4 mr-1.5" />
                 {editingIndex >= 0 ? 'Update' : 'Save'}
               </Button>
+              {editingBuiltin && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleRevert}
+                  className="h-9 px-3 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 text-sm"
+                >
+                  <RefreshCw className="w-4 h-4 mr-1.5" />
+                  Revert
+                </Button>
+              )}
               {editingIndex >= 0 && (
                 <Button
                   size="sm"
@@ -891,6 +1080,7 @@ export default function WaveEditor({
                     onDeleteInstrument(editingIndex);
                     setInstrument({ ...DEFAULT_INSTRUMENT });
                     setEditingIndex(-1);
+                    setEditingBuiltin(null);
                   }}
                   className="h-9 w-9 p-0 border-red-500/50 text-red-400 hover:bg-red-500/20"
                 >
