@@ -100,7 +100,7 @@ export default function CounterpointGenerator() {
       setSettings(prev => ({ ...prev, measures: prev.measures + 5 }));
     };
     window.autoAdjustMeasures = (notes) => {
-      const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
+      const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       
       // Calculate max beat from all notes
       const maxBeat = Math.max(
@@ -125,9 +125,7 @@ export default function CounterpointGenerator() {
       delete window.expandMeasures; 
       delete window.autoAdjustMeasures;
     };
-  }, [generatedVoices]);
-  
-  const timeSigConfig = TIME_SIGNATURES.find(t => t.value === settings.timeSignature) || TIME_SIGNATURES[0];
+  }, [generatedVoices, settings.timeSignature]);
   
   const queryClient = useQueryClient();
   const previewTimeoutRef = useRef(null);
