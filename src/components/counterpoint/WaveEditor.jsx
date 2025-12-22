@@ -294,7 +294,7 @@ export default function WaveEditor({
   const oscillatorsRef = useRef([]);
   const liveNoteIdRef = useRef(null);
 
-  // Draw waveform visualization (frequency spectrum)
+  // Draw waveform visualization
   const drawWaveform = useCallback(() => {
     const canvas = canvasRef.current;
     const analyser = analyserRef.current;
@@ -302,13 +302,8 @@ export default function WaveEditor({
 
     const ctx = canvas.getContext('2d');
     
-    // Set canvas resolution for sharp rendering
+    // Get actual display dimensions
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-    
     const width = rect.width;
     const height = rect.height;
     const bufferLength = analyser.frequencyBinCount;
@@ -316,29 +311,32 @@ export default function WaveEditor({
 
     const draw = () => {
       animationRef.current = requestAnimationFrame(draw);
-      analyser.getByteFrequencyData(dataArray); // Use frequency data instead of time domain
+      analyser.getByteTimeDomainData(dataArray);
 
       ctx.fillStyle = 'rgb(30, 41, 59)';
       ctx.fillRect(0, 0, width, height);
 
-      // Draw frequency bars (spectrum analyzer style)
-      const barCount = 64; // Number of bars to display
-      const barWidth = width / barCount;
-      
-      for (let i = 0; i < barCount; i++) {
-        // Sample from the frequency data (skip lower bins, focus on audible range)
-        const dataIndex = Math.floor((i / barCount) * bufferLength * 0.6);
-        const barHeight = (dataArray[dataIndex] / 255) * height * 0.9;
-        
-        // Create gradient for bars
-        const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight);
-        gradient.addColorStop(0, '#E8B885');
-        gradient.addColorStop(0.5, '#F59E0B');
-        gradient.addColorStop(1, '#EF4444');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(i * barWidth, height - barHeight, barWidth - 1, barHeight);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#E8B885';
+      ctx.beginPath();
+
+      const sliceWidth = width / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * height / 2;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+        x += sliceWidth;
       }
+
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
     };
 
     draw();
