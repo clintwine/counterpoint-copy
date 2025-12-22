@@ -302,8 +302,13 @@ export default function WaveEditor({
 
     const ctx = canvas.getContext('2d');
     
-    // Get actual display dimensions
+    // Set canvas resolution for sharp rendering
     const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
     const width = rect.width;
     const height = rect.height;
     const bufferLength = analyser.frequencyBinCount;
