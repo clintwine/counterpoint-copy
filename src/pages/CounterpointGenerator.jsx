@@ -1333,7 +1333,7 @@ export default function CounterpointGenerator() {
                   {/* Search and Sort Controls */}
                   <div className="flex gap-3 mb-2">
                     <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
                       <input
                         type="text"
                         placeholder="Search by name..."
