@@ -1712,7 +1712,17 @@ export default function CounterpointGenerator() {
                                   onStop={handleStop}
                                   loopStart={loopStart}
                                   loopEnd={loopEnd}
-                                  onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
+                                  onLoopChange={(start, end) => { 
+                                setLoopStart(start); 
+                                setLoopEnd(end);
+                                // Reset playhead when loop is cleared
+                                if (start === null && end === null) {
+                                  setCurrentBeat(0);
+                                  setPlayheadPosition(0);
+                                  lastPlayheadRef.current = 0;
+                                  playedNotesRef.current.clear();
+                                }
+                              }}
                                   isLooping={isLooping}
                                   onLoopToggle={() => setIsLooping(!isLooping)}
                                   timeSignature={settings.timeSignature}
@@ -1817,7 +1827,17 @@ export default function CounterpointGenerator() {
                               loopStart={loopStart}
                               loopEnd={loopEnd}
                               isLooping={isLooping}
-                              onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
+                              onLoopChange={(start, end) => { 
+                               setLoopStart(start); 
+                               setLoopEnd(end);
+                               // Reset playhead when loop is cleared
+                               if (start === null && end === null) {
+                                 setCurrentBeat(0);
+                                 setPlayheadPosition(0);
+                                 lastPlayheadRef.current = 0;
+                                 playedNotesRef.current.clear();
+                               }
+                              }}
                               onVoiceInstrumentChange={(voiceIndex, instrument) => {
                                 const newVoices = [...voices];
                                 // Always update voice 0 (cantus firmus) since that's what's being edited
