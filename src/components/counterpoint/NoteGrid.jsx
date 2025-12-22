@@ -283,32 +283,47 @@ export default function NoteGrid({
   
   // Memoize notes lookup for performance - filter duplicates
   // Group notes by pitch and integer beat (notes can have fractional beats)
+  // IMPORTANT: Long notes need to be added to ALL beats they cover for proper rendering
   const notesMap = useMemo(() => {
     const map = new Map();
     const seen = new Set();
-    
+
     cantusFirmus.forEach(note => {
       const uniqueKey = `0-${note.pitch}-${note.beat}`;
       if (seen.has(uniqueKey)) return; // Skip duplicates
       seen.add(uniqueKey);
-      
-      const intBeat = Math.floor(note.beat);
-      const key = `${note.pitch}-${intBeat}`;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push({ voiceIndex: 0, note });
+
+      // Add note to all beats it covers
+      const startBeat = Math.floor(note.beat);
+      const endBeat = Math.floor(note.beat + (note.duration || DEFAULT_DURATION));
+      for (let beat = startBeat; beat <= endBeat; beat++) {
+        const key = `${note.pitch}-${beat}`;
+        if (!map.has(key)) map.set(key, []);
+        // Only add once per beat
+        if (!map.get(key).some(n => n.voiceIndex === 0 && n.note.beat === note.beat)) {
+          map.get(key).push({ voiceIndex: 0, note });
+        }
+      }
     });
-    
+
     voices.forEach((voice, voiceIndex) => {
       if (!voice.notes) return;
       voice.notes.forEach(note => {
         const uniqueKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
         if (seen.has(uniqueKey)) return; // Skip duplicates
         seen.add(uniqueKey);
-        
-        const intBeat = Math.floor(note.beat);
-        const key = `${note.pitch}-${intBeat}`;
-        if (!map.has(key)) map.set(key, []);
-        map.get(key).push({ voiceIndex, note });
+
+        // Add note to all beats it covers
+        const startBeat = Math.floor(note.beat);
+        const endBeat = Math.floor(note.beat + (note.duration || DEFAULT_DURATION));
+        for (let beat = startBeat; beat <= endBeat; beat++) {
+          const key = `${note.pitch}-${beat}`;
+          if (!map.has(key)) map.set(key, []);
+          // Only add once per beat
+          if (!map.get(key).some(n => n.voiceIndex === voiceIndex && n.note.beat === note.beat)) {
+            map.get(key).push({ voiceIndex, note });
+          }
+        }
       });
     });
     return map;
