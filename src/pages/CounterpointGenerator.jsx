@@ -162,6 +162,8 @@ export default function CounterpointGenerator() {
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [unsavedChangesDialog, setUnsavedChangesDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
   
   const playbackRef = useRef(null);
   const animationRef = useRef(null);
@@ -294,9 +296,9 @@ export default function CounterpointGenerator() {
       if (result?.id) {
         setCurrentProjectId(result.id);
       }
+      setHasUnsavedChanges(false);
       setSaveDialogOpen(false);
       setSaveAsMode(false);
-      setHasUnsavedChanges(false);
       toast.success(saveAsMode ? 'Project saved to database' : (currentProjectId ? 'Project updated in database' : 'Project saved to database'));
     },
     onError: (error) => {
@@ -342,9 +344,9 @@ export default function CounterpointGenerator() {
     } else {
       const saved = saveProjectLocally(projectName, projectData);
       setCurrentProjectId(saved.id);
+      setHasUnsavedChanges(false);
       setSaveDialogOpen(false);
       setSaveAsMode(false);
-      setHasUnsavedChanges(false);
       toast.success('Project saved locally');
     }
   }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode, customInstruments]);
@@ -583,9 +585,12 @@ export default function CounterpointGenerator() {
   };
 
   const handleLoadProject = (project) => {
-    if (hasUnsavedChanges && !confirm('You have unsaved changes. Load this project anyway?')) {
+    if (hasUnsavedChanges) {
+      setPendingAction({ type: 'loadProject', data: project });
+      setUnsavedChangesDialog(true);
       return;
     }
+    
     // Load voices and ensure each has an instrument
     const loadedVoices = project.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -633,8 +638,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    setLoadDialogOpen(false);
     setHasUnsavedChanges(false);
+    setLoadDialogOpen(false);
   };
 
   // Stop preview when modal closes
@@ -649,7 +654,9 @@ export default function CounterpointGenerator() {
   }, [songDialogOpen]);
 
   const handleLoadSong = (song) => {
-    if (hasUnsavedChanges && !confirm('You have unsaved changes. Load this song anyway?')) {
+    if (hasUnsavedChanges) {
+      setPendingAction({ type: 'loadSong', data: song });
+      setUnsavedChangesDialog(true);
       return;
     }
     
@@ -721,8 +728,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    setSongDialogOpen(false);
     setHasUnsavedChanges(false);
+    setSongDialogOpen(false);
     };
 
   const handlePreviewSong = (song, e) => {
@@ -822,7 +829,9 @@ export default function CounterpointGenerator() {
   };
 
   const handleNewProject = () => {
-    if (hasUnsavedChanges && !confirm('You have unsaved changes. Create a new project anyway?')) {
+    if (hasUnsavedChanges) {
+      setPendingAction({ type: 'newProject' });
+      setUnsavedChangesDialog(true);
       return;
     }
     
@@ -1197,6 +1206,14 @@ export default function CounterpointGenerator() {
       }, sixteenthNoteDuration * (beatsPerMeasure / 4) * 1000);
     }
   };
+
+  // Track changes to notes and settings
+  useEffect(() => {
+    // Mark as changed whenever notes or settings change
+    if (cantusFirmus.length > 0 || generatedVoices.length > 0) {
+      setHasUnsavedChanges(true);
+    }
+  }, [cantusFirmus, generatedVoices, settings]);
 
   // Handle note press during recording
   const handleNotePress = useCallback((pitch) => {
@@ -1764,6 +1781,73 @@ export default function CounterpointGenerator() {
                   </form>
                 </DialogContent>
               </Dialog>
+
+              {/* Unsaved Changes Dialog */}
+              <Dialog open={unsavedChangesDialog} onOpenChange={setUnsavedChangesDialog}>
+                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Unsaved Changes</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-white/70">You have unsaved changes. What would you like to do?</p>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={async () => {
+                          await handleSaveProject(true);
+                          setUnsavedChangesDialog(false);
+                          
+                          // Execute pending action
+                          if (pendingAction) {
+                            if (pendingAction.type === 'loadSong') {
+                              handleLoadSong(pendingAction.data);
+                            } else if (pendingAction.type === 'loadProject') {
+                              handleLoadProject(pendingAction.data);
+                            } else if (pendingAction.type === 'newProject') {
+                              handleNewProject();
+                            }
+                            setPendingAction(null);
+                          }
+                        }}
+                        className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
+                      >
+                        Save and Continue
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setUnsavedChangesDialog(false);
+                          setHasUnsavedChanges(false);
+                          
+                          // Execute pending action without saving
+                          if (pendingAction) {
+                            if (pendingAction.type === 'loadSong') {
+                              handleLoadSong(pendingAction.data);
+                            } else if (pendingAction.type === 'loadProject') {
+                              handleLoadProject(pendingAction.data);
+                            } else if (pendingAction.type === 'newProject') {
+                              handleNewProject();
+                            }
+                            setPendingAction(null);
+                          }
+                        }}
+                        variant="outline"
+                        className="border-[#3A3A3A] text-white hover:bg-[#3A3A3A]"
+                      >
+                        Don't Save
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setUnsavedChangesDialog(false);
+                          setPendingAction(null);
+                        }}
+                        variant="ghost"
+                        className="text-white/70 hover:text-white hover:bg-[#3A3A3A]"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
@@ -1894,10 +1978,7 @@ export default function CounterpointGenerator() {
                               isPlaying={isPlaying}
                               measures={settings.measures}
                               cantusFirmus={cantusFirmus}
-                              onNotesUpdate={(notes) => {
-                setCantusFirmus(notes);
-                setHasUnsavedChanges(true);
-              }}
+                              onNotesUpdate={setCantusFirmus}
                               onSeek={handleSeek}
                               activeVoice={activeVoice}
                               onActiveVoiceChange={setActiveVoice}
@@ -2198,10 +2279,7 @@ export default function CounterpointGenerator() {
             currentNotes={cantusFirmus}
             messages={chatbotMessages}
             onMessagesChange={setChatbotMessages}
-            onApplyMelody={(notes) => {
-              setCantusFirmus(notes);
-              setHasUnsavedChanges(true);
-            }}
+            onApplyMelody={(notes) => setCantusFirmus(notes)}
             instrument={voices[0]?.instrument || 'organ'}
             customInstruments={customInstruments}
             onApplyHarmony={(notes, voiceType) => {
