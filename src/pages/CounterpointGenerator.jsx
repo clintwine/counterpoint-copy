@@ -1515,18 +1515,20 @@ export default function CounterpointGenerator() {
                       <Button
                         type="submit"
                         disabled={!projectName.trim() || saveProjectMutation.isPending}
-                        className="flex-1 bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
+                        className={`${currentUser?.role === 'admin' ? 'flex-1' : 'w-full'} bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]`}
                       >
                         {saveAsMode ? 'Save Locally' : (currentProjectId?.startsWith('local_') ? 'Update Local' : 'Save Locally')}
                       </Button>
-                      <Button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); handleSaveProject(false, true); }}
-                        disabled={!projectName.trim() || saveProjectMutation.isPending}
-                        className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                      >
-                        {saveProjectMutation.isPending ? 'Saving...' : 'Save to Database'}
-                      </Button>
+                      {currentUser?.role === 'admin' && (
+                        <Button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); handleSaveProject(false, true); }}
+                          disabled={!projectName.trim() || saveProjectMutation.isPending}
+                          className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          {saveProjectMutation.isPending ? 'Saving...' : 'Save to Database'}
+                        </Button>
+                      )}
                     </div>
                   </form>
                 </DialogContent>
