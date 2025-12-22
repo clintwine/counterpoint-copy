@@ -209,8 +209,7 @@ export default function WaveEditor({
   onClose,
   currentInstrument = null,
   currentInstrumentConfig = null,
-  presetLibrary = [],
-  defaultName = null
+  presetLibrary = []
 }) {
   const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
@@ -224,12 +223,7 @@ export default function WaveEditor({
 
   // Load current instrument when opening editor - only run once on mount
   useEffect(() => {
-    if (defaultName) {
-      // Start fresh with default name
-      setInstrument({ ...DEFAULT_INSTRUMENT, name: defaultName });
-      setEditingIndex(-1);
-      setEditingBuiltin(null);
-    } else if (currentInstrumentConfig) {
+    if (currentInstrumentConfig) {
       // Custom or preset with config provided
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
