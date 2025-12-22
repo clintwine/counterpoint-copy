@@ -822,7 +822,8 @@ export default function WaveEditor({
       ...DEFAULT_INSTRUMENT,
       ...inst,
       name: inst.name,
-      effects: inst.effects || DEFAULT_INSTRUMENT.effects
+      effects: inst.effects || (inst.filter ? [{ type: 'filter', config: { filterType: inst.filter.type, frequency: inst.filter.frequency, Q: inst.filter.Q } }] : DEFAULT_INSTRUMENT.effects),
+      volume: inst.volume ?? 1
     };
     setInstrument(loadedInstrument);
     setEditingIndex(index);
@@ -921,7 +922,7 @@ export default function WaveEditor({
                           const loadedInstrument = {
                             ...DEFAULT_INSTRUMENT,
                             ...config,
-                            filter: { ...DEFAULT_INSTRUMENT.filter, ...config.filter }
+                            effects: config.effects || [{ type: 'filter', config: { filterType: config.filter?.type || 'lowpass', frequency: config.filter?.frequency || 2000, Q: config.filter?.Q || 1 } }]
                           };
                           setInstrument(loadedInstrument);
                           setEditingIndex(-1);
