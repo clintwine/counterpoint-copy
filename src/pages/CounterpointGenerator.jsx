@@ -869,6 +869,7 @@ export default function CounterpointGenerator() {
 
   // Playback logic - smooth animation with requestAnimationFrame
   useEffect(() => {
+    console.log('[Playback] State changed:', { isPlaying, tempo, measures: settings.measures });
     if (isPlaying) {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const beatsPerSecond = (tempo / 60) * 4; // 16th notes per second
@@ -879,10 +880,12 @@ export default function CounterpointGenerator() {
 
       // Safety: ensure loop range is at least 1 beat to prevent stuck loops
       if (effectiveLoopEnd <= effectiveLoopStart) {
+        console.log('[Playback] Stopping - invalid loop range');
         setIsPlaying(false);
         return;
       }
       
+      console.log('[Playback] Starting animation loop');
       lastTimeRef.current = performance.now();
       
       const animate = (timestamp) => {
@@ -896,6 +899,7 @@ export default function CounterpointGenerator() {
             if (isLooping) {
               return effectiveLoopStart;
             }
+            console.log('[Playback] Reached end, stopping');
             setIsPlaying(false);
             return 0;
           }
@@ -908,11 +912,13 @@ export default function CounterpointGenerator() {
       animationRef.current = requestAnimationFrame(animate);
       
       return () => {
+        console.log('[Playback] Cleanup - canceling animation');
         if (animationRef.current) {
           cancelAnimationFrame(animationRef.current);
         }
       };
     } else {
+      console.log('[Playback] Not playing - cleanup');
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

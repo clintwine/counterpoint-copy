@@ -1159,7 +1159,11 @@ export default function WaveEditor({
       </div>
 
       {/* Bottom Row: Tabbed Interface */}
-      <Tabs defaultValue="oscillators" className="w-full">
+      <Tabs 
+        defaultValue="oscillators" 
+        className="w-full"
+        onValueChange={(value) => console.log('[WaveEditor] Tab changed to:', value)}
+      >
         <TabsList className="bg-slate-700/50 mb-3">
           <TabsTrigger value="oscillators" className="text-sm">Oscillators</TabsTrigger>
           <TabsTrigger value="processing" className="text-sm">Filter & Effects</TabsTrigger>
