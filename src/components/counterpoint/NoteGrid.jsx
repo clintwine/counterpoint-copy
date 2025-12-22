@@ -1363,7 +1363,7 @@ export default function NoteGrid({
                 const toastId = 'audio-export';
                 try {
                   toast.loading('Generating audio file...', { id: toastId });
-                  const { renderToWav } = await import('../counterpoint/audioExporter');
+                  const { renderToWav } = await import('./audioExporter');
                   const blob = await renderToWav(cantusFirmus, tempo, voices[0]?.instrument || 'organ');
                   
                   const url = URL.createObjectURL(blob);
