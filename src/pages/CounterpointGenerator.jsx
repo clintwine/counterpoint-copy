@@ -788,9 +788,6 @@ export default function CounterpointGenerator() {
     };
 
     // Find and play all notes between last and current position
-    const sixteenthNoteDuration = (60 / tempo) / 4;
-    const beatsPerSecond = (tempo / 60) * 4;
-    
     allNotes.forEach(({ note, voiceIndex }) => {
       const noteKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
       
@@ -802,16 +799,9 @@ export default function CounterpointGenerator() {
         
         const volume = (voices[voiceIndex]?.volume || 80) / 100;
         const velocity = note.velocity ?? 0.8;
+        const sixteenthNoteDuration = (60 / tempo) / 4;
         const actualDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
         const instrument = voices[voiceIndex]?.instrument || 'organ';
-        
-        // Calculate timing offset: how far back in time was this note supposed to trigger?
-        // currentPos is where we are NOW, note.beat is where the note should have triggered
-        const beatsLate = currentPos - note.beat;
-        const timeOffset = beatsLate / beatsPerSecond; // Convert to seconds
-        
-        // Schedule note with correct timing offset (negative delay = should have played earlier)
-        const scheduleDelay = Math.max(0, -timeOffset * 1000); // Convert to ms, ensure non-negative
         
         // Check if using custom instrument
         const customConfig = getCustomConfig(instrument);
@@ -826,18 +816,15 @@ export default function CounterpointGenerator() {
           };
         }
         
-        // Schedule with precise timing
-        setTimeout(() => {
-          if (customConfig) {
-            // Use custom instrument playback
-            import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
-              playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, pitchBend);
-            });
-          } else {
-            // Use built-in instrument
-            playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
-          }
-        }, scheduleDelay);
+        if (customConfig) {
+          // Use custom instrument playback
+          import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
+            playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, pitchBend);
+          });
+        } else {
+          // Use built-in instrument
+          playNote(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, pitchBend);
+        }
       }
     });
 
