@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Square, Save, Trash2, Plus, RefreshCw } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronDown } from 'lucide-react';
 import { initAudio, getAudioContext, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 
 const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
@@ -215,7 +218,7 @@ export default function WaveEditor({
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -861,171 +864,140 @@ export default function WaveEditor({
     <div className="space-y-3">
       {/* Top Row: Presets + Name + Waveform Preview */}
       <div className="flex gap-3">
-        {/* Left: Combined Library List */}
-        <div className="w-40 flex-shrink-0 space-y-1.5">
+        {/* Left: Instrument Library Dropdown */}
+        <div className="w-48 flex-shrink-0 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Library</Label>
-          <Input
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 bg-slate-800 border-slate-600 text-white text-xs placeholder:text-white/40"
-          />
-          <div className="bg-slate-700/50 rounded-lg p-2 space-y-1 max-h-[120px] overflow-y-auto">
-            {/* Built-in Instruments */}
-            {Object.entries(BUILTIN_INSTRUMENTS)
-              .filter(([key, config]) => config.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(([key, config]) => (
-              <div key={`builtin-${key}`} className="flex items-center gap-0.5 group">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const builtinToPreview = { ...DEFAULT_INSTRUMENT, ...config };
-                    playPresetPreview(builtinToPreview, `builtin-${key}`);
-                  }}
-                  className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
-                >
-                  {previewingPreset === `builtin-${key}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    const loadedInstrument = {
-                      ...DEFAULT_INSTRUMENT,
-                      ...config,
-                      filter: { ...DEFAULT_INSTRUMENT.filter, ...config.filter }
-                    };
-                    setInstrument(loadedInstrument);
-                    setEditingIndex(-1);
-                    setEditingBuiltin(key);
-                  }}
-                  className={`flex-1 h-6 text-xs justify-start px-2 ${editingBuiltin === key ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-600'}`}
-                >
-                  {config.name}
-                </Button>
-              </div>
-            ))}
-            
-            {/* Presets */}
-            {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY)
-              .filter(preset => preset.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map((preset, i) => (
-              <div key={`lib-${i}`} className="flex items-center gap-0.5 group">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playPresetPreview(preset, `lib-${i}`);
-                  }}
-                  className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
-                  >
-                  {previewingPreset === `lib-${i}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                  </Button>
-                  <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setInstrument({ ...preset });
-                    setEditingIndex(-1);
-                    const instrumentValue = `preset_${i}`;
-                    if (onInstrumentChange) {
-                      onInstrumentChange(instrumentValue);
-                    }
-                    if (onVoiceInstrumentChange) {
-                      onVoiceInstrumentChange(0, instrumentValue);
-                    }
-                  }}
-                  className="flex-1 h-6 text-xs justify-start px-2 text-white/60 hover:text-white hover:bg-slate-600"
-                  >
-                  {preset.name}
-                  </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Ensure all required fields are present
-                    const clonedPreset = {
-                      ...DEFAULT_INSTRUMENT,
-                      ...preset,
-                      name: `${preset.name} Copy`,
-                      lfo: preset.lfo || { rate: 0, amount: 0, target: 'pitch' },
-                      distortion: preset.distortion ?? 0,
-                      bitcrush: preset.bitcrush ?? 0
-                    };
-                    setInstrument(clonedPreset);
-                    setEditingIndex(-1);
-                  }}
-                  className="h-6 w-6 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                  title="Clone"
-                  >
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                </Button>
-              </div>
-            ))}
-            {/* Custom Instruments */}
-            {customInstruments.length > 0 && (
-              <>
-                <div className="h-px bg-slate-600 my-1" />
-                {customInstruments
-                  .filter(inst => inst.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((inst, i) => (
-                  <div key={i} className="flex items-center gap-1 group">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playPresetPreview(inst, `custom-${i}`);
-                      }}
-                      className="h-6 w-6 p-0 text-white/40 hover:text-amber-400 flex-shrink-0"
-                    >
-                      {previewingPreset === `custom-${i}` ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => loadInstrument(inst, i)}
-                      className={`flex-1 h-6 text-xs justify-start px-2 ${editingIndex === i ? 'bg-amber-500/20 text-amber-400' : 'text-white/70 hover:text-white'}`}
-                    >
-                      {inst.name}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Ensure all required fields are present
-                        const clonedInstrument = {
-                          ...DEFAULT_INSTRUMENT,
-                          ...inst,
-                          name: `${inst.name} Copy`,
-                          lfo: inst.lfo || { rate: 0, amount: 0, target: 'pitch' },
-                          distortion: inst.distortion ?? 0,
-                          bitcrush: inst.bitcrush ?? 0
-                        };
-                        setInstrument(clonedInstrument);
-                        setEditingIndex(-1);
-                      }}
-                      className="h-6 w-6 p-0 text-white/40 hover:text-blue-400 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                      title="Clone"
-                    >
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" />
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                      </svg>
-                    </Button>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
+          <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full justify-between bg-slate-700 border-slate-600 text-white text-sm hover:bg-slate-600 h-9"
+              >
+                <span className="truncate">
+                  {editingBuiltin ? BUILTIN_INSTRUMENTS[editingBuiltin]?.name : 
+                   editingIndex >= 0 ? customInstruments[editingIndex]?.name :
+                   'Browse instruments...'}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0 bg-slate-800 border-slate-700" align="start">
+              <Command className="bg-slate-800">
+                <CommandInput placeholder="Search instruments..." className="h-9 text-sm text-white" />
+                <CommandList>
+                  <CommandEmpty className="text-white/50 text-sm py-4 text-center">
+                    No instrument found.
+                  </CommandEmpty>
+                  
+                  {/* Built-in Instruments */}
+                  <CommandGroup heading="Built-in Instruments">
+                    {Object.entries(BUILTIN_INSTRUMENTS).map(([key, config]) => (
+                      <CommandItem
+                        key={`builtin-${key}`}
+                        value={config.name}
+                        onSelect={() => {
+                          const loadedInstrument = {
+                            ...DEFAULT_INSTRUMENT,
+                            ...config,
+                            filter: { ...DEFAULT_INSTRUMENT.filter, ...config.filter }
+                          };
+                          setInstrument(loadedInstrument);
+                          setEditingIndex(-1);
+                          setEditingBuiltin(key);
+                          setLibraryOpen(false);
+                        }}
+                        className="text-white text-sm cursor-pointer flex items-center justify-between group"
+                      >
+                        <span>{config.name}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const builtinToPreview = { ...DEFAULT_INSTRUMENT, ...config };
+                            playPresetPreview(builtinToPreview, `builtin-${key}`);
+                          }}
+                          className="text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700"
+                          title="Preview"
+                        >
+                          ▶
+                        </button>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                  
+                  <CommandSeparator />
+                  
+                  {/* Presets */}
+                  <CommandGroup heading="Presets">
+                    {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY).map((preset, i) => (
+                      <CommandItem
+                        key={`preset-${i}`}
+                        value={preset.name}
+                        onSelect={() => {
+                          setInstrument({ ...preset });
+                          setEditingIndex(-1);
+                          setEditingBuiltin(null);
+                          const instrumentValue = `preset_${i}`;
+                          if (onInstrumentChange) {
+                            onInstrumentChange(instrumentValue);
+                          }
+                          if (onVoiceInstrumentChange) {
+                            onVoiceInstrumentChange(0, instrumentValue);
+                          }
+                          setLibraryOpen(false);
+                        }}
+                        className="text-white text-sm cursor-pointer flex items-center justify-between group"
+                      >
+                        <span>{preset.name}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playPresetPreview(preset, `lib-${i}`);
+                          }}
+                          className="text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700"
+                          title="Preview"
+                        >
+                          ▶
+                        </button>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                  
+                  {/* Custom Instruments */}
+                  {customInstruments.length > 0 && (
+                    <>
+                      <CommandSeparator />
+                      <CommandGroup heading="Custom">
+                        {customInstruments.map((inst, i) => (
+                          <CommandItem
+                            key={`custom-${i}`}
+                            value={inst.name}
+                            onSelect={() => {
+                              loadInstrument(inst, i);
+                              setLibraryOpen(false);
+                            }}
+                            className="text-white text-sm cursor-pointer flex items-center justify-between group"
+                          >
+                            <span>{inst.name}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                playPresetPreview(inst, `custom-${i}`);
+                              }}
+                              className="text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700"
+                              title="Preview"
+                            >
+                              ▶
+                            </button>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Center: Name + Waveform */}
