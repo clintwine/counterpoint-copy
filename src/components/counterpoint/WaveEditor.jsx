@@ -892,54 +892,56 @@ export default function WaveEditor({
   }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isDraggingTimbre, isPlaying]);
 
   return (
-    <div className="space-y-3">
-      {/* Top Row: Name + Instruments + Waveform Preview */}
-      <div className="flex gap-3">
-        {/* Left: Name Input + Save/Revert Buttons */}
-        <div className="flex-shrink-0 space-y-1.5">
+    <div className="space-y-4">
+      {/* Top Row: Name + Buttons + Library */}
+      <div className="flex items-end gap-3">
+        {/* Name Input */}
+        <div className="flex-1 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Instrument Name</Label>
-          <div className="flex gap-2">
-            <Input
-              value={instrument.name}
-              onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
-              className="bg-slate-700 border-slate-600 text-white h-9 text-sm w-48"
-              placeholder="Instrument name..."
-            />
+          <Input
+            value={instrument.name}
+            onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
+            className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+            placeholder="Instrument name..."
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={handleSave}
+            className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900"
+          >
+            <Save className="w-3.5 h-3.5 mr-1.5" />
+            {editingIndex >= 0 ? 'Update' : 'Save'}
+          </Button>
+          {editingBuiltin && (
             <Button
               size="sm"
-              onClick={handleSave}
-              className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900"
+              onClick={handleRevert}
+              className="h-9 px-3 bg-blue-500 hover:bg-blue-600 text-white"
             >
-              <Save className="w-3.5 h-3.5 mr-1.5" />
-              {editingIndex >= 0 ? 'Update' : 'Save'}
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+              Reset
             </Button>
-            {editingBuiltin && (
-              <Button
-                size="sm"
-                onClick={handleRevert}
-                className="h-9 px-3 bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                Reset
-              </Button>
-            )}
-            {editingIndex >= 0 && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  if (confirm(`Delete "${instrument.name}"?`)) {
-                    onDeleteInstrument(editingIndex);
-                    setInstrument({ ...DEFAULT_INSTRUMENT });
-                    setEditingIndex(-1);
-                    setEditingBuiltin(null);
-                  }
-                }}
-                className="h-9 px-3 bg-red-500 hover:bg-red-600 text-white"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            )}
-          </div>
+          )}
+          {editingIndex >= 0 && (
+            <Button
+              size="sm"
+              onClick={() => {
+                if (confirm(`Delete "${instrument.name}"?`)) {
+                  onDeleteInstrument(editingIndex);
+                  setInstrument({ ...DEFAULT_INSTRUMENT });
+                  setEditingIndex(-1);
+                  setEditingBuiltin(null);
+                }
+              }}
+              className="h-9 px-3 bg-red-500 hover:bg-red-600 text-white"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
 
         {/* Instrument Library Dropdown + New Button */}
@@ -1112,14 +1114,17 @@ export default function WaveEditor({
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Center: Waveform Preview */}
-        <div className="flex-1 space-y-2.5">
+      {/* Second Row: Waveform Preview + ADSR Controls */}
+      <div className="flex gap-3">
+        {/* Waveform Preview */}
+        <div className="flex-1 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Waveform</Label>
           <div className="relative">
            <canvas
              ref={canvasRef}
-             className="w-full h-[80px] rounded border border-slate-600"
+             className="w-full h-[100px] rounded border border-slate-600"
            />
             <Button
               variant="ghost"
@@ -1132,8 +1137,8 @@ export default function WaveEditor({
           </div>
         </div>
 
-        {/* Right: ADSR Knobs + Live Preview */}
-        <div className="flex-shrink-0 space-y-2.5">
+        {/* ADSR Envelope Controls */}
+        <div className="w-80 flex-shrink-0 space-y-1.5">
           <div className="flex items-center justify-between">
             <Label className="text-white/70 text-xs uppercase tracking-wider">Envelope</Label>
             <div className="flex items-center gap-2">
@@ -1145,16 +1150,16 @@ export default function WaveEditor({
               />
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-between">
             {['attack', 'decay', 'sustain', 'release'].map(param => (
               <div key={param} className="text-center">
                 <div
-                  className="w-11 h-11 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer"
+                  className="w-14 h-14 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer"
                   style={{
                     background: `conic-gradient(from 225deg, #10b981 ${instrument.envelope[param] * (param === 'sustain' ? 270 : 135)}deg, #334155 0deg)`
                   }}
                 >
-                  <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center">
                     <span className="text-[9px] text-white/70">{Math.round(instrument.envelope[param] * 100)}</span>
                   </div>
                   <input
@@ -1170,11 +1175,11 @@ export default function WaveEditor({
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
-                <span className="text-[10px] text-white/50 uppercase">{param.charAt(0)}</span>
+                <span className="text-[10px] text-white/50 uppercase mt-1 block">{param.charAt(0)}</span>
               </div>
             ))}
           </div>
-          <div className="space-y-1 pt-1">
+          <div className="space-y-1 pt-2">
             <div className="flex items-center justify-between">
               <span className="text-white/40 text-xs">Volume</span>
               <span className="text-white/60 text-xs">{Math.round((instrument.volume ?? 1) * 100)}%</span>
