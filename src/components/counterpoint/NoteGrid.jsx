@@ -1222,7 +1222,18 @@ export default function NoteGrid({
       
       // Play note sound when pitch changes during drag
       if ((dragState.isDragging || hasMoved) && newPitchIndex !== prevPitchIndex && newPitchIndex >= 0 && newPitchIndex < pitches.length) {
-        playNoteSound(pitches[newPitchIndex]);
+        // Use the first dragged note's properties for preview
+        const firstDraggedNote = originalDragNotesRef.current?.notes?.[0];
+        if (firstDraggedNote) {
+          // Create a preview note with the new pitch but original effects
+          const previewNote = {
+            ...firstDraggedNote,
+            pitch: pitches[newPitchIndex]
+          };
+          playNoteSound(pitches[newPitchIndex], previewNote);
+        } else {
+          playNoteSound(pitches[newPitchIndex]);
+        }
       }
 
       // Auto-scroll when dragging near edges
