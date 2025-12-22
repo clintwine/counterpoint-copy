@@ -878,6 +878,20 @@ export default function CounterpointGenerator() {
     return map[timeSig] || 16;
   };
 
+  // Handle tab visibility changes - pause playback when tab is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isPlaying) {
+        console.log('[Playback] Tab hidden - pausing playback');
+        stopAllNotes();
+        setIsPlaying(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isPlaying]);
+
   // Playback logic - smooth animation with requestAnimationFrame
   useEffect(() => {
     console.log('[Playback] State changed:', { isPlaying, tempo, measures: settings.measures });
@@ -901,6 +915,14 @@ export default function CounterpointGenerator() {
       lastTimeRef.current = performance.now();
       
       const animate = (timestamp) => {
+        // Check if tab is still visible
+        if (document.hidden) {
+          console.log('[Playback] Tab hidden during animation - stopping');
+          stopAllNotes();
+          setIsPlaying(false);
+          return;
+        }
+
         if (!lastTimeRef.current) lastTimeRef.current = timestamp;
         const deltaTime = (timestamp - lastTimeRef.current) / 1000; // Convert to seconds
         lastTimeRef.current = timestamp;
