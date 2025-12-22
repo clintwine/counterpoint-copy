@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { initAudio, playNote, stopAllNotes, playNoteWithCustomInstrument } from './audioEngine';
+import toast from 'react-hot-toast';
 
 export default function AIChatbot({ 
   isOpen, 
@@ -209,14 +210,17 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
       // Append new notes to existing
       const combined = [...currentNotes, ...notes].sort((a, b) => a.beat - b.beat);
       onApplyMelody(combined);
+      toast.success(`Extended melody with ${notes.length} new notes`);
     } else if (isPartialEdit) {
       // Replace notes only in the edited range, keep the rest
       const notesOutsideRange = currentNotes.filter(n => n.beat < minNewBeat || n.beat >= maxNewBeat);
       const combined = [...notesOutsideRange, ...notes].sort((a, b) => a.beat - b.beat);
       onApplyMelody(combined);
+      toast.success(`Updated ${notes.length} notes in selected range`);
     } else {
       // Full replacement
       onApplyMelody(notes);
+      toast.success(`Applied ${notes.length} AI-generated notes to score`);
     }
   };
 
