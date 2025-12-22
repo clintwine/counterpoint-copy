@@ -720,7 +720,15 @@ export default function NoteGrid({
     // Calculate actual duration based on note duration and tempo
     const sixteenthNoteDuration = (60 / tempo) / 4;
     const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
-    playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+    
+    // Use articulation if present
+    if (note?.articulation && note.articulation !== 'normal') {
+      import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+        playNoteWithArticulation(pitch, actualDuration, 0.7, 0, instrument, note.articulation, tempo, pitchBend);
+      });
+    } else {
+      playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+    }
   }, [voices, activeVoice, tempo]);
 
   const selectAll = useCallback(() => {
