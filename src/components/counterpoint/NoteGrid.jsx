@@ -350,9 +350,20 @@ export default function NoteGrid({
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
+
+  // Detect fullscreen mode
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Audio visualizer
   useEffect(() => {
@@ -1767,9 +1778,11 @@ export default function NoteGrid({
           <div 
                   ref={gridRef}
                   className={`overflow-auto relative select-none mx-2 sm:mx-5 ${
-                    showPianoPanel 
-                      ? 'max-h-[47vh] sm:max-h-[488px]'
-                      : 'max-h-[66vh] sm:max-h-[648px]'
+                    isFullscreen
+                      ? (showPianoPanel ? 'max-h-[calc(100vh-320px)]' : 'max-h-[calc(100vh-200px)]')
+                      : (showPianoPanel 
+                          ? 'max-h-[47vh] sm:max-h-[488px]'
+                          : 'max-h-[66vh] sm:max-h-[648px]')
                   }`}
                 style={{ 
                   scrollbarWidth: 'thin', 
