@@ -222,10 +222,12 @@ export default function WaveEditor({
 }) {
   const handleNew = () => {
     const nextNumber = customInstruments.length + 1;
-    setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-    setEditingIndex(-1);
+    const newInstrument = { ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` };
+    setInstrument(newInstrument);
+    // Immediately save it to the list
+    onSaveInstrument(newInstrument, -1);
+    setEditingIndex(customInstruments.length); // Will be the new index after save
     setEditingBuiltin(null);
-    if (onNew) onNew();
   };
   const [instrument, setInstrument] = useState(() => ({ ...DEFAULT_INSTRUMENT, eq: [...DEFAULT_INSTRUMENT.eq] }));
   const [editingIndex, setEditingIndex] = useState(-1);
