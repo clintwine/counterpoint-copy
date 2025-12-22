@@ -354,12 +354,13 @@ export default function CounterpointGenerator() {
           if (e.key === ' ') {
             e.preventDefault();
             console.log('[Keyboard] Spacebar pressed - toggling playback');
+            console.trace();
             setIsPlaying(prev => {
               if (prev) {
-                console.log('[Keyboard] Stopping via spacebar');
+                console.log('[Keyboard] setIsPlaying(false) - stopping via spacebar');
                 stopAllNotes();
               } else {
-                console.log('[Keyboard] Starting via spacebar');
+                console.log('[Keyboard] setIsPlaying(true) - starting via spacebar');
               }
               return !prev;
             });
@@ -891,6 +892,7 @@ export default function CounterpointGenerator() {
       // Safety: ensure loop range is at least 1 beat to prevent stuck loops
       if (effectiveLoopEnd <= effectiveLoopStart) {
         console.log('[Playback] Stopping - invalid loop range');
+        console.log('[Playback] setIsPlaying(false) - invalid loop range');
         setIsPlaying(false);
         return;
       }
@@ -910,6 +912,7 @@ export default function CounterpointGenerator() {
               return effectiveLoopStart;
             }
             console.log('[Playback] Reached end, stopping');
+            console.log('[Playback] setIsPlaying(false) - reached end of playback');
             setIsPlaying(false);
             return 0;
           }
@@ -1100,6 +1103,7 @@ export default function CounterpointGenerator() {
       console.log('[Playback] handlePlayPause - STOPPING playback');
       console.trace();
       stopAllNotes();
+      console.log('[Playback] setIsPlaying(false) - called from handlePlayPause');
       setIsPlaying(false);
     } else {
       console.log('[Playback] handlePlayPause - STARTING playback');
@@ -1110,6 +1114,7 @@ export default function CounterpointGenerator() {
         lastPlayheadRef.current = loopStart;
         playedNotesRef.current.clear();
       }
+      console.log('[Playback] setIsPlaying(true) - called from handlePlayPause');
       setIsPlaying(true);
     }
   };
