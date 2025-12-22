@@ -471,10 +471,14 @@ export default function WaveEditor({
     const masterGain = audioContext.createGain();
     masterGain.gain.value = (inst.volume ?? 1) * 0.3;
 
+    // Get filter config from effects array or fall back to old filter property
+    const filterEffect = inst.effects?.find(e => e.type === 'filter');
+    const filterConfig = filterEffect?.config || inst.filter || { filterType: 'lowpass', frequency: 2000, Q: 1 };
+    
     const filter = audioContext.createBiquadFilter();
-    filter.type = inst.filter.type;
-    filter.frequency.value = inst.filter.frequency;
-    filter.Q.value = inst.filter.Q;
+    filter.type = filterConfig.filterType || filterConfig.type || 'lowpass';
+    filter.frequency.value = filterConfig.frequency || 2000;
+    filter.Q.value = filterConfig.Q || 1;
 
     const now = audioContext.currentTime;
     const { attack, decay, sustain, release } = inst.envelope;
