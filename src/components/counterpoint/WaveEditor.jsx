@@ -264,7 +264,7 @@ export default function WaveEditor({
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...builtinConfig,
-        filter: { ...DEFAULT_INSTRUMENT.filter, ...builtinConfig.filter }
+        effects: builtinConfig.effects || [{ type: 'filter', config: { filterType: builtinConfig.filter?.type || 'lowpass', frequency: builtinConfig.filter?.frequency || 2000, Q: builtinConfig.filter?.Q || 1 } }]
       };
       setInstrument(loadedInstrument);
       setEditingIndex(-1);
