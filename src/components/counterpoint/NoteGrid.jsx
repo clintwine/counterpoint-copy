@@ -2489,7 +2489,7 @@ export default function NoteGrid({
                   }}
                   min={-12}
                   max={12}
-                  step={0.1}
+                  step={0.5}
                   className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-7">
@@ -2533,7 +2533,7 @@ export default function NoteGrid({
                   }}
                   min={-12}
                   max={12}
-                  step={0.1}
+                  step={0.5}
                   className="w-14 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
                 />
                 <span className="text-white/70 text-[10px] w-7">
