@@ -1006,19 +1006,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
-                      <Button
-                        onClick={() => {
-                          // Trigger new instrument
-                        }}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white h-7 px-3 text-xs font-medium"
-                      >
-                        <Plus className="w-3.5 h-3.5 mr-1.5" />
-                        New
-                      </Button>
-                    </div>
+                    <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                     <p id="wave-editor-description" className="sr-only">
                       Create and edit custom instruments with oscillators, filters, and effects
                     </p>

@@ -904,7 +904,7 @@ export default function WaveEditor({
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Delete + Library + Save */}
+      {/* Top Row: Delete + New + Library + Save */}
       <div className="flex items-end gap-3">
         {/* Delete button */}
         {editingIndex >= 0 && (
@@ -923,6 +923,16 @@ export default function WaveEditor({
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
         )}
+
+        {/* New button */}
+        <Button
+          size="sm"
+          onClick={handleNew}
+          className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Plus className="w-3.5 h-3.5 mr-1.5" />
+          New
+        </Button>
 
         {/* Instrument Library + Save */}
         <div className="flex-1 space-y-1.5">
