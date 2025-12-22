@@ -20,10 +20,9 @@ const DEFAULT_INSTRUMENT = {
     { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }
   ],
   envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
-  filter: { type: 'lowpass', frequency: 2000, Q: 1 },
-  lfo: { rate: 0, amount: 0, target: 'pitch' },
-  distortion: 0,
-  bitcrush: 0
+  effects: [
+    { type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }
+  ]
 };
 
 // Built-in instrument configurations for editing
@@ -212,10 +211,7 @@ export default function WaveEditor({
   currentInstrumentConfig = null,
   presetLibrary = []
 }) {
-  const [instrument, setInstrument] = useState({ 
-    ...DEFAULT_INSTRUMENT,
-    effects: [{ type: 'filter', config: { type: 'lowpass', frequency: 2000, Q: 1 } }]
-  });
+  const [instrument, setInstrument] = useState({ ...DEFAULT_INSTRUMENT });
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingBuiltin, setEditingBuiltin] = useState(null);
   const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
@@ -643,6 +639,35 @@ export default function WaveEditor({
     if (instrument.oscillators.length <= 1) return;
     const newOscs = instrument.oscillators.filter((_, i) => i !== index);
     setInstrument({ ...instrument, oscillators: newOscs });
+  };
+
+  const updateEffect = (index, key, value) => {
+    const newEffects = [...instrument.effects];
+    newEffects[index] = { 
+      ...newEffects[index],
+      config: { ...newEffects[index].config, [key]: value }
+    };
+    setInstrument({ ...instrument, effects: newEffects });
+  };
+
+  const addEffect = (type) => {
+    if (instrument.effects.length >= 4) return;
+    
+    const effectConfigs = {
+      filter: { filterType: 'lowpass', frequency: 2000, Q: 1 },
+      distortion: { amount: 50 },
+      bitcrusher: { bits: 8 },
+      lfo: { rate: 5, amount: 0.5, target: 'pitch' }
+    };
+    
+    const newEffect = { type, config: effectConfigs[type] };
+    setInstrument({ ...instrument, effects: [...instrument.effects, newEffect] });
+  };
+
+  const removeEffect = (index) => {
+    if (instrument.effects.length <= 1) return;
+    const newEffects = instrument.effects.filter((_, i) => i !== index);
+    setInstrument({ ...instrument, effects: newEffects });
   };
 
   const handleSave = () => {
@@ -1299,208 +1324,192 @@ export default function WaveEditor({
 
         <TabsContent value="processing" className="mt-0">
           <div className="space-y-2.5">
-            <Label className="text-white/70 text-sm uppercase tracking-wider">Effects & Processing</Label>
+            <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
             <div className="grid grid-cols-4 gap-3">
-              {/* Filter Card */}
-              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-sm font-medium">Filter</span>
-                </div>
-                <Select
-                  value={instrument.filter.type}
-                  onValueChange={(v) => setInstrument({ ...instrument, filter: { ...instrument.filter, type: v } })}
-                >
-                  <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                    {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
-                      <SelectItem key={t} value={t} className="text-white text-sm capitalize">{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="space-y-1">
+              {/* Existing effects */}
+              {instrument.effects.map((effect, i) => (
+                <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Cutoff</span>
-                    <span className="text-white/60 text-xs">{instrument.filter.frequency} Hz</span>
+                    <span className="text-white/60 text-sm font-medium capitalize">{effect.type}</span>
+                    {instrument.effects.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeEffect(i)}
+                        className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
-                  <Slider
-                    value={[instrument.filter.frequency]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, frequency: v } })}
-                    min={100}
-                    max={8000}
-                    step={10}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Resonance</span>
-                    <span className="text-white/60 text-xs">{instrument.filter.Q.toFixed(1)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.filter.Q]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, filter: { ...instrument.filter, Q: v } })}
-                    min={0.1}
-                    max={20}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-              </div>
 
-              {/* LFO Card */}
-              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-sm font-medium">LFO</span>
-                </div>
-                <Select
-                  value={instrument.lfo?.target || 'pitch'}
-                  onValueChange={(v) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), target: v } })}
-                >
-                  <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
-                    <SelectItem value="pitch" className="text-white text-sm">Pitch</SelectItem>
-                    <SelectItem value="filter" className="text-white text-sm">Filter</SelectItem>
-                    <SelectItem value="volume" className="text-white text-sm">Volume</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Rate</span>
-                    <span className="text-white/60 text-xs">{(instrument.lfo?.rate || 0).toFixed(1)} Hz</span>
-                  </div>
-                  <Slider
-                    value={[instrument.lfo?.rate || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), rate: v } })}
-                    min={0}
-                    max={20}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Depth</span>
-                    <span className="text-white/60 text-xs">{Math.round((instrument.lfo?.amount || 0) * 100)}%</span>
-                  </div>
-                  <Slider
-                    value={[instrument.lfo?.amount || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, lfo: { ...(instrument.lfo || {}), amount: v } })}
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+                  {effect.type === 'filter' && (
+                    <>
+                      <Select
+                        value={effect.config.filterType}
+                        onValueChange={(v) => updateEffect(i, 'filterType', v)}
+                      >
+                        <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                          {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
+                            <SelectItem key={t} value={t} className="text-white text-sm capitalize">{t}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/40 text-xs">Cutoff</span>
+                          <span className="text-white/60 text-xs">{effect.config.frequency} Hz</span>
+                        </div>
+                        <Slider
+                          value={[effect.config.frequency]}
+                          onValueChange={([v]) => updateEffect(i, 'frequency', v)}
+                          min={100}
+                          max={8000}
+                          step={10}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/40 text-xs">Resonance</span>
+                          <span className="text-white/60 text-xs">{effect.config.Q.toFixed(1)}</span>
+                        </div>
+                        <Slider
+                          value={[effect.config.Q]}
+                          onValueChange={([v]) => updateEffect(i, 'Q', v)}
+                          min={0.1}
+                          max={20}
+                          step={0.1}
+                        />
+                      </div>
+                    </>
+                  )}
 
-              {/* Distortion Card */}
-              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-sm font-medium">Distortion</span>
-                </div>
-                <div className="space-y-1 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Amount</span>
-                    <span className="text-white/60 text-xs">{Math.round(instrument.distortion || 0)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.distortion || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, distortion: v })}
-                    min={0}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Width</span>
-                    <span className="text-white/60 text-xs">{Math.round((instrument.width || 0) * 100)}%</span>
-                  </div>
-                  <Slider
-                    value={[instrument.width || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, width: v })}
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+                  {effect.type === 'distortion' && (
+                    <div className="space-y-1 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/40 text-xs">Amount</span>
+                        <span className="text-white/60 text-xs">{Math.round(effect.config.amount)}</span>
+                      </div>
+                      <Slider
+                        value={[effect.config.amount]}
+                        onValueChange={([v]) => updateEffect(i, 'amount', v)}
+                        min={0}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                  )}
 
-              {/* Bitcrusher Card */}
-              <div className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/60 text-sm font-medium">Bitcrusher</span>
-                </div>
-                <div className="space-y-1 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Bit Depth</span>
-                    <span className="text-white/60 text-xs">{(instrument.bitcrush || 0).toFixed(1)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.bitcrush || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, bitcrush: v })}
-                    min={0}
-                    max={16}
-                    step={0.5}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Unison</span>
-                    <span className="text-white/60 text-xs">{Math.round(instrument.unison || 1)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.unison || 1]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, unison: Math.round(v) })}
-                    min={1}
-                    max={7}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
+                  {effect.type === 'bitcrusher' && (
+                    <div className="space-y-1 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white/40 text-xs">Bit Depth</span>
+                        <span className="text-white/60 text-xs">{effect.config.bits}</span>
+                      </div>
+                      <Slider
+                        value={[effect.config.bits]}
+                        onValueChange={([v]) => updateEffect(i, 'bits', Math.round(v))}
+                        min={1}
+                        max={16}
+                        step={1}
+                      />
+                    </div>
+                  )}
 
-            {/* Spread Section */}
-            <div className="pt-2">
-              <Label className="text-white/70 text-xs uppercase tracking-wider mb-2 block">Voice Spread</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-700/30 rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Detune</span>
-                    <span className="text-white/60 text-xs">{Math.round(instrument.unisonDetune || 0)}</span>
-                  </div>
-                  <Slider
-                    value={[instrument.unisonDetune || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, unisonDetune: v })}
-                    min={0}
-                    max={50}
-                    step={1}
-                    className="w-full"
-                  />
+                  {effect.type === 'lfo' && (
+                    <>
+                      <Select
+                        value={effect.config.target}
+                        onValueChange={(v) => updateEffect(i, 'target', v)}
+                      >
+                        <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                          <SelectItem value="pitch" className="text-white text-sm">Pitch</SelectItem>
+                          <SelectItem value="filter" className="text-white text-sm">Filter</SelectItem>
+                          <SelectItem value="volume" className="text-white text-sm">Volume</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/40 text-xs">Rate</span>
+                          <span className="text-white/60 text-xs">{effect.config.rate.toFixed(1)} Hz</span>
+                        </div>
+                        <Slider
+                          value={[effect.config.rate]}
+                          onValueChange={([v]) => updateEffect(i, 'rate', v)}
+                          min={0}
+                          max={20}
+                          step={0.1}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/40 text-xs">Depth</span>
+                          <span className="text-white/60 text-xs">{Math.round(effect.config.amount * 100)}%</span>
+                        </div>
+                        <Slider
+                          value={[effect.config.amount]}
+                          onValueChange={([v]) => updateEffect(i, 'amount', v)}
+                          min={0}
+                          max={1}
+                          step={0.01}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="bg-slate-700/30 rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/40 text-xs">Stereo Width</span>
-                    <span className="text-white/60 text-xs">{Math.round((instrument.stereoSpread || 0) * 100)}%</span>
-                  </div>
-                  <Slider
-                    value={[instrument.stereoSpread || 0]}
-                    onValueChange={([v]) => setInstrument({ ...instrument, stereoSpread: v })}
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+              ))}
+
+              {/* Empty slots for adding effects */}
+              {[...Array(4 - instrument.effects.length)].map((_, i) => (
+                <Popover key={`empty-${i}`}>
+                  <PopoverTrigger asChild>
+                    <button className="bg-slate-700/30 border-2 border-dashed border-slate-600 rounded p-3 flex items-center justify-center min-h-[200px] hover:border-amber-500/50 hover:bg-slate-700/40 transition-colors group">
+                      <div className="flex flex-col items-center gap-2 text-white/40 group-hover:text-amber-400/70">
+                        <Plus className="w-6 h-6" />
+                        <span className="text-xs">Add Effect</span>
+                      </div>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 bg-slate-800 border-slate-700 p-2">
+                    <div className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white text-sm hover:bg-slate-700"
+                        onClick={() => addEffect('filter')}
+                      >
+                        Filter
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white text-sm hover:bg-slate-700"
+                        onClick={() => addEffect('distortion')}
+                      >
+                        Distortion
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white text-sm hover:bg-slate-700"
+                        onClick={() => addEffect('bitcrusher')}
+                      >
+                        Bitcrusher
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white text-sm hover:bg-slate-700"
+                        onClick={() => addEffect('lfo')}
+                      >
+                        LFO
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ))}
             </div>
           </div>
         </TabsContent>
