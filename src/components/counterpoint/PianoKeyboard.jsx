@@ -223,9 +223,15 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   // Handle external trigger to open wave editor
   useEffect(() => {
     if (externalOpenWaveEditor) {
+      console.log('[PianoKeyboard] External trigger to open wave editor');
       setShowWaveEditor(true);
     }
   }, [externalOpenWaveEditor]);
+  
+  // Debug: Log when dialog state changes
+  useEffect(() => {
+    console.log('[PianoKeyboard] showWaveEditor changed to:', showWaveEditor);
+  }, [showWaveEditor]);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
@@ -985,16 +991,39 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       </div>
 
       {/* Wave Editor Modal */}
-              <Dialog open={showWaveEditor} onOpenChange={setShowWaveEditor}>
+              <Dialog 
+                open={showWaveEditor} 
+                onOpenChange={(open) => {
+                  console.log('[PianoKeyboard] Dialog onOpenChange:', open);
+                  console.trace();
+                  setShowWaveEditor(open);
+                }}
+              >
                 <DialogContent 
                   className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999]" 
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                  onPointerDownOutside={(e) => e.preventDefault()}
-                  onInteractOutside={(e) => e.preventDefault()}
+                  onOpenAutoFocus={(e) => {
+                    console.log('[PianoKeyboard] Dialog onOpenAutoFocus prevented');
+                    e.preventDefault();
+                  }}
+                  onCloseAutoFocus={(e) => {
+                    console.log('[PianoKeyboard] Dialog onCloseAutoFocus prevented');
+                    e.preventDefault();
+                  }}
+                  onPointerDownOutside={(e) => {
+                    console.log('[PianoKeyboard] Dialog onPointerDownOutside prevented');
+                    e.preventDefault();
+                  }}
+                  onInteractOutside={(e) => {
+                    console.log('[PianoKeyboard] Dialog onInteractOutside prevented');
+                    e.preventDefault();
+                  }}
+                  aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
                     <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                    <p id="wave-editor-description" className="sr-only">
+                      Create and edit custom instruments with oscillators, filters, and effects
+                    </p>
                   </DialogHeader>
                   <WaveEditor
             customInstruments={customInstruments}
