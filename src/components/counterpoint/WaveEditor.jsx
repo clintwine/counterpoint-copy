@@ -889,17 +889,26 @@ export default function WaveEditor({
                   ref={(el) => {
                     if (el) {
                       console.log('CommandList element:', el);
-                      console.log('CommandList computed style:', window.getComputedStyle(el));
                       console.log('CommandList scrollHeight:', el.scrollHeight);
                       console.log('CommandList clientHeight:', el.clientHeight);
-                      console.log('CommandList overflow:', window.getComputedStyle(el).overflow);
                       console.log('CommandList overflowY:', window.getComputedStyle(el).overflowY);
+                      console.log('CommandList pointerEvents:', window.getComputedStyle(el).pointerEvents);
+                      console.log('CommandList position:', window.getComputedStyle(el).position);
+                      
+                      // Add wheel event listener for debugging
+                      const wheelHandler = (e) => {
+                        console.log('Wheel event on CommandList:', e.deltaY);
+                        console.log('Can scroll?', el.scrollHeight > el.clientHeight);
+                        console.log('Current scrollTop:', el.scrollTop);
+                      };
+                      el.addEventListener('wheel', wheelHandler);
                     }
                   }}
                   style={{ 
-                    maxHeight: '320px', 
-                    overflowY: 'auto',
-                    overscrollBehavior: 'contain'
+                    maxHeight: '320px !important', 
+                    overflowY: 'auto !important',
+                    overscrollBehavior: 'contain',
+                    pointerEvents: 'auto'
                   }}
                 >
                   <CommandEmpty className="text-white/50 text-sm py-4 text-center">
