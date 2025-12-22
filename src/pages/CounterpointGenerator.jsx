@@ -129,6 +129,7 @@ export default function CounterpointGenerator() {
   
   const queryClient = useQueryClient();
   const previewTimeoutRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
   
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [chatbotActive, setChatbotActive] = useState(false);
@@ -1080,6 +1081,10 @@ export default function CounterpointGenerator() {
     setIsPlaying(false);
     setIsRecording(false);
     setIsCountingIn(false);
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
     stopAllNotes();
     setCurrentBeat(0);
     setPlayheadPosition(0);
@@ -1109,13 +1114,14 @@ export default function CounterpointGenerator() {
       let count = 4;
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       const sixteenthNoteDuration = (60 / tempo) / 4;
-      const countInterval = setInterval(() => {
+      countdownIntervalRef.current = setInterval(() => {
         playMetronomeClick(count === 4);
         count--;
         setCountInBeats(count);
         
         if (count === 0) {
-          clearInterval(countInterval);
+          clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
           setIsCountingIn(false);
           setIsRecording(true);
           setIsPlaying(true);
