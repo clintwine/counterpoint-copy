@@ -481,12 +481,14 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   // Create EQ chain if present
   const eqNodes = [];
   if (eq && eq.length > 0) {
+    console.log('[AudioEngine] Creating EQ nodes:', eq);
     eq.forEach(band => {
       const eqFilter = audioContext.createBiquadFilter();
       eqFilter.type = band.type || 'peaking';
       eqFilter.frequency.value = band.frequency || 1000;
       eqFilter.Q.value = band.Q || 1;
       eqFilter.gain.value = band.gain || 0;
+      console.log(`[AudioEngine] EQ Band: ${eqFilter.type} @ ${eqFilter.frequency.value}Hz, Gain: ${eqFilter.gain.value}dB, Q: ${eqFilter.Q.value}`);
       eqNodes.push(eqFilter);
     });
   }
