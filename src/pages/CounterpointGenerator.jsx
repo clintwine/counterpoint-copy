@@ -361,15 +361,21 @@ export default function CounterpointGenerator() {
             e.preventDefault();
             console.log('[Keyboard] Spacebar pressed - toggling playback');
             console.trace();
-            setIsPlaying(prev => {
-              if (prev) {
-                console.log('[Keyboard] setIsPlaying(false) - stopping via spacebar');
-                stopAllNotes();
-              } else {
-                console.log('[Keyboard] setIsPlaying(true) - starting via spacebar');
+            if (isPlaying) {
+              console.log('[Keyboard] setIsPlaying(false) - stopping via spacebar');
+              stopAllNotes();
+              setIsPlaying(false);
+            } else {
+              console.log('[Keyboard] setIsPlaying(true) - starting via spacebar');
+              // When starting playback, jump to loop start if set
+              if (loopStart !== null) {
+                setCurrentBeat(loopStart);
+                setPlayheadPosition(loopStart);
+                lastPlayheadRef.current = loopStart;
+                playedNotesRef.current.clear();
               }
-              return !prev;
-            });
+              setIsPlaying(true);
+            }
           }
 
           // Cmd/Ctrl + S for save project
