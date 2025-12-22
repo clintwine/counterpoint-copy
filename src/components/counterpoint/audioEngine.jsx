@@ -713,9 +713,9 @@ function getNextScaleNote(pitch) {
 }
 
 // Play note with articulation
-export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, instrument, articulation = 'normal', tempo = 80) {
+export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, instrument, articulation = 'normal', tempo = 80, pitchBend = 0) {
   if (!articulation || articulation === 'normal') {
-    return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+    return playNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
   }
   
   const sixteenthNoteDuration = (60 / tempo) / 4;
@@ -723,18 +723,18 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
   switch (articulation) {
     case 'staccato':
       // Short and detached - 20% of original duration
-      return playNote(pitch, duration * 0.2, volume, voiceIndex, instrument, 0);
+      return playNote(pitch, duration * 0.2, volume, voiceIndex, instrument, pitchBend);
       
     case 'legato':
       // Full smooth duration
-      return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+      return playNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
       
     case 'accent':
       // Emphasized with higher velocity
-      return playNote(pitch, duration, Math.min(1, volume * 1.5), voiceIndex, instrument, 0);
+      return playNote(pitch, duration, Math.min(1, volume * 1.5), voiceIndex, instrument, pitchBend);
       
     case 'trill':
-      // Rapid alternation with upper note
+      // Rapid alternation with upper note - preserve pitch bend on each note
       const trillSpeed = sixteenthNoteDuration * 0.5; // 32nd notes
       const numTrillNotes = Math.floor(duration / trillSpeed);
       const upperNote = getNextScaleNote(pitch);
@@ -742,23 +742,23 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
       for (let i = 0; i < numTrillNotes; i++) {
         setTimeout(() => {
           const notePitch = i % 2 === 0 ? pitch : upperNote;
-          playNote(notePitch, trillSpeed * 0.9, volume * 0.8, voiceIndex, instrument, 0);
+          playNote(notePitch, trillSpeed * 0.9, volume * 0.8, voiceIndex, instrument, pitchBend);
         }, i * trillSpeed * 1000);
       }
       return null;
       
     case 'grace':
-      // Quick grace note before main note
+      // Quick grace note before main note - preserve pitch bend
       const graceNote = getNextScaleNote(pitch);
       const graceDuration = sixteenthNoteDuration * 0.25; // Very quick
-      playNote(graceNote, graceDuration, volume * 0.7, voiceIndex, instrument, 0);
+      playNote(graceNote, graceDuration, volume * 0.7, voiceIndex, instrument, pitchBend);
       setTimeout(() => {
-        playNote(pitch, duration - graceDuration, volume, voiceIndex, instrument, 0);
+        playNote(pitch, duration - graceDuration, volume, voiceIndex, instrument, pitchBend);
       }, graceDuration * 1000);
       return null;
       
     default:
-      return playNote(pitch, duration, volume, voiceIndex, instrument, 0);
+      return playNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
   }
 }
 

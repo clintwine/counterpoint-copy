@@ -2713,8 +2713,15 @@ export default function NoteGrid({
                             const instrument = voices[0]?.instrument || 'organ';
                             const sixteenthNoteDuration = (60 / tempo) / 4;
                             const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                            const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
+                            const pitchBend = hasBend ? {
+                              start: firstSelected.bendStart ?? 0,
+                              end: firstSelected.bendEnd ?? 0,
+                              startTime: firstSelected.bendStartTime ?? 0,
+                              endTime: firstSelected.bendEndTime ?? 1
+                            } : 0;
                             import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-                              playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo);
+                              playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo, pitchBend);
                             });
                           }
                         }}
@@ -2732,8 +2739,15 @@ export default function NoteGrid({
                               const instrument = voices[0]?.instrument || 'organ';
                               const sixteenthNoteDuration = (60 / tempo) / 4;
                               const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                              const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
+                              const pitchBend = hasBend ? {
+                                start: firstSelected.bendStart ?? 0,
+                                end: firstSelected.bendEnd ?? 0,
+                                startTime: firstSelected.bendStartTime ?? 0,
+                                endTime: firstSelected.bendEndTime ?? 1
+                              } : 0;
                               import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-                                playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo);
+                                playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo, pitchBend);
                               });
                             }
                           }}
