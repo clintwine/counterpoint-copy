@@ -666,7 +666,8 @@ export default function NoteGrid({
       startTime: note.bendStartTime ?? 0,
       endTime: note.bendEndTime ?? 1
     } : 0;
-    playNote(pitch, 0.5, 0.6, 0, instrument, pitchBend);
+    // Use longer duration and higher volume to match piano keyboard feel
+    playNote(pitch, 0.3, 0.8, 0, instrument, pitchBend);
   }, [voices, activeVoice]);
 
   const selectAll = useCallback(() => {
