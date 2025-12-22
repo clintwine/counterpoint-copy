@@ -1821,69 +1821,70 @@ export default function WaveEditor({
                       </Select>
                     )}
                     
-                    {/* Frequency knob */}
-                    <div className="flex flex-col items-center">
-                      <div
-                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
-                        style={{
-                          background: `conic-gradient(from 225deg, #3b82f6 ${((Math.log10(band.frequency) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * 270}deg, #334155 0deg)`,
-                          userSelect: 'none',
-                          WebkitUserSelect: 'none'
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
-                          <span className="text-[8px] text-white/70 pointer-events-none">{band.frequency > 1000 ? `${(band.frequency/1000).toFixed(1)}k` : band.frequency}</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={Math.log10(20)}
-                          max={Math.log10(20000)}
-                          step="0.01"
-                          value={Math.log10(band.frequency)}
-                          onChange={(e) => {
-                            const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
-                            newEq[i] = { ...newEq[i], frequency: Math.round(Math.pow(10, parseFloat(e.target.value))) };
-                            setInstrument({ ...instrument, eq: newEq });
-                          }}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                      </div>
-                      <span className="text-[9px] text-white/40 uppercase">Freq</span>
-                    </div>
-                    
-
-                    
-                    {/* Q knob (only for middle bands) */}
-                    {i > 0 && i < 4 && (
+                    {/* Knobs in 2-column grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Frequency knob */}
                       <div className="flex flex-col items-center">
                         <div
                           className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
                           style={{
-                            background: `conic-gradient(from 225deg, #f59e0b ${(band.Q / 10) * 270}deg, #334155 0deg)`,
+                            background: `conic-gradient(from 225deg, #3b82f6 ${((Math.log10(band.frequency) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * 270}deg, #334155 0deg)`,
                             userSelect: 'none',
                             WebkitUserSelect: 'none'
                           }}
                         >
                           <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
-                            <span className="text-[8px] text-white/70 pointer-events-none">{band.Q.toFixed(1)}</span>
+                            <span className="text-[8px] text-white/70 pointer-events-none">{band.frequency > 1000 ? `${(band.frequency/1000).toFixed(1)}k` : band.frequency}</span>
                           </div>
                           <input
                             type="range"
-                            min="0.1"
-                            max="10"
-                            step="0.1"
-                            value={band.Q}
+                            min={Math.log10(20)}
+                            max={Math.log10(20000)}
+                            step="0.01"
+                            value={Math.log10(band.frequency)}
                             onChange={(e) => {
                               const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
-                              newEq[i] = { ...newEq[i], Q: parseFloat(e.target.value) };
+                              newEq[i] = { ...newEq[i], frequency: Math.round(Math.pow(10, parseFloat(e.target.value))) };
                               setInstrument({ ...instrument, eq: newEq });
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           />
                         </div>
-                        <span className="text-[9px] text-white/40 uppercase">Q</span>
+                        <span className="text-[9px] text-white/40 uppercase">Freq</span>
                       </div>
-                    )}
+                      
+                      {/* Q knob (only for middle bands) */}
+                      {i > 0 && i < 4 && (
+                        <div className="flex flex-col items-center">
+                          <div
+                            className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
+                            style={{
+                              background: `conic-gradient(from 225deg, #f59e0b ${(band.Q / 10) * 270}deg, #334155 0deg)`,
+                              userSelect: 'none',
+                              WebkitUserSelect: 'none'
+                            }}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
+                              <span className="text-[8px] text-white/70 pointer-events-none">{band.Q.toFixed(1)}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0.1"
+                              max="10"
+                              step="0.1"
+                              value={band.Q}
+                              onChange={(e) => {
+                                const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                                newEq[i] = { ...newEq[i], Q: parseFloat(e.target.value) };
+                                setInstrument({ ...instrument, eq: newEq });
+                              }}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                          </div>
+                          <span className="text-[9px] text-white/40 uppercase">Q</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
