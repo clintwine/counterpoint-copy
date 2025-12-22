@@ -224,11 +224,17 @@ export default function WaveEditor({
   // Load current instrument when opening editor - only run once on mount
   useEffect(() => {
     if (currentInstrumentConfig) {
+      // Convert old filter format to new effects format
+      let effects = currentInstrumentConfig.effects;
+      if (!effects && currentInstrumentConfig.filter) {
+        effects = [{ type: 'filter', config: { filterType: currentInstrumentConfig.filter.type, frequency: currentInstrumentConfig.filter.frequency, Q: currentInstrumentConfig.filter.Q } }];
+      }
+      
       // Custom or preset with config provided
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...currentInstrumentConfig,
-        filter: { ...DEFAULT_INSTRUMENT.filter, ...currentInstrumentConfig.filter },
+        effects: effects || DEFAULT_INSTRUMENT.effects,
         volume: currentInstrumentConfig.volume ?? 1
       };
       setInstrument(loadedInstrument);
@@ -249,10 +255,15 @@ export default function WaveEditor({
       const index = parseInt(currentInstrument.split('_')[1]);
       const presetToLoad = presetLibrary[index] || PRESET_LIBRARY[index];
       if (presetToLoad) {
+        // Convert old filter format to new effects format
+        let effects = presetToLoad.effects;
+        if (!effects && presetToLoad.filter) {
+          effects = [{ type: 'filter', config: { filterType: presetToLoad.filter.type, frequency: presetToLoad.filter.frequency, Q: presetToLoad.filter.Q } }];
+        }
         const loadedInstrument = {
           ...DEFAULT_INSTRUMENT,
           ...presetToLoad,
-          filter: { ...DEFAULT_INSTRUMENT.filter, ...presetToLoad.filter }
+          effects: effects || DEFAULT_INSTRUMENT.effects
         };
         setInstrument(loadedInstrument);
       }
@@ -261,10 +272,15 @@ export default function WaveEditor({
     } else if (currentInstrument && BUILTIN_INSTRUMENTS[currentInstrument]) {
       // Load built-in instrument for editing
       const builtinConfig = BUILTIN_INSTRUMENTS[currentInstrument];
+      // Convert old filter format to new effects format
+      let effects = builtinConfig.effects;
+      if (!effects && builtinConfig.filter) {
+        effects = [{ type: 'filter', config: { filterType: builtinConfig.filter.type, frequency: builtinConfig.filter.frequency, Q: builtinConfig.filter.Q } }];
+      }
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...builtinConfig,
-        filter: { ...DEFAULT_INSTRUMENT.filter, ...builtinConfig.filter }
+        effects: effects || DEFAULT_INSTRUMENT.effects
       };
       setInstrument(loadedInstrument);
       setEditingIndex(-1);
