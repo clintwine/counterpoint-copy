@@ -1006,7 +1006,33 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
-                    <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                    <div className="flex items-center justify-between">
+                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                      <Button
+                        onClick={() => {
+                          const nextNumber = customInstruments.length + 1;
+                          const newInstrument = { 
+                            name: `Custom ${nextNumber}`,
+                            oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
+                            envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
+                            effects: [{ type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }],
+                            eq: [
+                              { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+                              { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
+                            ]
+                          };
+                          onSaveInstrument(newInstrument, -1);
+                        }}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        New
+                      </Button>
+                    </div>
                     <p id="wave-editor-description" className="sr-only">
                       Create and edit custom instruments with oscillators, filters, and effects
                     </p>
