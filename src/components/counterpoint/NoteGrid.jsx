@@ -1390,18 +1390,6 @@ export default function NoteGrid({
                 AI Composer
                 {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={onGenerate} 
-                disabled={!canGenerate || isGenerating}
-                className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGenerating ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4 mr-2" />
-                )}
-                Generate Counterpoint
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           </div>
