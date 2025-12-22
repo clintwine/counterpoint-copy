@@ -220,9 +220,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   const [showWaveEditor, setShowWaveEditor] = useState(false);
   const customInstruments = externalCustomInstruments;
 
+  // Track if we should start with a fresh instrument
+  const [startFresh, setStartFresh] = useState(false);
+
   // Handle external trigger to open wave editor
   useEffect(() => {
     if (externalOpenWaveEditor) {
+      setStartFresh(externalOpenWaveEditor === 'create');
       setShowWaveEditor(true);
     }
   }, [externalOpenWaveEditor]);
@@ -996,10 +1000,14 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
             onDeleteInstrument={onDeleteInstrument}
             onInstrumentChange={onInstrumentChange}
             onVoiceInstrumentChange={onVoiceInstrumentChange}
-            onClose={() => setShowWaveEditor(false)}
-            currentInstrument={instrument}
-            currentInstrumentConfig={getCustomConfig()}
-            presetLibrary={PRESET_LIBRARY} />
+            onClose={() => {
+              setShowWaveEditor(false);
+              setStartFresh(false);
+            }}
+            currentInstrument={startFresh ? null : instrument}
+            currentInstrumentConfig={startFresh ? null : getCustomConfig()}
+            presetLibrary={PRESET_LIBRARY}
+            defaultName={startFresh ? `Custom ${customInstruments.length + 1}` : null} />
 
                 </DialogContent>
               </Dialog>
