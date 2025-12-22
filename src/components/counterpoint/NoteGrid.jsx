@@ -1804,19 +1804,28 @@ export default function NoteGrid({
                                 };
 
                                 const handleMouseUp = (upEvent) => {
-                                  const upBeat = getBeatFromHeaderPosition(upEvent.clientX);
+                                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
                                   if (upBeat !== null) {
-                                    const dragDistance = Math.abs(upBeat - beat);
+                                    // Apply snapping for loop selection (always snap for loop regions)
+                                    const snappedBeat = Math.floor(beat);
+                                    const snappedUpBeat = Math.floor(upBeat);
+                                    const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
+
                                     if (dragDistance === 0) {
+                                      // Single click - seek to position
+                                      if (snapToGrid) {
+                                        upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
+                                      }
                                       if (onSeek) {
-                                        onSeek(beat);
+                                        onSeek(upBeat);
                                       }
                                       if (onLoopChange) {
                                         onLoopChange(null, null);
                                       }
                                     } else {
-                                      const start = Math.min(beat, upBeat);
-                                      const end = Math.max(beat, upBeat) + 1;
+                                      // Drag - create loop region (always use full beats for loops)
+                                      const start = Math.min(snappedBeat, snappedUpBeat);
+                                      const end = Math.max(snappedBeat, snappedUpBeat) + 1;
                                       if (onLoopChange) {
                                         onLoopChange(start, end);
                                       }
@@ -2252,9 +2261,15 @@ export default function NoteGrid({
               const gridRect = gridRef.current.getBoundingClientRect();
               const scrollLeft = gridRef.current.scrollLeft;
               const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
-              const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+              let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+
+              // Apply snapping if enabled
+              if (snapToGrid) {
+                beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+              }
+
               setScrubPosition(beat);
-              onSeek && onSeek(Math.floor(beat));
+              onSeek && onSeek(beat);
             };
 
             const handleMouseUp = () => {
@@ -2277,9 +2292,15 @@ export default function NoteGrid({
               const gridRect = gridRef.current.getBoundingClientRect();
               const scrollLeft = gridRef.current.scrollLeft;
               const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
-              const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+              let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+
+              // Apply snapping if enabled
+              if (snapToGrid) {
+                beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+              }
+
               setScrubPosition(beat);
-              onSeek && onSeek(Math.floor(beat));
+              onSeek && onSeek(beat);
             };
 
             const handleTouchEnd = () => {
