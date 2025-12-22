@@ -26,6 +26,7 @@ export default function AIChatbot({
   const messagesEndRef = useRef(null);
   const [previewPlaying, setPreviewPlaying] = useState(null);
   const previewTimeoutRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   // Fetch Bach Inventions for training
   const { data: songs = [] } = useQuery({
@@ -69,6 +70,9 @@ First 15 notes: ${JSON.stringify(notes.slice(0, 15))}`;
     }).join('\n---\n');
 
     try {
+      // Create abort controller for this request
+      abortControllerRef.current = new AbortController();
+      
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `You are an expert composer trained on J.S. Bach's Two-Part Inventions. Create a sophisticated melodic line.
 
@@ -179,15 +183,33 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
         }];
       });
     } catch (error) {
-      setMessages(prev => {
-        const filtered = prev.filter(m => !m.isGenerating);
-        return [...filtered, { 
-          role: 'assistant', 
-          content: "Sorry, I had trouble generating that melody. Please try again."
-        }];
-      });
+      // Check if it was an abort
+      if (error.name === 'AbortError') {
+        setMessages(prev => {
+          const filtered = prev.filter(m => !m.isGenerating);
+          return [...filtered, { 
+            role: 'assistant', 
+            content: "Generation stopped."
+          }];
+        });
+      } else {
+        setMessages(prev => {
+          const filtered = prev.filter(m => !m.isGenerating);
+          return [...filtered, { 
+            role: 'assistant', 
+            content: "Sorry, I had trouble generating that melody. Please try again."
+          }];
+        });
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
   };
 
@@ -397,18 +419,29 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSend()}
             placeholder="Describe your melody..."
             className="bg-slate-800 border-slate-700 text-white placeholder:text-white/40 h-9 text-sm"
+            disabled={isLoading}
           />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            size="sm"
-            className="bg-amber-500 hover:bg-amber-600 text-slate-900 h-9 w-9 p-0"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+          {isLoading ? (
+            <Button
+              onClick={handleStop}
+              size="sm"
+              className="bg-red-500 hover:bg-red-600 text-white h-9 w-9 p-0"
+            >
+              <Square className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              size="sm"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-900 h-9 w-9 p-0"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>
