@@ -895,7 +895,73 @@ export default function WaveEditor({
     <div className="space-y-3">
       {/* Top Row: Presets + Name + Waveform Preview */}
       <div className="flex gap-3">
-        {/* Left: Instrument Library Dropdown */}
+        {/* Left: File Menu */}
+        <div className="flex-shrink-0">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-9 px-3 text-white hover:bg-slate-700"
+              >
+                File
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-1 bg-slate-800 border-slate-700 z-[10000]" align="start">
+              <div className="space-y-0.5">
+                <button
+                  onClick={() => {
+                    const nextNumber = customInstruments.length + 1;
+                    setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+                    setEditingIndex(-1);
+                    setEditingBuiltin(null);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm text-white hover:bg-slate-700 rounded flex items-center gap-2"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New Instrument
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="w-full text-left px-3 py-2 text-sm text-amber-400 hover:bg-slate-700 rounded flex items-center gap-2"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  {editingIndex >= 0 ? 'Update' : 'Save'}
+                </button>
+                {editingBuiltin && (
+                  <button
+                    onClick={handleRevert}
+                    className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-slate-700 rounded flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Revert to Default
+                  </button>
+                )}
+                {editingIndex >= 0 && (
+                  <>
+                    <div className="h-px bg-slate-700 my-1" />
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete "${instrument.name}"?`)) {
+                          onDeleteInstrument(editingIndex);
+                          setInstrument({ ...DEFAULT_INSTRUMENT });
+                          setEditingIndex(-1);
+                          setEditingBuiltin(null);
+                        }
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded flex items-center gap-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Instrument Library Dropdown */}
         <div className="w-48 flex-shrink-0 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Instruments</Label>
           <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
@@ -1054,79 +1120,12 @@ export default function WaveEditor({
         {/* Center: Name + Waveform */}
         <div className="flex-1 space-y-2.5">
           <div className="flex gap-2 items-center">
-            <div className="flex-1">
-              <Input
-                value={instrument.name}
-                onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
-                className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                placeholder="Instrument name..."
-              />
-            </div>
-            
-            {/* File Menu */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-9 px-3 border-slate-600 text-white hover:bg-slate-700"
-                >
-                  <FileText className="w-4 h-4 mr-1.5" />
-                  File
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-1 bg-slate-800 border-slate-700 z-[10000]" align="end">
-                <div className="space-y-0.5">
-                  <button
-                    onClick={() => {
-                      const nextNumber = customInstruments.length + 1;
-                      setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-                      setEditingIndex(-1);
-                      setEditingBuiltin(null);
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-white hover:bg-slate-700 rounded flex items-center gap-2"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    New Instrument
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="w-full text-left px-3 py-2 text-sm text-amber-400 hover:bg-slate-700 rounded flex items-center gap-2"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    {editingIndex >= 0 ? 'Update' : 'Save'}
-                  </button>
-                  {editingBuiltin && (
-                    <button
-                      onClick={handleRevert}
-                      className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-slate-700 rounded flex items-center gap-2"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      Revert to Default
-                    </button>
-                  )}
-                  {editingIndex >= 0 && (
-                    <>
-                      <div className="h-px bg-slate-700 my-1" />
-                      <button
-                        onClick={() => {
-                          if (confirm(`Delete "${instrument.name}"?`)) {
-                            onDeleteInstrument(editingIndex);
-                            setInstrument({ ...DEFAULT_INSTRUMENT });
-                            setEditingIndex(-1);
-                            setEditingBuiltin(null);
-                          }
-                        }}
-                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded flex items-center gap-2"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Input
+              value={instrument.name}
+              onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
+              className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+              placeholder="Instrument name..."
+            />
           </div>
           <div className="relative">
            <canvas
