@@ -1686,7 +1686,14 @@ export default function WaveEditor({
                   {[0, 80, 160, 240, 320, 400].map((x) => (
                     <line key={`v-${x}`} x1={x} y1="0" x2={x} y2="192" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                   ))}
-                  
+
+                  {/* Gain labels (Y-axis) */}
+                  <text x="5" y="10" fill="rgba(255,255,255,0.5)" fontSize="9">+15dB</text>
+                  <text x="5" y="50" fill="rgba(255,255,255,0.5)" fontSize="9">+5dB</text>
+                  <text x="5" y="98" fill="rgba(255,255,255,0.5)" fontSize="9">0dB</text>
+                  <text x="5" y="145" fill="rgba(255,255,255,0.5)" fontSize="9">-5dB</text>
+                  <text x="5" y="187" fill="rgba(255,255,255,0.5)" fontSize="9">-15dB</text>
+
                   {/* Frequency labels */}
                   <text x="10" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">20Hz</text>
                   <text x="80" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">200Hz</text>
@@ -1856,35 +1863,7 @@ export default function WaveEditor({
                       <span className="text-[9px] text-white/40 uppercase">Freq</span>
                     </div>
                     
-                    {/* Gain knob */}
-                    <div className="flex flex-col items-center">
-                      <div
-                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
-                        style={{
-                          background: `conic-gradient(from 225deg, ${band.gain > 0 ? '#10b981' : '#ef4444'} ${((band.gain + 15) / 30) * 270}deg, #334155 0deg)`,
-                          userSelect: 'none',
-                          WebkitUserSelect: 'none'
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
-                          <span className="text-[8px] text-white/70 pointer-events-none">{band.gain > 0 ? '+' : ''}{band.gain.toFixed(1)}</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-15"
-                          max="15"
-                          step="0.5"
-                          value={band.gain}
-                          onChange={(e) => {
-                            const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
-                            newEq[i] = { ...newEq[i], gain: parseFloat(e.target.value) };
-                            setInstrument({ ...instrument, eq: newEq });
-                          }}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                      </div>
-                      <span className="text-[9px] text-white/40 uppercase">Gain</span>
-                    </div>
+
                     
                     {/* Q knob (only for middle bands) */}
                     {i > 0 && i < 4 && (
