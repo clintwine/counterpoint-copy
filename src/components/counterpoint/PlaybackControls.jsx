@@ -141,12 +141,12 @@ export default function PlaybackControls({
       {/* Transport controls and tempo */}
       <div className="flex items-center gap-2 justify-center">
         {/* Transport controls */}
-        <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-1.5">
+        <div className="flex items-center bg-[#595959] rounded-md p-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-9 w-9 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Go to start"
           >
             <SkipBack className="w-4 h-4" />
@@ -154,8 +154,9 @@ export default function PlaybackControls({
 
           <Button
             onClick={onPlayPause}
+            variant="ghost"
             size="sm"
-            className="h-9 w-9 p-0 rounded bg-[#D4AF37] hover:bg-[#E5C158] text-[#1E1E1E] mx-0.5"
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
           >
             {isPlaying ? (
               <Pause className="w-4 h-4" />
@@ -168,24 +169,23 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onStop}
-            className="h-9 w-9 p-0 text-white/70 hover:text-white hover:bg-[#2D2D2D] rounded"
+            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Stop"
           >
             <Square className="w-3.5 h-3.5 fill-current" />
           </Button>
 
-          <div className="w-px h-6 bg-[#3A3A3A] mx-0.5" />
-
           <Button
             onClick={onRecordToggle}
+            variant="ghost"
             size="sm"
             disabled={isPlaying && !isRecording}
-            className={`h-9 w-9 p-0 rounded ${
+            className={`h-7 w-7 p-0 rounded ${
               isRecording 
-                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                ? 'text-red-500 hover:text-red-400 hover:bg-white/10' 
                 : isCountingIn
-                ? 'bg-amber-600 hover:bg-amber-700 text-white animate-pulse'
-                : 'bg-red-600/20 hover:bg-red-600/30 text-red-600 hover:text-red-600'
+                ? 'text-amber-500 hover:bg-white/10 animate-pulse'
+                : 'text-red-500 hover:text-red-400 hover:bg-white/10'
             }`}
             title={isRecording ? 'Stop recording' : 'Record'}
           >
