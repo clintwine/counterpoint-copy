@@ -1764,11 +1764,15 @@ export default function WaveEditor({
                           e.preventDefault();
                           e.stopPropagation();
                           const svg = e.currentTarget.ownerSVGElement;
-                          const rect = svg.getBoundingClientRect();
                           
                           const handleMove = (moveEvent) => {
-                            const x = Math.max(0, Math.min(400, ((moveEvent.clientX - rect.left) / rect.width) * 400));
-                            const y = Math.max(0, Math.min(192, ((moveEvent.clientY - rect.top) / rect.height) * 192));
+                            const pt = svg.createSVGPoint();
+                            pt.x = moveEvent.clientX;
+                            pt.y = moveEvent.clientY;
+                            const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+                            
+                            const x = Math.max(0, Math.min(400, svgP.x));
+                            const y = Math.max(0, Math.min(192, svgP.y));
                             
                             const newFreq = xToFreq(x);
                             const newGain = Math.max(-15, Math.min(15, yToGain(y)));
