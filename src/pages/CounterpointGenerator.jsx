@@ -495,7 +495,7 @@ export default function CounterpointGenerator() {
     }));
     setVoices(voicesWithInstruments);
     
-    // Load notes as-is (preview plays correctly, so no conversion needed)
+    // Load notes - preserve fractional beats (don't round)
     const loadedTempo = song.settings?.tempo || 80;
     const loadedCantusFirmus = song.cantusFirmus || [];
     const loadedGeneratedVoices = song.generatedVoices || [];
