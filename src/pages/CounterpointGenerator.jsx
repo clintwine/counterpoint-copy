@@ -305,6 +305,9 @@ export default function CounterpointGenerator() {
   // Save song mutation (admin only)
   const saveSongMutation = useMutation({
     mutationFn: async (data) => {
+      if (currentUser?.role !== 'admin') {
+        throw new Error('Admin access required');
+      }
       await base44.entities.Song.create(data);
     },
     onSuccess: () => {
@@ -339,6 +342,9 @@ export default function CounterpointGenerator() {
   // Update song mutation (admin only)
   const updateSongMutation = useMutation({
     mutationFn: async ({ id, data }) => {
+      if (currentUser?.role !== 'admin') {
+        throw new Error('Admin access required');
+      }
       await base44.entities.Song.update(id, data);
     },
     onSuccess: () => {
@@ -356,7 +362,12 @@ export default function CounterpointGenerator() {
 
   // Delete song mutation (admin only)
   const deleteSongMutation = useMutation({
-    mutationFn: (id) => base44.entities.Song.delete(id),
+    mutationFn: (id) => {
+      if (currentUser?.role !== 'admin') {
+        throw new Error('Admin access required');
+      }
+      return base44.entities.Song.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['songs'] });
       toast.success('Song deleted');
