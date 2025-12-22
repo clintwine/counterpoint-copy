@@ -905,6 +905,63 @@ export default function NoteGrid({
       } else if (e.key === 'q' && cantusFirmus.length > 0) {
         e.preventDefault();
         quantize();
+      } else if (e.key === 'H' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Horizontally reverse selected notes
+        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const minBeat = Math.min(...selectedNotesList.map(n => n.beat));
+        const maxBeat = Math.max(...selectedNotesList.map(n => n.beat + (n.duration || DEFAULT_DURATION)));
+        const center = (minBeat + maxBeat) / 2;
+        
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const distanceFromCenter = n.beat - center;
+            const newBeat = center - distanceFromCenter - (n.duration || DEFAULT_DURATION);
+            return { ...n, beat: Math.max(0, Math.min(totalBeats - 0.125, newBeat)) };
+          }
+          return n;
+        });
+        
+        const newSelectedKeys = new Set(selectedNotesList.map(n => {
+          const distanceFromCenter = n.beat - center;
+          const newBeat = center - distanceFromCenter - (n.duration || DEFAULT_DURATION);
+          return getNoteKey(n.pitch, Math.max(0, Math.min(totalBeats - 0.125, newBeat)));
+        }));
+        
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'V' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Vertically flip selected notes
+        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const pitchIndices = selectedNotesList.map(n => pitches.indexOf(n.pitch));
+        const minPitchIdx = Math.min(...pitchIndices);
+        const maxPitchIdx = Math.max(...pitchIndices);
+        const centerPitchIdx = (minPitchIdx + maxPitchIdx) / 2;
+        
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentPitchIdx = pitches.indexOf(n.pitch);
+            const distanceFromCenter = currentPitchIdx - centerPitchIdx;
+            const newPitchIdx = Math.round(centerPitchIdx - distanceFromCenter);
+            const clampedIdx = Math.max(0, Math.min(pitches.length - 1, newPitchIdx));
+            return { ...n, pitch: pitches[clampedIdx] };
+          }
+          return n;
+        });
+        
+        const newSelectedKeys = new Set(selectedNotesList.map(n => {
+          const currentPitchIdx = pitches.indexOf(n.pitch);
+          const distanceFromCenter = currentPitchIdx - centerPitchIdx;
+          const newPitchIdx = Math.round(centerPitchIdx - distanceFromCenter);
+          const clampedIdx = Math.max(0, Math.min(pitches.length - 1, newPitchIdx));
+          return getNoteKey(pitches[clampedIdx], n.beat);
+        }));
+        
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
       } else if (e.key === 'v') {
         setTool('select');
       } else if (e.key === 'm') {
