@@ -138,9 +138,23 @@ export default function WaveEditor({
       } else {
         setEditingIndex(-1);
       }
+    } else if (currentInstrument?.startsWith('preset_')) {
+      // Load preset instrument
+      const index = parseInt(currentInstrument.split('_')[1]);
+      const presetToLoad = presetLibrary[index] || PRESET_LIBRARY[index];
+      if (presetToLoad) {
+        const loadedInstrument = {
+          ...DEFAULT_INSTRUMENT,
+          ...presetToLoad,
+          filter: { ...DEFAULT_INSTRUMENT.filter, ...presetToLoad.filter }
+        };
+        setInstrument(loadedInstrument);
+      }
+      setEditingIndex(-1);
     } else {
-      // No config provided - start fresh
-      setInstrument({ ...DEFAULT_INSTRUMENT });
+      // Built-in instrument or no instrument - show message that built-in can't be edited
+      const nextNumber = customInstruments.length + 1;
+      setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
       setEditingIndex(-1);
     }
   }, []);
