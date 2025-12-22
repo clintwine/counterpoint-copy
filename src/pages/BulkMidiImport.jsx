@@ -24,32 +24,52 @@ export default function BulkMidiImport() {
         try {
           const midi = new Midi(e.target.result);
           
+          // Extract tempo from MIDI
+          const midiTempo = midi.header.tempos.length > 0 ? midi.header.tempos[0].bpm : 120;
+          const midiBPM = Math.round(midiTempo);
+          
           // Extract notes from all tracks
           const allNotes = [];
           midi.tracks.forEach(track => {
             track.notes.forEach(note => {
               allNotes.push({
                 pitch: note.name,
-                beat: Math.round(note.ticks / (midi.header.ppq / 4)),
-                duration: Math.max(0.25, Math.round((note.durationTicks / (midi.header.ppq / 4)) * 4) / 4),
+                time: note.time,
+                duration: note.duration,
                 velocity: note.velocity
               });
             });
           });
 
-          // Sort by beat
-          allNotes.sort((a, b) => a.beat - b.beat);
+          // Sort by time
+          allNotes.sort((a, b) => a.time - b.time);
+          
+          // Convert MIDI times (in seconds) to our 16th-note beat grid
+          const sixteenthNotesPerSecond = (midiBPM / 60) * 4;
+          
+          // Round to 3 decimal places (millisecond precision) - preserves trills while matching playback system
+          const importedNotes = allNotes.map(n => ({
+            pitch: n.pitch,
+            beat: Math.round(n.time * sixteenthNotesPerSecond * 1000) / 1000,
+            duration: Math.max(0.0625, Math.round((n.duration * sixteenthNotesPerSecond) * 1000) / 1000),
+            velocity: n.velocity
+          }));
+          
+          // Calculate required measures based on the longest note
+          const maxBeat = Math.max(...importedNotes.map(n => n.beat + (n.duration || 1)), 0);
+          const beatsPerMeasure = 16; // 4/4 time signature default
+          const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || 1;
 
           const songName = file.name.replace('.mid', '').replace('.midi', '');
           
           resolve({
             name: songName,
-            cantusFirmus: allNotes,
+            cantusFirmus: importedNotes,
             settings: {
               key: 'C',
               mode: 'major',
-              measures: Math.ceil((allNotes[allNotes.length - 1]?.beat || 16) / 16),
-              tempo: Math.round(midi.header.tempos[0]?.bpm || 120)
+              measures: requiredMeasures,
+              tempo: midiBPM
             },
             voices: [
               { name: 'Melody', instrument: 'organ', enabled: true, notes: [] }

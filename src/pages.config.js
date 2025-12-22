@@ -1,13 +1,13 @@
 import BulkMidiImport from './pages/BulkMidiImport';
-import Home from './pages/Home';
 import CounterpointGenerator from './pages/CounterpointGenerator';
+import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "BulkMidiImport": BulkMidiImport,
-    "Home": Home,
     "CounterpointGenerator": CounterpointGenerator,
+    "Home": Home,
 }
 
 export const pagesConfig = {
