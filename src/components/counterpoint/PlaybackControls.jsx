@@ -146,7 +146,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Go to start"
           >
             <SkipBack className="w-4 h-4" />
@@ -160,7 +160,7 @@ export default function PlaybackControls({
               const prevMeasure = Math.max(0, currentMeasure - 1);
               onSeek(prevMeasure * beatsPerMeasure);
             }}
-            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Previous measure"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -173,7 +173,7 @@ export default function PlaybackControls({
             onClick={onPlayPause}
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
           >
             {isPlaying ? (
               <Pause className="w-4 h-4" />
@@ -191,7 +191,7 @@ export default function PlaybackControls({
               const nextBeat = Math.min(totalBeats - 1, nextMeasure * beatsPerMeasure);
               onSeek(nextBeat);
             }}
-            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Next measure"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -204,7 +204,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onStop}
-            className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
+            className="h-[33px] w-[33px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Stop"
           >
             <Square className="w-3.5 h-3.5 fill-current" />
@@ -215,7 +215,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             disabled={isPlaying && !isRecording}
-            className={`h-7 w-7 p-0 rounded ${
+            className={`h-[33px] w-[33px] p-0 rounded ${
               isRecording 
                 ? 'text-red-500 hover:text-red-400 hover:bg-white/10' 
                 : isCountingIn
@@ -235,7 +235,7 @@ export default function PlaybackControls({
             variant="ghost"
             size="sm"
             onClick={onLoopToggle}
-            className={`h-7 w-7 p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+            className={`h-[33px] w-[33px] p-0 rounded ${isLooping ? 'text-[#D4AF37] bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
             title="Loop"
           >
             <Repeat className="w-4 h-4" />
