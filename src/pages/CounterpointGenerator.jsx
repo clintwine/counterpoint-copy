@@ -295,6 +295,7 @@ export default function CounterpointGenerator() {
       }
       setSaveDialogOpen(false);
       setSaveAsMode(false);
+      setHasUnsavedChanges(false);
       toast.success(saveAsMode ? 'Project saved to database' : (currentProjectId ? 'Project updated in database' : 'Project saved to database'));
     },
     onError: (error) => {
@@ -323,6 +324,7 @@ export default function CounterpointGenerator() {
         // Update local project
         const saved = saveProjectLocally(projectName, projectData);
         setCurrentProjectId(saved.id);
+        setHasUnsavedChanges(false);
         toast.success('Project saved locally');
       } else {
         // Save to database
@@ -341,6 +343,7 @@ export default function CounterpointGenerator() {
       setCurrentProjectId(saved.id);
       setSaveDialogOpen(false);
       setSaveAsMode(false);
+      setHasUnsavedChanges(false);
       toast.success('Project saved locally');
     }
   }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode, customInstruments]);
@@ -579,6 +582,9 @@ export default function CounterpointGenerator() {
   };
 
   const handleLoadProject = (project) => {
+    if (hasUnsavedChanges && !confirm('You have unsaved changes. Load this project anyway?')) {
+      return;
+    }
     // Load voices and ensure each has an instrument
     const loadedVoices = project.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -627,6 +633,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setLoadDialogOpen(false);
+    setHasUnsavedChanges(false);
   };
 
   // Stop preview when modal closes
@@ -641,6 +648,10 @@ export default function CounterpointGenerator() {
   }, [songDialogOpen]);
 
   const handleLoadSong = (song) => {
+    if (hasUnsavedChanges && !confirm('You have unsaved changes. Load this song anyway?')) {
+      return;
+    }
+    
     // Stop any preview
     if (previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
@@ -710,6 +721,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setSongDialogOpen(false);
+    setHasUnsavedChanges(false);
     };
 
   const handlePreviewSong = (song, e) => {
@@ -809,6 +821,10 @@ export default function CounterpointGenerator() {
   };
 
   const handleNewProject = () => {
+    if (hasUnsavedChanges && !confirm('You have unsaved changes. Create a new project anyway?')) {
+      return;
+    }
+    
     setSettings(DEFAULT_SETTINGS);
     setCantusFirmus([]);
     setGeneratedVoices([]);
@@ -818,6 +834,7 @@ export default function CounterpointGenerator() {
     setTempo(80);
     setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+    setHasUnsavedChanges(false);
   };
 
   // Initialize audio on first interaction
@@ -1876,7 +1893,10 @@ export default function CounterpointGenerator() {
                               isPlaying={isPlaying}
                               measures={settings.measures}
                               cantusFirmus={cantusFirmus}
-                              onNotesUpdate={setCantusFirmus}
+                              onNotesUpdate={(notes) => {
+                setCantusFirmus(notes);
+                setHasUnsavedChanges(true);
+              }}
                               onSeek={handleSeek}
                               activeVoice={activeVoice}
                               onActiveVoiceChange={setActiveVoice}
@@ -2177,7 +2197,10 @@ export default function CounterpointGenerator() {
             currentNotes={cantusFirmus}
             messages={chatbotMessages}
             onMessagesChange={setChatbotMessages}
-            onApplyMelody={(notes) => setCantusFirmus(notes)}
+            onApplyMelody={(notes) => {
+              setCantusFirmus(notes);
+              setHasUnsavedChanges(true);
+            }}
             instrument={voices[0]?.instrument || 'organ'}
             customInstruments={customInstruments}
             onApplyHarmony={(notes, voiceType) => {
