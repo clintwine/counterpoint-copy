@@ -622,6 +622,11 @@ export default function NoteGrid({
     saveToHistory(newNotes);
     onNotesUpdate(newNotes);
     setSelectedNotes(new Set());
+    
+    // Auto-adjust measures after deletion
+    if (window.autoAdjustMeasures) {
+      setTimeout(() => window.autoAdjustMeasures(newNotes), 100);
+    }
   }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory]);
 
   const copySelected = useCallback(() => {
@@ -956,6 +961,12 @@ export default function NoteGrid({
                 saveToHistory(newNotes);
                 onNotesUpdate(newNotes);
                 
+                // Auto-expand if adding note in last measure
+                const lastMeasureStart = (measures - 1) * beatsPerMeasure;
+                if (beat >= lastMeasureStart && window.expandMeasures) {
+                  window.expandMeasures();
+                }
+                
                 // Play the note with proper duration for feedback
                 initAudio();
                 const instrument = voices[activeVoice]?.instrument || 'organ';
@@ -1030,6 +1041,13 @@ export default function NoteGrid({
                   paintedNotesRef.current.add(noteKey);
                   const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   onNotesUpdate(newNotes);
+                  
+                  // Auto-expand if adding note in last measure
+                  const lastMeasureStart = (measures - 1) * beatsPerMeasure;
+                  if (cell.beat >= lastMeasureStart && window.expandMeasures) {
+                    window.expandMeasures();
+                  }
+                  
                   // Play the note with proper duration for feedback
                   initAudio();
                   const instrument = voices[activeVoice]?.instrument || 'organ';
@@ -1123,25 +1141,31 @@ export default function NoteGrid({
           console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
           // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
           if (deltaX < 15 && deltaY < 15) {
-            // Check if note already exists at this position
-            const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
-            if (!noteExists) {
-              const newNotes = [...cantusFirmus, { 
-                pitch: pendingNote.pitch, 
-                beat: pendingNote.beat, 
-                duration: lastNoteDuration, 
-                velocity: 0.8 
-              }].sort((a, b) => a.beat - b.beat);
-              saveToHistory(newNotes);
-              onNotesUpdate(newNotes);
+          // Check if note already exists at this position
+          const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
+          if (!noteExists) {
+          const newNotes = [...cantusFirmus, { 
+          pitch: pendingNote.pitch, 
+          beat: pendingNote.beat, 
+          duration: lastNoteDuration, 
+          velocity: 0.8 
+          }].sort((a, b) => a.beat - b.beat);
+          saveToHistory(newNotes);
+          onNotesUpdate(newNotes);
 
-              // Play the note with proper duration for feedback
-              initAudio();
-              const instrument = voices[0]?.instrument || 'organ';
-              playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
-            } else {
-              console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
-            }
+          // Auto-expand if adding note in last measure
+          const lastMeasureStart = (measures - 1) * beatsPerMeasure;
+          if (pendingNote.beat >= lastMeasureStart && window.expandMeasures) {
+          window.expandMeasures();
+          }
+
+          // Play the note with proper duration for feedback
+          initAudio();
+          const instrument = voices[0]?.instrument || 'organ';
+          playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
+          } else {
+          console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
+          }
           }
 
           setPendingNote(null);
@@ -1240,6 +1264,11 @@ export default function NoteGrid({
         // Update selection keys to new positions
         const newSelected = new Set(movedNotes.map(n => getNoteKey(n.pitch, n.beat)));
         setSelectedNotes(newSelected);
+        
+        // Auto-adjust measures after moving notes
+        if (window.autoAdjustMeasures) {
+          setTimeout(() => window.autoAdjustMeasures(newNotes), 100);
+        }
       } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
         // Simple click without drag - update selection now
         if (shouldUpdateSelection) {

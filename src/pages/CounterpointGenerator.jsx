@@ -47,7 +47,7 @@ const DEFAULT_SETTINGS = {
   species: '1st',
   key: 'C',
   mode: 'major',
-  measures: 8,
+  measures: 5,
   numVoices: 2,
   strictRules: true,
   showViolations: true,
@@ -94,13 +94,40 @@ export default function CounterpointGenerator() {
   
   const dragControls = useDragControls();
   
-  // Auto-expand measures functionality
+  // Auto-expand and auto-shrink measures functionality
   useEffect(() => {
     window.expandMeasures = () => {
-      setSettings(prev => ({ ...prev, measures: prev.measures + 4 }));
+      setSettings(prev => ({ ...prev, measures: prev.measures + 5 }));
     };
-    return () => { delete window.expandMeasures; };
-  }, []);
+    window.autoAdjustMeasures = (notes) => {
+      const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
+      
+      // Calculate max beat from all notes
+      const maxBeat = Math.max(
+        ...notes.map(n => n.beat + (n.duration || 1)),
+        ...generatedVoices.flatMap(v => (v.notes || []).map(n => n.beat + (n.duration || 1))),
+        0
+      );
+      
+      // Calculate required measures with 5 measure buffer
+      const requiredMeasures = Math.ceil(maxBeat / beatsPerMeasure) || 1;
+      const targetMeasures = Math.max(5, requiredMeasures + 5);
+      
+      setSettings(prev => {
+        // Only update if different to avoid infinite loops
+        if (prev.measures !== targetMeasures) {
+          return { ...prev, measures: targetMeasures };
+        }
+        return prev;
+      });
+    };
+    return () => { 
+      delete window.expandMeasures; 
+      delete window.autoAdjustMeasures;
+    };
+  }, [generatedVoices]);
+  
+  const timeSigConfig = TIME_SIGNATURES.find(t => t.value === settings.timeSignature) || TIME_SIGNATURES[0];
   
   const queryClient = useQueryClient();
   const previewTimeoutRef = useRef(null);
@@ -585,6 +612,9 @@ export default function CounterpointGenerator() {
     setVoices(DEFAULT_VOICES);
     setProjectName('');
     setCurrentProjectId(null);
+    setTempo(80);
+    setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
+    setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
   };
 
   // Initialize audio on first interaction
