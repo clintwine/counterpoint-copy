@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Keyboard, Guitar, Volume2, Waves, ChevronDown } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Plus } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 import WaveEditor from './WaveEditor';
@@ -1006,21 +1006,34 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
-                    <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                    <div className="flex items-center justify-between">
+                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+                      <Button
+                        onClick={() => {
+                          // Trigger new instrument
+                        }}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white h-7 px-3 text-xs font-medium"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        New
+                      </Button>
+                    </div>
                     <p id="wave-editor-description" className="sr-only">
                       Create and edit custom instruments with oscillators, filters, and effects
                     </p>
                   </DialogHeader>
                   <WaveEditor
-            customInstruments={customInstruments}
-            onSaveInstrument={onSaveInstrument}
-            onDeleteInstrument={onDeleteInstrument}
-            onInstrumentChange={onInstrumentChange}
-            onVoiceInstrumentChange={onVoiceInstrumentChange}
-            onClose={() => setShowWaveEditor(false)}
-            currentInstrument={instrument}
-            currentInstrumentConfig={getCustomConfig()}
-            presetLibrary={PRESET_LIBRARY} />
+                  customInstruments={customInstruments}
+                  onSaveInstrument={onSaveInstrument}
+                  onDeleteInstrument={onDeleteInstrument}
+                  onInstrumentChange={onInstrumentChange}
+                  onVoiceInstrumentChange={onVoiceInstrumentChange}
+                  onClose={() => setShowWaveEditor(false)}
+                  currentInstrument={instrument}
+                  currentInstrumentConfig={getCustomConfig()}
+                  presetLibrary={PRESET_LIBRARY}
+                  onNew={() => {}} />
 
                 </DialogContent>
               </Dialog>

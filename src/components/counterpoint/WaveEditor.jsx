@@ -216,8 +216,16 @@ export default function WaveEditor({
   onClose,
   currentInstrument = null,
   currentInstrumentConfig = null,
-  presetLibrary = []
+  presetLibrary = [],
+  onNew
 }) {
+  const handleNew = () => {
+    const nextNumber = customInstruments.length + 1;
+    setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+    setEditingIndex(-1);
+    setEditingBuiltin(null);
+    if (onNew) onNew();
+  };
   const [instrument, setInstrument] = useState(() => ({ ...DEFAULT_INSTRUMENT, eq: [...DEFAULT_INSTRUMENT.eq] }));
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingBuiltin, setEditingBuiltin] = useState(null);
@@ -944,9 +952,9 @@ export default function WaveEditor({
           )}
         </div>
 
-        {/* Instrument Library Dropdown + New Button */}
+        {/* Instrument Library Dropdown */}
         <div className="w-64 flex-shrink-0 space-y-1.5">
-          <Label className="text-white/70 text-xs uppercase tracking-wider">Load Instrument</Label>
+          <Label className="text-white/70 text-xs uppercase tracking-wider">INSTRUMENT</Label>
           <div className="flex gap-2">
             <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
             <PopoverTrigger asChild>
@@ -1099,19 +1107,6 @@ export default function WaveEditor({
               </Command>
             </PopoverContent>
             </Popover>
-            <Button
-              size="sm"
-              onClick={() => {
-                const nextNumber = customInstruments.length + 1;
-                setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-                setEditingIndex(-1);
-                setEditingBuiltin(null);
-              }}
-              className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white flex-shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1.5" />
-              New
-            </Button>
           </div>
         </div>
       </div>
