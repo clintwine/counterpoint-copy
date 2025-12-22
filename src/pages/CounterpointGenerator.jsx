@@ -94,18 +94,12 @@ export default function CounterpointGenerator() {
   
   const dragControls = useDragControls();
   
-  // Auto-expand/decrease measures functionality
+  // Auto-expand measures functionality
   useEffect(() => {
     window.expandMeasures = () => {
       setSettings(prev => ({ ...prev, measures: prev.measures + 4 }));
     };
-    window.decreaseMeasures = () => {
-      setSettings(prev => ({ ...prev, measures: Math.max(4, prev.measures - 4) }));
-    };
-    return () => { 
-      delete window.expandMeasures; 
-      delete window.decreaseMeasures;
-    };
+    return () => { delete window.expandMeasures; };
   }, []);
   
   const queryClient = useQueryClient();
