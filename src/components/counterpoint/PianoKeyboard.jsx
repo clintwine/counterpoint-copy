@@ -1000,27 +1000,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 modal={true}
               >
                 <DialogContent 
-                  className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999]" 
-                  onOpenAutoFocus={(e) => {
-                    console.log('[PianoKeyboard] Dialog onOpenAutoFocus prevented');
-                    e.preventDefault();
-                  }}
-                  onCloseAutoFocus={(e) => {
-                    console.log('[PianoKeyboard] Dialog onCloseAutoFocus prevented');
-                    e.preventDefault();
-                  }}
-                  onPointerDownOutside={(e) => {
-                    console.log('[PianoKeyboard] Dialog onPointerDownOutside prevented');
-                    e.preventDefault();
-                  }}
-                  onInteractOutside={(e) => {
-                    console.log('[PianoKeyboard] Dialog onInteractOutside prevented');
-                    e.preventDefault();
-                  }}
-                  onEscapeKeyDown={(e) => {
-                    console.log('[PianoKeyboard] Dialog onEscapeKeyDown prevented');
-                    e.preventDefault();
-                  }}
+                  className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999] [&>button]:text-white [&>button]:hover:text-white/80" 
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
                   aria-describedby="wave-editor-description"
                 >
                   <DialogHeader className="pb-3">
