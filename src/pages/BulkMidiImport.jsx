@@ -10,6 +10,22 @@ export default function BulkMidiImport() {
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check admin access
+  React.useEffect(() => {
+    base44.auth.me().then(user => {
+      setCurrentUser(user);
+      setLoading(false);
+      if (user?.role !== 'admin') {
+        window.location.href = '/';
+      }
+    }).catch(() => {
+      setLoading(false);
+      window.location.href = '/';
+    });
+  }, []);
 
   const handleFileSelect = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -85,6 +101,11 @@ export default function BulkMidiImport() {
   };
 
   const handleImport = async () => {
+    if (currentUser?.role !== 'admin') {
+      alert('Admin access required');
+      return;
+    }
+
     setImporting(true);
     setProgress(0);
     const importResults = [];
@@ -104,6 +125,18 @@ export default function BulkMidiImport() {
     setResults(importResults);
     setImporting(false);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (currentUser?.role !== 'admin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
