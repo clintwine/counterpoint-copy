@@ -1826,9 +1826,10 @@ export default function CounterpointGenerator() {
                                   onExportMidi={() => {
                                     toast.loading('Exporting MIDI...', { id: 'export-midi' });
                                     try {
+                                      const timeSignatureParts = settings.timeSignature.split('/').map(Number);
                                       const midiData = {
                                         tempo,
-                                        timeSignature: [4, 4],
+                                        timeSignature: timeSignatureParts,
                                         tracks: allVoices.map((voice, idx) => ({
                                           name: voice.name,
                                           notes: voice.notes?.map(n => ({
@@ -1945,9 +1946,10 @@ export default function CounterpointGenerator() {
                               onExportMidi={() => {
                                 toast.loading('Exporting MIDI...', { id: 'export-midi' });
                                 try {
+                                  const timeSignatureParts = settings.timeSignature.split('/').map(Number);
                                   const midiData = {
                                     tempo,
-                                    timeSignature: [4, 4],
+                                    timeSignature: timeSignatureParts,
                                     tracks: allVoices.map((voice, idx) => ({
                                       name: voice.name,
                                       notes: voice.notes?.map(n => ({
