@@ -1163,6 +1163,7 @@ export default function WaveEditor({
         <TabsList className="bg-slate-700/50 mb-3">
           <TabsTrigger value="oscillators" className="text-sm">Oscillators</TabsTrigger>
           <TabsTrigger value="processing" className="text-sm">Filter & Effects</TabsTrigger>
+          <TabsTrigger value="eq" className="text-sm">EQ</TabsTrigger>
         </TabsList>
 
         <TabsContent value="oscillators" className="mt-0">
@@ -1624,6 +1625,311 @@ export default function WaveEditor({
                   </PopoverContent>
                 </Popover>
               ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="eq" className="mt-0">
+          <div className="space-y-4">
+            <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+              {/* EQ Frequency Display */}
+              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4">
+                <svg className="w-full h-full" viewBox="0 0 400 192">
+                  {/* Grid lines */}
+                  {[0, 48, 96, 144, 192].map((y) => (
+                    <line key={`h-${y}`} x1="0" y1={y} x2="400" y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                  ))}
+                  {[0, 80, 160, 240, 320, 400].map((x) => (
+                    <line key={`v-${x}`} x1={x} y1="0" x2={x} y2="192" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                  ))}
+                  
+                  {/* Frequency labels */}
+                  <text x="10" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">20Hz</text>
+                  <text x="80" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">200Hz</text>
+                  <text x="160" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">2kHz</text>
+                  <text x="240" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">5kHz</text>
+                  <text x="350" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">20kHz</text>
+                  
+                  {/* EQ Curve */}
+                  <path
+                    d={(() => {
+                      const eqBands = instrument.eq || [
+                        { frequency: 60, gain: 0, Q: 1 },
+                        { frequency: 250, gain: 0, Q: 1 },
+                        { frequency: 1000, gain: 0, Q: 1 },
+                        { frequency: 4000, gain: 0, Q: 1 },
+                        { frequency: 12000, gain: 0, Q: 1 }
+                      ];
+                      
+                      const freqToX = (freq) => {
+                        const logMin = Math.log10(20);
+                        const logMax = Math.log10(20000);
+                        const logFreq = Math.log10(freq);
+                        return ((logFreq - logMin) / (logMax - logMin)) * 400;
+                      };
+                      
+                      const gainToY = (gain) => 96 - (gain * 3.2); // -15dB to +15dB range
+                      
+                      let path = 'M 0,96';
+                      for (let x = 0; x <= 400; x += 2) {
+                        const freq = Math.pow(10, Math.log10(20) + (x / 400) * (Math.log10(20000) - Math.log10(20)));
+                        let totalGain = 0;
+                        
+                        eqBands.forEach(band => {
+                          const Q = band.Q || 1;
+                          const octaves = Math.log2(freq / band.frequency);
+                          const bandwidth = 1 / Q;
+                          const response = 1 / (1 + Math.pow(octaves / (bandwidth / 2), 2));
+                          totalGain += band.gain * response;
+                        });
+                        
+                        const y = gainToY(totalGain);
+                        path += ` L ${x},${y}`;
+                      }
+                      
+                      return path;
+                    })()}
+                    fill="none"
+                    stroke="#E8B885"
+                    strokeWidth="2"
+                  />
+                  
+                  {/* EQ Band Markers */}
+                  {(instrument.eq || [
+                    { frequency: 60, gain: 0, Q: 1 },
+                    { frequency: 250, gain: 0, Q: 1 },
+                    { frequency: 1000, gain: 0, Q: 1 },
+                    { frequency: 4000, gain: 0, Q: 1 },
+                    { frequency: 12000, gain: 0, Q: 1 }
+                  ]).map((band, i) => {
+                    const freqToX = (freq) => {
+                      const logMin = Math.log10(20);
+                      const logMax = Math.log10(20000);
+                      const logFreq = Math.log10(freq);
+                      return ((logFreq - logMin) / (logMax - logMin)) * 400;
+                    };
+                    const gainToY = (gain) => 96 - (gain * 3.2);
+                    
+                    return (
+                      <circle
+                        key={i}
+                        cx={freqToX(band.frequency)}
+                        cy={gainToY(band.gain)}
+                        r="6"
+                        fill="#E8B885"
+                        stroke="#1E293B"
+                        strokeWidth="2"
+                        className="cursor-move"
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
+              
+              {/* EQ Band Controls */}
+              <div className="grid grid-cols-5 gap-3">
+                {(instrument.eq || [
+                  { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+                  { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+                  { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+                  { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+                  { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
+                ]).map((band, i) => (
+                  <div key={i} className="bg-slate-700/50 rounded-lg p-3 space-y-2">
+                    <div className="text-center">
+                      <span className="text-white/60 text-xs font-medium">
+                        {i === 0 ? 'Low' : i === 4 ? 'High' : `Band ${i}`}
+                      </span>
+                    </div>
+                    
+                    {/* Type selector for middle bands */}
+                    {i > 0 && i < 4 && (
+                      <Select
+                        value={band.type || 'peaking'}
+                        onValueChange={(v) => {
+                          const newEq = [...(instrument.eq || [])];
+                          newEq[i] = { ...band, type: v };
+                          setInstrument({ ...instrument, eq: newEq });
+                        }}
+                      >
+                        <SelectTrigger className="h-7 bg-slate-700 border-slate-600 text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                          <SelectItem value="peaking" className="text-white text-xs">Peak</SelectItem>
+                          <SelectItem value="notch" className="text-white text-xs">Notch</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    
+                    {/* Frequency knob */}
+                    <div className="flex flex-col items-center">
+                      <div
+                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                        style={{
+                          background: `conic-gradient(from 225deg, #3b82f6 ${((Math.log10(band.frequency) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * 270}deg, #334155 0deg)`
+                        }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                          <span className="text-[8px] text-white/70">{band.frequency > 1000 ? `${(band.frequency/1000).toFixed(1)}k` : band.frequency}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={Math.log10(20)}
+                          max={Math.log10(20000)}
+                          step="0.01"
+                          value={Math.log10(band.frequency)}
+                          onChange={(e) => {
+                            const newEq = [...(instrument.eq || [])];
+                            newEq[i] = { ...band, frequency: Math.round(Math.pow(10, parseFloat(e.target.value))) };
+                            setInstrument({ ...instrument, eq: newEq });
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                      </div>
+                      <span className="text-[9px] text-white/40 uppercase">Freq</span>
+                    </div>
+                    
+                    {/* Gain knob */}
+                    <div className="flex flex-col items-center">
+                      <div
+                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                        style={{
+                          background: `conic-gradient(from 225deg, ${band.gain > 0 ? '#10b981' : '#ef4444'} ${((band.gain + 15) / 30) * 270}deg, #334155 0deg)`
+                        }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                          <span className="text-[8px] text-white/70">{band.gain > 0 ? '+' : ''}{band.gain.toFixed(1)}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="-15"
+                          max="15"
+                          step="0.5"
+                          value={band.gain}
+                          onChange={(e) => {
+                            const newEq = [...(instrument.eq || [])];
+                            newEq[i] = { ...band, gain: parseFloat(e.target.value) };
+                            setInstrument({ ...instrument, eq: newEq });
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                      </div>
+                      <span className="text-[9px] text-white/40 uppercase">Gain</span>
+                    </div>
+                    
+                    {/* Q knob (only for middle bands) */}
+                    {i > 0 && i < 4 && (
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                          style={{
+                            background: `conic-gradient(from 225deg, #f59e0b ${(band.Q / 10) * 270}deg, #334155 0deg)`
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
+                            <span className="text-[8px] text-white/70">{band.Q.toFixed(1)}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.1"
+                            max="10"
+                            step="0.1"
+                            value={band.Q}
+                            onChange={(e) => {
+                              const newEq = [...(instrument.eq || [])];
+                              newEq[i] = { ...band, Q: parseFloat(e.target.value) };
+                              setInstrument({ ...instrument, eq: newEq });
+                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                        </div>
+                        <span className="text-[9px] text-white/40 uppercase">Q</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              {/* EQ Presets */}
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setInstrument({
+                      ...instrument,
+                      eq: [
+                        { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+                        { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
+                      ]
+                    });
+                  }}
+                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                >
+                  Flat
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setInstrument({
+                      ...instrument,
+                      eq: [
+                        { frequency: 60, gain: 4, Q: 1, type: 'lowshelf' },
+                        { frequency: 250, gain: -2, Q: 1.5, type: 'peaking' },
+                        { frequency: 1000, gain: 1, Q: 1, type: 'peaking' },
+                        { frequency: 4000, gain: 3, Q: 1.5, type: 'peaking' },
+                        { frequency: 12000, gain: 2, Q: 1, type: 'highshelf' }
+                      ]
+                    });
+                  }}
+                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                >
+                  Bright
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setInstrument({
+                      ...instrument,
+                      eq: [
+                        { frequency: 60, gain: 6, Q: 1, type: 'lowshelf' },
+                        { frequency: 250, gain: 2, Q: 1, type: 'peaking' },
+                        { frequency: 1000, gain: -1, Q: 1, type: 'peaking' },
+                        { frequency: 4000, gain: -2, Q: 1, type: 'peaking' },
+                        { frequency: 12000, gain: -3, Q: 1, type: 'highshelf' }
+                      ]
+                    });
+                  }}
+                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                >
+                  Warm
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setInstrument({
+                      ...instrument,
+                      eq: [
+                        { frequency: 60, gain: -3, Q: 1, type: 'lowshelf' },
+                        { frequency: 250, gain: -2, Q: 1.5, type: 'peaking' },
+                        { frequency: 1000, gain: 4, Q: 2, type: 'peaking' },
+                        { frequency: 4000, gain: 2, Q: 1.5, type: 'peaking' },
+                        { frequency: 12000, gain: -2, Q: 1, type: 'highshelf' }
+                      ]
+                    });
+                  }}
+                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                >
+                  Vocal
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>
