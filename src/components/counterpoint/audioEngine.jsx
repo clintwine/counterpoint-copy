@@ -208,14 +208,18 @@ export function getAnalyser() {
 const INSTRUMENT_CONFIGS = {
   organ: {
     oscillators: [
-      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },
-      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
-      { waveform: 'sine', detune: -2, gain: 0.6, harmonic: 3 },
-      { waveform: 'sine', detune: 2, gain: 0.4, harmonic: 5 }
+      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },      // 8' (fundamental)
+      { waveform: 'sine', detune: 0, gain: 0.9, harmonic: 2 },      // 4' (octave)
+      { waveform: 'sine', detune: -2, gain: 0.7, harmonic: 3 },     // 2 2/3' (twelfth)
+      { waveform: 'sine', detune: 0, gain: 0.6, harmonic: 4 },      // 2' (fifteenth)
+      { waveform: 'sine', detune: 2, gain: 0.5, harmonic: 5 },      // 1 3/5' (seventeenth)
+      { waveform: 'sine', detune: -1, gain: 0.4, harmonic: 6 },     // 1 1/3' (nineteenth)
+      { waveform: 'sine', detune: 1, gain: 0.3, harmonic: 8 },      // 1' (twenty-second)
+      { waveform: 'triangle', detune: -3, gain: 0.2, harmonic: 1 }  // Slight warmth
     ],
-    attack: 0.02,
-    filterFreq: 3000,
-    filterQ: 1.2,
+    attack: 0.01,
+    filterFreq: 4500,
+    filterQ: 0.8,
     distortion: 0
   },
   distortion: {
