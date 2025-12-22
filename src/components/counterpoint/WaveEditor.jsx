@@ -1914,7 +1914,6 @@ export default function WaveEditor({
               <div className="flex gap-2 mt-3">
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => {
                     setInstrument({
                       ...instrument,
@@ -1927,13 +1926,12 @@ export default function WaveEditor({
                       ]
                     });
                   }}
-                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                  className="text-xs h-7 bg-slate-700 text-white border border-slate-600 hover:bg-slate-600"
                 >
                   Flat
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => {
                     setInstrument({
                       ...instrument,
@@ -1946,13 +1944,12 @@ export default function WaveEditor({
                       ]
                     });
                   }}
-                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                  className="text-xs h-7 bg-slate-700 text-white border border-slate-600 hover:bg-slate-600"
                 >
                   Bright
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => {
                     setInstrument({
                       ...instrument,
@@ -1965,13 +1962,12 @@ export default function WaveEditor({
                       ]
                     });
                   }}
-                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                  className="text-xs h-7 bg-slate-700 text-white border border-slate-600 hover:bg-slate-600"
                 >
                   Warm
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => {
                     setInstrument({
                       ...instrument,
@@ -1984,7 +1980,7 @@ export default function WaveEditor({
                       ]
                     });
                   }}
-                  className="text-xs h-7 border-slate-600 text-white hover:bg-slate-700"
+                  className="text-xs h-7 bg-slate-700 text-white border border-slate-600 hover:bg-slate-600"
                 >
                   Vocal
                 </Button>
