@@ -150,7 +150,7 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
         const filtered = prev.filter(m => !m.isGenerating);
         return [...filtered, { 
           role: 'assistant', 
-          content: `${response.description}\n\n**Generated ${notes.length} notes**\n${response.rhythmicAnalysis || ''}`,
+          content: response.description,
           notes: notes
         }];
       });
