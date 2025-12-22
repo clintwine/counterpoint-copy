@@ -1378,7 +1378,13 @@ export default function NoteGrid({
             pitch: pitches[newPitchIdx], 
             beat: newBeat, 
             duration: n.duration || DEFAULT_DURATION,
-            velocity: n.velocity ?? 0.8
+            velocity: n.velocity ?? 0.8,
+            // Preserve articulation and bend properties
+            articulation: n.articulation,
+            bendStart: n.bendStart,
+            bendEnd: n.bendEnd,
+            bendStartTime: n.bendStartTime,
+            bendEndTime: n.bendEndTime
           };
         }).filter(n => n.beat >= 0 && n.beat < totalBeats);
 
