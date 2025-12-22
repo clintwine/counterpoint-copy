@@ -1133,13 +1133,21 @@ export default function CounterpointGenerator() {
                             <p className="text-white/70 text-sm mt-1">{song.description}</p>
                             <div className="flex gap-2 mt-2 flex-wrap">
                               <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
-                                {song.settings?.key} {song.settings?.mode}
+                                {song.settings?.key || 'C'} {song.settings?.mode || 'major'}
                               </span>
                               <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
-                                {song.settings?.timeSignature}
+                                {song.settings?.timeSignature || '4/4'}
                               </span>
                               <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
-                                {song.cantusFirmus?.length || 0} notes
+                                {(() => {
+                                  const maxBeat = Math.max(...(song.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
+                                  const tempo = song.settings?.tempo || 80;
+                                  const sixteenthNoteDuration = (60 / tempo) / 4;
+                                  const totalSeconds = maxBeat * sixteenthNoteDuration;
+                                  const minutes = Math.floor(totalSeconds / 60);
+                                  const seconds = Math.floor(totalSeconds % 60);
+                                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                })()}
                               </span>
                             </div>
                           </div>
