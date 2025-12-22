@@ -660,14 +660,16 @@ export default function NoteGrid({
   const playNoteSound = useCallback((pitch, note = null) => {
     initAudio();
     const instrument = voices[activeVoice]?.instrument || 'organ';
-    const pitchBend = (note?.bendStart !== undefined || note?.bendEnd !== undefined) ? {
+    const hasBend = note?.bendStart !== undefined || note?.bendEnd !== undefined;
+    const pitchBend = hasBend ? {
       start: note.bendStart ?? 0,
       end: note.bendEnd ?? 0,
       startTime: note.bendStartTime ?? 0,
       endTime: note.bendEndTime ?? 1
     } : 0;
-    // Use longer duration and higher volume to match piano keyboard feel
-    playNote(pitch, 0.3, 0.8, 0, instrument, pitchBend);
+    // Use longer duration for bends so they're audible
+    const duration = hasBend ? 1.5 : 0.3;
+    playNote(pitch, duration, 0.7, 0, instrument, pitchBend);
   }, [voices, activeVoice]);
 
   const selectAll = useCallback(() => {
