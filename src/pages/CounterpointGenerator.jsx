@@ -878,21 +878,7 @@ export default function CounterpointGenerator() {
     return map[timeSig] || 16;
   };
 
-  // Handle tab visibility changes - pause playback when tab is hidden
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && isPlaying) {
-        console.log('[Playback] Tab hidden - pausing playback');
-        stopAllNotes();
-        setIsPlaying(false);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isPlaying]);
-
-  // Playback logic - smooth animation with requestAnimationFrame
+  // Playback logic - use setInterval instead of requestAnimationFrame to work across tab changes
   useEffect(() => {
     console.log('[Playback] State changed:', { isPlaying, tempo, measures: settings.measures });
     if (isPlaying) {
@@ -911,21 +897,14 @@ export default function CounterpointGenerator() {
         return;
       }
       
-      console.log('[Playback] Starting animation loop');
-      lastTimeRef.current = performance.now();
+      console.log('[Playback] Starting playback with setInterval');
+      lastTimeRef.current = Date.now();
       
-      const animate = (timestamp) => {
-        // Check if tab is still visible
-        if (document.hidden) {
-          console.log('[Playback] Tab hidden during animation - stopping');
-          stopAllNotes();
-          setIsPlaying(false);
-          return;
-        }
-
-        if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-        const deltaTime = (timestamp - lastTimeRef.current) / 1000; // Convert to seconds
-        lastTimeRef.current = timestamp;
+      // Use setInterval instead of requestAnimationFrame - works even when tab is hidden
+      const intervalId = setInterval(() => {
+        const now = Date.now();
+        const deltaTime = (now - lastTimeRef.current) / 1000;
+        lastTimeRef.current = now;
 
         setPlayheadPosition(prev => {
           const next = prev + deltaTime * beatsPerSecond;
@@ -940,22 +919,20 @@ export default function CounterpointGenerator() {
           }
           return next;
         });
-
-        animationRef.current = requestAnimationFrame(animate);
-      };
+      }, 16); // ~60fps
       
-      animationRef.current = requestAnimationFrame(animate);
+      animationRef.current = intervalId;
       
       return () => {
-        console.log('[Playback] Cleanup - canceling animation');
+        console.log('[Playback] Cleanup - clearing interval');
         if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
+          clearInterval(animationRef.current);
         }
       };
     } else {
       console.log('[Playback] Not playing - cleanup');
       if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+        clearInterval(animationRef.current);
       }
       lastTimeRef.current = null;
     }
