@@ -668,10 +668,11 @@ export default function NoteGrid({
       startTime: note.bendStartTime ?? 0,
       endTime: note.bendEndTime ?? 1
     } : 0;
-    // Use longer duration for bends so they're audible
-    const duration = hasBend ? 1.5 : 0.3;
-    playNote(pitch, duration, 0.7, 0, instrument, pitchBend);
-  }, [voices, activeVoice]);
+    // Calculate actual duration based on note duration and tempo
+    const sixteenthNoteDuration = (60 / tempo) / 4;
+    const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
+    playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+  }, [voices, activeVoice, tempo]);
 
   const selectAll = useCallback(() => {
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
