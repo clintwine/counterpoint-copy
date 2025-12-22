@@ -160,11 +160,21 @@ export default function CounterpointGenerator() {
   const lastTimeRef = useRef(null);
   const audioInitialized = useRef(false);
 
-  // Fetch saved projects
-  const { data: savedProjects = [] } = useQuery({
+  // Fetch saved projects (combine database + local)
+  const { data: dbProjects = [] } = useQuery({
     queryKey: ['counterpoint-projects'],
     queryFn: () => base44.entities.CounterpointProject.list('-created_date'),
   });
+  
+  const [localProjects, setLocalProjects] = useState([]);
+  
+  useEffect(() => {
+    setLocalProjects(loadLocalProjects());
+  }, []);
+  
+  const savedProjects = [...localProjects, ...dbProjects].sort((a, b) => 
+    new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date)
+  );
 
   // Fetch songs
   const { data: songs = [] } = useQuery({
@@ -185,11 +195,40 @@ export default function CounterpointGenerator() {
     }
   }, [savedInstruments]);
 
-  // Save project mutation
+  // Local storage helper functions
+  const saveProjectLocally = (name, data) => {
+    const projects = JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]');
+    const timestamp = Date.now();
+    const projectData = {
+      id: `local_${timestamp}`,
+      name,
+      ...data,
+      created_date: new Date().toISOString(),
+      updated_date: new Date().toISOString(),
+      isLocal: true
+    };
+    
+    // Check if updating existing local project
+    const existingIndex = projects.findIndex(p => p.id === currentProjectId);
+    if (existingIndex >= 0 && currentProjectId?.startsWith('local_')) {
+      projects[existingIndex] = { ...projectData, id: currentProjectId, created_date: projects[existingIndex].created_date };
+    } else {
+      projects.push(projectData);
+    }
+    
+    localStorage.setItem('counterpoint-local-projects', JSON.stringify(projects));
+    return projectData;
+  };
+
+  const loadLocalProjects = () => {
+    return JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]');
+  };
+
+  // Save project mutation (database only)
   const saveProjectMutation = useMutation({
     mutationFn: async (data) => {
       // If saveAsMode, always create new even if currentProjectId exists
-      if (saveAsMode || !currentProjectId) {
+      if (saveAsMode || !currentProjectId || currentProjectId.startsWith('local_')) {
         const result = await base44.entities.CounterpointProject.create(data);
         return result;
       }
@@ -203,35 +242,18 @@ export default function CounterpointGenerator() {
       }
       setSaveDialogOpen(false);
       setSaveAsMode(false);
-      toast.success(saveAsMode ? 'Project saved as new copy' : (currentProjectId ? 'Project updated' : 'Project saved'));
+      toast.success(saveAsMode ? 'Project saved to database' : (currentProjectId ? 'Project updated in database' : 'Project saved to database'));
     },
     onError: (error) => {
       console.error('Save failed:', error);
       setSaveAsMode(false);
-      toast.error('Failed to save project');
+      toast.error('Failed to save project to database');
     }
   });
 
   // Save project handler - defined early so keyboard shortcuts can use it
-  const handleSaveProject = useCallback((skipDialog = false) => {
-    // If we have an existing project and not in save-as mode, save directly
-    if (skipDialog && currentProjectId && projectName.trim()) {
-      saveProjectMutation.mutate({
-        name: projectName,
-        settings: { ...settings, tempo },
-        cantusFirmus,
-        generatedVoices,
-        voices,
-        effects,
-        envelope,
-        customInstruments
-      });
-      return;
-    }
-
-    // Otherwise, validate and save from dialog
-    if (!projectName.trim()) return;
-    saveProjectMutation.mutate({
+  const handleSaveProject = useCallback((skipDialog = false, saveToDatabase = false) => {
+    const projectData = {
       name: projectName,
       settings: { ...settings, tempo },
       cantusFirmus,
@@ -240,8 +262,35 @@ export default function CounterpointGenerator() {
       effects,
       envelope,
       customInstruments
-    });
-  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode]);
+    };
+
+    // If we have an existing project and not in save-as mode, save directly
+    if (skipDialog && currentProjectId && projectName.trim()) {
+      if (currentProjectId.startsWith('local_') && !saveToDatabase) {
+        // Update local project
+        const saved = saveProjectLocally(projectName, projectData);
+        setCurrentProjectId(saved.id);
+        toast.success('Project saved locally');
+      } else {
+        // Save to database
+        saveProjectMutation.mutate(projectData);
+      }
+      return;
+    }
+
+    // Otherwise, validate and save from dialog
+    if (!projectName.trim()) return;
+    
+    if (saveToDatabase) {
+      saveProjectMutation.mutate(projectData);
+    } else {
+      const saved = saveProjectLocally(projectName, projectData);
+      setCurrentProjectId(saved.id);
+      setSaveDialogOpen(false);
+      setSaveAsMode(false);
+      toast.success('Project saved locally');
+    }
+  }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode, customInstruments]);
 
   // Global keyboard handlers for play/pause and save
       useEffect(() => {
@@ -296,7 +345,17 @@ export default function CounterpointGenerator() {
 
   // Delete project mutation
   const deleteProjectMutation = useMutation({
-    mutationFn: (id) => base44.entities.CounterpointProject.delete(id),
+    mutationFn: (id) => {
+      if (id.startsWith('local_')) {
+        // Delete from local storage
+        const projects = loadLocalProjects();
+        const filtered = projects.filter(p => p.id !== id);
+        localStorage.setItem('counterpoint-local-projects', JSON.stringify(filtered));
+        setLocalProjects(filtered);
+        return Promise.resolve();
+      }
+      return base44.entities.CounterpointProject.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['counterpoint-projects'] });
     }
@@ -1159,8 +1218,13 @@ export default function CounterpointGenerator() {
                           className="flex items-center justify-between p-3 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer"
                           onClick={() => handleLoadProject(project)}
                         >
-                          <div>
-                            <p className="text-white font-medium">{project.name}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-white font-medium">{project.name}</p>
+                              {project.isLocal && (
+                                <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Local</span>
+                              )}
+                            </div>
                             <p className="text-white/50 text-xs">
                               {project.settings?.key} {project.settings?.mode} • {project.cantusFirmus?.length || 0} notes
                             </p>
@@ -1436,7 +1500,7 @@ export default function CounterpointGenerator() {
                       {saveAsMode ? 'Save Project As' : 'Save Project'}
                     </DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(); }} className="space-y-4">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(false, false); }} className="space-y-4">
                     <div>
                       <Label className="text-white/80">Project Name</Label>
                       <Input
@@ -1447,13 +1511,23 @@ export default function CounterpointGenerator() {
                         autoFocus
                       />
                     </div>
-                    <Button
-                      type="submit"
-                      disabled={!projectName.trim() || saveProjectMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
-                      {saveProjectMutation.isPending ? 'Saving...' : (saveAsMode ? 'Save As New Project' : (currentProjectId ? 'Update Project' : 'Save Project'))}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="submit"
+                        disabled={!projectName.trim() || saveProjectMutation.isPending}
+                        className="flex-1 bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
+                      >
+                        {saveAsMode ? 'Save Locally' : (currentProjectId?.startsWith('local_') ? 'Update Local' : 'Save Locally')}
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); handleSaveProject(false, true); }}
+                        disabled={!projectName.trim() || saveProjectMutation.isPending}
+                        className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        {saveProjectMutation.isPending ? 'Saving...' : 'Save to Database'}
+                      </Button>
+                    </div>
                   </form>
                 </DialogContent>
               </Dialog>
