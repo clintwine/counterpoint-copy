@@ -1118,6 +1118,31 @@ export default function CounterpointGenerator() {
                   <DialogHeader>
                     <DialogTitle className="text-white">Browse Library</DialogTitle>
                   </DialogHeader>
+                  
+                  {/* Search and Sort Controls */}
+                  <div className="flex gap-3 mb-2">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={librarySearchQuery}
+                        onChange={(e) => setLibrarySearchQuery(e.target.value)}
+                        className="w-full bg-[#1A1A1A] border border-[#3A3A3A] rounded-lg px-10 py-2 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
+                      />
+                    </div>
+                    <Select value={librarySortBy} onValueChange={setLibrarySortBy}>
+                      <SelectTrigger className="w-40 bg-[#1A1A1A] border-[#3A3A3A] text-white text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
+                        <SelectItem value="updated" className="text-white">Last Updated</SelectItem>
+                        <SelectItem value="created" className="text-white">Date Created</SelectItem>
+                        <SelectItem value="name" className="text-white">Name (A-Z)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <Tabs defaultValue="songs" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 bg-[#1A1A1A]">
                       <TabsTrigger value="songs" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
@@ -1130,10 +1155,26 @@ export default function CounterpointGenerator() {
                     
                     <TabsContent value="songs" className="mt-4">
                       <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {songs.length === 0 ? (
-                          <p className="text-white/60 text-sm text-center py-4">No songs available</p>
-                        ) : (
-                          songs.map((song) => (
+                        {(() => {
+                          const filtered = songs.filter(song => 
+                            song.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
+                          );
+                          
+                          const sorted = [...filtered].sort((a, b) => {
+                            if (librarySortBy === 'updated') {
+                              return new Date(b.updated_date) - new Date(a.updated_date);
+                            } else if (librarySortBy === 'created') {
+                              return new Date(b.created_date) - new Date(a.created_date);
+                            } else {
+                              return a.name.localeCompare(b.name);
+                            }
+                          });
+
+                          if (sorted.length === 0) {
+                            return <p className="text-white/60 text-sm text-center py-4">No songs found</p>;
+                          }
+
+                          return sorted.map((song) => (
                             <div
                               key={song.id}
                               className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
@@ -1211,17 +1252,33 @@ export default function CounterpointGenerator() {
                                 </Button>
                               </div>
                             </div>
-                          ))
-                        )}
+                          ));
+                        })()}
                       </div>
                     </TabsContent>
 
                     <TabsContent value="projects" className="mt-4">
                       <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {savedProjects.length === 0 ? (
-                          <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p>
-                        ) : (
-                          savedProjects.map((project) => (
+                        {(() => {
+                          const filtered = savedProjects.filter(project => 
+                            project.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
+                          );
+                          
+                          const sorted = [...filtered].sort((a, b) => {
+                            if (librarySortBy === 'updated') {
+                              return new Date(b.updated_date) - new Date(a.updated_date);
+                            } else if (librarySortBy === 'created') {
+                              return new Date(b.created_date) - new Date(a.created_date);
+                            } else {
+                              return a.name.localeCompare(b.name);
+                            }
+                          });
+
+                          if (sorted.length === 0) {
+                            return <p className="text-white/60 text-sm text-center py-4">No projects found</p>;
+                          }
+
+                          return sorted.map((project) => (
                             <div
                               key={project.id}
                               className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
@@ -1272,8 +1329,8 @@ export default function CounterpointGenerator() {
                                 </Button>
                               </div>
                             </div>
-                          ))
-                        )}
+                          ));
+                        })()}
                       </div>
                     </TabsContent>
                   </Tabs>
