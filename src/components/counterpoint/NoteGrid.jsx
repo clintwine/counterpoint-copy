@@ -687,8 +687,6 @@ export default function NoteGrid({
     if (pastedNotes.length > 0 && scrollToBeatRef?.current) {
       scrollToBeatRef.current(targetBeat);
     }
-    
-    toast.success(`Pasted ${pastedNotes.length} notes at beat ${targetBeat}`);
   }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory, currentBeat, scrollToBeatRef]);
 
   // Play note sound when adding
