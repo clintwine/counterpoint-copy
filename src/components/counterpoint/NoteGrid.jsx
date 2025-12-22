@@ -282,7 +282,7 @@ export default function NoteGrid({
   const getNoteKey = useCallback((pitch, beat) => `${pitch}-${Math.round(beat * 1000) / 1000}`, []);
   
   // Memoize notes lookup for performance - filter duplicates
-  // Group notes by pitch and integer beat, accounting for note duration
+  // Group notes by pitch and integer beat (notes can have fractional beats)
   const notesMap = useMemo(() => {
     const map = new Map();
     const seen = new Set();
@@ -292,20 +292,10 @@ export default function NoteGrid({
       if (seen.has(uniqueKey)) return; // Skip duplicates
       seen.add(uniqueKey);
       
-      // Add note to all beats it spans
-      const startBeat = Math.floor(note.beat);
-      const duration = note.duration || DEFAULT_DURATION;
-      const endBeat = Math.floor(note.beat + duration);
-      
-      for (let beat = startBeat; beat <= endBeat; beat++) {
-        const key = `${note.pitch}-${beat}`;
-        if (!map.has(key)) map.set(key, []);
-        // Only add once per beat
-        const existing = map.get(key).find(n => n.voiceIndex === 0 && n.note.beat === note.beat);
-        if (!existing) {
-          map.get(key).push({ voiceIndex: 0, note });
-        }
-      }
+      const intBeat = Math.floor(note.beat);
+      const key = `${note.pitch}-${intBeat}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push({ voiceIndex: 0, note });
     });
     
     voices.forEach((voice, voiceIndex) => {
@@ -315,20 +305,10 @@ export default function NoteGrid({
         if (seen.has(uniqueKey)) return; // Skip duplicates
         seen.add(uniqueKey);
         
-        // Add note to all beats it spans
-        const startBeat = Math.floor(note.beat);
-        const duration = note.duration || DEFAULT_DURATION;
-        const endBeat = Math.floor(note.beat + duration);
-        
-        for (let beat = startBeat; beat <= endBeat; beat++) {
-          const key = `${note.pitch}-${beat}`;
-          if (!map.has(key)) map.set(key, []);
-          // Only add once per beat
-          const existing = map.get(key).find(n => n.voiceIndex === voiceIndex && n.note.beat === note.beat);
-          if (!existing) {
-            map.get(key).push({ voiceIndex, note });
-          }
-        }
+        const intBeat = Math.floor(note.beat);
+        const key = `${note.pitch}-${intBeat}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push({ voiceIndex, note });
       });
     });
     return map;
