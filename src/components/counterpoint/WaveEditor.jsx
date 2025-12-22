@@ -904,49 +904,42 @@ export default function WaveEditor({
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Buttons + Library */}
+      {/* Top Row: Delete + Library + Save */}
       <div className="flex items-end gap-3">
-        {/* Action Buttons */}
-        <div className="flex gap-2">
+        {/* Delete button */}
+        {editingIndex >= 0 && (
           <Button
             size="sm"
-            onClick={handleSave}
-            className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900"
+            onClick={() => {
+              if (confirm(`Delete "${instrument.name}"?`)) {
+                onDeleteInstrument(editingIndex);
+                setInstrument({ ...DEFAULT_INSTRUMENT });
+                setEditingIndex(-1);
+                setEditingBuiltin(null);
+              }
+            }}
+            className="h-9 px-3 bg-red-500 hover:bg-red-600 text-white"
           >
-            <Save className="w-3.5 h-3.5 mr-1.5" />
-            {editingIndex >= 0 ? 'Update' : 'Save'}
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
-          {editingBuiltin && (
+        )}
+
+        {/* Instrument Library + Save */}
+        <div className="flex-1 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Label className="text-white/70 text-xs uppercase tracking-wider">INSTRUMENT</Label>
             <Button
-              size="sm"
-              onClick={handleRevert}
-              className="h-9 px-3 bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-              Reset
-            </Button>
-          )}
-          {editingIndex >= 0 && (
-            <Button
+              variant="ghost"
               size="sm"
               onClick={() => {
-                if (confirm(`Delete "${instrument.name}"?`)) {
-                  onDeleteInstrument(editingIndex);
-                  setInstrument({ ...DEFAULT_INSTRUMENT });
-                  setEditingIndex(-1);
-                  setEditingBuiltin(null);
-                }
+                setRenamingName(instrument.name);
+                setRenameDialogOpen(true);
               }}
-              className="h-9 px-3 bg-red-500 hover:bg-red-600 text-white"
+              className="h-5 w-5 p-0 text-white/60 hover:text-white hover:bg-transparent"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Edit2 className="w-3 h-3" />
             </Button>
-          )}
-        </div>
-
-        {/* Instrument Library Dropdown + Rename */}
-        <div className="flex-1 space-y-1.5">
-          <Label className="text-white/70 text-xs uppercase tracking-wider">INSTRUMENT</Label>
+          </div>
           <div className="flex gap-2">
             <Popover open={libraryOpen} onOpenChange={setLibraryOpen} modal={true}>
             <PopoverTrigger asChild>
@@ -1100,15 +1093,12 @@ export default function WaveEditor({
             </PopoverContent>
             </Popover>
             <Button
-              variant="outline"
               size="sm"
-              onClick={() => {
-                setRenamingName(instrument.name);
-                setRenameDialogOpen(true);
-              }}
-              className="h-9 w-9 p-0 bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              onClick={handleSave}
+              className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900"
             >
-              <Edit2 className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5 mr-1.5" />
+              {editingIndex >= 0 ? 'Update' : 'Save'}
             </Button>
           </div>
         </div>
