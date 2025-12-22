@@ -182,18 +182,26 @@ export default function CounterpointGenerator() {
     queryFn: () => base44.entities.Song.list('-created_date'),
   });
 
-  // Fetch custom instruments
-  const { data: savedInstruments = [] } = useQuery({
+  // Fetch custom instruments from database
+  const { data: dbInstruments = [] } = useQuery({
     queryKey: ['custom-instruments'],
     queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
   });
 
-  // Sync saved instruments to local state
+  // Load local instruments
+  const [localInstruments, setLocalInstruments] = useState([]);
+  
   useEffect(() => {
-    if (savedInstruments.length > 0) {
-      setCustomInstruments(savedInstruments);
-    }
-  }, [savedInstruments]);
+    setLocalInstruments(loadLocalInstruments());
+  }, []);
+
+  // Merge local and database instruments
+  const savedInstruments = [...localInstruments, ...dbInstruments];
+
+  // Sync merged instruments to state
+  useEffect(() => {
+    setCustomInstruments(savedInstruments);
+  }, [savedInstruments.length]);
 
   // Local storage helper functions
   const saveProjectLocally = (name, data) => {
@@ -222,6 +230,44 @@ export default function CounterpointGenerator() {
 
   const loadLocalProjects = () => {
     return JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]');
+  };
+
+  // Local storage helper functions for instruments
+  const saveInstrumentLocally = (instrument) => {
+    const instruments = JSON.parse(localStorage.getItem('counterpoint-local-instruments') || '[]');
+    const timestamp = Date.now();
+    const instrumentData = {
+      id: `local_${timestamp}`,
+      ...instrument,
+      isLocal: true,
+      created_date: new Date().toISOString()
+    };
+    
+    instruments.push(instrumentData);
+    localStorage.setItem('counterpoint-local-instruments', JSON.stringify(instruments));
+    setLocalInstruments(instruments);
+    return instrumentData;
+  };
+
+  const updateInstrumentLocally = (id, instrument) => {
+    const instruments = loadLocalInstruments();
+    const index = instruments.findIndex(i => i.id === id);
+    if (index >= 0) {
+      instruments[index] = { ...instruments[index], ...instrument };
+      localStorage.setItem('counterpoint-local-instruments', JSON.stringify(instruments));
+      setLocalInstruments(instruments);
+    }
+  };
+
+  const deleteInstrumentLocally = (id) => {
+    const instruments = loadLocalInstruments();
+    const filtered = instruments.filter(i => i.id !== id);
+    localStorage.setItem('counterpoint-local-instruments', JSON.stringify(filtered));
+    setLocalInstruments(filtered);
+  };
+
+  const loadLocalInstruments = () => {
+    return JSON.parse(localStorage.getItem('counterpoint-local-instruments') || '[]');
   };
 
   // Save project mutation (database only)
@@ -436,22 +482,32 @@ export default function CounterpointGenerator() {
     }
   });
 
-  // Save custom instrument mutation
+  // Save custom instrument mutation (now saves locally)
   const saveInstrumentMutation = useMutation({
     mutationFn: async ({ instrument, index }) => {
+      // Check if updating existing instrument
       if (index >= 0 && savedInstruments[index]?.id) {
-        // Update existing
-        await base44.entities.CustomInstrument.update(savedInstruments[index].id, instrument);
-        return { index };
+        const existingInstrument = savedInstruments[index];
+        if (existingInstrument.id.startsWith('local_')) {
+          // Update local instrument
+          updateInstrumentLocally(existingInstrument.id, instrument);
+          return { index, local: true };
+        } else {
+          // Update database instrument (admin only)
+          await base44.entities.CustomInstrument.update(existingInstrument.id, instrument);
+          return { index };
+        }
       } else {
-        // Create new
-        const result = await base44.entities.CustomInstrument.create(instrument);
-        return { index: -1, result };
+        // Create new local instrument
+        saveInstrumentLocally(instrument);
+        return { index: -1, local: true };
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['custom-instruments'] });
-      toast.success('Instrument saved');
+    onSuccess: (result) => {
+      if (!result.local) {
+        queryClient.invalidateQueries({ queryKey: ['custom-instruments'] });
+      }
+      toast.success('Instrument saved locally');
     },
     onError: () => {
       toast.error('Failed to save instrument');
@@ -461,8 +517,16 @@ export default function CounterpointGenerator() {
   // Delete custom instrument mutation
   const deleteInstrumentMutation = useMutation({
     mutationFn: (index) => {
-      if (savedInstruments[index]?.id) {
-        return base44.entities.CustomInstrument.delete(savedInstruments[index].id);
+      const instrument = savedInstruments[index];
+      if (instrument?.id) {
+        if (instrument.id.startsWith('local_')) {
+          // Delete from local storage
+          deleteInstrumentLocally(instrument.id);
+          return Promise.resolve();
+        } else {
+          // Delete from database
+          return base44.entities.CustomInstrument.delete(instrument.id);
+        }
       }
     },
     onSuccess: () => {
