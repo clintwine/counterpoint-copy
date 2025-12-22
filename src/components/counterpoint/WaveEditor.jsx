@@ -1666,7 +1666,7 @@ export default function WaveEditor({
               {/* EQ Frequency Display */}
               <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4 flex">
                 {/* Y-axis gain labels */}
-                <div className="absolute top-0 bottom-0 flex flex-col justify-between py-1 text-[9px] text-white/50 pointer-events-none z-10" style={{ left: '75px' }}>
+                <div className="absolute top-0 bottom-0 flex flex-col justify-between py-1 text-[9px] text-white/50 pointer-events-none z-10" style={{ left: '50px' }}>
                   <span>+15</span>
                   <span>+5</span>
                   <span>0</span>
