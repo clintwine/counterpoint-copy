@@ -1664,9 +1664,9 @@ export default function WaveEditor({
           <div className="space-y-4">
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               {/* EQ Frequency Display */}
-              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4 flex gap-1">
+              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4 flex">
                 {/* Y-axis gain labels */}
-                <div className="flex flex-col justify-between py-1 pr-1 text-[9px] text-white/50">
+                <div className="flex flex-col justify-between py-1 pl-1 text-[9px] text-white/50">
                   <span>+15</span>
                   <span>+5</span>
                   <span>0</span>
