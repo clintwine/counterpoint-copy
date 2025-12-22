@@ -473,6 +473,7 @@ export default function WaveEditor({
 
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.8;
     analyserRef.current = analyser;
 
     const masterGain = audioContext.createGain();
