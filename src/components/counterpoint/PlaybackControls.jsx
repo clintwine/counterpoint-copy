@@ -242,6 +242,8 @@ export default function PlaybackControls({
           </Button>
           </div>
 
+        <div className="w-px h-6 bg-[#3A3A3A]" />
+
         {/* BPM and Time Signature container */}
         <div className="flex items-center bg-[#1A1A1A] rounded-md border border-[#3A3A3A] p-0.5 gap-1">
           {/* BPM - Large Logic Pro style */}
