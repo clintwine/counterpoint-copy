@@ -96,14 +96,17 @@ NOTE: The user may want to edit/extend this existing melody rather than replace 
 USER REQUEST: "${userMessage}"
 
 EDITING INSTRUCTIONS:
-- If the user asks to "edit", "extend", "add to", "modify", or "continue" an existing melody, incorporate the existing notes
-- For "extend" requests: start where the existing melody ends (beat = last note's beat + duration)
-- For "edit" requests: modify specific sections while keeping the rest intact
-- For "replace" or fresh generation requests: create entirely new melody starting from beat 0
+- If the user asks to "edit", "extend", "add to", "modify", or "continue" an existing melody:
+  * For "extend" requests: START at beat ${currentNotes.length > 0 ? Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) : 0} (right after existing melody ends)
+  * For "edit measures X-Y" requests: ONLY generate notes for beats ${currentNotes.length > 0 ? `between the specified measures (e.g., if editing measures 5-8 in 4/4, generate notes from beat 64 to beat 128)` : ''}
+  * For partial edits: ONLY output notes for the requested section, NOT the entire score
+- For "replace" or "create new" requests: create entirely new melody starting from beat 0
+
+CRITICAL: When editing specific measures, ONLY generate notes for those measures. The system will automatically preserve other notes.
 
 GENERATION REQUIREMENTS:
 
-1. NOTE COUNT: Generate EXACTLY ${requestedNoteCount} or MORE notes
+1. NOTE COUNT: ${userMessage.toLowerCase().includes('edit') && userMessage.match(/measure[s]?\s+(\d+)/i) ? 'Generate notes ONLY for the requested measures' : `Generate EXACTLY ${requestedNoteCount} or MORE notes`}
 
 2. RHYTHM STRATEGY (CRITICAL):
    - Use 16th notes (duration 0.25) for runs and ornamental passages - this creates 4 notes per beat!
@@ -156,14 +159,20 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
       });
 
       const notes = response.notes || [];
-      
+
+      // Detect edit mode based on user request
+      const isPartialEdit = userMessage.toLowerCase().includes('edit') || 
+                            userMessage.toLowerCase().includes('modify') ||
+                            userMessage.match(/measure[s]?\s+\d+/i);
+
       // Remove generating message and add result
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isGenerating);
         return [...filtered, { 
           role: 'assistant', 
           content: response.description,
-          notes: notes
+          notes: notes,
+          editMode: isPartialEdit ? 'partial' : 'replace'
         }];
       });
     } catch (error) {
@@ -179,8 +188,32 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
     }
   };
 
-  const handleApplyNotes = (notes) => {
-    if (notes && notes.length > 0 && onApplyMelody) {
+  const handleApplyNotes = (notes, editMode = 'replace') => {
+    if (!notes || notes.length === 0 || !onApplyMelody) return;
+    
+    // Detect if this is an edit/extension based on the AI's response
+    const minNewBeat = Math.min(...notes.map(n => n.beat));
+    const maxNewBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
+    
+    // If AI generated notes that start after existing notes, it's an extension
+    const isExtension = currentNotes.length > 0 && minNewBeat >= Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) - 2;
+    
+    // If AI only covered a small portion of the score, it's likely an edit
+    const totalBeats = settings.measures * 16;
+    const coverageRatio = (maxNewBeat - minNewBeat) / totalBeats;
+    const isPartialEdit = coverageRatio < 0.8 && currentNotes.length > 0;
+    
+    if (isExtension) {
+      // Append new notes to existing
+      const combined = [...currentNotes, ...notes].sort((a, b) => a.beat - b.beat);
+      onApplyMelody(combined);
+    } else if (isPartialEdit) {
+      // Replace notes only in the edited range, keep the rest
+      const notesOutsideRange = currentNotes.filter(n => n.beat < minNewBeat || n.beat >= maxNewBeat);
+      const combined = [...notesOutsideRange, ...notes].sort((a, b) => a.beat - b.beat);
+      onApplyMelody(combined);
+    } else {
+      // Full replacement
       onApplyMelody(notes);
     }
   };
@@ -302,7 +335,7 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => handleApplyNotes(msg.notes)}
+                      onClick={() => handleApplyNotes(msg.notes, msg.editMode)}
                       className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-8 font-medium"
                     >
                       Apply to Score
