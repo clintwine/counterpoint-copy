@@ -149,7 +149,10 @@ export default function PlaybackControls({
             className="h-[38px] w-[38px] p-0 text-white/90 hover:text-white hover:bg-white/10 rounded"
             title="Go to start"
           >
-            <SkipBack className="w-5 h-5" />
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 20L9 12l10-8v16z" fill="currentColor" stroke="none" />
+              <path d="M5 19V5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </Button>
 
           <Button
