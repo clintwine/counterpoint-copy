@@ -711,10 +711,15 @@ export default function WaveEditor({
   const handleRevert = () => {
     if (editingBuiltin && BUILTIN_INSTRUMENTS[editingBuiltin]) {
       const builtinConfig = BUILTIN_INSTRUMENTS[editingBuiltin];
+      // Convert old filter format to new effects format
+      let effects = builtinConfig.effects;
+      if (!effects && builtinConfig.filter) {
+        effects = [{ type: 'filter', config: { filterType: builtinConfig.filter.type, frequency: builtinConfig.filter.frequency, Q: builtinConfig.filter.Q } }];
+      }
       const loadedInstrument = {
         ...DEFAULT_INSTRUMENT,
         ...builtinConfig,
-        filter: { ...DEFAULT_INSTRUMENT.filter, ...builtinConfig.filter }
+        effects: effects || DEFAULT_INSTRUMENT.effects
       };
       setInstrument(loadedInstrument);
     }
@@ -1343,7 +1348,10 @@ export default function WaveEditor({
             <Label className="text-white/70 text-sm uppercase tracking-wider">Effects</Label>
             <div className="grid grid-cols-4 gap-3">
               {/* Existing effects */}
-              {instrument.effects.map((effect, i) => (
+              {instrument.effects.map((effect, i) => {
+                if (!effect.config) return null;
+
+                return (
                 <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-white/60 text-sm font-medium capitalize">{effect.type}</span>
@@ -1359,7 +1367,7 @@ export default function WaveEditor({
                     )}
                   </div>
 
-                  {effect.type === 'filter' && (
+                  {effect.type === 'filter' && effect.config && (
                     <>
                       <Select
                         value={effect.config.filterType}
@@ -1403,7 +1411,7 @@ export default function WaveEditor({
                     </>
                   )}
 
-                  {effect.type === 'distortion' && (
+                  {effect.type === 'distortion' && effect.config && (
                     <div className="space-y-1 pt-2">
                       <div className="flex items-center justify-between">
                         <span className="text-white/40 text-xs">Amount</span>
@@ -1419,7 +1427,7 @@ export default function WaveEditor({
                     </div>
                   )}
 
-                  {effect.type === 'bitcrusher' && (
+                  {effect.type === 'bitcrusher' && effect.config && (
                     <div className="space-y-1 pt-2">
                       <div className="flex items-center justify-between">
                         <span className="text-white/40 text-xs">Bit Depth</span>
@@ -1435,7 +1443,7 @@ export default function WaveEditor({
                     </div>
                   )}
 
-                  {effect.type === 'lfo' && (
+                  {effect.type === 'lfo' && effect.config && (
                     <>
                       <Select
                         value={effect.config.target}
@@ -1477,9 +1485,10 @@ export default function WaveEditor({
                         />
                       </div>
                     </>
-                  )}
-                </div>
-              ))}
+                    )}
+                    </div>
+                    );
+                    })}
 
               {/* Empty slots for adding effects */}
               {[...Array(4 - instrument.effects.length)].map((_, i) => (
