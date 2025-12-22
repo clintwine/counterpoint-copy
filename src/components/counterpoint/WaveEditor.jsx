@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Square, Save, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { Play, Square, Save, Trash2, Plus, RefreshCw, FileText, MoreVertical } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
@@ -896,21 +896,7 @@ export default function WaveEditor({
       <div className="flex gap-3">
         {/* Left: Instrument Library Dropdown */}
         <div className="w-48 flex-shrink-0 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label className="text-white/70 text-xs uppercase tracking-wider">Instruments</Label>
-            <Button
-              size="sm"
-              onClick={() => {
-                const nextNumber = customInstruments.length + 1;
-                setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-                setEditingIndex(-1);
-              }}
-              className="h-7 px-2 bg-slate-600 text-white hover:bg-slate-500 text-xs"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1" />
-              New
-            </Button>
-          </div>
+          <Label className="text-white/70 text-xs uppercase tracking-wider">Instruments</Label>
           <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -1066,51 +1052,80 @@ export default function WaveEditor({
 
         {/* Center: Name + Waveform */}
         <div className="flex-1 space-y-2.5">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <div className="flex-1">
-              <Label className="text-white/70 text-sm">Name</Label>
               <Input
                 value={instrument.name}
                 onChange={(e) => setInstrument({ ...instrument, name: e.target.value })}
                 className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                placeholder="Instrument name..."
               />
             </div>
-            <div className="flex items-end gap-2">
-              <Button
-                size="sm"
-                onClick={handleSave}
-                className="h-9 px-3 bg-amber-500 text-slate-900 hover:bg-amber-400 text-sm"
-              >
-                <Save className="w-4 h-4 mr-1.5" />
-                {editingIndex >= 0 ? 'Update' : 'Save'}
-              </Button>
-              {editingBuiltin && (
+            
+            {/* File Menu */}
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={handleRevert}
-                  className="h-9 px-3 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 text-sm"
+                  className="h-9 px-3 border-slate-600 text-white hover:bg-slate-700"
                 >
-                  <RefreshCw className="w-4 h-4 mr-1.5" />
-                  Revert
+                  <FileText className="w-4 h-4 mr-1.5" />
+                  File
                 </Button>
-              )}
-              {editingIndex >= 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    onDeleteInstrument(editingIndex);
-                    setInstrument({ ...DEFAULT_INSTRUMENT });
-                    setEditingIndex(-1);
-                    setEditingBuiltin(null);
-                  }}
-                  className="h-9 w-9 p-0 border-red-500/50 text-red-400 hover:bg-red-500/20"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1 bg-slate-800 border-slate-700 z-[10000]" align="end">
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => {
+                      const nextNumber = customInstruments.length + 1;
+                      setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+                      setEditingIndex(-1);
+                      setEditingBuiltin(null);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-white hover:bg-slate-700 rounded flex items-center gap-2"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    New Instrument
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="w-full text-left px-3 py-2 text-sm text-amber-400 hover:bg-slate-700 rounded flex items-center gap-2"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    {editingIndex >= 0 ? 'Update' : 'Save'}
+                  </button>
+                  {editingBuiltin && (
+                    <button
+                      onClick={handleRevert}
+                      className="w-full text-left px-3 py-2 text-sm text-blue-400 hover:bg-slate-700 rounded flex items-center gap-2"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Revert to Default
+                    </button>
+                  )}
+                  {editingIndex >= 0 && (
+                    <>
+                      <div className="h-px bg-slate-700 my-1" />
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete "${instrument.name}"?`)) {
+                            onDeleteInstrument(editingIndex);
+                            setInstrument({ ...DEFAULT_INSTRUMENT });
+                            setEditingIndex(-1);
+                            setEditingBuiltin(null);
+                          }
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded flex items-center gap-2"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="relative">
            <canvas
