@@ -888,27 +888,22 @@ export default function WaveEditor({
                 <CommandList 
                   ref={(el) => {
                     if (el) {
-                      console.log('CommandList element:', el);
-                      console.log('CommandList scrollHeight:', el.scrollHeight);
-                      console.log('CommandList clientHeight:', el.clientHeight);
-                      console.log('CommandList overflowY:', window.getComputedStyle(el).overflowY);
-                      console.log('CommandList pointerEvents:', window.getComputedStyle(el).pointerEvents);
-                      console.log('CommandList position:', window.getComputedStyle(el).position);
-                      
-                      // Add wheel event listener for debugging
+                      // Force scroll by manually handling wheel events
                       const wheelHandler = (e) => {
-                        console.log('Wheel event on CommandList:', e.deltaY);
-                        console.log('Can scroll?', el.scrollHeight > el.clientHeight);
-                        console.log('Current scrollTop:', el.scrollTop);
+                        e.stopPropagation();
+                        el.scrollTop += e.deltaY;
                       };
-                      el.addEventListener('wheel', wheelHandler);
+                      el.addEventListener('wheel', wheelHandler, { passive: true });
+                      
+                      return () => {
+                        el.removeEventListener('wheel', wheelHandler);
+                      };
                     }
                   }}
                   style={{ 
-                    maxHeight: '320px !important', 
-                    overflowY: 'auto !important',
-                    overscrollBehavior: 'contain',
-                    pointerEvents: 'auto'
+                    maxHeight: '320px', 
+                    overflowY: 'auto',
+                    overscrollBehavior: 'contain'
                   }}
                 >
                   <CommandEmpty className="text-white/50 text-sm py-4 text-center">
