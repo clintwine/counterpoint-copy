@@ -943,9 +943,10 @@ export default function WaveEditor({
         </div>
 
         {/* Instrument Library Dropdown + New Button */}
-        <div className="w-48 flex-shrink-0 space-y-1.5">
+        <div className="w-64 flex-shrink-0 space-y-1.5">
           <Label className="text-white/70 text-xs uppercase tracking-wider">Load Instrument</Label>
-          <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
+          <div className="flex gap-2">
+            <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -1095,20 +1096,20 @@ export default function WaveEditor({
                 </CommandList>
               </Command>
             </PopoverContent>
-          </Popover>
-          <Button
-            size="sm"
-            onClick={() => {
-              const nextNumber = customInstruments.length + 1;
-              setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-              setEditingIndex(-1);
-              setEditingBuiltin(null);
-            }}
-            className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1.5" />
-            New
-          </Button>
+            </Popover>
+            <Button
+              size="sm"
+              onClick={() => {
+                const nextNumber = customInstruments.length + 1;
+                setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+                setEditingIndex(-1);
+                setEditingBuiltin(null);
+              }}
+              className="h-9 px-3 bg-green-600 hover:bg-green-700 text-white flex-shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              New
+            </Button>
           </div>
         </div>
 
