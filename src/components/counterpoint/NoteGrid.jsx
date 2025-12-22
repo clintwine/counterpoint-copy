@@ -566,7 +566,7 @@ export default function NoteGrid({
     }
   }, [scrollToBeatRef, CELL_WIDTH]);
 
-  // Scroll to keep playhead visible during playback (not while scrubbing)
+  // Smooth auto-scroll following playhead during playback (like a 2D game camera)
     useEffect(() => {
       if (gridRef.current && isPlaying && !isScrubbing) {
         if (smoothPlayhead === 0) {
@@ -575,15 +575,16 @@ export default function NoteGrid({
         } else {
           const containerWidth = gridRef.current.clientWidth - 56; // subtract pitch label width
           const playheadPixelPosition = smoothPlayhead * CELL_WIDTH;
+          
+          // Center the playhead like a 2D game character - smooth scrolling
+          const targetScroll = Math.max(0, playheadPixelPosition - containerWidth * 0.5);
+          
+          // Smooth interpolation for buttery smooth camera follow
           const currentScroll = gridRef.current.scrollLeft;
-
-          // Keep playhead in the middle third of the visible area
-          const leftThreshold = currentScroll + containerWidth * 0.3;
-          const rightThreshold = currentScroll + containerWidth * 0.7;
-
-          if (playheadPixelPosition > rightThreshold || playheadPixelPosition < leftThreshold) {
-            gridRef.current.scrollLeft = Math.max(0, playheadPixelPosition - containerWidth * 0.3);
-          }
+          const smoothingFactor = 0.15; // Lower = smoother but slower, higher = snappier
+          const newScroll = currentScroll + (targetScroll - currentScroll) * smoothingFactor;
+          
+          gridRef.current.scrollLeft = newScroll;
         }
       }
     }, [smoothPlayhead, CELL_WIDTH, isScrubbing, isPlaying]);
