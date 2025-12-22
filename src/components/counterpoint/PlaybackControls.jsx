@@ -319,7 +319,7 @@ export default function PlaybackControls({
           variant="ghost"
           size="sm"
           onClick={onMetronomeToggle}
-          className={`h-9 w-9 p-0 rounded ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/20' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A]'}`}
+          className={`h-9 w-9 p-0 rounded border ${metronomeEnabled ? 'text-[#D4AF37] bg-[#D4AF37]/20 border-[#D4AF37]/30' : 'text-white/60 hover:text-white hover:bg-[#3A3A3A] border-[#3A3A3A]'}`}
           title="Metronome"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
