@@ -2457,74 +2457,107 @@ export default function NoteGrid({
               <div className="w-px h-3 bg-slate-600" />
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <span className="text-white/50 text-[10px]">Bend</span>
-                <Select
-                  value={(() => {
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    const start = firstSelected?.bendStart ?? 0;
-                    const end = firstSelected?.bendEnd ?? 0;
-                    if (start === 0 && end === 0) return 'none';
-                    if (start === 0 && end === 1) return 'up1';
-                    if (start === 0 && end === 2) return 'up2';
-                    if (start === 0 && end === -1) return 'down1';
-                    if (start === 0 && end === -2) return 'down2';
-                    if (start === 1 && end === 0) return 'down1-return';
-                    if (start === 2 && end === 0) return 'down2-return';
-                    if (start === -1 && end === 0) return 'up1-return';
-                    if (start === -2 && end === 0) return 'up2-return';
-                    return 'none';
-                  })()}
-                  onValueChange={(value) => {
-                    const bendMap = {
-                      'none': { start: 0, end: 0 },
-                      'up1': { start: 0, end: 1 },
-                      'up2': { start: 0, end: 2 },
-                      'down1': { start: 0, end: -1 },
-                      'down2': { start: 0, end: -2 },
-                      'up1-return': { start: -1, end: 0 },
-                      'up2-return': { start: -2, end: 0 },
-                      'down1-return': { start: 1, end: 0 },
-                      'down2-return': { start: 2, end: 0 },
-                    };
-                    const bend = bendMap[value];
-                    const newNotes = cantusFirmus.map(n => 
-                      selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
-                        ? { ...n, bendStart: bend.start, bendEnd: bend.end } 
-                        : n
-                    );
-                    saveToHistory(newNotes);
-                    onNotesUpdate(newNotes);
-                    
-                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                    if (firstSelected) {
-                      initAudio();
-                      const instrument = voices[0]?.instrument || 'organ';
-                      const pitchBend = {
-                        start: bend.start,
-                        end: bend.end,
-                        startTime: firstSelected?.bendStartTime ?? 0,
-                        endTime: firstSelected?.bendEndTime ?? 1
-                      };
-                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                      playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-24 h-7 bg-slate-700 border-slate-600 text-white text-[10px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="none" className="text-white text-xs">None</SelectItem>
-                    <SelectItem value="up1" className="text-white text-xs">↗ Up +1</SelectItem>
-                    <SelectItem value="up2" className="text-white text-xs">↗ Up +2</SelectItem>
-                    <SelectItem value="down1" className="text-white text-xs">↘ Down -1</SelectItem>
-                    <SelectItem value="down2" className="text-white text-xs">↘ Down -2</SelectItem>
-                    <SelectItem value="up1-return" className="text-white text-xs">↘↗ Return +1</SelectItem>
-                    <SelectItem value="up2-return" className="text-white text-xs">↘↗ Return +2</SelectItem>
-                    <SelectItem value="down1-return" className="text-white text-xs">↗↘ Return -1</SelectItem>
-                    <SelectItem value="down2-return" className="text-white text-xs">↗↘ Return -2</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-24 justify-between bg-slate-700 border-slate-600 text-white text-[10px] px-2"
+                    >
+                      {(() => {
+                        const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                        const start = firstSelected?.bendStart ?? 0;
+                        const end = firstSelected?.bendEnd ?? 0;
+                        if (start === 0 && end === 0) return 'None';
+                        if (start === 0 && end === 1) return '↗ +1';
+                        if (start === 0 && end === 2) return '↗ +2';
+                        if (start === 0 && end === -1) return '↘ -1';
+                        if (start === 0 && end === -2) return '↘ -2';
+                        if (start === -1 && end === 0) return '↗↘ +1';
+                        if (start === -2 && end === 0) return '↗↘ +2';
+                        if (start === 1 && end === 0) return '↘↗ -1';
+                        if (start === 2 && end === 0) return '↘↗ -2';
+                        if (start === 0 && end === 0.5) return '↗ +½';
+                        if (start === 0 && end === -0.5) return '↘ -½';
+                        if (start === 0 && end === 3) return '↗ +3';
+                        if (start === 0 && end === -3) return '↘ -3';
+                        return 'None';
+                      })()}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-48">
+                    {[
+                      { label: 'None', start: 0, end: 0 },
+                      { label: '↗ Up +½ semitone', start: 0, end: 0.5 },
+                      { label: '↗ Up +1 semitone', start: 0, end: 1 },
+                      { label: '↗ Up +2 semitones', start: 0, end: 2 },
+                      { label: '↗ Up +3 semitones', start: 0, end: 3 },
+                      { label: '↘ Down -½ semitone', start: 0, end: -0.5 },
+                      { label: '↘ Down -1 semitone', start: 0, end: -1 },
+                      { label: '↘ Down -2 semitones', start: 0, end: -2 },
+                      { label: '↘ Down -3 semitones', start: 0, end: -3 },
+                      { label: '↗↘ Return from +1', start: -1, end: 0 },
+                      { label: '↗↘ Return from +2', start: -2, end: 0 },
+                      { label: '↘↗ Return from -1', start: 1, end: 0 },
+                      { label: '↘↗ Return from -2', start: 2, end: 0 },
+                    ].map((bendType) => (
+                      <DropdownMenuItem
+                        key={bendType.label}
+                        className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                        onSelect={() => {
+                          const newNotes = cantusFirmus.map(n => 
+                            selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                              ? { ...n, bendStart: bendType.start, bendEnd: bendType.end } 
+                              : n
+                          );
+                          saveToHistory(newNotes);
+                          onNotesUpdate(newNotes);
+                          
+                          const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                          if (firstSelected) {
+                            initAudio();
+                            const instrument = voices[0]?.instrument || 'organ';
+                            const pitchBend = {
+                              start: bendType.start,
+                              end: bendType.end,
+                              startTime: firstSelected?.bendStartTime ?? 0,
+                              endTime: firstSelected?.bendEndTime ?? 1
+                            };
+                            const sixteenthNoteDuration = (60 / tempo) / 4;
+                            const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                            playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+                          }
+                        }}
+                      >
+                        <span>{bendType.label}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                            if (firstSelected) {
+                              initAudio();
+                              const instrument = voices[0]?.instrument || 'organ';
+                              const pitchBend = {
+                                start: bendType.start,
+                                end: bendType.end,
+                                startTime: firstSelected?.bendStartTime ?? 0,
+                                endTime: firstSelected?.bendEndTime ?? 1
+                              };
+                              const sixteenthNoteDuration = (60 / tempo) / 4;
+                              const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                              playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                          title="Preview"
+                        >
+                          ▶
+                        </button>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
                   </div>
                   </div></div>
