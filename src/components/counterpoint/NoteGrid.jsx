@@ -952,9 +952,11 @@ export default function NoteGrid({
               // Add note immediately on mousedown
               const noteExists = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
               if (!noteExists) {
+                // Preserve fractional beats - don't round unless snap to grid is on
+                const beatValue = snapToGrid ? Math.round(beat / quantizeGrid) * quantizeGrid : Math.round(beat * 1000) / 1000;
                 const newNotes = [...cantusFirmus, { 
                   pitch, 
-                  beat, 
+                  beat: beatValue, 
                   duration: lastNoteDuration, 
                   velocity: 0.8 
                 }].sort((a, b) => a.beat - b.beat);
@@ -963,7 +965,7 @@ export default function NoteGrid({
                 
                 // Auto-expand if adding note in last measure
                 const lastMeasureStart = (measures - 1) * beatsPerMeasure;
-                if (beat >= lastMeasureStart && window.expandMeasures) {
+                if (beatValue >= lastMeasureStart && window.expandMeasures) {
                   window.expandMeasures();
                 }
                 
@@ -1039,12 +1041,14 @@ export default function NoteGrid({
                 // Only add if not already painted in this stroke and no existing note
                 if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
                   paintedNotesRef.current.add(noteKey);
-                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: cell.beat, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
+                  // Preserve fractional beats when painting
+                  const beatValue = snapToGrid ? Math.round(cell.beat / quantizeGrid) * quantizeGrid : Math.round(cell.beat * 1000) / 1000;
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: beatValue, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   onNotesUpdate(newNotes);
                   
                   // Auto-expand if adding note in last measure
                   const lastMeasureStart = (measures - 1) * beatsPerMeasure;
-                  if (cell.beat >= lastMeasureStart && window.expandMeasures) {
+                  if (beatValue >= lastMeasureStart && window.expandMeasures) {
                     window.expandMeasures();
                   }
                   
