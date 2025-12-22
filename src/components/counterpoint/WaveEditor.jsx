@@ -561,8 +561,16 @@ export default function WaveEditor({
       }
     });
 
-    // Chain effects
+    // Chain effects: filter -> EQ -> distortion -> bitcrush -> master
     let outputNode = filter;
+
+    // Apply EQ after filter
+    if (eqNodes.length > 0) {
+      eqNodes.forEach(eqNode => {
+        outputNode.connect(eqNode);
+        outputNode = eqNode;
+      });
+    }
 
     // Distortion
     if (inst.distortion > 0) {
@@ -596,20 +604,8 @@ export default function WaveEditor({
     }
 
     outputNode.connect(masterGain);
-    // Chain: oscillators -> filter -> EQ -> distortion -> bitcrush -> master -> analyser
-    let outputNode = filter;
-
-    // Apply EQ after filter
-    if (eqNodes.length > 0) {
-      eqNodes.forEach(eqNode => {
-        outputNode.connect(eqNode);
-        outputNode = eqNode;
-      });
-    }
-
-    // Connect rest of effects chain
-    // Effects already connected above in new chain
-    // outputNode.connect(masterGain); (already done)
+    masterGain.connect(analyser);
+    analyser.connect(audioContext.destination);
 
     masterGain.gain.setValueAtTime(0, now);
     masterGain.gain.linearRampToValueAtTime((inst.volume ?? 1) * 0.3, now + attack);
