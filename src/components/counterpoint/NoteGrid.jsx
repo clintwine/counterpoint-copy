@@ -640,22 +640,56 @@ export default function NoteGrid({
     }
   }, [selectedNotes, cantusFirmus]);
 
-  const paste = useCallback((atBeat = 0) => {
+  const paste = useCallback((atBeat = null) => {
     if (clipboard.length === 0) return;
+    
+    // If no beat specified, paste at current playhead or after existing notes
+    let targetBeat = atBeat;
+    if (targetBeat === null) {
+      if (cantusFirmus.length > 0) {
+        // Paste after the last note
+        const lastBeat = Math.max(...cantusFirmus.map(n => n.beat + (n.duration || 1)));
+        targetBeat = Math.ceil(lastBeat);
+      } else {
+        // No notes - paste at playhead or beat 0
+        targetBeat = currentBeat || 0;
+      }
+    }
+    
     const newNotes = [...cantusFirmus];
+    const pastedNotes = [];
     clipboard.forEach(note => {
-      const targetBeat = note.beat + atBeat;
-      if (targetBeat < totalBeats) {
+      const finalBeat = note.beat + targetBeat;
+      if (finalBeat < totalBeats) {
         // Allow multiple notes per beat - just add it
-        const exists = newNotes.some(n => n.beat === targetBeat && n.pitch === note.pitch);
+        const exists = newNotes.some(n => n.beat === finalBeat && n.pitch === note.pitch);
         if (!exists) {
-          newNotes.push({ pitch: note.pitch, beat: targetBeat });
+          const pastedNote = { 
+            pitch: note.pitch, 
+            beat: finalBeat,
+            duration: note.duration || DEFAULT_DURATION,
+            velocity: note.velocity ?? 0.8
+          };
+          newNotes.push(pastedNote);
+          pastedNotes.push(pastedNote);
         }
       }
     });
-    saveToHistory(newNotes.sort((a, b) => a.beat - b.beat));
-    onNotesUpdate(newNotes.sort((a, b) => a.beat - b.beat));
-  }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory]);
+    
+    const sorted = newNotes.sort((a, b) => a.beat - b.beat);
+    saveToHistory(sorted);
+    onNotesUpdate(sorted);
+    
+    // Select the pasted notes and scroll to them
+    const pastedKeys = new Set(pastedNotes.map(n => getNoteKey(n.pitch, n.beat)));
+    setSelectedNotes(pastedKeys);
+    
+    if (pastedNotes.length > 0 && scrollToBeatRef?.current) {
+      scrollToBeatRef.current(targetBeat);
+    }
+    
+    toast.success(`Pasted ${pastedNotes.length} notes at beat ${targetBeat}`);
+  }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory, currentBeat, scrollToBeatRef]);
 
   // Play note sound when adding
   const playNoteSound = useCallback((pitch, note = null) => {
@@ -740,7 +774,7 @@ export default function NoteGrid({
         copySelected();
       } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        paste(currentBeat);
+        paste();
       } else if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         selectAll();
