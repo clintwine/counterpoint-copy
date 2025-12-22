@@ -141,7 +141,7 @@ export default function PlaybackControls({
       {/* Transport controls and tempo */}
       <div className="flex items-center gap-2 justify-center">
         {/* Transport controls */}
-        <div className="flex items-center bg-[#595959] rounded-md p-1">
+        <div className="flex items-center bg-[#595959] rounded-md">
           <Button
             variant="ghost"
             size="sm"
