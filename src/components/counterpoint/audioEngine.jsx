@@ -472,7 +472,11 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
     return playSampledNote(pitch, duration, volume, customConfig);
   }
   
-  const { oscillators: oscConfigs, envelope, filter: filterConfig, lfo, distortion, bitcrush, eq } = customConfig;
+  const { oscillators: oscConfigs, envelope, filter: oldFilter, effects, lfo, distortion, bitcrush, eq } = customConfig;
+
+  // Extract filter config from effects array or fall back to old filter property
+  const filterEffect = effects?.find(e => e.type === 'filter');
+  const filterConfig = filterEffect?.config || oldFilter || { filterType: 'lowpass', frequency: 2000, Q: 1 };
 
   const oscillators = [];
   const gainNode = audioContext.createGain();
@@ -555,7 +559,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   });
 
   // Filter
-  filterNode.type = filterConfig.type || 'lowpass';
+  filterNode.type = filterConfig.filterType || filterConfig.type || 'lowpass';
   filterNode.frequency.value = filterConfig.frequency || 2000;
   filterNode.Q.value = filterConfig.Q || 1;
   
