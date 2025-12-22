@@ -2066,7 +2066,18 @@ export default function NoteGrid({
                           const isBarLine = beat % beatsPerMeasure === 0 && beat !== 0;
                           const noteKey = getNoteKey(pitch, beat);
                           const isSelected = selectedNotes.has(noteKey);
-                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
+                          // Get notes at current beat AND notes that extend into this beat from earlier beats
+                          const notesAtPosition = [];
+                          for (let checkBeat = Math.max(0, beat - 20); checkBeat <= beat; checkBeat++) {
+                            const potentialNotes = notesMap.get(`${pitch}-${checkBeat}`) || [];
+                            potentialNotes.forEach(({ voiceIndex, note }) => {
+                              const noteEnd = note.beat + (note.duration || DEFAULT_DURATION);
+                              // Include note if it overlaps with current beat
+                              if (note.beat <= beat && noteEnd > beat) {
+                                notesAtPosition.push({ voiceIndex, note });
+                              }
+                            });
+                          }
                           const isCurrentBeat = currentBeat === beat;
                           const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
 
