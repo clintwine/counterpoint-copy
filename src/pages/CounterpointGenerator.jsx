@@ -133,6 +133,12 @@ export default function CounterpointGenerator() {
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [chatbotActive, setChatbotActive] = useState(false);
   const [chatbotMinimized, setChatbotMinimized] = useState(false);
+  const [chatbotMessages, setChatbotMessages] = useState([
+    { 
+      role: 'assistant', 
+      content: "Hi! I'm your AI composer trained on Bach's Inventions. Tell me what kind of melody you'd like and I'll create it for you!\n\nExamples:\n• \"Create a 64-note flowing melody\"\n• \"Make a virtuosic passage with lots of sixteenth notes\"\n• \"Generate an expressive melodic line\""
+    }
+  ]);
   const [activeVoice, setActiveVoice] = useState(0);
           const [selectedNotes, setSelectedNotes] = useState([]);
           const scrollToBeatRef = useRef(null);
@@ -1935,6 +1941,8 @@ export default function CounterpointGenerator() {
             voices={voices}
             onVoicesChange={setVoices}
             currentNotes={cantusFirmus}
+            messages={chatbotMessages}
+            onMessagesChange={setChatbotMessages}
             onApplyMelody={(notes) => setCantusFirmus(notes)}
             onApplyHarmony={(notes, voiceType) => {
               // Map voice type to voice index

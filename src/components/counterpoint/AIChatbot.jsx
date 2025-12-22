@@ -13,14 +13,11 @@ export default function AIChatbot({
   settings,
   tempo = 80,
   onApplyMelody,
-  currentNotes
+  currentNotes,
+  messages,
+  onMessagesChange
 }) {
-  const [messages, setMessages] = useState([
-    { 
-      role: 'assistant', 
-      content: "Hi! I'm your AI composer trained on Bach's Inventions. Tell me what kind of melody you'd like and I'll create it for you!\n\nExamples:\n• \"Create a 64-note flowing melody\"\n• \"Make a virtuosic passage with lots of sixteenth notes\"\n• \"Generate an expressive melodic line\""
-    }
-  ]);
+  const setMessages = onMessagesChange;
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
