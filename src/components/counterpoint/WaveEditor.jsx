@@ -1307,20 +1307,7 @@ export default function WaveEditor({
                       className="w-full"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/40 text-xs">Phase</span>
-                      <span className="text-white/60 text-xs">{Math.round(osc.phase || 0)}°</span>
-                    </div>
-                    <Slider
-                      value={[osc.phase || 0]}
-                      onValueChange={([v]) => updateOscillator(i, 'phase', v)}
-                      min={0}
-                      max={360}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
+
                 </div>
                 ))}
 
@@ -1677,8 +1664,16 @@ export default function WaveEditor({
           <div className="space-y-4">
             <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
               {/* EQ Frequency Display */}
-              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4">
-                <svg className="w-full h-full" viewBox="0 0 400 192">
+              <div className="relative h-48 bg-slate-900 rounded border border-slate-600 mb-4 flex">
+                {/* Y-axis gain labels */}
+                <div className="flex flex-col justify-between py-2 pr-2 text-[9px] text-white/50 w-12">
+                  <span>+15dB</span>
+                  <span>+5dB</span>
+                  <span>0dB</span>
+                  <span>-5dB</span>
+                  <span>-15dB</span>
+                </div>
+                <svg className="flex-1 h-full" viewBox="0 0 400 192">
                   {/* Grid lines */}
                   {[0, 48, 96, 144, 192].map((y) => (
                     <line key={`h-${y}`} x1="0" y1={y} x2="400" y2={y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
@@ -1686,13 +1681,6 @@ export default function WaveEditor({
                   {[0, 80, 160, 240, 320, 400].map((x) => (
                     <line key={`v-${x}`} x1={x} y1="0" x2={x} y2="192" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                   ))}
-
-                  {/* Gain labels (Y-axis) */}
-                  <text x="5" y="10" fill="rgba(255,255,255,0.5)" fontSize="9">+15dB</text>
-                  <text x="5" y="50" fill="rgba(255,255,255,0.5)" fontSize="9">+5dB</text>
-                  <text x="5" y="98" fill="rgba(255,255,255,0.5)" fontSize="9">0dB</text>
-                  <text x="5" y="145" fill="rgba(255,255,255,0.5)" fontSize="9">-5dB</text>
-                  <text x="5" y="187" fill="rgba(255,255,255,0.5)" fontSize="9">-15dB</text>
 
                   {/* Frequency labels */}
                   <text x="10" y="185" fill="rgba(255,255,255,0.5)" fontSize="10">20Hz</text>
@@ -1801,7 +1789,7 @@ export default function WaveEditor({
                     );
                   })}
                 </svg>
-              </div>
+                </div>
               
               {/* EQ Band Controls */}
               <div className="grid grid-cols-5 gap-3">
