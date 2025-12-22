@@ -1741,6 +1741,13 @@ export default function WaveEditor({
                       return ((logFreq - logMin) / (logMax - logMin)) * 400;
                     };
                     const gainToY = (gain) => 96 - (gain * 3.2);
+                    const xToFreq = (x) => {
+                      const logMin = Math.log10(20);
+                      const logMax = Math.log10(20000);
+                      const logFreq = logMin + (x / 400) * (logMax - logMin);
+                      return Math.round(Math.pow(10, logFreq));
+                    };
+                    const yToGain = (y) => (96 - y) / 3.2;
                     
                     return (
                       <circle
@@ -1752,6 +1759,33 @@ export default function WaveEditor({
                         stroke="#1E293B"
                         strokeWidth="2"
                         className="cursor-move"
+                        style={{ userSelect: 'none' }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const svg = e.currentTarget.ownerSVGElement;
+                          const rect = svg.getBoundingClientRect();
+                          
+                          const handleMove = (moveEvent) => {
+                            const x = Math.max(0, Math.min(400, ((moveEvent.clientX - rect.left) / rect.width) * 400));
+                            const y = Math.max(0, Math.min(192, ((moveEvent.clientY - rect.top) / rect.height) * 192));
+                            
+                            const newFreq = xToFreq(x);
+                            const newGain = Math.max(-15, Math.min(15, yToGain(y)));
+                            
+                            const newEq = [...(instrument.eq?.length ? instrument.eq : DEFAULT_INSTRUMENT.eq)];
+                            newEq[i] = { ...newEq[i], frequency: newFreq, gain: parseFloat(newGain.toFixed(1)) };
+                            setInstrument({ ...instrument, eq: newEq });
+                          };
+                          
+                          const handleUp = () => {
+                            document.removeEventListener('mousemove', handleMove);
+                            document.removeEventListener('mouseup', handleUp);
+                          };
+                          
+                          document.addEventListener('mousemove', handleMove);
+                          document.addEventListener('mouseup', handleUp);
+                        }}
                       />
                     );
                   })}
