@@ -1164,16 +1164,16 @@ export default function WaveEditor({
         className="w-full"
         onValueChange={(value) => {
           console.log('[WaveEditor] Tab changed to:', value);
-          console.trace();
         }}
       >
-        <TabsList className="bg-slate-700/50 mb-3">
+        <TabsList className="bg-slate-700/50 mb-3" onClick={(e) => e.stopPropagation()}>
           <TabsTrigger 
             value="oscillators" 
             className="text-sm"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              console.log('[WaveEditor] Oscillators tab clicked');
               e.stopPropagation();
+              e.preventDefault();
             }}
           >
             Oscillators
@@ -1181,9 +1181,10 @@ export default function WaveEditor({
           <TabsTrigger 
             value="processing" 
             className="text-sm"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              console.log('[WaveEditor] Processing tab clicked');
               e.stopPropagation();
+              e.preventDefault();
             }}
           >
             Filter & Effects
@@ -1191,9 +1192,10 @@ export default function WaveEditor({
           <TabsTrigger 
             value="eq" 
             className="text-sm"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              console.log('[WaveEditor] EQ tab clicked');
               e.stopPropagation();
+              e.preventDefault();
             }}
           >
             EQ

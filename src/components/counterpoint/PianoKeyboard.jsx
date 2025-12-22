@@ -995,9 +995,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 open={showWaveEditor} 
                 onOpenChange={(open) => {
                   console.log('[PianoKeyboard] Dialog onOpenChange:', open);
-                  console.trace();
                   setShowWaveEditor(open);
                 }}
+                modal={true}
               >
                 <DialogContent 
                   className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999]" 
@@ -1015,6 +1015,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                   }}
                   onInteractOutside={(e) => {
                     console.log('[PianoKeyboard] Dialog onInteractOutside prevented');
+                    e.preventDefault();
+                  }}
+                  onEscapeKeyDown={(e) => {
+                    console.log('[PianoKeyboard] Dialog onEscapeKeyDown prevented');
                     e.preventDefault();
                   }}
                   aria-describedby="wave-editor-description"
