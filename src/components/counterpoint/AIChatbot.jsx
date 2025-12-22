@@ -44,6 +44,13 @@ export default function AIChatbot({
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
+    
+    // Add generating message
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: '🎵 Composing your melody... analyzing Bach patterns and generating notes...',
+      isGenerating: true
+    }]);
 
     // Detect requested note count
     const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
@@ -140,16 +147,24 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
       });
 
       const notes = response.notes || [];
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `${response.description}\n\n**Generated ${notes.length} notes**\n${response.rhythmicAnalysis || ''}`,
-        notes: notes
-      }]);
+      
+      // Remove generating message and add result
+      setMessages(prev => {
+        const filtered = prev.filter(m => !m.isGenerating);
+        return [...filtered, { 
+          role: 'assistant', 
+          content: `${response.description}\n\n**Generated ${notes.length} notes**\n${response.rhythmicAnalysis || ''}`,
+          notes: notes
+        }];
+      });
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "Sorry, I had trouble generating that melody. Please try again."
-      }]);
+      setMessages(prev => {
+        const filtered = prev.filter(m => !m.isGenerating);
+        return [...filtered, { 
+          role: 'assistant', 
+          content: "Sorry, I had trouble generating that melody. Please try again."
+        }];
+      });
     } finally {
       setIsLoading(false);
     }
@@ -258,35 +273,28 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
                 <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
                   <div className="flex items-center gap-2">
                     <Music className="w-3 h-3 text-amber-400" />
-                    <span className="text-xs text-white/70">{msg.notes.length} notes</span>
+                    <span className="text-xs text-white/70">{msg.notes.length} notes generated</span>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {msg.notes.slice(0, 12).map((n, j) => (
-                      <span key={j} className="text-xs bg-slate-700 px-1.5 py-0.5 rounded">
-                        {n.pitch}
-                      </span>
-                    ))}
-                    {msg.notes.length > 12 && (
-                      <span className="text-xs text-white/50">+{msg.notes.length - 12}</span>
-                    )}
-                  </div>
-                  <div className="flex gap-2 flex-wrap mt-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button
                       size="sm"
                       onClick={() => handlePreview(msg.notes, i)}
-                      variant="outline"
-                      className="border-slate-600 text-white text-xs h-7 hover:bg-slate-700"
+                      className={`text-xs h-8 font-medium ${
+                        previewPlaying === i 
+                          ? 'bg-red-500 hover:bg-red-600 text-white' 
+                          : 'bg-blue-600 hover:bg-blue-700 text-white border-0'
+                      }`}
                     >
                       {previewPlaying === i ? (
-                        <><Square className="w-3 h-3 mr-1" />Stop</>
+                        <><Square className="w-3.5 h-3.5 mr-1.5" />Stop Preview</>
                       ) : (
-                        <><Play className="w-3 h-3 mr-1" />Preview</>
+                        <><Play className="w-3.5 h-3.5 mr-1.5" />Preview</>
                       )}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleApplyNotes(msg.notes)}
-                      className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7"
+                      className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-8 font-medium"
                     >
                       Apply to Score
                     </Button>
