@@ -68,8 +68,15 @@ function createDelay(ctx) {
 }
 
 export async function renderToWav(notes, tempo, instrumentName) {
+  // Filter out any notes with negative beats
+  const validNotes = notes.filter(n => n.beat >= 0);
+  
+  if (validNotes.length === 0) {
+    throw new Error('No valid notes to export');
+  }
+  
   // Calculate duration
-  const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)), 0);
+  const maxBeat = Math.max(...validNotes.map(n => n.beat + (n.duration || 1)), 0);
   const duration = (maxBeat * (60 / tempo) / 4) + 2;
   
   const sampleRate = 44100;
@@ -103,7 +110,7 @@ export async function renderToWav(notes, tempo, instrumentName) {
   masterGain.connect(offlineCtx.destination);
   
   // Render each note
-  notes.forEach(note => {
+  validNotes.forEach(note => {
     const frequency = noteToFrequency(note.pitch);
     const startTime = note.beat * (60 / tempo) / 4;
     const noteDuration = (note.duration || 1) * (60 / tempo) / 4;
