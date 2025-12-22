@@ -1000,7 +1000,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 modal={true}
               >
                 <DialogContent 
-                  className="bg-slate-900 border-slate-700 max-w-4xl max-h-[92vh] overflow-y-auto p-6 z-[9999] [&>button]:text-white [&>button]:hover:text-white/80" 
+                  className="bg-slate-900 border-slate-700 max-w-4xl h-[92vh] overflow-y-auto p-6 z-[9999] [&>button]:text-white [&>button]:hover:text-white/80" 
                   onOpenAutoFocus={(e) => e.preventDefault()}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                   aria-describedby="wave-editor-description"
