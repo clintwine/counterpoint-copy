@@ -590,8 +590,18 @@ export default function CounterpointGenerator() {
     setCurrentProjectId(project.id);
 
     // Load effects and envelope
-    setEffects(project.effects || { reverb: 0.3, delay: 0, chorus: 0 });
-    setEnvelope(project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
+    const loadedEffects = project.effects || { reverb: 0.3, delay: 0, chorus: 0 };
+    const loadedEnvelope = project.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 };
+    setEffects(loadedEffects);
+    setEnvelope(loadedEnvelope);
+    
+    // Apply to audio engine
+    import('@/components/counterpoint/audioEngine').then(({ setEffectLevel, setEnvelope: setGlobalEnvelope }) => {
+      setEffectLevel('reverb', loadedEffects.reverb);
+      setEffectLevel('delay', loadedEffects.delay);
+      setEffectLevel('chorus', loadedEffects.chorus);
+      setGlobalEnvelope(loadedEnvelope);
+    });
 
     // Merge custom instruments from project with existing saved instruments
     // Keep all instruments from database, only add project-specific ones if unique
@@ -663,8 +673,18 @@ export default function CounterpointGenerator() {
     setCurrentProjectId(null);
     
     // Load effects and envelope
-    setEffects(song.effects || { reverb: 0.3, delay: 0, chorus: 0 });
-    setEnvelope(song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 });
+    const loadedEffects = song.effects || { reverb: 0.3, delay: 0, chorus: 0 };
+    const loadedEnvelope = song.envelope || { attack: 0.02, sustain: 0.7, release: 0.3 };
+    setEffects(loadedEffects);
+    setEnvelope(loadedEnvelope);
+    
+    // Apply to audio engine
+    import('@/components/counterpoint/audioEngine').then(({ setEffectLevel, setEnvelope: setGlobalEnvelope }) => {
+      setEffectLevel('reverb', loadedEffects.reverb);
+      setEffectLevel('delay', loadedEffects.delay);
+      setEffectLevel('chorus', loadedEffects.chorus);
+      setGlobalEnvelope(loadedEnvelope);
+    });
 
     // Merge custom instruments from song with existing saved instruments
     // Keep all instruments from database, only add song-specific ones if unique
