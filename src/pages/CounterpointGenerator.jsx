@@ -1835,7 +1835,7 @@ export default function CounterpointGenerator() {
                               onImportMidi={handleImportMidi}
                               onOpenWaveEditor={() => {
                               setShowPianoPanel(true);
-                              setOpenWaveEditor(true);
+                              setOpenWaveEditor('create');
                               setTimeout(() => setOpenWaveEditor(false), 100);
                               }}
                               customInstruments={customInstruments}
