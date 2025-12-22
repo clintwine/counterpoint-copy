@@ -1802,13 +1802,15 @@ export default function WaveEditor({
                     {/* Frequency knob */}
                     <div className="flex flex-col items-center">
                       <div
-                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
                         style={{
-                          background: `conic-gradient(from 225deg, #3b82f6 ${((Math.log10(band.frequency) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * 270}deg, #334155 0deg)`
+                          background: `conic-gradient(from 225deg, #3b82f6 ${((Math.log10(band.frequency) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20))) * 270}deg, #334155 0deg)`,
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none'
                         }}
                       >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
-                          <span className="text-[8px] text-white/70">{band.frequency > 1000 ? `${(band.frequency/1000).toFixed(1)}k` : band.frequency}</span>
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
+                          <span className="text-[8px] text-white/70 pointer-events-none">{band.frequency > 1000 ? `${(band.frequency/1000).toFixed(1)}k` : band.frequency}</span>
                         </div>
                         <input
                           type="range"
@@ -1830,13 +1832,15 @@ export default function WaveEditor({
                     {/* Gain knob */}
                     <div className="flex flex-col items-center">
                       <div
-                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                        className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
                         style={{
-                          background: `conic-gradient(from 225deg, ${band.gain > 0 ? '#10b981' : '#ef4444'} ${((band.gain + 15) / 30) * 270}deg, #334155 0deg)`
+                          background: `conic-gradient(from 225deg, ${band.gain > 0 ? '#10b981' : '#ef4444'} ${((band.gain + 15) / 30) * 270}deg, #334155 0deg)`,
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none'
                         }}
                       >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
-                          <span className="text-[8px] text-white/70">{band.gain > 0 ? '+' : ''}{band.gain.toFixed(1)}</span>
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
+                          <span className="text-[8px] text-white/70 pointer-events-none">{band.gain > 0 ? '+' : ''}{band.gain.toFixed(1)}</span>
                         </div>
                         <input
                           type="range"
@@ -1859,13 +1863,15 @@ export default function WaveEditor({
                     {i > 0 && i < 4 && (
                       <div className="flex flex-col items-center">
                         <div
-                          className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1"
+                          className="w-12 h-12 rounded-full bg-slate-700 border border-slate-600 relative flex items-center justify-center cursor-pointer mb-1 select-none"
                           style={{
-                            background: `conic-gradient(from 225deg, #f59e0b ${(band.Q / 10) * 270}deg, #334155 0deg)`
+                            background: `conic-gradient(from 225deg, #f59e0b ${(band.Q / 10) * 270}deg, #334155 0deg)`,
+                            userSelect: 'none',
+                            WebkitUserSelect: 'none'
                           }}
                         >
-                          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
-                            <span className="text-[8px] text-white/70">{band.Q.toFixed(1)}</span>
+                          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center pointer-events-none">
+                            <span className="text-[8px] text-white/70 pointer-events-none">{band.Q.toFixed(1)}</span>
                           </div>
                           <input
                             type="range"
