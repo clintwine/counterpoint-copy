@@ -1250,10 +1250,10 @@ export default function CounterpointGenerator() {
                                 <p className="text-white font-medium text-lg">{song.name}</p>
                                 <p className="text-white/70 text-sm mt-1">{song.description}</p>
                                 <div className="flex gap-2 mt-2 flex-wrap">
-                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded font-medium">
                                     {song.settings?.key || 'C'} {song.settings?.mode || 'major'}
                                   </span>
-                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded font-medium">
                                     {song.settings?.timeSignature || '4/4'}
                                   </span>
                                   <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
@@ -1271,12 +1271,15 @@ export default function CounterpointGenerator() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button
-                                  variant="ghost"
                                   size="sm"
                                   onClick={(e) => handlePreviewSong(song, e)}
-                                  className={`${previewingSongId === song.id ? 'text-red-400 hover:text-red-300' : 'text-white/60 hover:text-white'}`}
+                                  className={`${previewingSongId === song.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-amber-500/80 hover:bg-amber-500 text-slate-900'}`}
                                 >
-                                  {previewingSongId === song.id ? '⏹' : '▶'}
+                                  {previewingSongId === song.id ? (
+                                    <>⏹ Stop</>
+                                  ) : (
+                                    <>▶ Preview</>
+                                  )}
                                 </Button>
                                 {currentUser?.role === 'admin' && (
                                   <>
