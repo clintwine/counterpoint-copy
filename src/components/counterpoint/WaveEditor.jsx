@@ -868,7 +868,21 @@ export default function WaveEditor({
       <div className="flex gap-3">
         {/* Left: Instrument Library Dropdown */}
         <div className="w-48 flex-shrink-0 space-y-1.5">
-          <Label className="text-white/70 text-xs uppercase tracking-wider">Library</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-white/70 text-xs uppercase tracking-wider">Instruments</Label>
+            <Button
+              size="sm"
+              onClick={() => {
+                const nextNumber = customInstruments.length + 1;
+                setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+                setEditingIndex(-1);
+              }}
+              className="h-7 px-2 bg-slate-600 text-white hover:bg-slate-500 text-xs"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              New
+            </Button>
+          </div>
           <Popover open={libraryOpen} onOpenChange={setLibraryOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -1034,19 +1048,6 @@ export default function WaveEditor({
               />
             </div>
             <div className="flex items-end gap-2">
-              {/* TODO: Re-enable voice recording feature later */}
-              <Button
-                size="sm"
-                onClick={() => {
-                  const nextNumber = customInstruments.length + 1;
-                  setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
-                  setEditingIndex(-1);
-                }}
-                className="h-9 px-3 bg-slate-600 text-white hover:bg-slate-500 text-sm"
-              >
-                <Plus className="w-4 h-4 mr-1.5" />
-                New
-              </Button>
               <Button
                 size="sm"
                 onClick={handleSave}
