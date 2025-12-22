@@ -1038,9 +1038,17 @@ export default function WaveEditor({
               <Button
                 size="sm"
                 onClick={() => {
-                  const nextNumber = customInstruments.length + 1;
-                  setInstrument({ ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` });
+                  // Generate a fresh name like "Custom 1", "Custom 2", etc.
+                  const existingCustomNames = customInstruments.map(inst => inst.name);
+                  let counter = 1;
+                  let newName = `Custom ${counter}`;
+                  while (existingCustomNames.includes(newName)) {
+                    counter++;
+                    newName = `Custom ${counter}`;
+                  }
+                  setInstrument({ ...DEFAULT_INSTRUMENT, name: newName });
                   setEditingIndex(-1);
+                  setEditingBuiltin(null);
                 }}
                 className="h-9 px-3 bg-slate-600 text-white hover:bg-slate-500 text-sm"
               >
