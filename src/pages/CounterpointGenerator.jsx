@@ -1124,6 +1124,9 @@ export default function CounterpointGenerator() {
   };
 
   const handleStop = () => {
+    console.log('[Playback] handleStop called');
+    console.trace();
+    console.log('[Playback] setIsPlaying(false) - called from handleStop');
     setIsPlaying(false);
     setIsRecording(false);
     setIsCountingIn(false);
