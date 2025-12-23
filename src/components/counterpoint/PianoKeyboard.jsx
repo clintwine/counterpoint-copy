@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Plus } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 import WaveEditor from './WaveEditor';
