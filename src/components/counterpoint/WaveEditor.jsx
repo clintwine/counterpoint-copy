@@ -220,14 +220,21 @@ export default function WaveEditor({
   presetLibrary = [],
   onNew
 }) {
-  const handleNew = () => {
-    const nextNumber = customInstruments.length + 1;
-    const newInstrument = { ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` };
-    setInstrument(newInstrument);
-    // Immediately save it to the list
-    onSaveInstrument(newInstrument, -1);
-    setEditingIndex(customInstruments.length); // Will be the new index after save
-    setEditingBuiltin(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const handleNew = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const nextNumber = customInstruments.length + 1;
+      const newInstrument = { ...DEFAULT_INSTRUMENT, name: `Custom ${nextNumber}` };
+      setInstrument(newInstrument);
+      // Immediately save it to the list
+      await onSaveInstrument(newInstrument, -1);
+      setEditingIndex(customInstruments.length); // Will be the new index after save
+      setEditingBuiltin(null);
+    } finally {
+      setIsCreating(false);
+    }
   };
   const [instrument, setInstrument] = useState(() => ({ ...DEFAULT_INSTRUMENT, eq: [...DEFAULT_INSTRUMENT.eq] }));
   const [editingIndex, setEditingIndex] = useState(-1);
