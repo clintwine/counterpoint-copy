@@ -234,7 +234,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   }, [showWaveEditor]);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
-  const [isCreatingInstrument, setIsCreatingInstrument] = useState(false);
 
   // Combined instruments list
   const allInstruments = [
@@ -1011,37 +1010,30 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                       <Button
                         onClick={async () => {
-                          if (isCreatingInstrument) return;
-                          setIsCreatingInstrument(true);
-                          try {
-                            const newIndex = customInstruments.length;
-                            const nextNumber = newIndex + 1;
-                            const newInstrument = { 
-                              name: `Custom ${nextNumber}`,
-                              oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
-                              envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
-                              effects: [{ type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }],
-                              eq: [
-                                { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
-                                { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
-                              ]
-                            };
-                            await onSaveInstrument(newInstrument, -1);
-                            // Select the newly created instrument after save completes
-                            onInstrumentChange(`custom_${newIndex}`);
-                          } finally {
-                            setIsCreatingInstrument(false);
-                          }
+                          const newIndex = customInstruments.length;
+                          const nextNumber = newIndex + 1;
+                          const newInstrument = { 
+                            name: `Custom ${nextNumber}`,
+                            oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
+                            envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
+                            effects: [{ type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }],
+                            eq: [
+                              { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+                              { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+                              { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
+                            ]
+                          };
+                          await onSaveInstrument(newInstrument, -1);
+                          // Select the newly created instrument after save completes
+                          onInstrumentChange(`custom_${newIndex}`);
                         }}
                         size="sm"
-                        disabled={isCreatingInstrument}
-                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium"
                       >
                         <Plus className="w-3.5 h-3.5 mr-1.5" />
-                        {isCreatingInstrument ? 'Creating...' : 'New'}
+                        New
                       </Button>
                       <Button
                         onClick={() => {
