@@ -906,26 +906,8 @@ export default function WaveEditor({
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Delete + Library + Save */}
+      {/* Top Row: Library + Save */}
       <div className="flex items-end gap-3">
-        {/* Delete button */}
-        {editingIndex >= 0 && (
-          <Button
-            size="sm"
-            onClick={() => {
-              if (confirm(`Delete "${instrument.name}"?`)) {
-                onDeleteInstrument(editingIndex);
-                setInstrument({ ...DEFAULT_INSTRUMENT });
-                setEditingIndex(-1);
-                setEditingBuiltin(null);
-              }
-            }}
-            className="h-9 px-3 bg-red-500 hover:bg-red-600 text-white"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
-        )}
-
         {/* Instrument Library + Save */}
         <div className="flex-1 space-y-1.5">
           <div className="flex items-center gap-2">
