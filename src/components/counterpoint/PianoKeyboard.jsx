@@ -234,7 +234,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
   }, [showWaveEditor]);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
-  const [isCreatingInstrument, setIsCreatingInstrument] = useState(false);
+  const isCreatingInstrumentRef = useRef(false);
 
   // Combined instruments list
   const allInstruments = [
@@ -1011,8 +1011,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                       <Button
                         onClick={async () => {
-                          if (isCreatingInstrument) return;
-                          setIsCreatingInstrument(true);
+                          if (isCreatingInstrumentRef.current) return;
+                          isCreatingInstrumentRef.current = true;
                           try {
                             const newIndex = customInstruments.length;
                             const nextNumber = newIndex + 1;
@@ -1033,12 +1033,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                             // Select the newly created instrument after save completes
                             onInstrumentChange(`custom_${newIndex}`);
                           } finally {
-                            setIsCreatingInstrument(false);
+                            setTimeout(() => {
+                              isCreatingInstrumentRef.current = false;
+                            }, 500);
                           }
                         }}
                         size="sm"
-                        disabled={isCreatingInstrument}
-                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium disabled:opacity-50"
+                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium"
                       >
                         <Plus className="w-3.5 h-3.5 mr-1.5" />
                         New
