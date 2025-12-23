@@ -959,7 +959,7 @@ export default function WaveEditor({
                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-0 bg-slate-800 border-slate-700 z-[9999]" align="start">
+            <PopoverContent className="w-64 p-0 bg-slate-800 border-slate-700 z-[100001]" align="start">
               <Command className="bg-slate-800">
                 <CommandInput placeholder="Search instruments..." className="h-9 text-sm text-white [&_svg]:text-white" />
                 <CommandList 
