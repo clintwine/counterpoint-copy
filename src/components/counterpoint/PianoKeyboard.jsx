@@ -1035,15 +1035,17 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         </Button>
                         <Button
                           onClick={() => {
-                            const editingIndex = instrument.name.startsWith('Custom') 
-                              ? customInstruments.findIndex(inst => inst.name === instrument.name)
-                              : -1;
-                            if (editingIndex >= 0 && confirm(`Delete "${instrument.name}"?`)) {
-                              onDeleteInstrument(editingIndex);
+                            if (instrument.startsWith('custom_')) {
+                              const index = parseInt(instrument.split('_')[1]);
+                              const customConfig = customInstruments[index];
+                              if (customConfig && confirm(`Delete "${customConfig.name}"?`)) {
+                                onDeleteInstrument(index);
+                              }
                             }
                           }}
                           size="sm"
-                          className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0"
+                          disabled={!instrument.startsWith('custom_')}
+                          className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 disabled:opacity-30"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
