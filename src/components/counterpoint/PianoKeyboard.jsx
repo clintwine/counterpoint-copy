@@ -1010,8 +1010,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
                       <Button
                         onClick={async () => {
-                          const nextNumber = customInstruments.length + 1;
                           const newIndex = customInstruments.length;
+                          const nextNumber = newIndex + 1;
                           const newInstrument = { 
                             name: `Custom ${nextNumber}`,
                             oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
@@ -1026,6 +1026,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                             ]
                           };
                           await onSaveInstrument(newInstrument, -1);
+                          // Select the newly created instrument after save completes
                           onInstrumentChange(`custom_${newIndex}`);
                         }}
                         size="sm"
