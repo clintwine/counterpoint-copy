@@ -6,13 +6,15 @@ export default function Layout({ children }) {
       {children}
       <Toaster 
         position="top-center"
+        containerStyle={{
+          zIndex: 99999999,
+        }}
         toastOptions={{
           duration: 3000,
           style: {
             background: '#2D2D2D',
             color: '#fff',
             border: '1px solid #3A3A3A',
-            zIndex: 999999,
           },
           success: {
             iconTheme: {
