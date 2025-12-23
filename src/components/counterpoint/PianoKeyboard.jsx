@@ -1000,7 +1000,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                 modal={true}
               >
                 <DialogContent 
-                  className="bg-slate-900 border-slate-700 max-w-4xl h-[92vh] overflow-y-auto p-6 z-[9999] [&>button]:text-white [&>button]:hover:text-white/80" 
+                  className="bg-slate-900 border-slate-700 max-w-4xl h-[92vh] overflow-y-auto p-6 z-[100000] [&>button]:text-white [&>button]:hover:text-white/80" 
                   onOpenAutoFocus={(e) => e.preventDefault()}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                   aria-describedby="wave-editor-description"
@@ -1047,7 +1047,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         }}
                         size="sm"
                         disabled={!instrument.startsWith('custom_')}
-                        className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 disabled:opacity-30"
+                        className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 disabled:opacity-20 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>

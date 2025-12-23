@@ -297,6 +297,22 @@ export default function WaveEditor({
       setEditingBuiltin(null);
     }
   }, []);
+
+  // React to currentInstrument changes (e.g., when New button is clicked)
+  useEffect(() => {
+    if (currentInstrument?.startsWith('custom_') && currentInstrumentConfig) {
+      const index = parseInt(currentInstrument.split('_')[1]);
+      const loadedInstrument = {
+        ...DEFAULT_INSTRUMENT,
+        ...currentInstrumentConfig,
+        effects: currentInstrumentConfig.effects || DEFAULT_INSTRUMENT.effects,
+        volume: currentInstrumentConfig.volume ?? 1
+      };
+      setInstrument(loadedInstrument);
+      setEditingIndex(index);
+      setEditingBuiltin(null);
+    }
+  }, [currentInstrument, currentInstrumentConfig]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
