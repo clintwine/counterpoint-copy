@@ -300,19 +300,22 @@ export default function WaveEditor({
 
   // React to currentInstrument changes (e.g., when New button is clicked)
   useEffect(() => {
-    if (currentInstrument?.startsWith('custom_') && currentInstrumentConfig) {
+    if (currentInstrument?.startsWith('custom_')) {
       const index = parseInt(currentInstrument.split('_')[1]);
-      const loadedInstrument = {
-        ...DEFAULT_INSTRUMENT,
-        ...currentInstrumentConfig,
-        effects: currentInstrumentConfig.effects || DEFAULT_INSTRUMENT.effects,
-        volume: currentInstrumentConfig.volume ?? 1
-      };
-      setInstrument(loadedInstrument);
-      setEditingIndex(index);
-      setEditingBuiltin(null);
+      const config = currentInstrumentConfig || customInstruments[index];
+      if (config) {
+        const loadedInstrument = {
+          ...DEFAULT_INSTRUMENT,
+          ...config,
+          effects: config.effects || DEFAULT_INSTRUMENT.effects,
+          volume: config.volume ?? 1
+        };
+        setInstrument(loadedInstrument);
+        setEditingIndex(index);
+        setEditingBuiltin(null);
+      }
     }
-  }, [currentInstrument, currentInstrumentConfig]);
+  }, [currentInstrument, currentInstrumentConfig, customInstruments]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewingPreset, setPreviewingPreset] = useState(null);
   const [waveformData, setWaveformData] = useState([]);
@@ -950,8 +953,8 @@ export default function WaveEditor({
               >
                 <span className="truncate">
                   {editingBuiltin ? BUILTIN_INSTRUMENTS[editingBuiltin]?.name : 
-                   editingIndex >= 0 ? customInstruments[editingIndex]?.name :
-                   'Browse...'}
+                   editingIndex >= 0 && customInstruments[editingIndex] ? customInstruments[editingIndex].name :
+                   instrument.name || 'Browse...'}
                 </span>
                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
