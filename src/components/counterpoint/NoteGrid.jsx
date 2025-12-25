@@ -159,7 +159,11 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
           { oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
           { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 }, { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
         ];
-        return PRESET_LIBRARY[index] || null;
+        const preset = PRESET_LIBRARY[index];
+        if (!preset || !preset.oscillators || !Array.isArray(preset.oscillators) || preset.oscillators.length === 0) {
+          return null;
+        }
+        return preset;
       }
       if (inst === 'builtin_n64_guitar') {
         return customInstruments.find(i => i.id === 'builtin_n64_guitar');
