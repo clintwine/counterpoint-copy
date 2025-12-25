@@ -1315,7 +1315,33 @@ export default function NoteGrid({
             ...firstDraggedNote,
             pitch: pitches[newPitchIndex]
           };
-          playNoteSound(pitches[newPitchIndex], previewNote);
+          
+          // Use custom instrument config if available
+          initAudio();
+          const instrument = voices[activeVoice]?.instrument || 'organ';
+          const customConfig = getInstrumentConfig(instrument);
+          
+          const hasBend = previewNote.bendStart !== undefined || previewNote.bendEnd !== undefined;
+          const pitchBend = hasBend ? {
+            start: previewNote.bendStart ?? 0,
+            end: previewNote.bendEnd ?? 0,
+            startTime: previewNote.bendStartTime ?? 0,
+            endTime: previewNote.bendEndTime ?? 1
+          } : 0;
+          
+          const sixteenthNoteDuration = (60 / tempo) / 4;
+          const actualDuration = previewNote.duration ? (previewNote.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
+          const velocity = previewNote.velocity ?? 0.7;
+          
+          if (customConfig) {
+            playNoteWithCustomInstrument(pitches[newPitchIndex], actualDuration, velocity, customConfig);
+          } else if (previewNote.articulation && previewNote.articulation !== 'normal') {
+            import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+              playNoteWithArticulation(pitches[newPitchIndex], actualDuration, velocity, 0, instrument, previewNote.articulation, tempo, pitchBend);
+            });
+          } else {
+            playNote(pitches[newPitchIndex], actualDuration, velocity, 0, instrument, pitchBend);
+          }
         } else {
           playNoteSound(pitches[newPitchIndex]);
         }
