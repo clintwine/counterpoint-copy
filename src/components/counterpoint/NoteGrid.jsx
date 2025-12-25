@@ -535,8 +535,8 @@ export default function NoteGrid({
       });
     }
     
-    // Highlight hovered cell in draw mode
-    if (hoveredCell && tool === 'draw') {
+    // Highlight hovered cell - in draw mode or when hovering over any cell
+    if (hoveredCell) {
       highlightedNotes.add(hoveredCell.pitch);
     }
     
