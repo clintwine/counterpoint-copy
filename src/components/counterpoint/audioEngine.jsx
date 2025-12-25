@@ -458,8 +458,82 @@ export function getCustomInstruments() {
 }
 
 // Play note with custom instrument support
-export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
+export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig, pitchBend = 0, articulation = 'normal', tempo = 80) {
   if (!audioContext) initAudio();
+  
+  // Handle articulations (tremolo, trill, grace, etc.) for custom instruments
+  if (articulation && articulation !== 'normal') {
+    const sixteenthNoteDuration = (60 / tempo) / 4;
+    
+    switch (articulation) {
+      case 'staccato':
+        return playSingleCustomNote(pitch, duration * 0.2, Math.min(1, volume * 1.5), customConfig, pitchBend);
+        
+      case 'accent':
+        return playSingleCustomNote(pitch, duration, Math.min(1, volume * 1.5), customConfig, pitchBend);
+        
+      case 'trill':
+        const trillSpeed = sixteenthNoteDuration * 0.5;
+        const numTrillNotes = Math.floor(duration / trillSpeed);
+        const upperNote = getNextScaleNote(pitch);
+        for (let i = 0; i < numTrillNotes; i++) {
+          setTimeout(() => {
+            const notePitch = i % 2 === 0 ? pitch : upperNote;
+            playSingleCustomNote(notePitch, trillSpeed * 0.9, volume * 0.8, customConfig, pitchBend);
+          }, i * trillSpeed * 1000);
+        }
+        return null;
+        
+      case 'grace':
+        const graceNote = getNextScaleNote(pitch);
+        const graceDuration = sixteenthNoteDuration * 0.25;
+        playSingleCustomNote(graceNote, graceDuration, volume * 0.7, customConfig, pitchBend);
+        setTimeout(() => {
+          playSingleCustomNote(pitch, duration - graceDuration, volume, customConfig, pitchBend);
+        }, graceDuration * 1000);
+        return null;
+        
+      case 'tremolo-slow':
+        const tremoloSlow = sixteenthNoteDuration * 2;
+        const numSlowNotes = Math.floor(duration / tremoloSlow);
+        for (let i = 0; i < numSlowNotes; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloSlow * 0.9, volume * 0.9, customConfig, pitchBend);
+          }, i * tremoloSlow * 1000);
+        }
+        return null;
+        
+      case 'tremolo-medium':
+        const tremoloMed = sixteenthNoteDuration;
+        const numMedNotes = Math.floor(duration / tremoloMed);
+        for (let i = 0; i < numMedNotes; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloMed * 0.9, volume * 0.85, customConfig, pitchBend);
+          }, i * tremoloMed * 1000);
+        }
+        return null;
+        
+      case 'tremolo-fast':
+        const tremoloFast = sixteenthNoteDuration * 0.5;
+        const numFastNotes = Math.floor(duration / tremoloFast);
+        for (let i = 0; i < numFastNotes; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloFast * 0.9, volume * 0.8, customConfig, pitchBend);
+          }, i * tremoloFast * 1000);
+        }
+        return null;
+        
+      case 'tremolo-ultra':
+        const tremoloUltra = sixteenthNoteDuration * 0.25;
+        const numUltraNotes = Math.floor(duration / tremoloUltra);
+        for (let i = 0; i < numUltraNotes; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloUltra * 0.9, volume * 0.75, customConfig, pitchBend);
+          }, i * tremoloUltra * 1000);
+        }
+        return null;
+    }
+  }
   
   // Electric guitar velocity-based variations for custom instruments
   if (customConfig.name === 'Electric Guitar') {
@@ -467,7 +541,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       // Maximum velocity - aggressive power chord
       const chordPitches = getPowerChordPitches(pitch);
       chordPitches.forEach((chordPitch, i) => {
-        playSingleCustomNote(chordPitch, duration, volume * (1 - i * 0.1), customConfig);
+        playSingleCustomNote(chordPitch, duration, volume * (1 - i * 0.1), customConfig, pitchBend);
       });
       return;
     } else if (volume <= 0.32) {
@@ -475,17 +549,17 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       const mutedConfig = { ...customConfig, distortion: 0 };
       const chordPitches = getPowerChordPitches(pitch);
       chordPitches.forEach((chordPitch, i) => {
-        playSingleCustomNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), mutedConfig);
+        playSingleCustomNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), mutedConfig, pitchBend);
       });
       return;
     }
   }
   
   // Default single note
-  return playSingleCustomNote(pitch, duration, volume, customConfig);
+  return playSingleCustomNote(pitch, duration, volume, customConfig, pitchBend);
 }
 
-async function playSingleCustomNote(pitch, duration, volume, customConfig) {
+async function playSingleCustomNote(pitch, duration, volume, customConfig, pitchBend = 0) {
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
 
@@ -505,7 +579,7 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig) {
   }
   
   if (customConfig.audioSample) {
-    return playSampledNote(pitch, duration, volume, customConfig);
+    return playSampledNote(pitch, duration, volume, customConfig, pitchBend);
   }
   
   const { oscillators: oscConfigs, envelope, filter: oldFilter, effects, lfo, distortion, bitcrush, eq } = customConfig;
@@ -575,6 +649,27 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig) {
     const harmonic = safeConfig.harmonic;
     osc.frequency.value = freq * harmonic;
     osc.detune.value = safeConfig.detune;
+    
+    // Apply pitch bend envelope if provided
+    if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
+      if (typeof pitchBend === 'number') {
+        osc.detune.value += pitchBend * 100;
+      } else if (pitchBend) {
+        const bendStart = (pitchBend.start ?? 0) * 100;
+        const bendEnd = (pitchBend.end ?? 0) * 100;
+        const startTime = pitchBend.startTime ?? 0;
+        const endTime = pitchBend.endTime ?? 1;
+        
+        const bendStartTimeAbs = now + (duration * startTime);
+        const bendEndTimeAbs = now + (duration * endTime);
+        
+        osc.detune.setValueAtTime(osc.detune.value + bendStart, now);
+        if (startTime > 0) {
+          osc.detune.setValueAtTime(osc.detune.value + bendStart, bendStartTimeAbs);
+        }
+        osc.detune.linearRampToValueAtTime(osc.detune.value + bendEnd, bendEndTimeAbs);
+      }
+    }
     
     // Apply LFO modulation
     if (lfoGain && lfo.target === 'pitch') {
@@ -656,7 +751,7 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig) {
 }
 
 // Play a sampled instrument (like recorded voice)
-function playSampledNote(pitch, duration, volume, customConfig) {
+function playSampledNote(pitch, duration, volume, customConfig, pitchBend = 0) {
   const freq = NOTE_FREQUENCIES[pitch];
   const baseFreq = 440; // A4 reference
   const playbackRate = freq / baseFreq;
@@ -664,6 +759,28 @@ function playSampledNote(pitch, duration, volume, customConfig) {
   const source = audioContext.createBufferSource();
   source.buffer = customConfig.audioSample;
   source.playbackRate.value = playbackRate;
+  
+  // Apply pitch bend to sampled instruments via detune
+  if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
+    if (typeof pitchBend === 'number') {
+      source.detune.value = pitchBend * 100;
+    } else if (pitchBend) {
+      const bendStart = (pitchBend.start ?? 0) * 100;
+      const bendEnd = (pitchBend.end ?? 0) * 100;
+      const startTime = pitchBend.startTime ?? 0;
+      const endTime = pitchBend.endTime ?? 1;
+      const now = Math.max(0.01, audioContext.currentTime + 0.01);
+      
+      const bendStartTimeAbs = now + (duration * startTime);
+      const bendEndTimeAbs = now + (duration * endTime);
+      
+      source.detune.setValueAtTime(bendStart, now);
+      if (startTime > 0) {
+        source.detune.setValueAtTime(bendStart, bendStartTimeAbs);
+      }
+      source.detune.linearRampToValueAtTime(bendEnd, bendEndTimeAbs);
+    }
+  }
   
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
