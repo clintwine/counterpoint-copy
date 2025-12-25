@@ -1923,7 +1923,7 @@ export default function NoteGrid({
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
                                                                               isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
                                                                             }`}
-                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? 'rgba(251, 191, 36, 0.4)' : isC ? 'rgba(200, 165, 112, 0.15)' : isSharp ? 'rgba(0,0,0,0.3)' : '#2B2B2B' }}
+                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? '#D4A574' : isSharp ? '#1E293B' : '#F5F5F5' }}
                                                                           >
                                                                             {pitch}
                                                                           </div>
@@ -2178,8 +2178,8 @@ export default function NoteGrid({
                               style={{ 
                                 width: CELL_WIDTH, 
                                 height: CELL_HEIGHT,
-                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323'),
-                                borderBottomColor: '#404040'
+                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isSharpLine ? '#1E293B' : '#F5F5F5'),
+                                borderBottomColor: isSharpLine ? '#2D2D2D' : '#E0E0E0'
                               }}
                             >
                               {notesAtPosition.map(({ voiceIndex, note }) => {
