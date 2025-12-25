@@ -2842,6 +2842,10 @@ export default function NoteGrid({
                       { value: 'accent', label: 'Accent', desc: 'Emphasized' },
                       { value: 'trill', label: 'Trill', desc: 'Rapid alternation' },
                       { value: 'grace', label: 'Grace Note', desc: 'Quick ornament' },
+                      { value: 'tremolo-slow', label: 'Tremolo (Slow)', desc: '8th note picking' },
+                      { value: 'tremolo-medium', label: 'Tremolo (Medium)', desc: '16th note picking' },
+                      { value: 'tremolo-fast', label: 'Tremolo (Fast)', desc: '32nd note picking' },
+                      { value: 'tremolo-ultra', label: 'Tremolo (Ultra)', desc: '64th note picking' },
                     ].map((style) => (
                       <DropdownMenuItem
                         key={style.value}
