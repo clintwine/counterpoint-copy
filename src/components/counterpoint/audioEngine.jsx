@@ -498,9 +498,12 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-slow':
         const tremoloSlowSpeed = sixteenthNoteDuration;
         const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
+        const slowChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numSlowPicks; i++) {
           setTimeout(() => {
-            playSingleCustomNote(pitch, tremoloSlowSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+            slowChordPitches.forEach((chordPitch, chordIdx) => {
+              playSingleCustomNote(chordPitch, tremoloSlowSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+            });
           }, i * tremoloSlowSpeed * 1000);
         }
         return null;
@@ -508,9 +511,12 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-medium':
         const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
         const numMedPicks = Math.floor(duration / tremoloMedSpeed);
+        const medChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numMedPicks; i++) {
           setTimeout(() => {
-            playSingleCustomNote(pitch, tremoloMedSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+            medChordPitches.forEach((chordPitch, chordIdx) => {
+              playSingleCustomNote(chordPitch, tremoloMedSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+            });
           }, i * tremoloMedSpeed * 1000);
         }
         return null;
@@ -518,9 +524,12 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-fast':
         const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
         const numFastPicks = Math.floor(duration / tremoloFastSpeed);
+        const fastChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numFastPicks; i++) {
           setTimeout(() => {
-            playSingleCustomNote(pitch, tremoloFastSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+            fastChordPitches.forEach((chordPitch, chordIdx) => {
+              playSingleCustomNote(chordPitch, tremoloFastSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+            });
           }, i * tremoloFastSpeed * 1000);
         }
         return null;
@@ -528,9 +537,12 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-ultra':
         const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
         const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
+        const ultraChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numUltraPicks; i++) {
           setTimeout(() => {
-            playSingleCustomNote(pitch, tremoloUltraSpeed * 0.8, volume * 0.85, customConfig, pitchBend);
+            ultraChordPitches.forEach((chordPitch, chordIdx) => {
+              playSingleCustomNote(chordPitch, tremoloUltraSpeed * 0.8, volume * 0.85 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+            });
           }, i * tremoloUltraSpeed * 1000);
         }
         return null;
@@ -895,9 +907,12 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
     case 'tremolo-slow':
       const tremoloSlowSpeed = sixteenthNoteDuration;
       const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
+      const slowPowerChord = (instrument === 'electricGuitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
       for (let i = 0; i < numSlowPicks; i++) {
         setTimeout(() => {
-          playNote(pitch, tremoloSlowSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+          slowPowerChord.forEach((chordPitch, chordIdx) => {
+            playNote(chordPitch, tremoloSlowSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), voiceIndex, instrument, pitchBend);
+          });
         }, i * tremoloSlowSpeed * 1000);
       }
       return null;
@@ -905,9 +920,12 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
     case 'tremolo-medium':
       const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
       const numMedPicks = Math.floor(duration / tremoloMedSpeed);
+      const medPowerChord = (instrument === 'electricGuitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
       for (let i = 0; i < numMedPicks; i++) {
         setTimeout(() => {
-          playNote(pitch, tremoloMedSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+          medPowerChord.forEach((chordPitch, chordIdx) => {
+            playNote(chordPitch, tremoloMedSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), voiceIndex, instrument, pitchBend);
+          });
         }, i * tremoloMedSpeed * 1000);
       }
       return null;
@@ -915,9 +933,12 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
     case 'tremolo-fast':
       const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
       const numFastPicks = Math.floor(duration / tremoloFastSpeed);
+      const fastPowerChord = (instrument === 'electricGuitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
       for (let i = 0; i < numFastPicks; i++) {
         setTimeout(() => {
-          playNote(pitch, tremoloFastSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+          fastPowerChord.forEach((chordPitch, chordIdx) => {
+            playNote(chordPitch, tremoloFastSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), voiceIndex, instrument, pitchBend);
+          });
         }, i * tremoloFastSpeed * 1000);
       }
       return null;
@@ -925,9 +946,12 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
     case 'tremolo-ultra':
       const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
       const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
+      const ultraPowerChord = (instrument === 'electricGuitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
       for (let i = 0; i < numUltraPicks; i++) {
         setTimeout(() => {
-          playNote(pitch, tremoloUltraSpeed * 0.8, volume * 0.85, voiceIndex, instrument, pitchBend);
+          ultraPowerChord.forEach((chordPitch, chordIdx) => {
+            playNote(chordPitch, tremoloUltraSpeed * 0.8, volume * 0.85 * (1 - chordIdx * 0.1), voiceIndex, instrument, pitchBend);
+          });
         }, i * tremoloUltraSpeed * 1000);
       }
       return null;
