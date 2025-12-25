@@ -2175,14 +2175,24 @@ export default function NoteGrid({
                                 const measureStartBeat = measureIndex * beatsPerMeasure;
 
                                 return (
-                                  <div 
-                                    key={measureIndex}
-                                    className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
-                                    style={{ 
-                                      width: CELL_WIDTH * beatsPerMeasure,
-                                      backgroundColor: '#3a3a3a'
-                                    }}
-                                    >
+                                 <div 
+                                   key={measureIndex}
+                                   className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
+                                   style={{ 
+                                     width: CELL_WIDTH * beatsPerMeasure,
+                                     backgroundColor: '#3a3a3a'
+                                   }}
+                                   onClick={(e) => {
+                                     // Only trigger if not dragging loop region
+                                     if (!isLoopSelecting) {
+                                       const beat = getBeatFromHeaderPosition(e.clientX);
+                                       if (beat !== null) {
+                                         const seekBeat = snapToGrid ? Math.round(beat / quantizeGrid) * quantizeGrid : beat;
+                                         onSeek?.(seekBeat);
+                                       }
+                                     }
+                                   }}
+                                   >
                                     <span className="text-white font-bold pointer-events-none relative z-10">
                                       {measureIndex + 1}
                                     </span>
