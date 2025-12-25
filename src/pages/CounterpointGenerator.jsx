@@ -1802,17 +1802,20 @@ export default function CounterpointGenerator() {
                         onClick={async () => {
                           await handleSaveProject(true);
                           setUnsavedChangesDialog(false);
+                          setHasUnsavedChanges(false);
                           
-                          // Execute pending action
+                          // Execute pending action after clearing unsaved flag
                           if (pendingAction) {
-                            if (pendingAction.type === 'loadSong') {
-                              handleLoadSong(pendingAction.data);
-                            } else if (pendingAction.type === 'loadProject') {
-                              handleLoadProject(pendingAction.data);
-                            } else if (pendingAction.type === 'newProject') {
-                              handleNewProject();
-                            }
-                            setPendingAction(null);
+                            setTimeout(() => {
+                              if (pendingAction.type === 'loadSong') {
+                                handleLoadSong(pendingAction.data);
+                              } else if (pendingAction.type === 'loadProject') {
+                                handleLoadProject(pendingAction.data);
+                              } else if (pendingAction.type === 'newProject') {
+                                handleNewProject();
+                              }
+                              setPendingAction(null);
+                            }, 50);
                           }
                         }}
                         className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
@@ -1824,17 +1827,19 @@ export default function CounterpointGenerator() {
                           setUnsavedChangesDialog(false);
                           setHasUnsavedChanges(false);
                           
-                          // Execute pending action without saving
-                          if (pendingAction) {
-                            if (pendingAction.type === 'loadSong') {
-                              handleLoadSong(pendingAction.data);
-                            } else if (pendingAction.type === 'loadProject') {
-                              handleLoadProject(pendingAction.data);
-                            } else if (pendingAction.type === 'newProject') {
-                              handleNewProject();
+                          // Execute pending action without saving after clearing unsaved flag
+                          setTimeout(() => {
+                            if (pendingAction) {
+                              if (pendingAction.type === 'loadSong') {
+                                handleLoadSong(pendingAction.data);
+                              } else if (pendingAction.type === 'loadProject') {
+                                handleLoadProject(pendingAction.data);
+                              } else if (pendingAction.type === 'newProject') {
+                                handleNewProject();
+                              }
+                              setPendingAction(null);
                             }
-                            setPendingAction(null);
-                          }
+                          }, 50);
                         }}
                         variant="outline"
                         className="border-[#3A3A3A] text-white hover:bg-[#3A3A3A]"
