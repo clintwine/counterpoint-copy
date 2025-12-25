@@ -348,7 +348,6 @@ export default function NoteGrid({
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
-  const [recentlyAddedNote, setRecentlyAddedNote] = useState(null); // Track recently added note for piano highlight
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -541,15 +540,8 @@ export default function NoteGrid({
       highlightedNotes.add(hoveredCell.pitch);
     }
     
-    // Highlight recently added note
-    if (recentlyAddedNote) {
-      console.log('[NoteGrid] Adding recentlyAddedNote to highlights:', recentlyAddedNote);
-      highlightedNotes.add(recentlyAddedNote);
-    }
-    
-    console.log('[NoteGrid] Calling onPressedNotesChange with:', Array.from(highlightedNotes));
     onPressedNotesChange(highlightedNotes);
-  }, [pendingNote, dragState, hoveredCell, tool, recentlyAddedNote, onPressedNotesChange, pitches]);
+  }, [pendingNote, dragState, hoveredCell, tool, onPressedNotesChange, pitches]);
 
 
   // Update viewport dimensions on mount and resize
@@ -1103,14 +1095,6 @@ export default function NoteGrid({
                 initAudio();
                 const instrument = voices[activeVoice]?.instrument || 'organ';
                 playNote(pitch, 0.5, 0.7, 0, instrument);
-                
-                // Highlight piano key briefly
-                console.log('[NoteGrid] Setting recentlyAddedNote to:', pitch);
-                setRecentlyAddedNote(pitch);
-                setTimeout(() => {
-                  console.log('[NoteGrid] Clearing recentlyAddedNote');
-                  setRecentlyAddedNote(null);
-                }, 800);
               }
               
               // Enable painting mode if paintMode is on
@@ -1194,10 +1178,6 @@ export default function NoteGrid({
                   initAudio();
                   const instrument = voices[activeVoice]?.instrument || 'organ';
                   playNote(cell.pitch, 0.5, 0.7, 0, instrument);
-                  
-                  // Highlight piano key briefly
-                  setRecentlyAddedNote(cell.pitch);
-                  setTimeout(() => setRecentlyAddedNote(null), 300);
                 }
               }
             }
@@ -1320,10 +1300,6 @@ export default function NoteGrid({
           initAudio();
           const instrument = voices[0]?.instrument || 'organ';
           playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
-          
-          // Highlight piano key briefly
-          setRecentlyAddedNote(pendingNote.pitch);
-          setTimeout(() => setRecentlyAddedNote(null), 300);
           } else {
           console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
           }

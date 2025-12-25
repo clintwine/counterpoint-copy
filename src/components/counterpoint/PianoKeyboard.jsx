@@ -208,7 +208,6 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
 }
 
 export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
-  console.log('[PianoKeyboard] Render with activeNotes:', activeNotes);
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
