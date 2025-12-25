@@ -201,29 +201,12 @@ export default function CounterpointGenerator() {
   // Load local instruments
   const [localInstruments, setLocalInstruments] = useState([]);
   
-  // N64-style electric guitar
-  const N64_ELECTRIC_GUITAR = {
-    id: 'builtin_n64_guitar',
-    name: 'N64 Electric Guitar',
-    oscillators: [
-      { waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 },
-      { waveform: 'square', detune: -3, gain: 0.4, harmonic: 2, phase: 90 },
-      { waveform: 'sawtooth', detune: 3, gain: 0.3, harmonic: 3, phase: 0 }
-    ],
-    envelope: { attack: 0.005, decay: 0.08, sustain: 0.65, release: 0.2 },
-    filter: { type: 'lowpass', frequency: 2800, Q: 2.5 },
-    distortion: 15,
-    lfo: { rate: 0, amount: 0, target: 'pitch' },
-    volume: 0.85,
-    isBuiltin: true
-  };
-  
   useEffect(() => {
     setLocalInstruments(loadLocalInstruments());
   }, []);
 
-  // Merge local and database instruments, prepend built-in N64 guitar
-  const savedInstruments = [N64_ELECTRIC_GUITAR, ...localInstruments, ...dbInstruments];
+  // Merge local and database instruments
+  const savedInstruments = [...localInstruments, ...dbInstruments];
 
   // Sync merged instruments to state
   useEffect(() => {
@@ -798,34 +781,16 @@ export default function CounterpointGenerator() {
         if (instrument.startsWith('preset_')) {
           const index = parseInt(instrument.split('_')[1]);
           const PRESET_LIBRARY = [
-            { oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 7, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
-            { oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 12, gain: 0.3, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
-            { oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
-            { oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
-            { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 700, gain: 0.3, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 1200, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
-            { oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
-            { oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
-            { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 }, { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+            { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+            { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+            { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+            { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+            { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+            { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+            { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+            { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
           ];
-          const preset = PRESET_LIBRARY[index];
-          if (!preset || !preset.oscillators || !Array.isArray(preset.oscillators) || preset.oscillators.length === 0) {
-            return null;
-          }
-          // Ensure all oscillators are valid objects
-          const validatedPreset = {
-            ...preset,
-            oscillators: preset.oscillators.filter(osc => osc && typeof osc === 'object').map(osc => ({
-              waveform: osc.waveform || 'sine',
-              detune: typeof osc.detune === 'number' ? osc.detune : 0,
-              gain: typeof osc.gain === 'number' ? osc.gain : 0.5,
-              harmonic: typeof osc.harmonic === 'number' ? osc.harmonic : 1,
-              phase: typeof osc.phase === 'number' ? osc.phase : 0
-            }))
-          };
-          return validatedPreset;
-        }
-        if (instrument === 'builtin_n64_guitar') {
-          return customInstruments.find(i => i.id === 'builtin_n64_guitar');
+          return PRESET_LIBRARY[index];
         }
         return null;
       };
@@ -1053,16 +1018,16 @@ export default function CounterpointGenerator() {
       if (instrument.startsWith('preset_')) {
         const index = parseInt(instrument.split('_')[1]);
         const PRESET_LIBRARY = [
-          { oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 7, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
-          { oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 12, gain: 0.3, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
-          { oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
-          { oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
-          { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 700, gain: 0.3, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 1200, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
-          { oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
-          { oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
-          { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 }, { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+          { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+          { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
         ];
-        return PRESET_LIBRARY[index] || null;
+        return PRESET_LIBRARY[index];
       }
       return null;
     };

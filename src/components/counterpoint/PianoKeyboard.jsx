@@ -73,8 +73,8 @@ const PRESET_LIBRARY = [
 {
   name: 'Warm Pad',
   oscillators: [
-  { waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1, phase: 0 },
-  { waveform: 'sawtooth', detune: 7, gain: 0.5, harmonic: 1, phase: 0 }],
+  { waveform: 'sawtooth', detune: 0, gain: 0.5 },
+  { waveform: 'sawtooth', detune: 7, gain: 0.5 }],
 
   envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
   filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
@@ -82,8 +82,8 @@ const PRESET_LIBRARY = [
 {
   name: 'Bright Lead',
   oscillators: [
-  { waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 },
-  { waveform: 'square', detune: 12, gain: 0.3, harmonic: 1, phase: 0 }],
+  { waveform: 'sawtooth', detune: 0, gain: 0.7 },
+  { waveform: 'square', detune: 12, gain: 0.3 }],
 
   envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
   filter: { type: 'lowpass', frequency: 4000, Q: 2 }
@@ -91,7 +91,7 @@ const PRESET_LIBRARY = [
 {
   name: 'Sub Bass',
   oscillators: [
-  { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
+  { waveform: 'sine', detune: 0, gain: 1.0 }],
 
   envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
   filter: { type: 'lowpass', frequency: 500, Q: 1 }
@@ -99,8 +99,8 @@ const PRESET_LIBRARY = [
 {
   name: 'Pluck',
   oscillators: [
-  { waveform: 'triangle', detune: 0, gain: 0.8, harmonic: 1, phase: 0 },
-  { waveform: 'square', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }],
+  { waveform: 'triangle', detune: 0, gain: 0.8 },
+  { waveform: 'square', detune: 0, gain: 0.2 }],
 
   envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
   filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
@@ -108,9 +108,9 @@ const PRESET_LIBRARY = [
 {
   name: 'Bell',
   oscillators: [
-  { waveform: 'sine', detune: 0, gain: 0.6, harmonic: 1, phase: 0 },
-  { waveform: 'sine', detune: 700, gain: 0.3, harmonic: 1, phase: 0 },
-  { waveform: 'sine', detune: 1200, gain: 0.1, harmonic: 1, phase: 0 }],
+  { waveform: 'sine', detune: 0, gain: 0.6 },
+  { waveform: 'sine', detune: 700, gain: 0.3 },
+  { waveform: 'sine', detune: 1200, gain: 0.1 }],
 
   envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
   filter: { type: 'highpass', frequency: 500, Q: 0.5 }
@@ -118,9 +118,9 @@ const PRESET_LIBRARY = [
 {
   name: 'Choir',
   oscillators: [
-  { waveform: 'sawtooth', detune: -5, gain: 0.4, harmonic: 1, phase: 0 },
-  { waveform: 'sawtooth', detune: 5, gain: 0.4, harmonic: 1, phase: 0 },
-  { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }],
+  { waveform: 'sawtooth', detune: -5, gain: 0.4 },
+  { waveform: 'sawtooth', detune: 5, gain: 0.4 },
+  { waveform: 'sine', detune: 0, gain: 0.2 }],
 
   envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
   filter: { type: 'bandpass', frequency: 1500, Q: 2 }
@@ -128,8 +128,8 @@ const PRESET_LIBRARY = [
 {
   name: 'Reese Bass',
   oscillators: [
-  { waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 },
-  { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }],
+  { waveform: 'sawtooth', detune: -10, gain: 0.5 },
+  { waveform: 'sawtooth', detune: 10, gain: 0.5 }],
 
   envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
   filter: { type: 'lowpass', frequency: 800, Q: 3 }
@@ -137,8 +137,8 @@ const PRESET_LIBRARY = [
 {
   name: 'Flutey',
   oscillators: [
-  { waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 },
-  { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }],
+  { waveform: 'sine', detune: 0, gain: 0.9 },
+  { waveform: 'triangle', detune: 0, gain: 0.1 }],
 
   envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
   filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
@@ -254,9 +254,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (instrument.startsWith('preset_')) {
       const index = parseInt(instrument.split('_')[1]);
       return PRESET_LIBRARY[index];
-    }
-    if (instrument === 'builtin_n64_guitar') {
-      return customInstruments.find(i => i.id === 'builtin_n64_guitar');
     }
     return null;
   }, [instrument, customInstruments]);
