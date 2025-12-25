@@ -70,16 +70,42 @@ const DEFAULT_INSTRUMENTS = [
   { value: 'synth', label: 'Synth' }];
 
 
-const PRESET_LIBRARY = [
-{
-  name: 'Warm Pad',
-  oscillators: [
-  { waveform: 'sawtooth', detune: 0, gain: 0.5 },
-  { waveform: 'sawtooth', detune: 7, gain: 0.5 }],
+// Built-in instrument configurations (same as WaveEditor)
+const BUILTIN_INSTRUMENTS = {
+  electricGuitar: {
+    name: 'Electric Guitar',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -8, gain: 0.7, harmonic: 1, phase: 0 },
+      { waveform: 'square', detune: 5, gain: 0.5, harmonic: 1, phase: 90 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2, phase: 0 }
+    ],
+    envelope: { attack: 0.005, decay: 0.15, sustain: 0.6, release: 0.25 },
+    effects: [
+      { type: 'filter', config: { filterType: 'lowpass', frequency: 3500, Q: 1.8 } }
+    ],
+    eq: [
+      { frequency: 60, gain: -2, Q: 1, type: 'lowshelf' },
+      { frequency: 250, gain: 1, Q: 1.5, type: 'peaking' },
+      { frequency: 1000, gain: 2, Q: 1, type: 'peaking' },
+      { frequency: 4000, gain: 3, Q: 1.2, type: 'peaking' },
+      { frequency: 12000, gain: -1, Q: 1, type: 'highshelf' }
+    ],
+    distortion: 5,
+    bitcrush: 2,
+    volume: 1
+  }
+};
 
-  envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
-  filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
-},
+const PRESET_LIBRARY = [
+  {
+    name: 'Warm Pad',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 7, gain: 0.5 }],
+
+    envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
+    filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
+  },
 {
   name: 'Bright Lead',
   oscillators: [
@@ -246,7 +272,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
 
 
-  // Get custom/preset instrument config if selected
+  // Get custom/preset/builtin instrument config if selected
   const getCustomConfig = useCallback(() => {
     if (instrument.startsWith('custom_')) {
       const index = parseInt(instrument.split('_')[1]);
@@ -255,6 +281,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     if (instrument.startsWith('preset_')) {
       const index = parseInt(instrument.split('_')[1]);
       return PRESET_LIBRARY[index];
+    }
+    // Check if it's a built-in instrument with custom config
+    if (BUILTIN_INSTRUMENTS[instrument]) {
+      return BUILTIN_INSTRUMENTS[instrument];
     }
     return null;
   }, [instrument, customInstruments]);
