@@ -1063,15 +1063,15 @@ export default function CounterpointGenerator() {
         }
         
         if (customConfig) {
-          // Use custom instrument playback
+          // Use custom instrument playback with articulation
           import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
-            playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, pitchBend);
+            playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, articulation, tempo, pitchBend);
           });
         } else {
           // Check if articulation is applied
           if (articulation !== 'normal') {
             import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-              playNoteWithArticulation(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, articulation, tempo);
+              playNoteWithArticulation(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, articulation, tempo, pitchBend);
             });
           } else {
             // Use built-in instrument
