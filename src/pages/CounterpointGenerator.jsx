@@ -2115,7 +2115,7 @@ export default function CounterpointGenerator() {
                               {showPianoPanel && !pianoPopout && (
                                 <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
                                   <PianoKeyboard
-                                    activeNotes={activeNotes}
+                                    activeNotes={[...activeNotes, ...Array.from(pressedPianoNotes).map(pitch => ({ pitch }))]}
                                     instrument={voices[0]?.instrument || 'organ'}
                                     onInstrumentChange={(inst) => {
                                       const newVoices = [...voices];
@@ -2192,7 +2192,7 @@ export default function CounterpointGenerator() {
             </div>
             <div className="p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
               <PianoKeyboard
-                activeNotes={activeNotes}
+                activeNotes={[...activeNotes, ...Array.from(pressedPianoNotes).map(pitch => ({ pitch }))]}
                 instrument={voices[0]?.instrument || 'organ'}
                 onInstrumentChange={(inst) => {
                   const newVoices = [...voices];
