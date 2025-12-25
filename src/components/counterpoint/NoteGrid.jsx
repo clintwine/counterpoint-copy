@@ -2178,8 +2178,8 @@ export default function NoteGrid({
                               style={{ 
                                 width: CELL_WIDTH, 
                                 height: CELL_HEIGHT,
-                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isSharpLine ? '#1E293B' : '#F5F5F5'),
-                                borderBottomColor: isSharpLine ? '#2D2D2D' : '#E0E0E0'
+                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323'),
+                                borderBottomColor: '#404040'
                               }}
                             >
                               {notesAtPosition.map(({ voiceIndex, note }) => {
