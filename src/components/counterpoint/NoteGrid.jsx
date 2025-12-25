@@ -2191,8 +2191,8 @@ export default function NoteGrid({
 
                                 if (isBeingDragged) return null;
 
-                                const isBlackKey = note.pitch.includes('#');
-                                const pianoColor = isBlackKey ? '#1E1E1E' : '#F5F5F5';
+                                const noteVelocity = note.velocity ?? 0.8;
+                                const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
                                 const noteInLoop = loopStart !== null && loopEnd !== null && note.beat >= loopStart && note.beat < loopEnd;
                                 
                                 return (
@@ -2336,13 +2336,13 @@ export default function NoteGrid({
                                       left: `${(note.beat - Math.floor(note.beat)) * CELL_WIDTH + 2}px`,
                                       width: noteWidth,
                                       minWidth: 20,
-                                      backgroundColor: pianoColor,
-                                      boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${pianoColor}` : undefined,
+                                      backgroundColor: velocityColor,
+                                      boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${velocityColor}` : undefined,
                                       cursor: resizeState ? 'ew-resize' : 'grab',
                                       zIndex: 5
                                     }}
                                     >
-                                    <span className={`text-[10px] font-bold pointer-events-none ${isBlackKey ? 'text-white' : 'text-slate-900'}`}>
+                                    <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
                                       {note.pitch.replace(/\d/, '')}
                                     </span>
                                     {((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (
@@ -2382,8 +2382,8 @@ export default function NoteGrid({
 
                                   const duration = note.duration || DEFAULT_DURATION;
                                   const noteWidth = duration * CELL_WIDTH - 4;
-                                  const isBlackKey = pitches[newPitchIdx].includes('#');
-                                  const pianoColor = isBlackKey ? '#1E1E1E' : '#F5F5F5';
+                                  const noteVelocity = note.velocity ?? 0.8;
+                                  const velocityColor = getVelocityColor(noteVelocity);
 
                                   return (
                                     <div
@@ -2394,11 +2394,11 @@ export default function NoteGrid({
                                         top: 28 + newPitchIdx * CELL_HEIGHT + 2,
                                         width: noteWidth,
                                         height: CELL_HEIGHT - 4,
-                                        backgroundColor: pianoColor,
+                                        backgroundColor: velocityColor,
                                         opacity: 0.8
                                       }}
                                     >
-                                      <span className={`text-[10px] font-bold ${isBlackKey ? 'text-white' : 'text-slate-900'}`}>
+                                      <span className="text-[10px] font-bold text-slate-900">
                                         {pitches[newPitchIdx].replace(/\d/, '')}
                                       </span>
                                     </div>
