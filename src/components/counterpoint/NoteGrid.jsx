@@ -1104,7 +1104,7 @@ export default function NoteGrid({
                 
                 // Highlight piano key briefly
                 setRecentlyAddedNote(pitch);
-                setTimeout(() => setRecentlyAddedNote(null), 300);
+                setTimeout(() => setRecentlyAddedNote(null), 800);
               }
               
               // Enable painting mode if paintMode is on
