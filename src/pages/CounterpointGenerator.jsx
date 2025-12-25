@@ -807,7 +807,25 @@ export default function CounterpointGenerator() {
             { oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
             { oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 }, { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
           ];
-          return PRESET_LIBRARY[index] || null;
+          const preset = PRESET_LIBRARY[index];
+          if (!preset || !preset.oscillators || !Array.isArray(preset.oscillators) || preset.oscillators.length === 0) {
+            return null;
+          }
+          // Ensure all oscillators are valid objects
+          const validatedPreset = {
+            ...preset,
+            oscillators: preset.oscillators.filter(osc => osc && typeof osc === 'object').map(osc => ({
+              waveform: osc.waveform || 'sine',
+              detune: typeof osc.detune === 'number' ? osc.detune : 0,
+              gain: typeof osc.gain === 'number' ? osc.gain : 0.5,
+              harmonic: typeof osc.harmonic === 'number' ? osc.harmonic : 1,
+              phase: typeof osc.phase === 'number' ? osc.phase : 0
+            }))
+          };
+          return validatedPreset;
+        }
+        if (instrument === 'builtin_n64_guitar') {
+          return customInstruments.find(i => i.id === 'builtin_n64_guitar');
         }
         return null;
       };
