@@ -1064,8 +1064,9 @@ export default function CounterpointGenerator() {
         
         if (customConfig) {
           // Use custom instrument playback with articulation
+          // Use raw velocity for power chord detection, then scale final volume
           import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
-            playNoteWithCustomInstrument(note.pitch, actualDuration, volume * Math.min(1, velocity * 1.2), customConfig, articulation, tempo, pitchBend);
+            playNoteWithCustomInstrument(note.pitch, actualDuration, Math.min(1, velocity * 1.2), customConfig, articulation, tempo, pitchBend);
           });
         } else {
           // Check if articulation is applied

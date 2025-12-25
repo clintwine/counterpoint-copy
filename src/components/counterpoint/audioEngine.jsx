@@ -602,6 +602,9 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig, pitch
   const filterEffect = effects?.find(e => e.type === 'filter');
   const filterConfig = filterEffect?.config || oldFilter || { filterType: 'lowpass', frequency: 2000, Q: 1 };
 
+  // Scale volume after power chord detection
+  const scaledVolume = volume * 0.8;
+
   const oscillators = [];
   const gainNode = audioContext.createGain();
   const filterNode = audioContext.createBiquadFilter();
