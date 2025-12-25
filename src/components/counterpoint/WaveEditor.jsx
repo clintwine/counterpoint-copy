@@ -349,6 +349,23 @@ export default function WaveEditor({
   const animationRef = useRef(null);
   const oscillatorsRef = useRef([]);
   const liveNoteIdRef = useRef(null);
+  const selectedBuiltinRef = useRef(null);
+  const selectedPresetRef = useRef(null);
+  const selectedCustomRef = useRef(null);
+
+  useEffect(() => {
+    if (libraryOpen) {
+      setTimeout(() => {
+        if (editingBuiltin && selectedBuiltinRef.current) {
+          selectedBuiltinRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } else if (editingIndex >= 0 && selectedCustomRef.current) {
+          selectedCustomRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } else if (selectedPresetRef.current) {
+          selectedPresetRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      }, 50);
+    }
+  }, [libraryOpen, editingBuiltin, editingIndex]);
 
   // Draw waveform visualization
   const drawWaveform = useCallback(() => {
@@ -1312,24 +1329,6 @@ export default function WaveEditor({
           <div className="space-y-2.5">
             <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <div className="grid grid-cols-4 gap-3">
-              const selectedBuiltinRef = useRef(null);
-              const selectedPresetRef = useRef(null);
-              const selectedCustomRef = useRef(null);
-
-              useEffect(() => {
-                if (libraryOpen) {
-                  setTimeout(() => {
-                    if (editingBuiltin && selectedBuiltinRef.current) {
-                      selectedBuiltinRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    } else if (editingIndex >= 0 && selectedCustomRef.current) {
-                      selectedCustomRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    } else if (selectedPresetRef.current) {
-                      selectedPresetRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    }
-                  }, 50);
-                }
-              }, [libraryOpen]);
-
               {/* Existing oscillators */}
               {instrument.oscillators.map((osc, i) => (
                 <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
