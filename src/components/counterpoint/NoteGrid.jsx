@@ -1921,7 +1921,7 @@ export default function NoteGrid({
                                                                                                     playNote(pitch, 0.5, 0.7, 0, pianoInstrument);
                                                                                                   }}
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
-                                                                              isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-amber-400 font-semibold' : isSharp ? 'text-white/50' : 'text-white/80'
+                                                                              isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-slate-900 font-semibold' : isSharp ? 'text-white/50' : 'text-slate-900'
                                                                             }`}
                                                                             style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? '#D4A574' : isSharp ? '#1E293B' : '#F5F5F5' }}
                                                                           >
