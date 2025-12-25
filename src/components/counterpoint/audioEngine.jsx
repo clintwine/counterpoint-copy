@@ -793,6 +793,50 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
       }, graceDuration * 1000);
       return null;
       
+    case 'tremolo-slow':
+      // 8th note tremolo picking (2 beats per note)
+      const tremoloSlow = sixteenthNoteDuration * 2;
+      const numSlowNotes = Math.floor(duration / tremoloSlow);
+      for (let i = 0; i < numSlowNotes; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloSlow * 0.9, volume * 0.9, voiceIndex, instrument, pitchBend);
+        }, i * tremoloSlow * 1000);
+      }
+      return null;
+      
+    case 'tremolo-medium':
+      // 16th note tremolo picking (1 beat per note)
+      const tremoloMed = sixteenthNoteDuration;
+      const numMedNotes = Math.floor(duration / tremoloMed);
+      for (let i = 0; i < numMedNotes; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloMed * 0.9, volume * 0.85, voiceIndex, instrument, pitchBend);
+        }, i * tremoloMed * 1000);
+      }
+      return null;
+      
+    case 'tremolo-fast':
+      // 32nd note tremolo picking (0.5 beats per note)
+      const tremoloFast = sixteenthNoteDuration * 0.5;
+      const numFastNotes = Math.floor(duration / tremoloFast);
+      for (let i = 0; i < numFastNotes; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloFast * 0.9, volume * 0.8, voiceIndex, instrument, pitchBend);
+        }, i * tremoloFast * 1000);
+      }
+      return null;
+      
+    case 'tremolo-ultra':
+      // 64th note tremolo picking (0.25 beats per note)
+      const tremoloUltra = sixteenthNoteDuration * 0.25;
+      const numUltraNotes = Math.floor(duration / tremoloUltra);
+      for (let i = 0; i < numUltraNotes; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloUltra * 0.9, volume * 0.75, voiceIndex, instrument, pitchBend);
+        }, i * tremoloUltra * 1000);
+      }
+      return null;
+      
     default:
       return playNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
   }
