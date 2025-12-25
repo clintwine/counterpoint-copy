@@ -802,18 +802,17 @@ export default function NoteGrid({
     // Calculate actual duration based on note duration and tempo
     const sixteenthNoteDuration = (60 / tempo) / 4;
     const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
-    const velocity = note?.velocity ?? 0.7;
     
     // Use custom instrument if available
     if (customConfig) {
-      playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig);
+      playNoteWithCustomInstrument(pitch, actualDuration, 0.7, customConfig);
     } else if (note?.articulation && note.articulation !== 'normal') {
       // Use articulation if present
       import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-        playNoteWithArticulation(pitch, actualDuration, velocity, 0, instrument, note.articulation, tempo, pitchBend);
+        playNoteWithArticulation(pitch, actualDuration, 0.7, 0, instrument, note.articulation, tempo, pitchBend);
       });
     } else {
-      playNote(pitch, actualDuration, velocity, 0, instrument, pitchBend);
+      playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
     }
   }, [voices, activeVoice, tempo, customInstruments, getInstrumentConfig]);
 
@@ -2842,10 +2841,6 @@ export default function NoteGrid({
                       { value: 'accent', label: 'Accent', desc: 'Emphasized' },
                       { value: 'trill', label: 'Trill', desc: 'Rapid alternation' },
                       { value: 'grace', label: 'Grace Note', desc: 'Quick ornament' },
-                      { value: 'tremolo-slow', label: 'Tremolo (Slow)', desc: '8th note picking' },
-                      { value: 'tremolo-medium', label: 'Tremolo (Medium)', desc: '16th note picking' },
-                      { value: 'tremolo-fast', label: 'Tremolo (Fast)', desc: '32nd note picking' },
-                      { value: 'tremolo-ultra', label: 'Tremolo (Ultra)', desc: '64th note picking' },
                     ].map((style) => (
                       <DropdownMenuItem
                         key={style.value}
