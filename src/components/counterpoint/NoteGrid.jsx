@@ -1165,9 +1165,7 @@ export default function NoteGrid({
                 }
                 
                 // Play the note with proper duration for feedback
-                initAudio();
-                const instrument = voices[activeVoice]?.instrument || 'organ';
-                playNote(pitch, 0.5, 0.7, 0, instrument);
+                playNoteSound(pitch);
               }
               
               // Enable painting mode if paintMode is on
@@ -1248,9 +1246,7 @@ export default function NoteGrid({
                   }
                   
                   // Play the note with proper duration for feedback
-                  initAudio();
-                  const instrument = voices[activeVoice]?.instrument || 'organ';
-                  playNote(cell.pitch, 0.5, 0.7, 0, instrument);
+                  playNoteSound(cell.pitch);
                 }
               }
             }
@@ -1370,9 +1366,7 @@ export default function NoteGrid({
           }
 
           // Play the note with proper duration for feedback
-          initAudio();
-          const instrument = voices[0]?.instrument || 'organ';
-          playNote(pendingNote.pitch, 0.5, 0.7, 0, instrument);
+          playNoteSound(pendingNote.pitch);
           } else {
           console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
           }
