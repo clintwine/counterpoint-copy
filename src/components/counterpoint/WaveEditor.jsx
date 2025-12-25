@@ -1147,7 +1147,7 @@ export default function WaveEditor({
                               </CommandGroup>
                               </>
                               )}
-                </CommandList>
+                              </CommandList>
               </Command>
             </PopoverContent>
             </Popover>
