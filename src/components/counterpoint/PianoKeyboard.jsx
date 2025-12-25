@@ -178,6 +178,15 @@ const FULL_PIANO_OCTAVES = [0, 1, 2, 3, 4, 5, 6, 7];
 function InstrumentSelect({ value, onChange, instruments, onCreateNew, customInstruments = [], onPreview }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find((i) => i.value === value);
+  const selectedItemRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (open && selectedItemRef.current) {
+      setTimeout(() => {
+        selectedItemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+      }, 0);
+    }
+  }, [open]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -207,6 +216,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
               <CommandItem
                 key={inst.value}
                 value={inst.label}
+                ref={inst.value === value ? selectedItemRef : null}
                 onSelect={() => {
                   onChange(inst.value);
                   setOpen(false);
