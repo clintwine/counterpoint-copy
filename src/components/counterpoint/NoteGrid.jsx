@@ -1439,14 +1439,36 @@ export default function NoteGrid({
         paintedNotesRef.current.clear();
 
         if (resizeState) {
-          // Save to history after resize and update last duration
-          const resizedNote = cantusFirmus.find(n => resizeState.startDurations[getNoteKey(n.pitch, n.beat)] !== undefined);
-          if (resizedNote) {
-            setLastNoteDuration(resizedNote.duration || DEFAULT_DURATION);
+        // Save to history after resize and update last duration
+        // Update selection keys if beat positions changed (left edge resize)
+        if (resizeState.edge === 'left') {
+        const newSelectedKeys = new Set();
+        cantusFirmus.forEach(n => {
+          const oldKey = Object.keys(resizeState.startDurations).find(key => {
+            const startData = resizeState.startDurations[key];
+            const [pitch] = key.split('-');
+            return n.pitch === pitch && Math.abs(n.beat - startData.beat) < 0.5;
+          });
+          if (oldKey) {
+            newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
           }
-          saveToHistory(cantusFirmus);
-          setResizeState(null);
-          return;
+        });
+        if (newSelectedKeys.size > 0) {
+          setSelectedNotes(newSelectedKeys);
+        }
+        }
+
+        const resizedNote = cantusFirmus.find(n => {
+        return Object.values(resizeState.startDurations).some(data => 
+          Math.abs(n.beat - data.beat) < 0.5 || selectedNotes.has(getNoteKey(n.pitch, n.beat))
+        );
+        });
+        if (resizedNote) {
+        setLastNoteDuration(resizedNote.duration || DEFAULT_DURATION);
+        }
+        saveToHistory(cantusFirmus);
+        setResizeState(null);
+        return;
         }
     
     if (marquee) {
