@@ -2236,10 +2236,12 @@ export default function NoteGrid({
                                     {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
                                       const beat = measureStartBeat + beatIndex;
                                       const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+                                      const isLoopStart = loopStart !== null && beat === Math.floor(loopStart);
+                                      const isLoopEnd = loopEnd !== null && beat === Math.floor(loopEnd) - 1;
                                       return (
                                         <div
                                           key={`bg-${beatIndex}`}
-                                          className="absolute top-0 bottom-0 pointer-events-none"
+                                          className={`absolute top-0 bottom-0 pointer-events-none ${isLoopStart || isLoopEnd ? 'hover:cursor-col-resize' : ''}`}
                                           style={{
                                             left: `${beatIndex * CELL_WIDTH}px`,
                                             width: `${CELL_WIDTH}px`,
@@ -2248,6 +2250,30 @@ export default function NoteGrid({
                                         />
                                       );
                                     })}
+                                    
+                                    {/* Loop edge indicators with resize cursors */}
+                                    {loopStart !== null && loopEnd !== null && (
+                                      <>
+                                        {/* Left edge resize indicator */}
+                                        {Math.floor(loopStart) >= measureStartBeat && Math.floor(loopStart) < measureStartBeat + beatsPerMeasure && (
+                                          <div
+                                            className="absolute top-0 bottom-0 w-1 bg-amber-600/60 hover:bg-amber-500 transition-colors pointer-events-auto cursor-col-resize z-20"
+                                            style={{
+                                              left: `${(Math.floor(loopStart) - measureStartBeat) * CELL_WIDTH}px`
+                                            }}
+                                          />
+                                        )}
+                                        {/* Right edge resize indicator */}
+                                        {Math.floor(loopEnd) - 1 >= measureStartBeat && Math.floor(loopEnd) - 1 < measureStartBeat + beatsPerMeasure && (
+                                          <div
+                                            className="absolute top-0 bottom-0 w-1 bg-amber-600/60 hover:bg-amber-500 transition-colors pointer-events-auto cursor-col-resize z-20"
+                                            style={{
+                                              left: `${(Math.floor(loopEnd) - measureStartBeat) * CELL_WIDTH - 1}px`
+                                            }}
+                                          />
+                                        )}
+                                      </>
+                                    )}
 
                                     {/* Ruler tick marks */}
                                     {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
