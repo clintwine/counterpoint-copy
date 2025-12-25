@@ -196,7 +196,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
-        <Command className="bg-slate-800">
+        <Command className="bg-slate-800" value={selected?.label || ''}>
           <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
           <CommandList>
             <CommandEmpty className="text-white/50 text-xs py-2 text-center">
