@@ -1015,14 +1015,24 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
 export function stopNoteSustain(oscillatorObj, release = 0.3) {
   if (!oscillatorObj || !audioContext) return;
   
+  // Handle case where oscillatorObj might not have the expected structure
+  if (!oscillatorObj.gainNode || !oscillatorObj.oscillators) {
+    console.warn('[AudioEngine] stopNoteSustain received invalid object:', oscillatorObj);
+    return;
+  }
+  
   const { oscillators, gainNode } = oscillatorObj;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   const releaseEndTime = Math.max(now + 0.01, now + release);
   
   // Release envelope
-  gainNode.gain.cancelScheduledValues(now);
-  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
+  try {
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
+  } catch (e) {
+    console.warn('[AudioEngine] Error setting release envelope:', e);
+  }
   
   // Stop oscillators after release
   setTimeout(() => {
