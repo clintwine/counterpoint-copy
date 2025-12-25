@@ -428,6 +428,17 @@ const INSTRUMENT_CONFIGS = {
     filterFreq: 5500,
     filterQ: 1.5,
     distortion: 0
+  },
+  electricGuitar: {
+    oscillators: [
+      { waveform: 'sawtooth', detune: -8, gain: 0.7, harmonic: 1, phase: 0 },
+      { waveform: 'square', detune: 5, gain: 0.5, harmonic: 1, phase: 90 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2, phase: 0 }
+    ],
+    attack: 0.005,
+    filterFreq: 3500,
+    filterQ: 1.8,
+    distortion: 5
   }
 };
 
