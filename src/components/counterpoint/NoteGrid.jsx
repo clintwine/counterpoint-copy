@@ -803,11 +803,10 @@ export default function NoteGrid({
     const sixteenthNoteDuration = (60 / tempo) / 4;
     const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
     const velocity = note?.velocity ?? 0.7;
-    const articulation = note?.articulation || 'normal';
     
     // Use custom instrument if available
     if (customConfig) {
-      playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig, pitchBend, articulation, tempo);
+      playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig);
     } else if (note?.articulation && note.articulation !== 'normal') {
       // Use articulation if present
       import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
@@ -2683,17 +2682,10 @@ export default function NoteGrid({
                       initAudio();
                       const instrument = voices[0]?.instrument || 'organ';
                       const customConfig = getInstrumentConfig(instrument);
-                      const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
-                      const pitchBend = hasBend ? {
-                        start: firstSelected.bendStart ?? 0,
-                        end: firstSelected.bendEnd ?? 0,
-                        startTime: firstSelected.bendStartTime ?? 0,
-                        endTime: firstSelected.bendEndTime ?? 1
-                      } : 0;
                       if (customConfig) {
-                        playNoteWithCustomInstrument(firstSelected.pitch, 0.5, value / 125, customConfig, pitchBend, firstSelected.articulation, tempo);
+                        playNoteWithCustomInstrument(firstSelected.pitch, 0.5, value / 125, customConfig);
                       } else {
-                        playNote(firstSelected.pitch, 0.5, value / 125, 0, instrument, pitchBend);
+                        playNote(firstSelected.pitch, 0.5, value / 125, 0, instrument);
                       }
                     }
                   }}
@@ -2783,7 +2775,7 @@ export default function NoteGrid({
                             const sixteenthNoteDuration = (60 / tempo) / 4;
                             const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                             if (customConfig) {
-                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, pitchBend, firstSelected.articulation, tempo);
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
                             } else {
                               playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
                             }
@@ -2808,7 +2800,7 @@ export default function NoteGrid({
                               const sixteenthNoteDuration = (60 / tempo) / 4;
                               const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                               if (customConfig) {
-                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, pitchBend, firstSelected.articulation, tempo);
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
                               } else {
                                 playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
                               }
@@ -2883,7 +2875,7 @@ export default function NoteGrid({
                             } : 0;
                             
                             if (customConfig) {
-                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, pitchBend, style.value, tempo);
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
                             } else {
                               import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
                                 playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
@@ -2915,7 +2907,7 @@ export default function NoteGrid({
                               } : 0;
                               
                               if (customConfig) {
-                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, pitchBend, style.value, tempo);
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
                               } else {
                                 import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
                                   playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
