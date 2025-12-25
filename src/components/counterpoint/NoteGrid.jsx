@@ -144,13 +144,30 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
       console.log('[NoteGrid InstrumentSelect] Current value:', value);
       console.log('[NoteGrid InstrumentSelect] Selected item:', selected);
       
-      if (selectedItemRef.current) {
+      // Wait for CommandList to render, then check multiple times
+      const scrollToSelected = () => {
+        console.log('[NoteGrid InstrumentSelect] Checking ref:', selectedItemRef.current);
+        if (selectedItemRef.current) {
+          console.log('[NoteGrid InstrumentSelect] Scrolling to selected item NOW');
+          selectedItemRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          return true;
+        }
+        return false;
+      };
+      
+      // Try immediately
+      if (!scrollToSelected()) {
+        // Try after 50ms
         setTimeout(() => {
-          console.log('[NoteGrid InstrumentSelect] Scrolling to selected item');
-          selectedItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        }, 100);
-      } else {
-        console.log('[NoteGrid InstrumentSelect] No selected item ref found');
+          if (!scrollToSelected()) {
+            // Try after 150ms
+            setTimeout(() => {
+              if (!scrollToSelected()) {
+                console.log('[NoteGrid InstrumentSelect] Failed to find selected item after 250ms');
+              }
+            }, 100);
+          }
+        }, 50);
       }
     }
   }, [open, value]);
