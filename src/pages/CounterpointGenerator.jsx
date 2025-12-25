@@ -2131,7 +2131,10 @@ export default function CounterpointGenerator() {
                                         setVoices(newVoices);
                                       }
                                     }}
-                                    onPressedNotesChange={setPressedPianoNotes}
+                                    onPressedNotesChange={(notes) => {
+                                      console.log('[CounterpointGenerator] Received pressedPianoNotes update:', Array.from(notes));
+                                      setPressedPianoNotes(notes);
+                                    }}
                                     onPopOut={() => setPianoPopout(true)}
                                     onNotePress={handleNotePress}
                                     effects={effects}

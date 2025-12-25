@@ -543,9 +543,11 @@ export default function NoteGrid({
     
     // Highlight recently added note
     if (recentlyAddedNote) {
+      console.log('[NoteGrid] Adding recentlyAddedNote to highlights:', recentlyAddedNote);
       highlightedNotes.add(recentlyAddedNote);
     }
     
+    console.log('[NoteGrid] Calling onPressedNotesChange with:', Array.from(highlightedNotes));
     onPressedNotesChange(highlightedNotes);
   }, [pendingNote, dragState, hoveredCell, tool, recentlyAddedNote, onPressedNotesChange, pitches]);
 
@@ -1103,8 +1105,12 @@ export default function NoteGrid({
                 playNote(pitch, 0.5, 0.7, 0, instrument);
                 
                 // Highlight piano key briefly
+                console.log('[NoteGrid] Setting recentlyAddedNote to:', pitch);
                 setRecentlyAddedNote(pitch);
-                setTimeout(() => setRecentlyAddedNote(null), 800);
+                setTimeout(() => {
+                  console.log('[NoteGrid] Clearing recentlyAddedNote');
+                  setRecentlyAddedNote(null);
+                }, 800);
               }
               
               // Enable painting mode if paintMode is on
