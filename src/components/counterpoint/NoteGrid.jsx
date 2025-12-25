@@ -2680,7 +2680,12 @@ export default function NoteGrid({
                     if (firstSelected) {
                       initAudio();
                       const instrument = voices[0]?.instrument || 'organ';
-                      playNote(firstSelected.pitch, 0.5, value / 125, 0, instrument);
+                      const customConfig = getInstrumentConfig(instrument);
+                      if (customConfig) {
+                        playNoteWithCustomInstrument(firstSelected.pitch, 0.5, value / 125, customConfig);
+                      } else {
+                        playNote(firstSelected.pitch, 0.5, value / 125, 0, instrument);
+                      }
                     }
                   }}
                   min={25}
@@ -2759,6 +2764,7 @@ export default function NoteGrid({
                           if (firstSelected) {
                             initAudio();
                             const instrument = voices[0]?.instrument || 'organ';
+                            const customConfig = getInstrumentConfig(instrument);
                             const pitchBend = {
                               start: bendType.start,
                               end: bendType.end,
@@ -2767,7 +2773,11 @@ export default function NoteGrid({
                             };
                             const sixteenthNoteDuration = (60 / tempo) / 4;
                             const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                            playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+                            if (customConfig) {
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
+                            } else {
+                              playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
+                            }
                           }
                         }}
                       >
@@ -2779,6 +2789,7 @@ export default function NoteGrid({
                             if (firstSelected) {
                               initAudio();
                               const instrument = voices[0]?.instrument || 'organ';
+                              const customConfig = getInstrumentConfig(instrument);
                               const pitchBend = {
                                 start: bendType.start,
                                 end: bendType.end,
@@ -2787,7 +2798,11 @@ export default function NoteGrid({
                               };
                               const sixteenthNoteDuration = (60 / tempo) / 4;
                               const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
-                              playNote(firstSelected.pitch, actualDuration, 0.7, 0, instrument, pitchBend);
+                              if (customConfig) {
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
+                              } else {
+                                playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
+                              }
                             }
                           }}
                           className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
@@ -2843,6 +2858,7 @@ export default function NoteGrid({
                           if (firstSelected) {
                             initAudio();
                             const instrument = voices[0]?.instrument || 'organ';
+                            const customConfig = getInstrumentConfig(instrument);
                             const sixteenthNoteDuration = (60 / tempo) / 4;
                             const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                             const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
@@ -2852,9 +2868,14 @@ export default function NoteGrid({
                               startTime: firstSelected.bendStartTime ?? 0,
                               endTime: firstSelected.bendEndTime ?? 1
                             } : 0;
-                            import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-                              playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo, pitchBend);
-                            });
+                            
+                            if (customConfig) {
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
+                            } else {
+                              import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                                playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
+                              });
+                            }
                           }
                         }}
                       >
@@ -2869,6 +2890,7 @@ export default function NoteGrid({
                             if (firstSelected) {
                               initAudio();
                               const instrument = voices[0]?.instrument || 'organ';
+                              const customConfig = getInstrumentConfig(instrument);
                               const sixteenthNoteDuration = (60 / tempo) / 4;
                               const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                               const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
@@ -2878,9 +2900,14 @@ export default function NoteGrid({
                                 startTime: firstSelected.bendStartTime ?? 0,
                                 endTime: firstSelected.bendEndTime ?? 1
                               } : 0;
-                              import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-                                playNoteWithArticulation(firstSelected.pitch, actualDuration, 0.7, 0, instrument, style.value, tempo, pitchBend);
-                              });
+                              
+                              if (customConfig) {
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
+                              } else {
+                                import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                                  playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
+                                });
+                              }
                             }
                           }}
                           className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
