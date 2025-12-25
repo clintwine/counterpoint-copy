@@ -1018,11 +1018,14 @@ export default function WaveEditor({
                   
                   {/* Built-in Instruments */}
                   <CommandGroup heading="Built-in Instruments">
-                    {Object.entries(BUILTIN_INSTRUMENTS).map(([key, config]) => (
-                      <CommandItem
-                        key={`builtin-${key}`}
-                        value={config.name}
-                        onSelect={() => {
+                    {Object.entries(BUILTIN_INSTRUMENTS).map(([key, config]) => {
+                      const isSelected = editingBuiltin === key;
+                      return (
+                        <CommandItem
+                          key={`builtin-${key}`}
+                          value={config.name}
+                          ref={isSelected ? selectedBuiltinRef : null}
+                          onSelect={() => {
                           const loadedInstrument = {
                             ...DEFAULT_INSTRUMENT,
                             ...config,
@@ -1055,11 +1058,14 @@ export default function WaveEditor({
                   
                   {/* Presets */}
                   <CommandGroup heading="Presets">
-                    {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY).map((preset, i) => (
-                      <CommandItem
-                        key={`preset-${i}`}
-                        value={preset.name}
-                        onSelect={() => {
+                    {(presetLibrary.length > 0 ? presetLibrary : PRESET_LIBRARY).map((preset, i) => {
+                      const isSelected = instrument.name === preset.name && editingIndex < 0 && !editingBuiltin;
+                      return (
+                        <CommandItem
+                          key={`preset-${i}`}
+                          value={preset.name}
+                          ref={isSelected ? selectedPresetRef : null}
+                          onSelect={() => {
                           setInstrument({ ...preset });
                           setEditingIndex(-1);
                           setEditingBuiltin(null);
@@ -1094,11 +1100,14 @@ export default function WaveEditor({
                     <>
                       <CommandSeparator />
                       <CommandGroup heading="Custom">
-                        {customInstruments.map((inst, i) => (
-                          <CommandItem
-                            key={`custom-${i}`}
-                            value={inst.name}
-                            onSelect={() => {
+                        {customInstruments.map((inst, i) => {
+                          const isSelected = editingIndex === i;
+                          return (
+                            <CommandItem
+                              key={`custom-${i}`}
+                              value={inst.name}
+                              ref={isSelected ? selectedCustomRef : null}
+                              onSelect={() => {
                               loadInstrument(inst, i);
                               setLibraryOpen(false);
                             }}
@@ -1114,12 +1123,13 @@ export default function WaveEditor({
                               title="Preview"
                             >
                               ▶
-                            </button>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </>
-                  )}
+                              </button>
+                              </CommandItem>
+                              );
+                              })}
+                              </CommandGroup>
+                              </>
+                              )}
                 </CommandList>
               </Command>
             </PopoverContent>
@@ -1302,6 +1312,24 @@ export default function WaveEditor({
           <div className="space-y-2.5">
             <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
             <div className="grid grid-cols-4 gap-3">
+              const selectedBuiltinRef = useRef(null);
+              const selectedPresetRef = useRef(null);
+              const selectedCustomRef = useRef(null);
+
+              useEffect(() => {
+                if (libraryOpen) {
+                  setTimeout(() => {
+                    if (editingBuiltin && selectedBuiltinRef.current) {
+                      selectedBuiltinRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    } else if (editingIndex >= 0 && selectedCustomRef.current) {
+                      selectedCustomRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    } else if (selectedPresetRef.current) {
+                      selectedPresetRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    }
+                  }, 50);
+                }
+              }, [libraryOpen]);
+
               {/* Existing oscillators */}
               {instrument.oscillators.map((osc, i) => (
                 <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">

@@ -183,8 +183,8 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
   React.useEffect(() => {
     if (open && selectedItemRef.current) {
       setTimeout(() => {
-        selectedItemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'auto' });
-      }, 0);
+        selectedItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, 50);
     }
   }, [open]);
 
@@ -212,31 +212,35 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
               No instrument found.
             </CommandEmpty>
             <CommandGroup>
-              {instruments.map((inst) =>
-              <CommandItem
-                key={inst.value}
-                value={inst.label}
-                ref={inst.value === value ? selectedItemRef : null}
-                onSelect={() => {
-                  onChange(inst.value);
-                  setOpen(false);
-                }}
-                className="text-white text-xs cursor-pointer flex items-center justify-between group">
+              {instruments.map((inst) => {
+                const isSelected = inst.value === value;
+                return (
+                  <CommandItem
+                    key={inst.value}
+                    value={inst.label}
+                    ref={isSelected ? selectedItemRef : null}
+                    onSelect={() => {
+                      onChange(inst.value);
+                      setOpen(false);
+                    }}
+                    className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                  >
 
                   <span>{inst.label}</span>
                   <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onPreview) onPreview(inst.value);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                  title="Preview sound">
-
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onPreview) onPreview(inst.value);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                    title="Preview sound"
+                  >
                     ▶
                   </button>
-                </CommandItem>
-              )}
-            </CommandGroup>
+                  </CommandItem>
+                  );
+                  })}
+                  </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
