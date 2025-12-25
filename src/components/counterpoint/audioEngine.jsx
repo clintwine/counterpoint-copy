@@ -461,6 +461,31 @@ export function getCustomInstruments() {
 export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
   if (!audioContext) initAudio();
   
+  // Electric guitar velocity-based variations for custom instruments
+  if (customConfig.name === 'Electric Guitar') {
+    if (volume >= 0.95) {
+      // Maximum velocity - aggressive power chord
+      const chordPitches = getPowerChordPitches(pitch);
+      chordPitches.forEach((chordPitch, i) => {
+        playSingleCustomNote(chordPitch, duration, volume * (1 - i * 0.1), customConfig);
+      });
+      return;
+    } else if (volume <= 0.32) {
+      // Low velocity - muted power chord
+      const mutedConfig = { ...customConfig, distortion: 0 };
+      const chordPitches = getPowerChordPitches(pitch);
+      chordPitches.forEach((chordPitch, i) => {
+        playSingleCustomNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), mutedConfig);
+      });
+      return;
+    }
+  }
+  
+  // Default single note
+  return playSingleCustomNote(pitch, duration, volume, customConfig);
+}
+
+async function playSingleCustomNote(pitch, duration, volume, customConfig) {
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
 
@@ -773,6 +798,27 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
   }
 }
 
+// Helper to get power chord pitches (root, fifth, octave)
+function getPowerChordPitches(rootPitch) {
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const match = rootPitch.match(/^([A-G]#?)(\d+)$/);
+  if (!match) return [rootPitch];
+  
+  const [, note, octave] = match;
+  const rootIndex = notes.indexOf(note);
+  const octaveNum = parseInt(octave);
+  
+  // Fifth is 7 semitones up
+  const fifthIndex = (rootIndex + 7) % 12;
+  const fifthOctave = rootIndex + 7 >= 12 ? octaveNum + 1 : octaveNum;
+  const fifth = notes[fifthIndex] + fifthOctave;
+  
+  // Octave is 12 semitones up
+  const octaveUp = note + (octaveNum + 1);
+  
+  return [rootPitch, fifth, octaveUp];
+}
+
 export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0) {
   if (!audioContext) initAudio();
   
@@ -782,6 +828,31 @@ export function playNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, in
     // Don't return, allow it to play anyway for musical integrity
   }
   
+  // Electric guitar velocity-based variations
+  if (instrument === 'electricGuitar') {
+    if (volume >= 0.95) {
+      // Maximum velocity - aggressive power chord
+      const chordPitches = getPowerChordPitches(pitch);
+      chordPitches.forEach((chordPitch, i) => {
+        playSingleNote(chordPitch, duration, volume * (1 - i * 0.1), voiceIndex, instrument, pitchBend);
+      });
+      return;
+    } else if (volume <= 0.32) {
+      // Low velocity - muted power chord
+      const chordPitches = getPowerChordPitches(pitch);
+      const mutedConfig = { ...INSTRUMENT_CONFIGS.electricGuitar, distortion: 0 };
+      chordPitches.forEach((chordPitch, i) => {
+        playSingleNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), voiceIndex, instrument, pitchBend, mutedConfig);
+      });
+      return;
+    }
+  }
+  
+  // Default single note playback
+  return playSingleNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
+}
+
+function playSingleNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, instrument = 'organ', pitchBend = 0, configOverride = null) {
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
   
