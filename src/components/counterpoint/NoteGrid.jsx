@@ -9,7 +9,7 @@ import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { initAudio, playNote, getAnalyser } from './audioEngine';
+import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 import toast from 'react-hot-toast';
 
@@ -120,16 +120,83 @@ const DEFAULT_INSTRUMENTS = [
   { value: 'synth', label: 'Synth' },
 ];
 
-const PRESET_LIBRARY = [
-  { value: 'preset_0', label: 'Warm Pad' },
-  { value: 'preset_1', label: 'Bright Lead' },
-  { value: 'preset_2', label: 'Sub Bass' },
-  { value: 'preset_3', label: 'Pluck' },
-  { value: 'preset_4', label: 'Bell' },
-  { value: 'preset_5', label: 'Choir' },
-  { value: 'preset_6', label: 'Reese Bass' },
-  { value: 'preset_7', label: 'Flutey' },
+const PRESET_LIBRARY_CONFIGS = [
+  {
+    name: 'Warm Pad',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 7, gain: 0.5 }
+    ],
+    envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
+    filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
+  },
+  {
+    name: 'Bright Lead',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.7 },
+      { waveform: 'square', detune: 12, gain: 0.3 }
+    ],
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 4000, Q: 2 }
+  },
+  {
+    name: 'Sub Bass',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 1.0 }
+    ],
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
+    filter: { type: 'lowpass', frequency: 500, Q: 1 }
+  },
+  {
+    name: 'Pluck',
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.8 },
+      { waveform: 'square', detune: 0, gain: 0.2 }
+    ],
+    envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
+  },
+  {
+    name: 'Bell',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.6 },
+      { waveform: 'sine', detune: 700, gain: 0.3 },
+      { waveform: 'sine', detune: 1200, gain: 0.1 }
+    ],
+    envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
+    filter: { type: 'highpass', frequency: 500, Q: 0.5 }
+  },
+  {
+    name: 'Choir',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.4 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.4 },
+      { waveform: 'sine', detune: 0, gain: 0.2 }
+    ],
+    envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
+    filter: { type: 'bandpass', frequency: 1500, Q: 2 }
+  },
+  {
+    name: 'Reese Bass',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -10, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 10, gain: 0.5 }
+    ],
+    envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
+    filter: { type: 'lowpass', frequency: 800, Q: 3 }
+  },
+  {
+    name: 'Flutey',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.9 },
+      { waveform: 'triangle', detune: 0, gain: 0.1 }
+    ],
+    envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
+    filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
+  }
 ];
+
+const PRESET_LIBRARY = PRESET_LIBRARY_CONFIGS.map((config, i) => ({ value: `preset_${i}`, label: config.name }));
 
 
 
@@ -706,10 +773,25 @@ export default function NoteGrid({
     }
   }, [clipboard, cantusFirmus, totalBeats, onNotesUpdate, saveToHistory, currentBeat, scrollToBeatRef]);
 
+  // Get custom instrument config if needed
+  const getInstrumentConfig = useCallback((instrumentValue) => {
+    if (instrumentValue.startsWith('custom_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      return customInstruments[index];
+    }
+    if (instrumentValue.startsWith('preset_')) {
+      const index = parseInt(instrumentValue.split('_')[1]);
+      return PRESET_LIBRARY_CONFIGS[index];
+    }
+    return null;
+  }, [customInstruments]);
+
   // Play note sound when adding
   const playNoteSound = useCallback((pitch, note = null) => {
     initAudio();
     const instrument = voices[activeVoice]?.instrument || 'organ';
+    const customConfig = getInstrumentConfig(instrument);
+    
     const hasBend = note?.bendStart !== undefined || note?.bendEnd !== undefined;
     const pitchBend = hasBend ? {
       start: note.bendStart ?? 0,
@@ -721,15 +803,18 @@ export default function NoteGrid({
     const sixteenthNoteDuration = (60 / tempo) / 4;
     const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
     
-    // Use articulation if present
-    if (note?.articulation && note.articulation !== 'normal') {
+    // Use custom instrument if available
+    if (customConfig) {
+      playNoteWithCustomInstrument(pitch, actualDuration, 0.7, customConfig);
+    } else if (note?.articulation && note.articulation !== 'normal') {
+      // Use articulation if present
       import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
         playNoteWithArticulation(pitch, actualDuration, 0.7, 0, instrument, note.articulation, tempo, pitchBend);
       });
     } else {
       playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
     }
-  }, [voices, activeVoice, tempo]);
+  }, [voices, activeVoice, tempo, customInstruments, getInstrumentConfig]);
 
   const selectAll = useCallback(() => {
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
