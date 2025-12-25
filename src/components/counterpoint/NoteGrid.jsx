@@ -1276,20 +1276,22 @@ export default function NoteGrid({
               const deltaX = coords.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
 
+      // Build a map of original note keys to identify which notes to resize
+      const originalKeys = new Set(resizeState.startNotes.map(s => `${s.pitch}-${s.beat}`));
+
       // Update note durations in real-time (group resize if multiple selected)
       const newNotes = cantusFirmus.map(n => {
-        // Find matching start note by pitch and original beat
-        const startNote = resizeState.startNotes.find(s => 
-          s.pitch === n.pitch && Math.abs(s.beat - n.beat) < 0.01
-        );
+        // Check if this note is one of the original resize targets
+        const originalKey = `${n.pitch}-${resizeState.startNotes.find(s => s.pitch === n.pitch)?.beat}`;
+        const startNote = resizeState.startNotes.find(s => s.pitch === n.pitch);
         
         if (startNote) {
           if (resizeState.edge === 'right') {
-            // Right edge: extend duration
+            // Right edge: extend duration, beat stays fixed
             const newDuration = Math.max(MIN_DURATION, Math.round((startNote.duration + deltaDuration) * 8) / 8);
             return { ...n, duration: newDuration };
           } else {
-            // Left edge: adjust beat and duration (beat moves, end stays fixed)
+            // Left edge: adjust beat and duration (beat moves left, end point stays fixed)
             let newBeat = startNote.beat + deltaDuration;
             let newDuration = startNote.duration - deltaDuration;
             
