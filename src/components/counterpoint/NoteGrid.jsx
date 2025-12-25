@@ -2116,19 +2116,49 @@ export default function NoteGrid({
                                 const beat = getBeatFromHeaderPosition(e.clientX);
                                 if (beat === null) return;
 
+                                // Check if clicking near edges of existing loop region
+                                const edgeThreshold = 2; // beats
+                                let dragMode = 'new'; // 'new', 'start', 'end'
+                                
+                                if (loopStart !== null && loopEnd !== null) {
+                                  if (Math.abs(beat - loopStart) <= edgeThreshold) {
+                                    dragMode = 'start';
+                                  } else if (Math.abs(beat - loopEnd) <= edgeThreshold) {
+                                    dragMode = 'end';
+                                  }
+                                }
+
                                 setIsLoopSelecting(true);
                                 setLoopSelectStart(beat);
-                                if (onLoopChange) {
-                                  onLoopChange(beat, beat);
+                                
+                                if (dragMode === 'new') {
+                                  if (onLoopChange) {
+                                    onLoopChange(beat, beat);
+                                  }
                                 }
 
                                 const handleMouseMove = (moveEvent) => {
                                   const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
                                   if (moveBeat !== null) {
-                                    const start = Math.min(beat, moveBeat);
-                                    const end = Math.max(beat, moveBeat);
-                                    if (onLoopChange) {
-                                      onLoopChange(start, end);
+                                    if (dragMode === 'start') {
+                                      // Dragging left edge - adjust loop start
+                                      const newStart = Math.floor(moveBeat);
+                                      if (newStart < loopEnd) {
+                                        onLoopChange?.(newStart, loopEnd);
+                                      }
+                                    } else if (dragMode === 'end') {
+                                      // Dragging right edge - adjust loop end
+                                      const newEnd = Math.floor(moveBeat) + 1;
+                                      if (newEnd > loopStart) {
+                                        onLoopChange?.(loopStart, newEnd);
+                                      }
+                                    } else {
+                                      // Creating new loop
+                                      const start = Math.min(beat, moveBeat);
+                                      const end = Math.max(beat, moveBeat);
+                                      if (onLoopChange) {
+                                        onLoopChange(start, end);
+                                      }
                                     }
                                   }
                                 };
@@ -2136,28 +2166,33 @@ export default function NoteGrid({
                                 const handleMouseUp = (upEvent) => {
                                   let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
                                   if (upBeat !== null) {
-                                    // Apply snapping for loop selection (always snap for loop regions)
-                                    const snappedBeat = Math.floor(beat);
-                                    const snappedUpBeat = Math.floor(upBeat);
-                                    const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
-
-                                    if (dragDistance === 0) {
-                                      // Single click - seek to position
-                                      if (snapToGrid) {
-                                        upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
-                                      }
-                                      if (onSeek) {
-                                        onSeek(upBeat);
-                                      }
-                                      if (onLoopChange) {
-                                        onLoopChange(null, null);
-                                      }
+                                    if (dragMode === 'start' || dragMode === 'end') {
+                                      // Edge drag complete - keep the adjusted loop
+                                      // Already updated via handleMouseMove
                                     } else {
-                                      // Drag - create loop region (always use full beats for loops)
-                                      const start = Math.min(snappedBeat, snappedUpBeat);
-                                      const end = Math.max(snappedBeat, snappedUpBeat) + 1;
-                                      if (onLoopChange) {
-                                        onLoopChange(start, end);
+                                      // New loop creation
+                                      const snappedBeat = Math.floor(beat);
+                                      const snappedUpBeat = Math.floor(upBeat);
+                                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
+
+                                      if (dragDistance === 0) {
+                                        // Single click - seek to position
+                                        if (snapToGrid) {
+                                          upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
+                                        }
+                                        if (onSeek) {
+                                          onSeek(upBeat);
+                                        }
+                                        if (onLoopChange) {
+                                          onLoopChange(null, null);
+                                        }
+                                      } else {
+                                        // Drag - create loop region (always use full beats for loops)
+                                        const start = Math.min(snappedBeat, snappedUpBeat);
+                                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
+                                        if (onLoopChange) {
+                                          onLoopChange(start, end);
+                                        }
                                       }
                                     }
                                   }
