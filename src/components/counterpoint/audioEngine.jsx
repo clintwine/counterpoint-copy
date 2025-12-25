@@ -472,7 +472,13 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
     return playSampledNote(pitch, duration, volume, customConfig);
   }
   
-  const { oscillators: oscConfigs, envelope, filter: oldFilter, effects, lfo, distortion, bitcrush, eq } = customConfig;
+  const { oscillators: oscConfigs = [], envelope = { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 }, filter: oldFilter, effects, lfo, distortion = 0, bitcrush = 0, eq } = customConfig;
+
+  // Ensure we have at least one oscillator
+  if (!oscConfigs || oscConfigs.length === 0) {
+    console.error('[AudioEngine] No oscillators defined in custom instrument');
+    return;
+  }
 
   // Extract filter config from effects array or fall back to old filter property
   const filterEffect = effects?.find(e => e.type === 'filter');
