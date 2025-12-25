@@ -1291,23 +1291,30 @@ export default function NoteGrid({
             const newDuration = Math.max(MIN_DURATION, Math.round((startNote.duration + deltaDuration) * 8) / 8);
             return { ...n, duration: newDuration };
           } else {
-            // Left edge: adjust beat and duration (beat moves left, end point stays fixed)
+            // Left edge: adjust beat and duration (beat moves, end point stays fixed)
+            const endPoint = startNote.beat + startNote.duration; // Fixed end point
             let newBeat = startNote.beat + deltaDuration;
-            let newDuration = startNote.duration - deltaDuration;
+            
+            // Clamp to not go below 0
+            newBeat = Math.max(0, newBeat);
+            
+            // Calculate duration to maintain fixed end point
+            let newDuration = endPoint - newBeat;
             
             // Clamp minimum duration
             if (newDuration < MIN_DURATION) {
               newDuration = MIN_DURATION;
-              newBeat = startNote.beat + startNote.duration - MIN_DURATION;
+              newBeat = endPoint - MIN_DURATION;
             }
             
             // Quantize if needed
             if (snapToGrid) {
               newBeat = Math.round(newBeat / quantizeGrid) * quantizeGrid;
-              newDuration = Math.round(newDuration * 8) / 8;
+              newDuration = endPoint - newBeat;
+              newDuration = Math.max(MIN_DURATION, Math.round(newDuration * 8) / 8);
             } else {
               newBeat = Math.round(newBeat * 1000) / 1000;
-              newDuration = Math.round(newDuration * 1000) / 1000;
+              newDuration = Math.round((endPoint - newBeat) * 1000) / 1000;
             }
             
             return { ...n, beat: Math.max(0, newBeat), duration: Math.max(MIN_DURATION, newDuration) };
