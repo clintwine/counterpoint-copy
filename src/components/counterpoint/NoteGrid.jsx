@@ -2940,21 +2940,21 @@ export default function NoteGrid({
                                 startTime: firstSelected.bendStartTime ?? 0,
                                 endTime: firstSelected.bendEndTime ?? 1
                               } : 0;
-                              
+
                               if (customConfig) {
-                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, firstSelected.articulation || 'normal', tempo, pitchBend);
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, style.value, tempo, pitchBend);
                               } else {
                                 import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
                                   playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
                                 });
                               }
-                            }
-                          }}
-                          className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                          title="Preview"
-                        >
-                          ▶
-                        </button>
+                              }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                              title="Preview"
+                              >
+                              ▶
+                              </button>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
