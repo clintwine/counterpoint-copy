@@ -752,9 +752,9 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig, pitch
   const releaseEndTime = Math.max(releaseStartTime + 0.001, now + totalDuration);
 
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume * 0.8, attackTime);
-  gainNode.gain.linearRampToValueAtTime(volume * sustain * 0.6, decayTime);
-  gainNode.gain.setValueAtTime(volume * sustain * 0.6, releaseStartTime);
+  gainNode.gain.linearRampToValueAtTime(scaledVolume, attackTime);
+  gainNode.gain.linearRampToValueAtTime(scaledVolume * sustain * 0.75, decayTime);
+  gainNode.gain.setValueAtTime(scaledVolume * sustain * 0.75, releaseStartTime);
   gainNode.gain.exponentialRampToValueAtTime(0.001, releaseEndTime);
 
   outputNode.connect(gainNode);
