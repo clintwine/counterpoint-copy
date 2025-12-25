@@ -1001,12 +1001,7 @@ export default function WaveEditor({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-0 bg-slate-800 border-slate-700 z-[100001]" align="start">
-              <Command 
-                className="bg-slate-800"
-                value={editingBuiltin ? BUILTIN_INSTRUMENTS[editingBuiltin]?.name : 
-                       editingIndex >= 0 && customInstruments[editingIndex] ? customInstruments[editingIndex].name :
-                       instrument.name || ''}
-              >
+              <Command className="bg-slate-800">
                 <CommandInput placeholder="Search instruments..." className="h-9 text-sm text-white [&_svg]:text-white" />
                 <CommandList 
                   ref={(el) => {
