@@ -721,15 +721,49 @@ export default function NoteGrid({
     const sixteenthNoteDuration = (60 / tempo) / 4;
     const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
     
+    // Check if using custom instrument
+    const getCustomConfig = (instrumentName) => {
+      if (instrumentName.startsWith('custom_')) {
+        const index = parseInt(instrumentName.split('_')[1]);
+        return customInstruments[index];
+      }
+      if (instrumentName.startsWith('preset_')) {
+        const index = parseInt(instrumentName.split('_')[1]);
+        const PRESET_LIBRARY = [
+          { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 7, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+          { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 12, gain: 0.3, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8, harmonic: 1, phase: 0 }, { waveform: 'square', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 700, gain: 0.3, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 1200, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 5, gain: 0.4, harmonic: 1, phase: 0 }, { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 1, phase: 0 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1, phase: 0 }, { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1, phase: 0 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1, phase: 0 }, { waveform: 'triangle', detune: 0, gain: 0.1, harmonic: 1, phase: 0 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+        ];
+        return PRESET_LIBRARY[index];
+      }
+      // Check for builtin N64 guitar
+      if (instrumentName === 'builtin_n64_guitar') {
+        return customInstruments.find(i => i.id === 'builtin_n64_guitar');
+      }
+      return null;
+    };
+    
+    const customConfig = getCustomConfig(instrument);
+    
     // Use articulation if present
-    if (note?.articulation && note.articulation !== 'normal') {
+    if (note?.articulation && note.articulation !== 'normal' && !customConfig) {
       import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
         playNoteWithArticulation(pitch, actualDuration, 0.7, 0, instrument, note.articulation, tempo, pitchBend);
+      });
+    } else if (customConfig) {
+      // Use custom instrument playback
+      import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
+        playNoteWithCustomInstrument(pitch, actualDuration, 0.7, customConfig);
       });
     } else {
       playNote(pitch, actualDuration, 0.7, 0, instrument, pitchBend);
     }
-  }, [voices, activeVoice, tempo]);
+  }, [voices, activeVoice, tempo, customInstruments]);
 
   const selectAll = useCallback(() => {
     const allKeys = new Set(cantusFirmus.map(n => getNoteKey(n.pitch, n.beat)));
