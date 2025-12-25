@@ -908,20 +908,41 @@ export default function WaveEditor({
     }
   };
 
+  // Serialize effects and oscillators to strings for stable comparison
+  const effectsKey = JSON.stringify(instrument.effects);
+  const oscillatorsKey = JSON.stringify(instrument.oscillators);
+  const eqKey = JSON.stringify(instrument.eq);
+
   // Update live preview sound when instrument changes
   useEffect(() => {
+    console.log('[WaveEditor] Live preview effect triggered', { 
+      livePreview, 
+      isDraggingTimbre, 
+      isPlaying,
+      attack: instrument.envelope.attack,
+      decay: instrument.envelope.decay,
+      sustain: instrument.envelope.sustain,
+      release: instrument.envelope.release
+    });
+    
     if (livePreview && !isDraggingTimbre && !isPlaying) {
+      console.log('[WaveEditor] Playing preview after 100ms delay');
       // Play preview on each change with animation (but not while dragging or already playing)
       const timeoutId = setTimeout(() => {
+        console.log('[WaveEditor] Actually playing preview now');
         setIsPlaying(true);
         playPreviewForInstrument(instrument, () => {
+          console.log('[WaveEditor] Preview ended, setting isPlaying to false');
           setIsPlaying(false);
         });
         drawWaveform();
       }, 100);
-      return () => clearTimeout(timeoutId);
+      return () => {
+        console.log('[WaveEditor] Cleaning up timeout');
+        clearTimeout(timeoutId);
+      };
     }
-  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isDraggingTimbre, isPlaying]);
+  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.volume, effectsKey, oscillatorsKey, eqKey, livePreview, isDraggingTimbre, isPlaying]);
 
   return (
     <div className="space-y-4">
