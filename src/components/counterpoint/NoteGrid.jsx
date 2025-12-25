@@ -136,41 +136,6 @@ const PRESET_LIBRARY = [
 function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find(i => i.value === value);
-  const selectedItemRef = React.useRef(null);
-  
-  React.useEffect(() => {
-    if (open) {
-      console.log('[NoteGrid InstrumentSelect] Dropdown opened');
-      console.log('[NoteGrid InstrumentSelect] Current value:', value);
-      console.log('[NoteGrid InstrumentSelect] Selected item:', selected);
-      
-      // Wait for CommandList to render, then check multiple times
-      const scrollToSelected = () => {
-        console.log('[NoteGrid InstrumentSelect] Checking ref:', selectedItemRef.current);
-        if (selectedItemRef.current) {
-          console.log('[NoteGrid InstrumentSelect] Scrolling to selected item NOW');
-          selectedItemRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          return true;
-        }
-        return false;
-      };
-      
-      // Try immediately
-      if (!scrollToSelected()) {
-        // Try after 50ms
-        setTimeout(() => {
-          if (!scrollToSelected()) {
-            // Try after 150ms
-            setTimeout(() => {
-              if (!scrollToSelected()) {
-                console.log('[NoteGrid InstrumentSelect] Failed to find selected item after 250ms');
-              }
-            }, 100);
-          }
-        }, 50);
-      }
-    }
-  }, [open, value]);
   
   const handlePreview = (instrumentValue, e) => {
     e.stopPropagation();
@@ -195,7 +160,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
         </Button>
       </PopoverTrigger>
         <PopoverContent className="w-52 p-0 bg-slate-800 border-slate-700">
-          <Command className="bg-slate-800">
+          <Command className="bg-slate-800" value={selected?.label || ''}>
             <CommandInput placeholder="Search instrument..." className="h-8 text-xs text-white" />
             <CommandList>
               <CommandEmpty className="text-white/50 text-xs py-2 text-center">
@@ -213,31 +178,26 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
                 )}
               </CommandEmpty>
               <CommandGroup>
-                {instruments.map(inst => {
-                  const isSelected = inst.value === value;
-                  return (
-                    <CommandItem
-                      key={inst.value}
-                      value={inst.label}
-                      ref={isSelected ? selectedItemRef : null}
-                      onSelect={() => {
-                        console.log('[NoteGrid InstrumentSelect] Selected:', inst.label);
-                        onChange(inst.value);
-                        setOpen(false);
-                      }}
-                      className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                {instruments.map(inst => (
+                  <CommandItem
+                    key={inst.value}
+                    value={inst.label}
+                    onSelect={() => {
+                      onChange(inst.value);
+                      setOpen(false);
+                    }}
+                    className={`text-white text-xs cursor-pointer flex items-center justify-between group ${inst.value === value ? 'bg-slate-700' : ''}`}
+                  >
+                    <span>{inst.label}</span>
+                    <button
+                      onClick={(e) => handlePreview(inst.value, e)}
+                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                      title="Preview sound"
                     >
-                      <span>{inst.label}</span>
-                      <button
-                        onClick={(e) => handlePreview(inst.value, e)}
-                        className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                        title="Preview sound"
-                      >
-                        ▶
-                      </button>
-                    </CommandItem>
-                  );
-                })}
+                      ▶
+                    </button>
+                  </CommandItem>
+                ))}
               </CommandGroup>
             </CommandList>
           </Command>
