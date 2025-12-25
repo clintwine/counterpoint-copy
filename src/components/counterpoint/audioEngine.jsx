@@ -529,13 +529,16 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   // Create oscillators from custom config (limit to first 3 for performance)
   const maxOscs = Math.min(3, oscConfigs.length);
   oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
+    // Skip if oscConfig is undefined or null
+    if (!oscConfig) return;
+    
     // Ensure oscConfig has all required properties with defaults
     const safeConfig = {
-      waveform: oscConfig?.waveform || 'sine',
-      gain: oscConfig?.gain ?? 0.5,
-      detune: oscConfig?.detune || 0,
-      harmonic: oscConfig?.harmonic || 1,
-      phase: oscConfig?.phase || 0
+      waveform: oscConfig.waveform || 'sine',
+      gain: typeof oscConfig.gain === 'number' ? oscConfig.gain : 0.5,
+      detune: oscConfig.detune || 0,
+      harmonic: oscConfig.harmonic || 1,
+      phase: oscConfig.phase || 0
     };
 
     const osc = audioContext.createOscillator();
@@ -941,13 +944,16 @@ export function playNoteSustain(pitch, volume = 0.7, voiceIndex = 0, instrument 
     // New sophisticated multi-oscillator format
     const maxOscs = Math.min(4, config.oscillators.length);
     config.oscillators.slice(0, maxOscs).forEach((oscConfig) => {
+      // Skip if oscConfig is undefined or null
+      if (!oscConfig) return;
+      
       // Ensure oscConfig has all required properties with defaults
       const safeConfig = {
-        waveform: oscConfig?.waveform || 'sine',
-        gain: oscConfig?.gain ?? 0.5,
-        detune: oscConfig?.detune || 0,
-        harmonic: oscConfig?.harmonic || 1,
-        phase: oscConfig?.phase || 0
+        waveform: oscConfig.waveform || 'sine',
+        gain: typeof oscConfig.gain === 'number' ? oscConfig.gain : 0.5,
+        detune: oscConfig.detune || 0,
+        harmonic: oscConfig.harmonic || 1,
+        phase: oscConfig.phase || 0
       };
 
       const osc = audioContext.createOscillator();
