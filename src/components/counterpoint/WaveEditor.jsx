@@ -129,6 +129,30 @@ const BUILTIN_INSTRUMENTS = {
     lfo: { rate: 0, amount: 0, target: 'pitch' },
     distortion: 0,
     bitcrush: 0
+  },
+  electricGuitar: {
+    name: 'Electric Guitar',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -8, gain: 0.7, harmonic: 1, phase: 0 },
+      { waveform: 'square', detune: 5, gain: 0.5, harmonic: 1, phase: 90 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2, phase: 0 }
+    ],
+    envelope: { attack: 0.005, decay: 0.15, sustain: 0.6, release: 0.25 },
+    filter: { type: 'lowpass', frequency: 3500, Q: 1.8 },
+    lfo: { rate: 0, amount: 0, target: 'pitch' },
+    distortion: 5,
+    bitcrush: 2,
+    effects: [
+      { type: 'filter', config: { filterType: 'lowpass', frequency: 3500, Q: 1.8 } }
+    ],
+    eq: [
+      { frequency: 60, gain: -2, Q: 1, type: 'lowshelf' },
+      { frequency: 250, gain: 1, Q: 1.5, type: 'peaking' },
+      { frequency: 1000, gain: 2, Q: 1, type: 'peaking' },
+      { frequency: 4000, gain: 3, Q: 1.2, type: 'peaking' },
+      { frequency: 12000, gain: -1, Q: 1, type: 'highshelf' }
+    ],
+    volume: 1
   }
 };
 
