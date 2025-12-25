@@ -494,6 +494,46 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'accent':
         volume = Math.min(1, volume * 1.5);
         break;
+        
+      case 'tremolo-slow':
+        const tremoloSlowSpeed = sixteenthNoteDuration;
+        const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
+        for (let i = 0; i < numSlowPicks; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloSlowSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+          }, i * tremoloSlowSpeed * 1000);
+        }
+        return null;
+        
+      case 'tremolo-medium':
+        const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
+        const numMedPicks = Math.floor(duration / tremoloMedSpeed);
+        for (let i = 0; i < numMedPicks; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloMedSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+          }, i * tremoloMedSpeed * 1000);
+        }
+        return null;
+        
+      case 'tremolo-fast':
+        const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
+        const numFastPicks = Math.floor(duration / tremoloFastSpeed);
+        for (let i = 0; i < numFastPicks; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloFastSpeed * 0.8, volume * 0.9, customConfig, pitchBend);
+          }, i * tremoloFastSpeed * 1000);
+        }
+        return null;
+        
+      case 'tremolo-ultra':
+        const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
+        const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
+        for (let i = 0; i < numUltraPicks; i++) {
+          setTimeout(() => {
+            playSingleCustomNote(pitch, tremoloUltraSpeed * 0.8, volume * 0.85, customConfig, pitchBend);
+          }, i * tremoloUltraSpeed * 1000);
+        }
+        return null;
     }
   }
   
@@ -851,11 +891,51 @@ export function playNoteWithArticulation(pitch, duration, volume, voiceIndex, in
         playNote(pitch, duration - graceDuration, volume, voiceIndex, instrument, pitchBend);
       }, graceDuration * 1000);
       return null;
-      
+
+    case 'tremolo-slow':
+      const tremoloSlowSpeed = sixteenthNoteDuration;
+      const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
+      for (let i = 0; i < numSlowPicks; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloSlowSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+        }, i * tremoloSlowSpeed * 1000);
+      }
+      return null;
+
+    case 'tremolo-medium':
+      const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
+      const numMedPicks = Math.floor(duration / tremoloMedSpeed);
+      for (let i = 0; i < numMedPicks; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloMedSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+        }, i * tremoloMedSpeed * 1000);
+      }
+      return null;
+
+    case 'tremolo-fast':
+      const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
+      const numFastPicks = Math.floor(duration / tremoloFastSpeed);
+      for (let i = 0; i < numFastPicks; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloFastSpeed * 0.8, volume * 0.9, voiceIndex, instrument, pitchBend);
+        }, i * tremoloFastSpeed * 1000);
+      }
+      return null;
+
+    case 'tremolo-ultra':
+      const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
+      const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
+      for (let i = 0; i < numUltraPicks; i++) {
+        setTimeout(() => {
+          playNote(pitch, tremoloUltraSpeed * 0.8, volume * 0.85, voiceIndex, instrument, pitchBend);
+        }, i * tremoloUltraSpeed * 1000);
+      }
+      return null;
+
     default:
       return playNote(pitch, duration, volume, voiceIndex, instrument, pitchBend);
-  }
-}
+    }
+    }
 
 // Helper to get power chord pitches (root, fifth, octave)
 function getPowerChordPitches(rootPitch) {
