@@ -856,7 +856,7 @@ function playSingleNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, ins
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
   
-  const config = INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
+  const config = configOverride || INSTRUMENT_CONFIGS[instrument] || INSTRUMENT_CONFIGS.organ;
   const now = Math.max(0.01, audioContext.currentTime + 0.01);
   
   // Use global envelope settings
