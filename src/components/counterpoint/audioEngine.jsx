@@ -458,8 +458,44 @@ export function getCustomInstruments() {
 }
 
 // Play note with custom instrument support
-export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig) {
+export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig, articulation = 'normal', tempo = 80, pitchBend = 0) {
   if (!audioContext) initAudio();
+  
+  // Handle articulation
+  if (articulation && articulation !== 'normal') {
+    const sixteenthNoteDuration = (60 / tempo) / 4;
+    
+    switch (articulation) {
+      case 'staccato':
+        duration = duration * 0.2;
+        break;
+      case 'trill':
+        const trillSpeed = sixteenthNoteDuration * 0.5;
+        const numTrillNotes = Math.floor(duration / trillSpeed);
+        const upperNote = getNextScaleNote(pitch);
+        
+        for (let i = 0; i < numTrillNotes; i++) {
+          setTimeout(() => {
+            const notePitch = i % 2 === 0 ? pitch : upperNote;
+            playSingleCustomNote(notePitch, trillSpeed * 0.9, volume * 0.8, customConfig, pitchBend);
+          }, i * trillSpeed * 1000);
+        }
+        return null;
+        
+      case 'grace':
+        const graceNote = getNextScaleNote(pitch);
+        const graceDuration = sixteenthNoteDuration * 0.25;
+        playSingleCustomNote(graceNote, graceDuration, volume * 0.7, customConfig, pitchBend);
+        setTimeout(() => {
+          playSingleCustomNote(pitch, duration - graceDuration, volume, customConfig, pitchBend);
+        }, graceDuration * 1000);
+        return null;
+        
+      case 'accent':
+        volume = Math.min(1, volume * 1.5);
+        break;
+    }
+  }
   
   // Electric guitar velocity-based variations for custom instruments
   if (customConfig.name === 'Electric Guitar') {
@@ -467,7 +503,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       // Maximum velocity - aggressive power chord
       const chordPitches = getPowerChordPitches(pitch);
       chordPitches.forEach((chordPitch, i) => {
-        playSingleCustomNote(chordPitch, duration, volume * (1 - i * 0.1), customConfig);
+        playSingleCustomNote(chordPitch, duration, volume * (1 - i * 0.1), customConfig, pitchBend);
       });
       return;
     } else if (volume <= 0.32) {
@@ -475,17 +511,17 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       const mutedConfig = { ...customConfig, distortion: 0 };
       const chordPitches = getPowerChordPitches(pitch);
       chordPitches.forEach((chordPitch, i) => {
-        playSingleCustomNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), mutedConfig);
+        playSingleCustomNote(chordPitch, duration * 0.3, volume * (1 - i * 0.15), mutedConfig, pitchBend);
       });
       return;
     }
   }
   
   // Default single note
-  return playSingleCustomNote(pitch, duration, volume, customConfig);
+  return playSingleCustomNote(pitch, duration, volume, customConfig, pitchBend);
 }
 
-async function playSingleCustomNote(pitch, duration, volume, customConfig) {
+async function playSingleCustomNote(pitch, duration, volume, customConfig, pitchBend = 0) {
   const freq = NOTE_FREQUENCIES[pitch];
   if (!freq) return;
 
@@ -575,6 +611,29 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig) {
     const harmonic = safeConfig.harmonic;
     osc.frequency.value = freq * harmonic;
     osc.detune.value = safeConfig.detune;
+
+    // Apply pitch bend envelope if provided
+    if (pitchBend !== 0 || (typeof pitchBend === 'object' && pitchBend !== null)) {
+      if (typeof pitchBend === 'number') {
+        // Simple constant bend
+        osc.detune.value += pitchBend * 100;
+      } else if (pitchBend) {
+        // Envelope bend: { start, end, startTime, endTime }
+        const bendStart = (pitchBend.start ?? 0) * 100;
+        const bendEnd = (pitchBend.end ?? 0) * 100;
+        const startTime = pitchBend.startTime ?? 0; // 0-1 (percentage of note duration)
+        const endTime = pitchBend.endTime ?? 1; // 0-1
+
+        const bendStartTimeAbs = now + (duration * startTime);
+        const bendEndTimeAbs = now + (duration * endTime);
+
+        osc.detune.setValueAtTime(safeConfig.detune + bendStart, now);
+        if (startTime > 0) {
+          osc.detune.setValueAtTime(safeConfig.detune + bendStart, bendStartTimeAbs);
+        }
+        osc.detune.linearRampToValueAtTime(safeConfig.detune + bendEnd, bendEndTimeAbs);
+      }
+    }
     
     // Apply LFO modulation
     if (lfoGain && lfo.target === 'pitch') {
