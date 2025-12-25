@@ -912,27 +912,30 @@ export default function WaveEditor({
   const effectsKey = JSON.stringify(instrument.effects);
   const oscillatorsKey = JSON.stringify(instrument.oscillators);
   const eqKey = JSON.stringify(instrument.eq);
+  const isPlayingRef = useRef(false);
 
   // Update live preview sound when instrument changes
   useEffect(() => {
     console.log('[WaveEditor] Live preview effect triggered', { 
       livePreview, 
       isDraggingTimbre, 
-      isPlaying,
+      isPlayingRef: isPlayingRef.current,
       attack: instrument.envelope.attack,
       decay: instrument.envelope.decay,
       sustain: instrument.envelope.sustain,
       release: instrument.envelope.release
     });
     
-    if (livePreview && !isDraggingTimbre && !isPlaying) {
+    if (livePreview && !isDraggingTimbre && !isPlayingRef.current) {
       console.log('[WaveEditor] Playing preview after 100ms delay');
       // Play preview on each change with animation (but not while dragging or already playing)
       const timeoutId = setTimeout(() => {
         console.log('[WaveEditor] Actually playing preview now');
+        isPlayingRef.current = true;
         setIsPlaying(true);
         playPreviewForInstrument(instrument, () => {
-          console.log('[WaveEditor] Preview ended, setting isPlaying to false');
+          console.log('[WaveEditor] Preview ended');
+          isPlayingRef.current = false;
           setIsPlaying(false);
         });
         drawWaveform();
@@ -942,7 +945,7 @@ export default function WaveEditor({
         clearTimeout(timeoutId);
       };
     }
-  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.volume, effectsKey, oscillatorsKey, eqKey, livePreview, isDraggingTimbre, isPlaying]);
+  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.volume, effectsKey, oscillatorsKey, eqKey, livePreview, isDraggingTimbre]);
 
   return (
     <div className="space-y-4">
