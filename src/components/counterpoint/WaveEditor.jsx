@@ -1068,7 +1068,8 @@ export default function WaveEditor({
                           ▶
                         </button>
                       </CommandItem>
-                    ))}
+                    );
+                  })}
                   </CommandGroup>
                   
                   <CommandSeparator />
@@ -1109,7 +1110,8 @@ export default function WaveEditor({
                           ▶
                         </button>
                       </CommandItem>
-                    ))}
+                    );
+                  })}
                   </CommandGroup>
                   
                   {/* Custom Instruments */}
