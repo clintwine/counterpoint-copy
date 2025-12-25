@@ -391,7 +391,7 @@ export default function NoteGrid({
 
   const [dragState, setDragState] = useState(null);
   const originalDragNotesRef = useRef(null); // Store original notes when drag starts
-  const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize)
+  const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize, left or right edge)
   const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
   const paintedNotesRef = useRef(new Set()); // Track notes painted in current stroke
   const [pendingNote, setPendingNote] = useState(null); // For draw tool - only add note on mouseup
@@ -1123,13 +1123,16 @@ export default function NoteGrid({
     return null;
   };
 
-  // Check if clicking on the right edge of a note (for resizing)
+  // Check if clicking on the edges of a note (for resizing)
   const isOnNoteEdge = (e, note) => {
     if (!note) return false;
     const rect = e.target.getBoundingClientRect();
     const noteWidth = (note.duration || DEFAULT_DURATION) * CELL_WIDTH;
     const clickX = e.clientX - rect.left;
-    return clickX > noteWidth - 8;
+    return { 
+      right: clickX > noteWidth - 10,
+      left: clickX < 10
+    };
   };
 
   const getEventCoords = (e) => {
@@ -1269,17 +1272,25 @@ export default function NoteGrid({
             }
 
         if (resizeState) {
-      // Handle note duration resize
+      // Handle note duration resize (left or right edge)
               const deltaX = coords.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
 
       // Update note durations in real-time (group resize if multiple selected)
       const newNotes = cantusFirmus.map(n => {
         const noteKey = getNoteKey(n.pitch, n.beat);
-        const startDuration = resizeState.startDurations[noteKey];
-        if (startDuration !== undefined) {
-          const newDuration = Math.max(MIN_DURATION, Math.round((startDuration + deltaDuration) * 8) / 8);
-          return { ...n, duration: newDuration };
+        const startData = resizeState.startDurations[noteKey];
+        if (startData !== undefined) {
+          if (resizeState.edge === 'right') {
+            // Right edge: extend duration
+            const newDuration = Math.max(MIN_DURATION, Math.round((startData.duration + deltaDuration) * 8) / 8);
+            return { ...n, duration: newDuration };
+          } else {
+            // Left edge: adjust beat and duration
+            const newBeat = Math.max(0, startData.beat + deltaDuration);
+            const newDuration = Math.max(MIN_DURATION, Math.round((startData.duration - deltaDuration) * 8) / 8);
+            return { ...n, beat: newBeat, duration: newDuration };
+          }
         }
         return n;
       });
@@ -2328,17 +2339,31 @@ export default function NoteGrid({
                                               playNoteSound(pitch, note);
 
                                     if (clickX > rect.width - 10) {
+                                                    // Right edge resize
                                                     const startDurations = {};
                                                     if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
                                                       cantusFirmus.forEach(n => {
                                                         if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                                          startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                                          startDurations[getNoteKey(n.pitch, n.beat)] = { duration: n.duration || DEFAULT_DURATION, beat: n.beat };
                                                         }
                                                       });
                                                     } else {
-                                                      startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                                      startDurations[nKey] = { duration: note.duration || DEFAULT_DURATION, beat: note.beat };
                                                     }
-                                                    setResizeState({ startX: coords.clientX, startDurations });
+                                                    setResizeState({ startX: coords.clientX, startDurations, edge: 'right' });
+                                    } else if (clickX < 10) {
+                                                    // Left edge resize
+                                                    const startDurations = {};
+                                                    if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                                      cantusFirmus.forEach(n => {
+                                                        if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                                          startDurations[getNoteKey(n.pitch, n.beat)] = { duration: n.duration || DEFAULT_DURATION, beat: n.beat };
+                                                        }
+                                                      });
+                                                    } else {
+                                                      startDurations[nKey] = { duration: note.duration || DEFAULT_DURATION, beat: note.beat };
+                                                    }
+                                                    setResizeState({ startX: coords.clientX, startDurations, edge: 'left' });
                                     } else {
                                     // Determine which notes to drag BEFORE any state updates
                                     const wasSelected = selectedNotes.has(nKey);
@@ -2393,18 +2418,31 @@ export default function NoteGrid({
                                                                                 playNoteSound(note.pitch, note);
 
                                                                                 if (clickX > rect.width - 10) {
-                                                                                  // Resize mode
+                                                                                  // Right edge resize mode
                                                                                   const startDurations = {};
                                                                                   if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
                                                                                     cantusFirmus.forEach(n => {
                                                                                       if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-                                                                                        startDurations[getNoteKey(n.pitch, n.beat)] = n.duration || DEFAULT_DURATION;
+                                                                                        startDurations[getNoteKey(n.pitch, n.beat)] = { duration: n.duration || DEFAULT_DURATION, beat: n.beat };
                                                                                       }
                                                                                     });
                                                                                   } else {
-                                                                                    startDurations[nKey] = note.duration || DEFAULT_DURATION;
+                                                                                    startDurations[nKey] = { duration: note.duration || DEFAULT_DURATION, beat: note.beat };
                                                                                   }
-                                                                                  setResizeState({ startX: coords.clientX, startDurations });
+                                                                                  setResizeState({ startX: coords.clientX, startDurations, edge: 'right' });
+                                                                                } else if (clickX < 10) {
+                                                                                  // Left edge resize mode
+                                                                                  const startDurations = {};
+                                                                                  if (selectedNotes.has(nKey) && selectedNotes.size > 0) {
+                                                                                    cantusFirmus.forEach(n => {
+                                                                                      if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+                                                                                        startDurations[getNoteKey(n.pitch, n.beat)] = { duration: n.duration || DEFAULT_DURATION, beat: n.beat };
+                                                                                      }
+                                                                                    });
+                                                                                  } else {
+                                                                                    startDurations[nKey] = { duration: note.duration || DEFAULT_DURATION, beat: note.beat };
+                                                                                  }
+                                                                                  setResizeState({ startX: coords.clientX, startDurations, edge: 'left' });
                                                                                 } else {
                                                                                   // Determine which notes to drag BEFORE any state updates
                                                                                   const keysToUse = selectedNotes.has(nKey) ? new Set(selectedNotes) : new Set([nKey]);
@@ -2467,6 +2505,7 @@ export default function NoteGrid({
                                     {((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (
                                       <span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">↕</span>
                                     )}
+                                    <div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-l" />
                                     <div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" />
                                   </div>
                                 );
