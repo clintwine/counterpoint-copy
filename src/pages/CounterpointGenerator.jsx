@@ -206,9 +206,9 @@ export default function CounterpointGenerator() {
     id: 'builtin_n64_guitar',
     name: 'N64 Electric Guitar',
     oscillators: [
-      { waveform: 'sawtooth', detune: 0, gain: 0.7 },
-      { waveform: 'square', detune: -3, gain: 0.4 },
-      { waveform: 'sawtooth', detune: 3, gain: 0.3 }
+      { waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 1, phase: 0 },
+      { waveform: 'square', detune: -3, gain: 0.4, harmonic: 2, phase: 90 },
+      { waveform: 'sawtooth', detune: 3, gain: 0.3, harmonic: 3, phase: 0 }
     ],
     envelope: { attack: 0.005, decay: 0.08, sustain: 0.65, release: 0.2 },
     filter: { type: 'lowpass', frequency: 2800, Q: 2.5 },
