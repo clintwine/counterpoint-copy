@@ -355,15 +355,27 @@ export default function WaveEditor({
 
   useEffect(() => {
     if (libraryOpen) {
+      console.log('[WaveEditor] Library opened');
+      console.log('[WaveEditor] editingBuiltin:', editingBuiltin);
+      console.log('[WaveEditor] editingIndex:', editingIndex);
+      console.log('[WaveEditor] selectedBuiltinRef:', selectedBuiltinRef.current);
+      console.log('[WaveEditor] selectedCustomRef:', selectedCustomRef.current);
+      console.log('[WaveEditor] selectedPresetRef:', selectedPresetRef.current);
+      
       setTimeout(() => {
         if (editingBuiltin && selectedBuiltinRef.current) {
+          console.log('[WaveEditor] Scrolling to builtin:', editingBuiltin);
           selectedBuiltinRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
         } else if (editingIndex >= 0 && selectedCustomRef.current) {
+          console.log('[WaveEditor] Scrolling to custom index:', editingIndex);
           selectedCustomRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
         } else if (selectedPresetRef.current) {
+          console.log('[WaveEditor] Scrolling to preset');
           selectedPresetRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } else {
+          console.log('[WaveEditor] No ref to scroll to');
         }
-      }, 50);
+      }, 150);
     }
   }, [libraryOpen, editingBuiltin, editingIndex]);
 

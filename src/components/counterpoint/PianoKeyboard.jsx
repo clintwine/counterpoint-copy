@@ -181,12 +181,21 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
   const selectedItemRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (open && selectedItemRef.current) {
-      setTimeout(() => {
-        selectedItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      }, 50);
+    if (open) {
+      console.log('[InstrumentSelect] Dialog opened, current value:', value);
+      console.log('[InstrumentSelect] Selected item ref:', selectedItemRef.current);
+      
+      if (selectedItemRef.current) {
+        // Delay to ensure DOM is ready
+        setTimeout(() => {
+          console.log('[InstrumentSelect] Scrolling to selected item');
+          selectedItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 100);
+      } else {
+        console.log('[InstrumentSelect] No selected item ref found');
+      }
     }
-  }, [open]);
+  }, [open, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
