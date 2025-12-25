@@ -136,6 +136,24 @@ const PRESET_LIBRARY = [
 function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
   const selected = instruments.find(i => i.value === value);
+  const selectedItemRef = React.useRef(null);
+  
+  React.useEffect(() => {
+    if (open) {
+      console.log('[NoteGrid InstrumentSelect] Dropdown opened');
+      console.log('[NoteGrid InstrumentSelect] Current value:', value);
+      console.log('[NoteGrid InstrumentSelect] Selected item:', selected);
+      
+      if (selectedItemRef.current) {
+        setTimeout(() => {
+          console.log('[NoteGrid InstrumentSelect] Scrolling to selected item');
+          selectedItemRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 100);
+      } else {
+        console.log('[NoteGrid InstrumentSelect] No selected item ref found');
+      }
+    }
+  }, [open, value]);
   
   const handlePreview = (instrumentValue, e) => {
     e.stopPropagation();
@@ -178,26 +196,31 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
                 )}
               </CommandEmpty>
               <CommandGroup>
-                {instruments.map(inst => (
-                  <CommandItem
-                    key={inst.value}
-                    value={inst.label}
-                    onSelect={() => {
-                      onChange(inst.value);
-                      setOpen(false);
-                    }}
-                    className="text-white text-xs cursor-pointer flex items-center justify-between group"
-                  >
-                    <span>{inst.label}</span>
-                    <button
-                      onClick={(e) => handlePreview(inst.value, e)}
-                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                      title="Preview sound"
+                {instruments.map(inst => {
+                  const isSelected = inst.value === value;
+                  return (
+                    <CommandItem
+                      key={inst.value}
+                      value={inst.label}
+                      ref={isSelected ? selectedItemRef : null}
+                      onSelect={() => {
+                        console.log('[NoteGrid InstrumentSelect] Selected:', inst.label);
+                        onChange(inst.value);
+                        setOpen(false);
+                      }}
+                      className="text-white text-xs cursor-pointer flex items-center justify-between group"
                     >
-                      ▶
-                    </button>
-                  </CommandItem>
-                ))}
+                      <span>{inst.label}</span>
+                      <button
+                        onClick={(e) => handlePreview(inst.value, e)}
+                        className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                        title="Preview sound"
+                      >
+                        ▶
+                      </button>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>
