@@ -529,16 +529,19 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   // Create oscillators from custom config (limit to first 3 for performance)
   const maxOscs = Math.min(3, oscConfigs.length);
   oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
-    // Skip if oscConfig is undefined or null
-    if (!oscConfig) return;
+    // Skip if oscConfig is undefined or null or not an object
+    if (!oscConfig || typeof oscConfig !== 'object') {
+      console.warn('[AudioEngine] Invalid oscillator config:', oscConfig);
+      return;
+    }
     
     // Ensure oscConfig has all required properties with defaults
     const safeConfig = {
       waveform: oscConfig.waveform || 'sine',
       gain: typeof oscConfig.gain === 'number' ? oscConfig.gain : 0.5,
-      detune: oscConfig.detune || 0,
-      harmonic: oscConfig.harmonic || 1,
-      phase: oscConfig.phase || 0
+      detune: typeof oscConfig.detune === 'number' ? oscConfig.detune : 0,
+      harmonic: typeof oscConfig.harmonic === 'number' ? oscConfig.harmonic : 1,
+      phase: typeof oscConfig.phase === 'number' ? oscConfig.phase : 0
     };
 
     const osc = audioContext.createOscillator();
