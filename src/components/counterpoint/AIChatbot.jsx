@@ -472,7 +472,8 @@ STEP 3: Add contrasting material (measures 5-6)
 STEP 4: Build to climax (measures 7-8+)
 STEP 5: Resolve to tonic
 
-TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and varied durations.`,
+TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and varied durations.`
+      }, {
         response_json_schema: {
           type: "object",
           properties: {
