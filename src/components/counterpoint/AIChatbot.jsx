@@ -57,6 +57,122 @@ export default function AIChatbot({
     const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
     const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : 64;
 
+    // Helper functions for analysis
+    const parsePitchToMidi = (pitch) => {
+      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const match = pitch.match(/^([A-G]#?)(\d+)$/);
+      if (!match) return 60;
+      const [, note, octave] = match;
+      return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
+    };
+    
+    const getIntervalDistribution = (intervals) => {
+      const dist = {};
+      intervals.forEach(int => {
+        const abs = Math.abs(int);
+        dist[abs] = (dist[abs] || 0) + 1;
+      });
+      return Object.entries(dist).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([int, count]) => `±${int}(${count})`).join(', ');
+    };
+    
+    const findSequences = (notes) => {
+      const sequences = [];
+      for (let len = 3; len <= 8; len++) {
+        for (let i = 0; i <= notes.length - len * 2; i++) {
+          const pattern = notes.slice(i, i + len);
+          let reps = 1;
+          for (let j = i + len; j <= notes.length - len; j += len) {
+            const next = notes.slice(j, j + len);
+            const transposition = parsePitchToMidi(next[0].pitch) - parsePitchToMidi(pattern[0].pitch);
+            const isSequence = pattern.every((n, k) => {
+              const expectedMidi = parsePitchToMidi(n.pitch) + transposition;
+              const actualMidi = parsePitchToMidi(next[k]?.pitch || '');
+              return Math.abs(expectedMidi - actualMidi) <= 1;
+            });
+            if (isSequence) reps++;
+            else break;
+          }
+          if (reps >= 2) sequences.push({ length: len, repetitions: reps, startIndex: i });
+        }
+      }
+      return sequences.slice(0, 3);
+    };
+    
+    const getScaleDegrees = (key, mode) => {
+      const major = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+      const minor = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+      return mode === 'minor' ? minor.join(', ') : major.join(', ');
+    };
+    
+    const getPitchRange = (notes) => {
+      if (!notes.length) return 'N/A';
+      const pitches = notes.map(n => n.pitch);
+      return `${pitches[0]} to ${pitches[pitches.length - 1]}`;
+    };
+    
+    const getThird = (key, mode) => {
+      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const rootIdx = notes.indexOf(key);
+      const interval = mode === 'minor' ? 3 : 4;
+      return notes[(rootIdx + interval) % 12];
+    };
+    
+    const getFifth = (key) => {
+      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const rootIdx = notes.indexOf(key);
+      return notes[(rootIdx + 7) % 12];
+    };
+    
+    const analyzeMelodicTendency = (notes) => {
+      if (notes.length < 2) return 'insufficient data';
+      let ascending = 0, descending = 0;
+      for (let i = 1; i < notes.length; i++) {
+        const prev = parsePitchToMidi(notes[i-1].pitch);
+        const curr = parsePitchToMidi(notes[i].pitch);
+        if (curr > prev) ascending++;
+        if (curr < prev) descending++;
+      }
+      return ascending > descending ? 'ascending' : descending > ascending ? 'descending' : 'balanced';
+    };
+    
+    const analyzeRhythmicCharacter = (notes) => {
+      const durations = notes.map(n => n.duration || 1);
+      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+      const fastNotes = durations.filter(d => d <= 0.5).length;
+      const slowNotes = durations.filter(d => d >= 2).length;
+      
+      if (avgDuration < 0.6) return 'rapid/virtuosic';
+      if (avgDuration > 1.5) return 'sustained/chorale';
+      if (fastNotes > slowNotes * 2) return 'ornamental';
+      return 'moderate/balanced';
+    };
+    
+    const getUserIntent = (message) => {
+      const msg = message.toLowerCase();
+      if (msg.includes('virtuosic') || msg.includes('fast') || msg.includes('brilliant')) {
+        return `🎭 STYLE DETECTED: Virtuosic → Use dense 16th note runs, wide leaps, dynamic contrasts`;
+      }
+      if (msg.includes('lyrical') || msg.includes('singing') || msg.includes('expressive')) {
+        return `🎭 STYLE DETECTED: Lyrical → Flowing stepwise motion, longer note values, cantabile`;
+      }
+      if (msg.includes('energetic') || msg.includes('lively') || msg.includes('dance')) {
+        return `🎭 STYLE DETECTED: Energetic → Strong rhythmic drive, syncopation, motor rhythm`;
+      }
+      if (msg.includes('contemplative') || msg.includes('slow') || msg.includes('meditative')) {
+        return `🎭 STYLE DETECTED: Contemplative → Sparse texture, long notes, minimal ornamentation`;
+      }
+      if (msg.includes('baroque')) {
+        return `🎭 STYLE DETECTED: Baroque → Sequences, continuous motion, ornaments, terraced dynamics`;
+      }
+      if (msg.includes('classical')) {
+        return `🎭 STYLE DETECTED: Classical → Balanced phrases, clear cadences, alberti figures`;
+      }
+      if (msg.includes('romantic')) {
+        return `🎭 STYLE DETECTED: Romantic → Wide range, expressive leaps, rubato implications`;
+      }
+      return ``;
+    };
+
     // Build sophisticated training context from Bach Inventions with deep analysis
     const trainingExamples = songs.slice(0, 12).map(song => {
       const notes = song.cantusFirmus || [];
