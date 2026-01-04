@@ -872,6 +872,22 @@ export default function NoteGrid({
     onNotesUpdate(uniqueNotes);
   }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory, quantizeGrid, getNoteKey]);
 
+  // Global mouse up to stop piano note
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDraggingPiano) {
+        setIsDraggingPiano(false);
+        if (pianoSustainRef.current) {
+          stopNoteSustain(pianoSustainRef.current, 0.3);
+          pianoSustainRef.current = null;
+        }
+      }
+    };
+    
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, [isDraggingPiano]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -2066,12 +2082,7 @@ export default function NoteGrid({
                       onMouseLeave={(e) => {
                         setHoveredCell(null);
                         handlePointerUp(e);
-                        // Stop sustained piano note on mouse leave
-                        setIsDraggingPiano(false);
-                        if (pianoSustainRef.current) {
-                          stopNoteSustain(pianoSustainRef.current, 0.3);
-                          pianoSustainRef.current = null;
-                        }
+                        // Don't stop piano note on mouse leave - only on mouse up
                       }}
                       onTouchMove={(e) => { 
                                                                                 // Handle pinch to zoom first
