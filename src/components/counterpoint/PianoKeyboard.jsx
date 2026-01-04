@@ -359,10 +359,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     return pressedNotes.has(`${note}${octave}`);
   };
 
-  const startNote = useCallback((pitch) => {
+  const startNote = useCallback(async (pitch) => {
     if (activeOscillators.current[pitch]) return; // Already playing
 
-    initAudio();
+    await initAudio();
     const customConfig = getCustomConfig();
 
     if (customConfig) {
@@ -403,11 +403,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     }
   }, [envelope.release, onNoteRelease]);
 
-  const handleMouseDown = useCallback((e, note, octave) => {
+  const handleMouseDown = useCallback(async (e, note, octave) => {
     e.preventDefault();
     isDraggingRef.current = true;
     const pitch = `${note}${octave}`;
-    startNote(pitch);
+    await startNote(pitch);
   }, [startNote]);
 
   const handleMouseUp = useCallback((note, octave) => {
@@ -440,7 +440,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
   // Handle computer keyboard input
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
       // Don't trigger piano when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.repeat) return;
@@ -449,7 +449,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
         e.preventDefault();
-        startNote(pitch);
+        await startNote(pitch);
       }
     };
 
