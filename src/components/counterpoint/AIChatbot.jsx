@@ -312,45 +312,7 @@ ${currentNotes.length > 30 ? `\n... (${currentNotes.length - 30} more notes)` : 
 
 🎯 USER REQUEST: "${userMessage}"
 
-${getUserIntent(userMessage)}`}
-
-function getScaleDegrees(key, mode) {
-  const major = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
-  const minor = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
-  return mode === 'minor' ? minor.join(', ') : major.join(', ');
-}
-
-function getPitchRange(notes) {
-  if (!notes.length) return 'N/A';
-  const pitches = notes.map(n => n.pitch);
-  return `${pitches[0]} to ${pitches[pitches.length - 1]}`;
-}
-
-function getUserIntent(message) {
-  const msg = message.toLowerCase();
-  if (msg.includes('virtuosic') || msg.includes('fast') || msg.includes('brilliant')) {
-    return `🎭 STYLE DETECTED: Virtuosic → Use dense 16th note runs, wide leaps, dynamic contrasts`;
-  }
-  if (msg.includes('lyrical') || msg.includes('singing') || msg.includes('expressive')) {
-    return `🎭 STYLE DETECTED: Lyrical → Flowing stepwise motion, longer note values, cantabile`;
-  }
-  if (msg.includes('energetic') || msg.includes('lively') || msg.includes('dance')) {
-    return `🎭 STYLE DETECTED: Energetic → Strong rhythmic drive, syncopation, motor rhythm`;
-  }
-  if (msg.includes('contemplative') || msg.includes('slow') || msg.includes('meditative')) {
-    return `🎭 STYLE DETECTED: Contemplative → Sparse texture, long notes, minimal ornamentation`;
-  }
-  if (msg.includes('baroque')) {
-    return `🎭 STYLE DETECTED: Baroque → Sequences, continuous motion, ornaments, terraced dynamics`;
-  }
-  if (msg.includes('classical')) {
-    return `🎭 STYLE DETECTED: Classical → Balanced phrases, clear cadences, alberti figures`;
-  }
-  if (msg.includes('romantic')) {
-    return `🎭 STYLE DETECTED: Romantic → Wide range, expressive leaps, rubato implications`;
-  }
-  return ``;
-}
+${getUserIntent(userMessage)}
 
 ═══════════════════════════════════════════════════════
 TASK INSTRUCTIONS:
