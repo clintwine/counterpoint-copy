@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers, Circle } from 'lucide-react';
+import { Play, Pause, SkipBack, Square, Repeat, Clock, Menu, Save, FolderOpen, Download, Sparkles, RefreshCw, FileText, FileAudio, Music, BookOpen, Layers, Circle, LogIn, LogOut } from 'lucide-react';
 import VolumeSlider from './VolumeSlider';
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FilePlus } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const TIME_SIGNATURES = [
   { value: '4/4', label: '4/4', beatsPerMeasure: 16, clicksPerMeasure: 4 },
@@ -65,7 +66,8 @@ export default function PlaybackControls({
   isCountingIn,
   countInBeats,
   masterVolume = 80,
-  onMasterVolumeChange
+  onMasterVolumeChange,
+  currentUser
 }) {
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -136,10 +138,24 @@ export default function PlaybackControls({
     };
   }, [isDragging, onTempoChange]);
 
+  const getInitials = (email) => {
+    if (!email) return '?';
+    const name = email.split('@')[0];
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <>
       {/* Transport controls and tempo */}
       <div className="flex items-center gap-2 justify-center">
+        {/* User avatar or login - positioned at far left */}
+        {currentUser ? (
+          <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#D4AF37] text-[#1E1E1E] font-semibold text-sm border-2 border-[#3A3A3A]" title={currentUser.email}>
+            {getInitials(currentUser.email)}
+          </div>
+        ) : null}
+        
+        <div className="w-px h-6 bg-[#3A3A3A]" />
         {/* Transport controls */}
         <div className="flex items-center bg-[#595959] rounded-md">
           <Button
