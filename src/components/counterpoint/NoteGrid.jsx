@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument } from './audioEngine';
+import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 import toast from 'react-hot-toast';
 
@@ -420,6 +420,9 @@ export default function NoteGrid({
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  const pianoSustainRef = useRef(null); // Track sustained piano note
+  const [isDraggingPiano, setIsDraggingPiano] = useState(false);
+  const lastPianoPitchRef = useRef(null);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
@@ -2022,10 +2025,24 @@ export default function NoteGrid({
                   backgroundColor: '#232323'
                 }}
         onMouseMove={handlePointerMove}
-                      onMouseUp={handlePointerUp}
+                      onMouseUp={(e) => {
+                        handlePointerUp(e);
+                        // Stop sustained piano note on mouse up
+                        setIsDraggingPiano(false);
+                        if (pianoSustainRef.current) {
+                          stopNoteSustain(pianoSustainRef.current, 0.3);
+                          pianoSustainRef.current = null;
+                        }
+                      }}
                       onMouseLeave={(e) => {
                         setHoveredCell(null);
                         handlePointerUp(e);
+                        // Stop sustained piano note on mouse leave
+                        setIsDraggingPiano(false);
+                        if (pianoSustainRef.current) {
+                          stopNoteSustain(pianoSustainRef.current, 0.3);
+                          pianoSustainRef.current = null;
+                        }
                       }}
                       onTouchMove={(e) => { 
                                                                                 // Handle pinch to zoom first
@@ -2107,13 +2124,24 @@ export default function NoteGrid({
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
                                                                         const isPianoPressed = pressedPianoNotes.has(pitch);
                                                                         
-                                                                        const playPianoKey = async () => {
+                                                                        const startPianoNote = async () => {
                                                                           await initAudio();
+
+                                                                          // Stop previous note if any
+                                                                          if (pianoSustainRef.current) {
+                                                                            stopNoteSustain(pianoSustainRef.current, 0.1);
+                                                                            pianoSustainRef.current = null;
+                                                                          }
+
+                                                                          lastPianoPitchRef.current = pitch;
                                                                           const customConfig = getInstrumentConfig(pianoInstrument);
+
                                                                           if (customConfig) {
-                                                                            await playNoteWithCustomInstrument(pitch, 0.5, 0.7, customConfig);
+                                                                            // For custom instruments, use timed note (no sustain support yet)
+                                                                            await playNoteWithCustomInstrument(pitch, 2, 0.7, customConfig);
                                                                           } else {
-                                                                            playNote(pitch, 0.5, 0.7, 0, pianoInstrument);
+                                                                            // Use sustain for built-in instruments
+                                                                            pianoSustainRef.current = playNoteSustain(pitch, 0.7, 0, pianoInstrument);
                                                                           }
                                                                         };
                                                                         
@@ -2122,12 +2150,24 @@ export default function NoteGrid({
                                                                             key={pitch}
                                                                             onMouseDown={(e) => {
                                                                               e.stopPropagation();
-                                                                              playPianoKey();
+                                                                              setIsDraggingPiano(true);
+                                                                              startPianoNote();
+                                                                            }}
+                                                                            onMouseEnter={() => {
+                                                                              if (isDraggingPiano && lastPianoPitchRef.current !== pitch) {
+                                                                                startPianoNote();
+                                                                              }
                                                                             }}
                                                                             onTouchEnd={(e) => {
                                                                               e.stopPropagation();
                                                                               if (!e.defaultPrevented) {
-                                                                                playPianoKey();
+                                                                                startPianoNote();
+                                                                                setTimeout(() => {
+                                                                                  if (pianoSustainRef.current) {
+                                                                                    stopNoteSustain(pianoSustainRef.current, 0.3);
+                                                                                    pianoSustainRef.current = null;
+                                                                                  }
+                                                                                }, 500);
                                                                               }
                                                                             }}
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
