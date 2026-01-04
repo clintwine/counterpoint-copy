@@ -216,46 +216,6 @@ MELODIC ANALYSIS:
 FULL SCORE (first 30 notes):
 ${JSON.stringify(notes.slice(0, 30), null, 2)}`;
     }).join('\n\n');
-    
-    function parsePitchToMidi(pitch) {
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-      const match = pitch.match(/^([A-G]#?)(\d+)$/);
-      if (!match) return 60;
-      const [, note, octave] = match;
-      return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
-    }
-    
-    function getIntervalDistribution(intervals) {
-      const dist = {};
-      intervals.forEach(int => {
-        const abs = Math.abs(int);
-        dist[abs] = (dist[abs] || 0) + 1;
-      });
-      return Object.entries(dist).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([int, count]) => `±${int}(${count})`).join(', ');
-    }
-    
-    function findSequences(notes) {
-      const sequences = [];
-      for (let len = 3; len <= 8; len++) {
-        for (let i = 0; i <= notes.length - len * 2; i++) {
-          const pattern = notes.slice(i, i + len);
-          let reps = 1;
-          for (let j = i + len; j <= notes.length - len; j += len) {
-            const next = notes.slice(j, j + len);
-            const transposition = parsePitchToMidi(next[0].pitch) - parsePitchToMidi(pattern[0].pitch);
-            const isSequence = pattern.every((n, k) => {
-              const expectedMidi = parsePitchToMidi(n.pitch) + transposition;
-              const actualMidi = parsePitchToMidi(next[k]?.pitch || '');
-              return Math.abs(expectedMidi - actualMidi) <= 1;
-            });
-            if (isSequence) reps++;
-            else break;
-          }
-          if (reps >= 2) sequences.push({ length: len, repetitions: reps, startIndex: i });
-        }
-      }
-      return sequences.slice(0, 3);
-    }
 
     try {
       // Create abort controller for this request
