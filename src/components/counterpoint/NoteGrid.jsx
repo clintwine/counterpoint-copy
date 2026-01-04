@@ -423,6 +423,7 @@ export default function NoteGrid({
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
   const lastPianoPitchRef = useRef(null);
+  const pianoStartYRef = useRef(null);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
@@ -1237,6 +1238,34 @@ export default function NoteGrid({
 
   const handlePointerMove = (e) => {
                 const coords = e.clientX !== undefined ? e : getEventCoords(e);
+
+                // Handle piano key dragging
+                if (isDraggingPiano && gridRef.current) {
+                  const gridRect = gridRef.current.getBoundingClientRect();
+                  const scrollTop = gridRef.current.scrollTop;
+                  const y = coords.clientY - gridRect.top - 28 + scrollTop;
+                  const pitchIndex = Math.floor(y / CELL_HEIGHT);
+                  
+                  if (pitchIndex >= 0 && pitchIndex < pitches.length) {
+                    const newPitch = pitches[pitchIndex];
+                    if (newPitch !== lastPianoPitchRef.current) {
+                      // Stop previous note
+                      if (pianoSustainRef.current) {
+                        stopNoteSustain(pianoSustainRef.current, 0.05);
+                      }
+                      
+                      // Start new note
+                      lastPianoPitchRef.current = newPitch;
+                      const customConfig = getInstrumentConfig(pianoInstrument);
+                      
+                      if (customConfig) {
+                        playNoteWithCustomInstrument(newPitch, 2, 0.7, customConfig);
+                      } else {
+                        pianoSustainRef.current = playNoteSustain(newPitch, 0.7, 0, pianoInstrument);
+                      }
+                    }
+                  }
+                }
 
                 // Update hovered cell for piano highlighting
                 const cell = getCellFromPosition(coords.clientX, coords.clientY);
@@ -2151,6 +2180,7 @@ export default function NoteGrid({
                                                                             onMouseDown={(e) => {
                                                                               e.stopPropagation();
                                                                               setIsDraggingPiano(true);
+                                                                              pianoStartYRef.current = e.clientY;
                                                                               startPianoNote();
                                                                             }}
                                                                             onMouseEnter={() => {
