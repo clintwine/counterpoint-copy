@@ -155,6 +155,7 @@ export default function CounterpointGenerator() {
   const [pianoPopout, setPianoPopout] = useState(false);
   const [pianoPopoutSize, setPianoPopoutSize] = useState({ width: 800, height: 300 });
   const [previewingSongId, setPreviewingSongId] = useState(null);
+  const [previewingProjectId, setPreviewingProjectId] = useState(null);
   const [librarySearchQuery, setLibrarySearchQuery] = useState('');
   const [librarySortBy, setLibrarySortBy] = useState('updated');
   const [libraryActiveTab, setLibraryActiveTab] = useState('songs');
@@ -654,6 +655,7 @@ export default function CounterpointGenerator() {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
       previewTimeoutRef.current = null;
       setPreviewingSongId(null);
+      setPreviewingProjectId(null);
       // Delay stopAllNotes slightly to ensure timeouts are cleared first
       setTimeout(() => stopAllNotes(), 50);
     }
@@ -742,6 +744,12 @@ export default function CounterpointGenerator() {
     e.stopPropagation();
     ensureAudio();
 
+    // Stop current project playback
+    if (isPlaying) {
+      setIsPlaying(false);
+      stopAllNotes();
+    }
+
     // Clear any existing preview
     if (previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
@@ -752,12 +760,14 @@ export default function CounterpointGenerator() {
     if (previewingSongId === song.id) {
       // Stop preview
       setPreviewingSongId(null);
+      setPreviewingProjectId(null);
       stopAllNotes();
       return;
     }
 
     // Start new preview
     setPreviewingSongId(song.id);
+    setPreviewingProjectId(null);
     const loadedTempo = song.settings?.tempo || 80;
     // Fix tempo if it was saved as 16th-note BPM instead of quarter-note BPM
     const previewTempo = loadedTempo > 200 ? Math.round(loadedTempo / 4) : loadedTempo;
@@ -827,6 +837,108 @@ export default function CounterpointGenerator() {
     const stopTimeout = setTimeout(() => {
       stopAllNotes();
       setPreviewingSongId(null);
+      previewTimeoutRef.current = null;
+    }, totalDuration);
+    
+    timeouts.push(stopTimeout);
+    previewTimeoutRef.current = timeouts;
+  };
+
+  const handlePreviewProject = (project, e) => {
+    e.stopPropagation();
+    ensureAudio();
+
+    // Stop current project playback
+    if (isPlaying) {
+      setIsPlaying(false);
+      stopAllNotes();
+    }
+
+    // Clear any existing preview
+    if (previewTimeoutRef.current) {
+      previewTimeoutRef.current.forEach(id => clearTimeout(id));
+      previewTimeoutRef.current = null;
+      stopAllNotes();
+    }
+
+    if (previewingProjectId === project.id) {
+      // Stop preview
+      setPreviewingProjectId(null);
+      setPreviewingSongId(null);
+      stopAllNotes();
+      return;
+    }
+
+    // Start new preview
+    setPreviewingProjectId(project.id);
+    setPreviewingSongId(null);
+    const previewTempo = project.settings?.tempo || 80;
+    const previewNotes = project.cantusFirmus || [];
+    const previewVoices = project.generatedVoices || [];
+    const projectVoices = project.voices || [];
+    const allPreviewVoices = [{ notes: previewNotes }, ...previewVoices];
+
+    // Play all voices with proper timing
+    const timeouts = [];
+    allPreviewVoices.forEach((voice, voiceIndex) => {
+      const voiceInstrument = projectVoices[voiceIndex]?.instrument || 'organ';
+      const volume = (projectVoices[voiceIndex]?.volume || 80) / 100;
+
+      // Get custom config if it's a custom instrument
+      const getCustomConfig = (instrument) => {
+        if (instrument.startsWith('custom_')) {
+          const index = parseInt(instrument.split('_')[1]);
+          return customInstruments[index];
+        }
+        if (instrument.startsWith('preset_')) {
+          const index = parseInt(instrument.split('_')[1]);
+          const PRESET_LIBRARY = [
+            { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
+            { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
+            { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
+            { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
+            { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
+            { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
+            { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
+            { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+          ];
+          return PRESET_LIBRARY[index];
+        }
+        return null;
+      };
+
+      const customConfig = getCustomConfig(voiceInstrument);
+
+      voice.notes?.forEach(note => {
+        const sixteenthNoteDuration = (60 / previewTempo) / 4;
+        const startTime = note.beat * sixteenthNoteDuration * 1000;
+        const noteDuration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
+        
+        const timeout = setTimeout(() => {
+          if (previewTimeoutRef.current) {
+            if (customConfig) {
+              import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
+                playNoteWithCustomInstrument(note.pitch, noteDuration, volume * 0.7, customConfig);
+              });
+            } else {
+              playNote(note.pitch, noteDuration, volume * 0.7, voiceIndex, voiceInstrument);
+            }
+          }
+        }, startTime);
+        
+        timeouts.push(timeout);
+      });
+    });
+    
+    // Auto-stop after duration
+    const maxBeat = Math.max(
+      ...allPreviewVoices.flatMap(v => v.notes?.map(n => n.beat + (n.duration || 1)) || [0])
+    );
+    const totalDuration = maxBeat * ((60 / previewTempo) / 4) * 1000 + 500;
+    
+    const stopTimeout = setTimeout(() => {
+      stopAllNotes();
+      setPreviewingProjectId(null);
       previewTimeoutRef.current = null;
     }, totalDuration);
     
@@ -1604,10 +1716,10 @@ export default function CounterpointGenerator() {
                               <div className="flex-1">
                                 <p className="text-white font-medium text-lg">{project.name}</p>
                                 <div className="flex gap-2 mt-2 flex-wrap">
-                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded">
+                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded font-medium">
                                     {project.settings?.key || 'C'} {project.settings?.mode || 'major'}
                                   </span>
-                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded font-medium">
                                     {project.settings?.timeSignature || '4/4'}
                                   </span>
                                   <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
@@ -1624,6 +1736,17 @@ export default function CounterpointGenerator() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={(e) => handlePreviewProject(project, e)}
+                                  className={`${previewingProjectId === project.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-amber-500/80 hover:bg-amber-500 text-slate-900'}`}
+                                >
+                                  {previewingProjectId === project.id ? (
+                                    <>⏹ Stop</>
+                                  ) : (
+                                    <>▶ Preview</>
+                                  )}
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
