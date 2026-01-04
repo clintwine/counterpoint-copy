@@ -57,99 +57,397 @@ export default function AIChatbot({
     const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
     const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : 64;
 
-    // Build training context from Bach Inventions
-    const trainingExamples = songs.slice(0, 8).map(song => {
+    // Build sophisticated training context from Bach Inventions with deep analysis
+    const trainingExamples = songs.slice(0, 12).map(song => {
       const notes = song.cantusFirmus || [];
       const durations = notes.map(n => n.duration || 1);
+      const pitches = notes.map(n => n.pitch);
+      
+      // Analyze intervals
+      const intervals = [];
+      for (let i = 1; i < notes.length; i++) {
+        const prev = pitches[i - 1];
+        const curr = pitches[i];
+        const prevMidi = parsePitchToMidi(prev);
+        const currMidi = parsePitchToMidi(curr);
+        intervals.push(currMidi - prevMidi);
+      }
+      
+      // Analyze melodic shape
+      const leaps = intervals.filter(int => Math.abs(int) > 2).length;
+      const steps = intervals.filter(int => Math.abs(int) <= 2).length;
+      const direction = intervals.filter(int => int > 0).length > intervals.filter(int => int < 0).length ? 'ascending tendency' : 'descending tendency';
+      
+      // Find sequences (repeating patterns at different pitch levels)
+      const sequences = findSequences(notes);
+      
       return `
-${song.name} - ${song.settings?.key || 'C'} ${song.settings?.mode || 'major'}
-Total notes: ${notes.length}
-Duration variety: ${Math.min(...durations)} to ${Math.max(...durations)} (uses ${new Set(durations).size} different durations)
-Rhythmic pattern: ${durations.slice(0, 20).join(',')}
-First 15 notes: ${JSON.stringify(notes.slice(0, 15))}`;
-    }).join('\n---\n');
+━━━ ${song.name} ━━━
+Key: ${song.settings?.key || 'C'} ${song.settings?.mode || 'major'} | Tempo: ${song.settings?.tempo || 80} BPM
+Total: ${notes.length} notes | Range: ${pitches[0]} to ${pitches[pitches.length - 1]}
+
+RHYTHM ANALYSIS:
+• Duration types: ${new Set(durations).size} different values (${Array.from(new Set(durations)).sort((a, b) => a - b).join(', ')})
+• Rhythmic density: ${(notes.length / Math.max(...notes.map(n => n.beat + (n.duration || 1))) * 4).toFixed(2)} notes/quarter
+• Pattern: ${durations.slice(0, 24).join(',')}
+
+MELODIC ANALYSIS:
+• Steps vs Leaps: ${steps} steps (${((steps / intervals.length) * 100).toFixed(0)}%), ${leaps} leaps (${((leaps / intervals.length) * 100).toFixed(0)}%)
+• Direction: ${direction}
+• Interval distribution: ${getIntervalDistribution(intervals)}
+• Sequences found: ${sequences.length > 0 ? sequences.map(s => `${s.length} notes × ${s.repetitions}`).join(', ') : 'none detected'}
+
+FULL SCORE (first 30 notes):
+${JSON.stringify(notes.slice(0, 30), null, 2)}`;
+    }).join('\n\n');
+    
+    function parsePitchToMidi(pitch) {
+      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const match = pitch.match(/^([A-G]#?)(\d+)$/);
+      if (!match) return 60;
+      const [, note, octave] = match;
+      return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
+    }
+    
+    function getIntervalDistribution(intervals) {
+      const dist = {};
+      intervals.forEach(int => {
+        const abs = Math.abs(int);
+        dist[abs] = (dist[abs] || 0) + 1;
+      });
+      return Object.entries(dist).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([int, count]) => `±${int}(${count})`).join(', ');
+    }
+    
+    function findSequences(notes) {
+      const sequences = [];
+      for (let len = 3; len <= 8; len++) {
+        for (let i = 0; i <= notes.length - len * 2; i++) {
+          const pattern = notes.slice(i, i + len);
+          let reps = 1;
+          for (let j = i + len; j <= notes.length - len; j += len) {
+            const next = notes.slice(j, j + len);
+            const transposition = parsePitchToMidi(next[0].pitch) - parsePitchToMidi(pattern[0].pitch);
+            const isSequence = pattern.every((n, k) => {
+              const expectedMidi = parsePitchToMidi(n.pitch) + transposition;
+              const actualMidi = parsePitchToMidi(next[k]?.pitch || '');
+              return Math.abs(expectedMidi - actualMidi) <= 1;
+            });
+            if (isSequence) reps++;
+            else break;
+          }
+          if (reps >= 2) sequences.push({ length: len, repetitions: reps, startIndex: i });
+        }
+      }
+      return sequences.slice(0, 3);
+    }
 
     try {
       // Create abort controller for this request
       abortControllerRef.current = new AbortController();
       
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert composer trained on J.S. Bach's Two-Part Inventions. Create a sophisticated melodic line.
+        prompt: `You are a MASTER composer with deep knowledge of Baroque counterpoint, classical form, and advanced music theory. You have analyzed thousands of works by Bach, Palestrina, Fux, Mozart, and Beethoven. Your compositions are sophisticated, musical, and theoretically sound.
 
-TRAINING EXAMPLES FROM BACH INVENTIONS:
+═══════════════════════════════════════════════════════
+TRAINING CORPUS - BACH'S TWO-PART INVENTIONS (ANALYZED):
+═══════════════════════════════════════════════════════
+
 ${trainingExamples}
 
-KEY OBSERVATIONS FROM BACH:
-1. Uses VARIED note durations (0.25, 0.5, 1, 2, 4) extensively - never just quarter notes
-2. Creates rhythmic patterns that repeat and develop
-3. Uses sequences (melodic patterns repeated at different pitch levels)
-4. Includes scalar runs (8-16 consecutive notes moving stepwise)
-5. Balances fast passages (16th notes) with sustained notes
-6. Creates melodic contour with peaks and valleys
-7. Uses motivic development - introduces ideas and transforms them
+═══════════════════════════════════════════════════════
+ADVANCED COMPOSITIONAL PRINCIPLES:
+═══════════════════════════════════════════════════════
 
+🎼 RHYTHM & METER (CRITICAL):
+1. **Rhythmic Hierarchy**: Establish strong vs weak beats. Longer notes on downbeats, shorter on offbeats
+2. **Motivic Rhythm**: Create a distinctive rhythmic motif (e.g., [0.25, 0.25, 0.5, 1]) and develop it
+3. **Hemiola & Syncopation**: Use cross-rhythms (3 against 2) for sophistication
+4. **Duration Variety**: Mix 16ths (0.25), 8ths (0.5), quarters (1), halves (2), whole notes (4)
+5. **Density Curve**: Start sparse → build to climax with dense runs → resolve with space
+6. **Triplet Integration**: Use triplet subdivisions (duration 2.67, 5.33) for variety
+
+🎵 MELODIC CONSTRUCTION (MASTERCLASS):
+1. **Motif Development**: 
+   - Create a 3-5 note motif with distinctive rhythm + pitch contour
+   - Develop through: sequence, inversion, retrograde, augmentation, diminution
+2. **Sequences**: 
+   - Repeat motifs at different pitch levels (up/down 2nd, 3rd, 4th)
+   - Use 2-4 repetitions before breaking the pattern
+3. **Scalar Passages**:
+   - 8-16 note runs using scale tones (diatonic scales in the given key)
+   - Alternate direction every 1-2 octaves
+4. **Arpeggiation**:
+   - Outline I, IV, V, vi chords using arpeggios
+   - Mix broken chords with passing tones
+5. **Climax Architecture**:
+   - Build tension to highest note around 60-70% through
+   - Use wider intervals, faster rhythms approaching climax
+   - Resolve with descending motion and longer durations
+6. **Interval Usage**:
+   - 70% steps (M2, m2), 20% small leaps (m3, M3), 10% larger leaps (4th, 5th, 6th)
+   - Follow leaps with stepwise motion in opposite direction
+7. **Neighbor Tones & Passing Tones**:
+   - Use upper/lower neighbors for ornamentation
+   - Fill in leaps with passing tones
+
+🎯 HARMONIC AWARENESS:
+1. **Implied Harmony**: Even single lines imply chords - outline tonic, dominant, subdominant
+2. **Cadences**: Create clear phrase endings (V-I, IV-I patterns in final measures)
+3. **Non-Chord Tones**: Use suspensions, appoggiaturas, escape tones
+4. **Voice Leading**: Smooth connection between phrases
+
+🏗️ FORM & STRUCTURE:
+1. **Phrase Length**: 4 or 8 measure phrases (16 or 32 beats)
+2. **Antecedent-Consequent**: Question phrase → answer phrase
+3. **ABA Form**: Statement → contrasting middle → return
+4. **Spinning Out**: Continuous development without clear phrase breaks (Fortspinnung)
+
+⚡ EXPRESSION & CHARACTER:
+1. **Dynamic Shaping**: Use velocity variations (0.4-1.0) to create crescendo/diminuendo
+2. **Articulation Variety**: Mix legato passages with staccato accents
+3. **Mood Consistency**: Maintain character (energetic, lyrical, dramatic, playful)
+4. **Stylistic Idioms**: 
+   - Baroque: sequences, consistent motor rhythm, ornaments
+   - Classical: balanced phrases, clear cadences, alberti bass patterns
+   - Romantic: wide range, expressive leaps, rubato feel
+
+═══════════════════════════════════════════════════════
 CURRENT COMPOSITION CONTEXT:
-- Key: ${settings.key} ${settings.mode}
-- Tempo: ${tempo} BPM
-- Time signature: ${settings.timeSignature || '4/4'}
-- Available beats: 0 to ${settings.measures * 16}
+═══════════════════════════════════════════════════════
+
+📊 MUSICAL PARAMETERS:
+• Key: ${settings.key} ${settings.mode}
+• Tempo: ${tempo} BPM (${tempo < 80 ? 'slow/contemplative' : tempo < 120 ? 'moderate' : tempo < 160 ? 'energetic' : 'virtuosic'})
+• Time signature: ${settings.timeSignature || '4/4'}
+• Total measures: ${settings.measures}
+• Available beat range: 0 to ${settings.measures * 16}
+• Scale degrees: ${getScaleDegrees(settings.key, settings.mode)}
+
 ${currentNotes && currentNotes.length > 0 ? `
-- EXISTING MELODY IN SCORE: ${currentNotes.length} notes
-${JSON.stringify(currentNotes.slice(0, 20))}
-${currentNotes.length > 20 ? `... (${currentNotes.length - 20} more notes)` : ''}
+📝 EXISTING MELODY IN SCORE:
+• Total notes: ${currentNotes.length}
+• Current range: ${getPitchRange(currentNotes)}
+• Density: ${(currentNotes.length / Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) * 4).toFixed(2)} notes/quarter
+• Existing score excerpt:
+${JSON.stringify(currentNotes.slice(0, 30), null, 2)}
+${currentNotes.length > 30 ? `\n... (${currentNotes.length - 30} more notes)` : ''}
 
-NOTE: The user may want to edit/extend this existing melody rather than replace it.` : '- No existing melody in score (starting fresh)'}
+⚠️ EDIT MODE: The user may want to extend/modify this melody rather than replace it!` : '✨ FRESH COMPOSITION - No existing melody'}
 
-USER REQUEST: "${userMessage}"
+🎯 USER REQUEST: "${userMessage}"
 
-EDITING INSTRUCTIONS:
-- If the user asks to "edit", "extend", "add to", "modify", or "continue" an existing melody:
-  * For "extend" requests: START at beat ${currentNotes.length > 0 ? Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) : 0} (right after existing melody ends)
-  * For "edit measures X-Y" requests: ONLY generate notes for beats ${currentNotes.length > 0 ? `between the specified measures (e.g., if editing measures 5-8 in 4/4, generate notes from beat 64 to beat 128)` : ''}
-  * For partial edits: ONLY output notes for the requested section, NOT the entire score
-- For "replace" or "create new" requests: create entirely new melody starting from beat 0
+${getUserIntent(userMessage)}`}
 
-CRITICAL: When editing specific measures, ONLY generate notes for those measures. The system will automatically preserve other notes.
+function getScaleDegrees(key, mode) {
+  const major = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+  const minor = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+  return mode === 'minor' ? minor.join(', ') : major.join(', ');
+}
 
-GENERATION REQUIREMENTS:
+function getPitchRange(notes) {
+  if (!notes.length) return 'N/A';
+  const pitches = notes.map(n => n.pitch);
+  return `${pitches[0]} to ${pitches[pitches.length - 1]}`;
+}
 
-1. NOTE COUNT: ${userMessage.toLowerCase().includes('edit') && userMessage.match(/measure[s]?\s+(\d+)/i) ? 'Generate notes ONLY for the requested measures' : `Generate EXACTLY ${requestedNoteCount} or MORE notes`}
+function getUserIntent(message) {
+  const msg = message.toLowerCase();
+  if (msg.includes('virtuosic') || msg.includes('fast') || msg.includes('brilliant')) {
+    return `🎭 STYLE DETECTED: Virtuosic → Use dense 16th note runs, wide leaps, dynamic contrasts`;
+  }
+  if (msg.includes('lyrical') || msg.includes('singing') || msg.includes('expressive')) {
+    return `🎭 STYLE DETECTED: Lyrical → Flowing stepwise motion, longer note values, cantabile`;
+  }
+  if (msg.includes('energetic') || msg.includes('lively') || msg.includes('dance')) {
+    return `🎭 STYLE DETECTED: Energetic → Strong rhythmic drive, syncopation, motor rhythm`;
+  }
+  if (msg.includes('contemplative') || msg.includes('slow') || msg.includes('meditative')) {
+    return `🎭 STYLE DETECTED: Contemplative → Sparse texture, long notes, minimal ornamentation`;
+  }
+  if (msg.includes('baroque')) {
+    return `🎭 STYLE DETECTED: Baroque → Sequences, continuous motion, ornaments, terraced dynamics`;
+  }
+  if (msg.includes('classical')) {
+    return `🎭 STYLE DETECTED: Classical → Balanced phrases, clear cadences, alberti figures`;
+  }
+  if (msg.includes('romantic')) {
+    return `🎭 STYLE DETECTED: Romantic → Wide range, expressive leaps, rubato implications`;
+  }
+  return ``;
+}
 
-2. RHYTHM STRATEGY (CRITICAL):
-   - Use 16th notes (duration 0.25) for runs and ornamental passages - this creates 4 notes per beat!
-   - Use 8th notes (duration 0.5) for moderate motion - 2 notes per beat
-   - Mix in quarter (1), half (2), and whole (4) notes for variety
-   - Example 8-beat phrase: [0.25, 0.25, 0.25, 0.25, 0.5, 0.5, 1, 1] = 8 notes in 4 beats
-   - To reach ${requestedNoteCount} notes in ${settings.measures * 4} beats, average ${(requestedNoteCount / (settings.measures * 4)).toFixed(1)} notes per beat
+═══════════════════════════════════════════════════════
+TASK INSTRUCTIONS:
+═══════════════════════════════════════════════════════
 
-3. MELODIC CONSTRUCTION:
-   - Start with a memorable motif (4-6 notes)
-   - Develop it through sequence (repeat at different pitch levels)
-   - Include scalar runs: 8-16 consecutive notes in one direction
-   - Use arpeggios: outline chord tones
-   - Create climax around 2/3 through
-   - Use steps (2nds) more than leaps (3rds+), but include some leaps for interest
+📋 EDIT MODE DETECTION:
+${currentNotes.length > 0 ? `
+• EXTENDING: If user says "extend", "continue", or "add more" → START at beat ${Math.max(...currentNotes.map(n => n.beat + (n.duration || 1)))}
+• EDITING MEASURES: If user specifies "edit measures 5-8" → ONLY generate for that range
+• PARTIAL EDIT: Output ONLY new/changed notes, system merges with existing
+• REPLACE: If user says "new", "fresh", or "replace" → Start from beat 0, ignore existing` : `
+• FRESH START: No existing melody, create from scratch starting at beat 0`}
 
-4. PITCH RANGE: C3 to C6 (use full range)
+═══════════════════════════════════════════════════════
+GENERATION PARAMETERS:
+═══════════════════════════════════════════════════════
 
-5. BEAT POSITIONING:
-   - Distribute notes across full range: 0 to ${settings.measures * 16}
-   - Each note's beat value should be: previous_note.beat + previous_note.duration
-   - Example: [{beat: 0, duration: 0.25}, {beat: 0.25, duration: 0.25}, {beat: 0.5, duration: 0.5}...]
+📊 TARGET METRICS:
+• Note count: ${userMessage.toLowerCase().includes('edit') && userMessage.match(/measure[s]?\s+(\d+)/i) ? 'Match requested measure range only' : `MINIMUM ${requestedNoteCount} notes (more is better!)`}
+• Rhythmic density: ${(requestedNoteCount / (settings.measures * 4)).toFixed(1)} notes per quarter note average
+• Beat range: 0 to ${settings.measures * 16}
+• Pitch range: C3 to C6 (3+ octave range for expressivity)
 
-6. STYLE EMULATION:
-   - Study the Bach examples above - notice how they use varied rhythms
-   - Create flowing, singable lines
-   - Use ornamental figures (trills = fast alternating notes, turns = neighbor tone patterns)
-   - Think contrapuntally even for a single line
+⚡ RHYTHM GENERATION STRATEGY:
 
-CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} notes. Be generous with 16th note runs!`,
+**CRITICAL**: To generate ${requestedNoteCount}+ notes in ${settings.measures} measures:
+• Heavy use of 16th notes (duration 0.25) = 4 notes per beat
+• Moderate 8th notes (duration 0.5) = 2 notes per beat  
+• Strategic longer notes (1, 2, 4) for structural points
+
+**Example 16-beat phrase generating 32+ notes**:
+[0.25,0.25,0.25,0.25, 0.5,0.5, 0.25,0.25,0.25,0.25, 1, 0.25,0.25,0.25,0.25, 0.25,0.25,0.25,0.25, 0.5,0.5, 0.25,0.25,0.25,0.25, 2]
+= 28 notes in 16 beats (1.75 notes/beat)
+
+**Rhythmic Vocabulary**:
+• Fast runs: [0.25, 0.25, 0.25, 0.25] = 16th note stream
+• Ornamental turns: [0.25, 0.25, 0.5] = neighbor-tone figure
+• Syncopation: [0.5, 1, 0.5] = anticipation pattern
+• Hemiola: [2.67, 2.67, 2.67] = triplet grouping across barlines
+• Driving rhythm: [0.5, 0.5, 0.5, 0.5] = steady 8th notes
+
+🎼 MELODIC GENERATION ALGORITHM:
+
+**PHASE 1 - EXPOSITION (measures 1-${Math.ceil(settings.measures * 0.3)})**:
+1. Introduce PRIMARY MOTIF (4-5 notes with distinctive rhythm)
+2. Immediately sequence it (repeat +2nd, +3rd, or -2nd)
+3. Add connective scalar passage (6-10 notes ascending/descending)
+4. Close first phrase with cadential gesture (slower rhythm → tonic)
+
+**PHASE 2 - DEVELOPMENT (measures ${Math.ceil(settings.measures * 0.3) + 1}-${Math.ceil(settings.measures * 0.7)})**:
+1. Transform motif: invert intervals, retrograde, change rhythm
+2. Increase rhythmic density with 16th note runs
+3. Explore different pitch areas (move through I, IV, V harmonic centers)
+4. Build sequences: 3-4 repetitions of a pattern rising or falling by step
+5. Introduce CLIMAX (highest note, loudest dynamic, densest rhythm)
+
+**PHASE 3 - RECAPITULATION (measures ${Math.ceil(settings.measures * 0.7) + 1}-${settings.measures})**:
+1. Return to opening motif (possibly varied)
+2. Wind down rhythmic activity (fewer 16ths, more quarters/halves)
+3. Cadential formula: descending scale or arpeggio to tonic
+4. Final note on tonic (${settings.key}) with longer duration (2-4 beats)
+
+🎨 INTERVAL & CONTOUR GUIDELINES:
+• **Steps (M2, m2)**: 65-75% of intervals - foundation of melody
+• **Small leaps (m3, M3)**: 15-20% - adds interest
+• **Medium leaps (P4, P5)**: 8-12% - structural boundaries
+• **Large leaps (m6, M6, 8ve)**: 2-5% - dramatic moments (compensate opposite direction!)
+• **Melodic shape**: Arch form (rise to climax, fall to resolution) or wave form (undulating)
+• **Compensatory motion**: After leap >P4, move stepwise in opposite direction
+
+🔬 ADVANCED TECHNIQUES:
+
+1. **Sequence Types**:
+   - Ascending by step: Motif at C, D, E, F...
+   - Descending by third: Motif at G, E, C, A...
+   - Chromatic sequence: Include chromatic passing tones
+   - Rosalia: Sequential repetition (name from famous pattern)
+
+2. **Ornamentation**:
+   - Turns: [main, upper, main, lower, main] with durations [0.25, 0.25, 0.25, 0.25]
+   - Mordents: [main, lower, main] rapid
+   - Appoggiaturas: Dissonant note → resolution on beat
+
+3. **Rhythmic Motifs**:
+   - Scotch snap: [0.25, 0.75] (short-long)
+   - Lombardic rhythm: [0.75, 0.25] (long-short)  
+   - Dotted rhythms: [0.75, 0.25] or [1.5, 0.5]
+
+4. **Harmonic Outlining**:
+   - Tonic arpeggio: ${settings.key}, ${getThird(settings.key, settings.mode)}, ${getFifth(settings.key)}
+   - Dominant arpeggio: ${getFifth(settings.key)}, leading tone, dominant
+   - Diminished 7th: Dramatic tension builders
+
+${currentNotes && currentNotes.length > 0 ? `
+🔍 EXISTING MELODY ANALYSIS:
+• Note count: ${currentNotes.length}
+• Range: ${getPitchRange(currentNotes)}
+• Last note: ${currentNotes[currentNotes.length - 1]?.pitch} at beat ${currentNotes[currentNotes.length - 1]?.beat}
+• Melodic direction tendency: ${analyzeMelodicTendency(currentNotes)}
+• Rhythmic character: ${analyzeRhythmicCharacter(currentNotes)}
+
+💡 CONTINUATION STRATEGY:
+- Maintain stylistic consistency with existing material
+- Develop existing motifs if present
+- Ensure smooth voice leading from last note
+- Balance existing melodic contour` : ''}
+
+🎯 USER REQUEST INTERPRETATION: "${userMessage}"
+
+${getUserIntent(userMessage)}`}
+
+function getThird(key, mode) {
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const rootIdx = notes.indexOf(key);
+  const interval = mode === 'minor' ? 3 : 4; // minor 3rd or major 3rd
+  return notes[(rootIdx + interval) % 12];
+}
+
+function getFifth(key) {
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const rootIdx = notes.indexOf(key);
+  return notes[(rootIdx + 7) % 12]; // Perfect 5th
+}
+
+function analyzeMelodicTendency(notes) {
+  if (notes.length < 2) return 'insufficient data';
+  let ascending = 0, descending = 0;
+  for (let i = 1; i < notes.length; i++) {
+    const prev = parsePitchToMidi(notes[i-1].pitch);
+    const curr = parsePitchToMidi(notes[i].pitch);
+    if (curr > prev) ascending++;
+    if (curr < prev) descending++;
+  }
+  return ascending > descending ? 'ascending' : descending > ascending ? 'descending' : 'balanced';
+}
+
+function analyzeRhythmicCharacter(notes) {
+  const durations = notes.map(n => n.duration || 1);
+  const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+  const fastNotes = durations.filter(d => d <= 0.5).length;
+  const slowNotes = durations.filter(d => d >= 2).length;
+  
+  if (avgDuration < 0.6) return 'rapid/virtuosic';
+  if (avgDuration > 1.5) return 'sustained/chorale';
+  if (fastNotes > slowNotes * 2) return 'ornamental';
+  return 'moderate/balanced';
+}
+
+function parsePitchToMidi(pitch) {
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const match = pitch.match(/^([A-G]#?)(\d+)$/);
+  if (!match) return 60;
+  const [, note, octave] = match;
+  return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
+}
         response_json_schema: {
           type: "object",
           properties: {
-            description: { type: "string" },
+            compositionAnalysis: {
+              type: "object",
+              properties: {
+                form: { type: "string", description: "Overall form (e.g., ABA, through-composed, binary)" },
+                keyAreas: { type: "array", items: { type: "string" }, description: "Harmonic progression through piece" },
+                motivicContent: { type: "string", description: "Description of main motifs and their development" },
+                climaxLocation: { type: "string", description: "Where and how climax occurs" },
+                stylisticFeatures: { type: "array", items: { type: "string" }, description: "Notable compositional techniques used" }
+              }
+            },
+            description: { type: "string", description: "User-friendly description of the composition" },
             noteCount: { type: "number" },
-            rhythmicAnalysis: { type: "string" },
+            rhythmicAnalysis: { type: "string", description: "Analysis of rhythmic structure and patterns" },
+            melodicAnalysis: { type: "string", description: "Analysis of melodic contour and intervals" },
+            theoreticalJustification: { type: "string", description: "Why these compositional choices were made" },
             notes: {
               type: "array",
               items: {
@@ -157,11 +455,14 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
                 properties: {
                   pitch: { type: "string" },
                   beat: { type: "number" },
-                  duration: { type: "number" }
-                }
+                  duration: { type: "number" },
+                  velocity: { type: "number", description: "Dynamic level 0.4-1.0 for expressive shaping" }
+                },
+                required: ["pitch", "beat", "duration"]
               }
             }
-          }
+          },
+          required: ["compositionAnalysis", "description", "noteCount", "notes"]
         }
       });
 
@@ -172,14 +473,43 @@ CRITICAL: Count your notes! You must generate AT LEAST ${requestedNoteCount} not
                             userMessage.toLowerCase().includes('modify') ||
                             userMessage.match(/measure[s]?\s+\d+/i);
 
-      // Remove generating message and add result
+      // Remove generating message and add result with detailed analysis
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isGenerating);
+        
+        // Build rich response with analysis
+        let analysisText = response.description + '\n\n';
+        
+        if (response.compositionAnalysis) {
+          analysisText += `📊 **Musical Analysis**:\n`;
+          analysisText += `• Form: ${response.compositionAnalysis.form || 'N/A'}\n`;
+          analysisText += `• Key areas: ${response.compositionAnalysis.keyAreas?.join(' → ') || 'N/A'}\n`;
+          analysisText += `• Motifs: ${response.compositionAnalysis.motivicContent || 'N/A'}\n`;
+          analysisText += `• Climax: ${response.compositionAnalysis.climaxLocation || 'N/A'}\n`;
+          if (response.compositionAnalysis.stylisticFeatures?.length > 0) {
+            analysisText += `• Techniques: ${response.compositionAnalysis.stylisticFeatures.join(', ')}\n`;
+          }
+          analysisText += `\n`;
+        }
+        
+        if (response.rhythmicAnalysis) {
+          analysisText += `🎵 ${response.rhythmicAnalysis}\n`;
+        }
+        
+        if (response.melodicAnalysis) {
+          analysisText += `🎼 ${response.melodicAnalysis}\n`;
+        }
+        
+        if (response.theoreticalJustification) {
+          analysisText += `\n💭 ${response.theoreticalJustification}`;
+        }
+        
         return [...filtered, { 
           role: 'assistant', 
-          content: response.description,
+          content: analysisText,
           notes: notes,
-          editMode: isPartialEdit ? 'partial' : 'replace'
+          editMode: isPartialEdit ? 'partial' : 'replace',
+          analysis: response.compositionAnalysis
         }];
       });
     } catch (error) {
