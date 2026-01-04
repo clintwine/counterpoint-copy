@@ -500,52 +500,19 @@ ${currentNotes && currentNotes.length > 0 ? `
 
 🎯 USER REQUEST INTERPRETATION: "${userMessage}"
 
-${getUserIntent(userMessage)}`}
+${getUserIntent(userMessage)}
 
-function getThird(key, mode) {
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const rootIdx = notes.indexOf(key);
-  const interval = mode === 'minor' ? 3 : 4; // minor 3rd or major 3rd
-  return notes[(rootIdx + interval) % 12];
-}
+═══════════════════════════════════════════════════════
+GENERATION ALGORITHM - EXECUTE THIS STEP BY STEP:
+═══════════════════════════════════════════════════════
 
-function getFifth(key) {
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const rootIdx = notes.indexOf(key);
-  return notes[(rootIdx + 7) % 12]; // Perfect 5th
-}
+STEP 1: Design the motif (measures 1-2)
+STEP 2: Sequence the motif (measures 3-4)  
+STEP 3: Add contrasting material (measures 5-6)
+STEP 4: Build to climax (measures 7-8+)
+STEP 5: Resolve to tonic
 
-function analyzeMelodicTendency(notes) {
-  if (notes.length < 2) return 'insufficient data';
-  let ascending = 0, descending = 0;
-  for (let i = 1; i < notes.length; i++) {
-    const prev = parsePitchToMidi(notes[i-1].pitch);
-    const curr = parsePitchToMidi(notes[i].pitch);
-    if (curr > prev) ascending++;
-    if (curr < prev) descending++;
-  }
-  return ascending > descending ? 'ascending' : descending > ascending ? 'descending' : 'balanced';
-}
-
-function analyzeRhythmicCharacter(notes) {
-  const durations = notes.map(n => n.duration || 1);
-  const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
-  const fastNotes = durations.filter(d => d <= 0.5).length;
-  const slowNotes = durations.filter(d => d >= 2).length;
-  
-  if (avgDuration < 0.6) return 'rapid/virtuosic';
-  if (avgDuration > 1.5) return 'sustained/chorale';
-  if (fastNotes > slowNotes * 2) return 'ornamental';
-  return 'moderate/balanced';
-}
-
-function parsePitchToMidi(pitch) {
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const match = pitch.match(/^([A-G]#?)(\d+)$/);
-  if (!match) return 60;
-  const [, note, octave] = match;
-  return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
-}
+TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and varied durations.`,
         response_json_schema: {
           type: "object",
           properties: {
