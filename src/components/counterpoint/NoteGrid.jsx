@@ -1702,18 +1702,6 @@ export default function NoteGrid({
                 AI Composer
                 {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              {currentUser ? (
-                <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
           </div>
