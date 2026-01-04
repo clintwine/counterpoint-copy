@@ -138,44 +138,10 @@ export default function PlaybackControls({
     };
   }, [isDragging, onTempoChange]);
 
-  const getInitials = (email) => {
-    if (!email) return '?';
-    const name = email.split('@')[0];
-    return name.slice(0, 2).toUpperCase();
-  };
-
   return (
     <>
       {/* Transport controls and tempo */}
       <div className="flex items-center gap-2 justify-center">
-        {/* User avatar - positioned at far left */}
-        {currentUser && (
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button 
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-[#D4AF37] text-[#1E1E1E] font-semibold text-sm border-2 border-[#3A3A3A] hover:bg-[#E5BF47] transition-colors cursor-pointer" 
-                  title={currentUser.email}
-                >
-                  {getInitials(currentUser.email)}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A]">
-                <DropdownMenuItem disabled className="text-white/50 text-xs cursor-default">
-                  {currentUser.email}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-                <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <div className="w-px h-6 bg-[#3A3A3A]" />
-          </>
-        )}
-        
         {/* Transport controls */}
         <div className="flex items-center bg-[#595959] rounded-md">
           <Button
