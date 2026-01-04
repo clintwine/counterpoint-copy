@@ -789,8 +789,8 @@ export default function NoteGrid({
   }, [customInstruments]);
 
   // Play note sound when adding
-  const playNoteSound = useCallback((pitch, note = null) => {
-    initAudio();
+  const playNoteSound = useCallback(async (pitch, note = null) => {
+    await initAudio();
     const instrument = voices[activeVoice]?.instrument || 'organ';
     const customConfig = getInstrumentConfig(instrument);
     
@@ -2476,7 +2476,7 @@ export default function NoteGrid({
                                 return (
                                   <div
                                     key={`${voiceIndex}-${note.beat.toFixed(3)}-${note.pitch}`}
-                                    onMouseDown={(e) => {
+                                    onMouseDown={async (e) => {
                                               e.stopPropagation();
                                               console.log('[NoteGrid] Existing note mousedown', { pitch, beat, hasPendingNote: !!pendingNote });
                                               setPendingNote(null); // Clear any pending note when clicking existing note
@@ -2484,7 +2484,7 @@ export default function NoteGrid({
                                               const coords = getEventCoords(e);
                                               const rect = e.currentTarget.getBoundingClientRect();
                                               const clickX = coords.clientX - rect.left;
-                                              playNoteSound(pitch, note);
+                                              await playNoteSound(pitch, note);
 
                                     if (clickX > rect.width - 10) {
                                                     // Right edge resize
@@ -2553,7 +2553,7 @@ export default function NoteGrid({
                                               setPendingNote(null); // Clear pending note when starting drag
                                               }
                                     }}
-                                    onTouchStart={(e) => {
+                                    onTouchStart={async (e) => {
                                                                                 e.stopPropagation();
                                                                                 e.preventDefault();
                                                                                 setPendingNote(null); // Clear any pending note when touching existing note
@@ -2563,7 +2563,7 @@ export default function NoteGrid({
                                                                                 const coords = { clientX: touch.clientX, clientY: touch.clientY };
                                                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                                                 const clickX = coords.clientX - rect.left;
-                                                                                playNoteSound(note.pitch, note);
+                                                                                await playNoteSound(note.pitch, note);
 
                                                                                 if (clickX > rect.width - 10) {
                                                                                   // Right edge resize mode
