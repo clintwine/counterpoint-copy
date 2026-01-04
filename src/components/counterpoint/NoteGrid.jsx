@@ -5,7 +5,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu, LogIn, LogOut } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -321,7 +322,8 @@ export default function NoteGrid({
               snapToGrid: snapToGridProp = true,
               onSnapToGridChange,
               chatbotActive = false,
-              projectName = ''
+              projectName = '',
+              currentUser
             }) {
   const gridRef = useRef(null);
   const containerRef = useRef(null);
@@ -1700,6 +1702,18 @@ export default function NoteGrid({
                 AI Composer
                 {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
               </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+              {currentUser ? (
+                <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => base44.auth.redirectToLogin(window.location.href)} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           </div>
