@@ -1359,6 +1359,29 @@ export default function CounterpointGenerator() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-1"
                   >
+                    <div className="flex items-center justify-end px-4 py-2">
+                      {currentUser ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            await base44.auth.logout();
+                          }}
+                          className="text-white/70 hover:text-white hover:bg-slate-700"
+                        >
+                          Logout ({currentUser.email})
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => base44.auth.redirectToLogin(window.location.href)}
+                          className="text-white/70 hover:text-white hover:bg-slate-700"
+                        >
+                          Login
+                        </Button>
+                      )}
+                    </div>
                                 {/* Load Project Dialog */}
               <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
                 <DialogTrigger asChild>
