@@ -80,6 +80,7 @@ export default function CounterpointGenerator() {
   const [countInBeats, setCountInBeats] = useState(4);
   const [masterVolume, setMasterVolume] = useState(80);
   const recordedNotesRef = useRef([]);
+  const activeRecordingNotesRef = useRef(new Map()); // Track note-on events during recording
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
   const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
   
@@ -1288,13 +1289,26 @@ export default function CounterpointGenerator() {
 
   const handleRecordToggle = () => {
     if (isRecording) {
-      // Stop recording
+      // Stop recording - finalize any held notes
+      activeRecordingNotesRef.current.forEach((noteStart, pitch) => {
+        const duration = Math.max(0.25, Math.round((playheadPosition - noteStart.startBeat) * 1000) / 1000);
+        const newNote = {
+          pitch,
+          beat: noteStart.startBeat,
+          duration: duration,
+          velocity: noteStart.velocity
+        };
+        recordedNotesRef.current.push(newNote);
+        setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
+      });
+      
       console.log('Stopping recording. Total notes recorded:', recordedNotesRef.current.length);
       setIsRecording(false);
       setIsPlaying(false);
       setIsCountingIn(false);
       stopAllNotes();
       recordedNotesRef.current = [];
+      activeRecordingNotesRef.current.clear();
     } else {
       // Start count-in
       ensureAudio();
@@ -1339,23 +1353,38 @@ export default function CounterpointGenerator() {
     if (isRecording && playheadPosition >= 0) {
       const recordBeat = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
       
-      // Check if this note at this beat already exists
-      const alreadyRecorded = recordedNotesRef.current.some(
-        n => n.pitch === pitch && Math.abs(n.beat - recordBeat) < 0.5
-      );
-      if (!alreadyRecorded) {
-        const newNote = {
-          pitch,
-          beat: Math.round(recordBeat * 1000) / 1000, // Round to 3 decimals
-          duration: 1,
+      // Track note-on event
+      if (!activeRecordingNotesRef.current.has(pitch)) {
+        activeRecordingNotesRef.current.set(pitch, {
+          startBeat: Math.round(recordBeat * 1000) / 1000,
           velocity: 0.8
-        };
-        recordedNotesRef.current.push(newNote);
-        console.log('Recorded note:', newNote, 'Total recorded:', recordedNotesRef.current.length);
-        
-        // Update cantusFirmus immediately for real-time visual feedback
-        setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
+        });
       }
+    }
+  }, [isRecording, playheadPosition, snapToGrid]);
+
+  // Handle note release during recording
+  const handleNoteRelease = useCallback((pitch) => {
+    if (isRecording && activeRecordingNotesRef.current.has(pitch)) {
+      const noteStart = activeRecordingNotesRef.current.get(pitch);
+      const currentPos = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
+      const duration = Math.max(0.25, Math.round((currentPos - noteStart.startBeat) * 1000) / 1000);
+      
+      const newNote = {
+        pitch,
+        beat: noteStart.startBeat,
+        duration: duration,
+        velocity: noteStart.velocity
+      };
+      
+      recordedNotesRef.current.push(newNote);
+      console.log('Recorded note:', newNote, 'Duration:', duration);
+      
+      // Update cantusFirmus immediately for real-time visual feedback
+      setCantusFirmus(prev => [...prev, newNote].sort((a, b) => a.beat - b.beat));
+      
+      // Remove from active tracking
+      activeRecordingNotesRef.current.delete(pitch);
     }
   }, [isRecording, playheadPosition, snapToGrid]);
 
@@ -2265,6 +2294,7 @@ export default function CounterpointGenerator() {
                                     onPressedNotesChange={setPressedPianoNotes}
                                     onPopOut={() => setPianoPopout(true)}
                                     onNotePress={handleNotePress}
+                                    onNoteRelease={handleNoteRelease}
                                     effects={effects}
                                     onEffectsChange={setEffects}
                                     envelope={envelope}
@@ -2341,6 +2371,7 @@ export default function CounterpointGenerator() {
                 }}
                 onPressedNotesChange={setPressedPianoNotes}
                 onNotePress={handleNotePress}
+                onNoteRelease={handleNoteRelease}
                 effects={effects}
                 onEffectsChange={setEffects}
                 envelope={envelope}

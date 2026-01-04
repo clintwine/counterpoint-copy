@@ -257,7 +257,7 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
 
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, onNoteRelease, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
   const octaves = FULL_PIANO_OCTAVES;
   const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
@@ -397,8 +397,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
         onPressedNotesChange?.(next);
         return next;
       });
+      
+      // Notify parent about note release for recording
+      onNoteRelease?.(pitch);
     }
-  }, [envelope.release]);
+  }, [envelope.release, onNoteRelease]);
 
   const handleMouseDown = useCallback((e, note, octave) => {
     e.preventDefault();
