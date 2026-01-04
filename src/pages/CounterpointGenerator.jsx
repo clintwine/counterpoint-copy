@@ -1351,7 +1351,8 @@ export default function CounterpointGenerator() {
   // Handle note press during recording
   const handleNotePress = useCallback((pitch) => {
     if (isRecording && playheadPosition >= 0) {
-      const recordBeat = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
+      // Always record at exact position, never quantize during recording
+      const recordBeat = playheadPosition;
       
       // Track note-on event
       if (!activeRecordingNotesRef.current.has(pitch)) {
@@ -1361,13 +1362,14 @@ export default function CounterpointGenerator() {
         });
       }
     }
-  }, [isRecording, playheadPosition, snapToGrid]);
+  }, [isRecording, playheadPosition]);
 
   // Handle note release during recording
   const handleNoteRelease = useCallback((pitch) => {
     if (isRecording && activeRecordingNotesRef.current.has(pitch)) {
       const noteStart = activeRecordingNotesRef.current.get(pitch);
-      const currentPos = snapToGrid ? Math.floor(playheadPosition) : playheadPosition;
+      // Always use exact position for recording, never quantize
+      const currentPos = playheadPosition;
       const duration = Math.max(0.25, Math.round((currentPos - noteStart.startBeat) * 1000) / 1000);
       
       const newNote = {
@@ -1386,7 +1388,7 @@ export default function CounterpointGenerator() {
       // Remove from active tracking
       activeRecordingNotesRef.current.delete(pitch);
     }
-  }, [isRecording, playheadPosition, snapToGrid]);
+  }, [isRecording, playheadPosition]);
 
   const handleSeek = (beat) => {
     setCurrentBeat(beat);
