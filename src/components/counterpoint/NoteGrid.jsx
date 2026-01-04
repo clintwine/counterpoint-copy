@@ -2107,11 +2107,11 @@ export default function NoteGrid({
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
                                                                         const isPianoPressed = pressedPianoNotes.has(pitch);
                                                                         
-                                                                        const playPianoKey = () => {
-                                                                          initAudio();
+                                                                        const playPianoKey = async () => {
+                                                                          await initAudio();
                                                                           const customConfig = getInstrumentConfig(pianoInstrument);
                                                                           if (customConfig) {
-                                                                            playNoteWithCustomInstrument(pitch, 0.5, 0.7, customConfig);
+                                                                            await playNoteWithCustomInstrument(pitch, 0.5, 0.7, customConfig);
                                                                           } else {
                                                                             playNote(pitch, 0.5, 0.7, 0, pianoInstrument);
                                                                           }
@@ -2120,13 +2120,16 @@ export default function NoteGrid({
                                                                         return (
                                                                           <div 
                                                                             key={pitch}
+                                                                            onMouseDown={(e) => {
+                                                                              e.stopPropagation();
+                                                                              playPianoKey();
+                                                                            }}
                                                                             onTouchEnd={(e) => {
-                                                                                                    // Only play note on tap, not after scroll
-                                                                                                    if (!e.defaultPrevented) {
-                                                                                                      playPianoKey();
-                                                                                                    }
-                                                                                                  }}
-                                                                            onClick={playPianoKey}
+                                                                              e.stopPropagation();
+                                                                              if (!e.defaultPrevented) {
+                                                                                playPianoKey();
+                                                                              }
+                                                                            }}
                                                                             className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
                                                                               isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-slate-900 font-semibold' : isSharp ? 'text-white/50' : 'text-slate-900'
                                                                             }`}
