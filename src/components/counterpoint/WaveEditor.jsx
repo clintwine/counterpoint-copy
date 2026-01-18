@@ -1358,7 +1358,7 @@ export default function WaveEditor({
                     <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                    <SelectContent className="bg-slate-800 border-slate-700 z-[200000]">
                       {WAVEFORMS.map(w => (
                         <SelectItem key={w} value={w} className="text-white text-sm capitalize">{w}</SelectItem>
                       ))}
@@ -1488,7 +1488,7 @@ export default function WaveEditor({
                         <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                        <SelectContent className="bg-slate-800 border-slate-700 z-[200000]">
                           {['lowpass', 'highpass', 'bandpass', 'notch'].map(t => (
                             <SelectItem key={t} value={t} className="text-white text-sm capitalize">{t}</SelectItem>
                           ))}
@@ -1938,7 +1938,7 @@ export default function WaveEditor({
                         <SelectTrigger className="h-7 bg-slate-700 border-slate-600 text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700 z-[10000]">
+                        <SelectContent className="bg-slate-800 border-slate-700 z-[200000]">
                           <SelectItem value="peaking" className="text-white text-xs">Peak</SelectItem>
                           <SelectItem value="notch" className="text-white text-xs">Notch</SelectItem>
                         </SelectContent>
