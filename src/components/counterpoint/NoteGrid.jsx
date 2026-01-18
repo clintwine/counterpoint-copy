@@ -1191,8 +1191,11 @@ export default function NoteGrid({
                   duration: lastNoteDuration, 
                   velocity: 0.8 
                 }].sort((a, b) => a.beat - b.beat);
-                saveToHistory(newNotes);
-                onNotesUpdate(newNotes);
+                
+                // Don't save to history or update until mouseup to avoid playback interruption
+                // Store as pending instead
+                setPendingNote({ pitch, beat: beatValue, clickX: coords.clientX, clickY: coords.clientY });
+                return; // Early return - wait for mouseup
                 
                 // Auto-expand if adding note in last measure
                 const lastMeasureStart = (measures - 1) * beatsPerMeasure;
@@ -1306,6 +1309,10 @@ export default function NoteGrid({
                   // Preserve fractional beats when painting
                   const beatValue = snapToGrid ? Math.round(cell.beat / quantizeGrid) * quantizeGrid : Math.round(cell.beat * 1000) / 1000;
                   const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: beatValue, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
+                  // Save to history immediately for paint mode (not during playback typically)
+                  if (!isPlaying) {
+                    saveToHistory(newNotes);
+                  }
                   onNotesUpdate(newNotes);
                   
                   // Auto-expand if adding note in last measure
@@ -1489,7 +1496,11 @@ export default function NoteGrid({
           duration: lastNoteDuration, 
           velocity: 0.8 
           }].sort((a, b) => a.beat - b.beat);
-          saveToHistory(newNotes);
+          
+          // Save to history only if not playing to avoid interruption
+          if (!isPlaying) {
+            saveToHistory(newNotes);
+          }
           onNotesUpdate(newNotes);
 
           // Auto-expand if adding note in last measure
