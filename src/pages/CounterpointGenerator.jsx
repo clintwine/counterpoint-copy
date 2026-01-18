@@ -215,12 +215,24 @@ export default function CounterpointGenerator() {
     setCustomInstruments(savedInstruments);
   }, [savedInstruments.length]);
 
-  // Add death metal guitar preset on first load (only once)
+  // Add death metal guitar preset on first load (only once) and clean up duplicates
   const deathMetalAddedRef = useRef(false);
   useEffect(() => {
-    if (deathMetalAddedRef.current || savedInstruments.length === 0) return;
-    const hasDeathMetal = savedInstruments.some(i => i.name === 'Death Metal Guitar');
-    if (!hasDeathMetal) {
+    if (deathMetalAddedRef.current) return;
+    deathMetalAddedRef.current = true;
+    
+    // Load local instruments and clean up duplicates
+    const localInsts = loadLocalInstruments();
+    const deathMetalInstruments = localInsts.filter(i => i.name === 'Death Metal Guitar');
+    
+    if (deathMetalInstruments.length > 1) {
+      // Remove all death metal guitars and keep only one
+      const cleanedInstruments = localInsts.filter(i => i.name !== 'Death Metal Guitar');
+      cleanedInstruments.push(deathMetalInstruments[0]); // Keep the first one
+      localStorage.setItem('counterpoint-local-instruments', JSON.stringify(cleanedInstruments));
+      setLocalInstruments(cleanedInstruments);
+    } else if (deathMetalInstruments.length === 0) {
+      // Add it if it doesn't exist
       const deathMetalGuitar = {
         name: 'Death Metal Guitar',
         oscillators: [
@@ -245,11 +257,8 @@ export default function CounterpointGenerator() {
         volume: 1.0
       };
       saveInstrumentLocally(deathMetalGuitar);
-      deathMetalAddedRef.current = true;
-    } else if (hasDeathMetal) {
-      deathMetalAddedRef.current = true;
     }
-  }, [savedInstruments]);
+  }, []);
 
   // Local storage helper functions
   const saveProjectLocally = (name, data) => {
