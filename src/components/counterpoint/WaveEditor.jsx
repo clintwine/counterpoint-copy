@@ -1720,7 +1720,7 @@ export default function WaveEditor({
                       </div>
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2 bg-slate-800 border-slate-700 z-[10000]">
+                  <PopoverContent className="w-48 p-2 bg-slate-800 border-slate-700 z-[200000]">
                     <div className="space-y-1">
                       <button
                         onClick={() => {
