@@ -215,10 +215,12 @@ export default function CounterpointGenerator() {
     setCustomInstruments(savedInstruments);
   }, [savedInstruments.length]);
 
-  // Add death metal guitar preset on first load
+  // Add death metal guitar preset on first load (only once)
+  const deathMetalAddedRef = useRef(false);
   useEffect(() => {
+    if (deathMetalAddedRef.current) return;
     const hasDeathMetal = savedInstruments.some(i => i.name === 'Death Metal Guitar');
-    if (!hasDeathMetal && savedInstruments.length >= 0) {
+    if (!hasDeathMetal) {
       const deathMetalGuitar = {
         name: 'Death Metal Guitar',
         oscillators: [
@@ -243,8 +245,9 @@ export default function CounterpointGenerator() {
         volume: 1.0
       };
       saveInstrumentLocally(deathMetalGuitar);
+      deathMetalAddedRef.current = true;
     }
-  }, [savedInstruments]);
+  }, []);
 
   // Local storage helper functions
   const saveProjectLocally = (name, data) => {
