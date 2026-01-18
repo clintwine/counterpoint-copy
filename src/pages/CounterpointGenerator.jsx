@@ -215,6 +215,37 @@ export default function CounterpointGenerator() {
     setCustomInstruments(savedInstruments);
   }, [savedInstruments.length]);
 
+  // Add death metal guitar preset on first load
+  useEffect(() => {
+    const hasDeathMetal = savedInstruments.some(i => i.name === 'Death Metal Guitar');
+    if (!hasDeathMetal && savedInstruments.length >= 0) {
+      const deathMetalGuitar = {
+        name: 'Death Metal Guitar',
+        oscillators: [
+          { waveform: 'sawtooth', detune: -12, gain: 0.8, harmonic: 1, phase: 0 },
+          { waveform: 'square', detune: 8, gain: 0.7, harmonic: 1, phase: 45 },
+          { waveform: 'sawtooth', detune: -5, gain: 0.6, harmonic: 2, phase: 90 },
+          { waveform: 'square', detune: 15, gain: 0.5, harmonic: 1, phase: 180 }
+        ],
+        envelope: { attack: 0.002, decay: 0.12, sustain: 0.65, release: 0.2 },
+        effects: [
+          { type: 'filter', config: { filterType: 'lowpass', frequency: 4200, Q: 2.8 } }
+        ],
+        eq: [
+          { frequency: 60, gain: 8, Q: 1.2, type: 'lowshelf' },
+          { frequency: 250, gain: -6, Q: 2, type: 'peaking' },
+          { frequency: 1000, gain: -8, Q: 2.5, type: 'peaking' },
+          { frequency: 4000, gain: 10, Q: 1.5, type: 'peaking' },
+          { frequency: 12000, gain: 5, Q: 1, type: 'highshelf' }
+        ],
+        distortion: 85,
+        bitcrush: 3,
+        volume: 1.0
+      };
+      saveInstrumentLocally(deathMetalGuitar);
+    }
+  }, [savedInstruments]);
+
   // Local storage helper functions
   const saveProjectLocally = (name, data) => {
     const projects = JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]');
