@@ -2393,23 +2393,32 @@ export default function NoteGrid({
                                     </span>
 
                                     {/* Individual beat backgrounds for loop highlighting */}
-                                    {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
-                                      const beat = measureStartBeat + beatIndex;
-                                      const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
-                                      const isLoopStart = loopStart !== null && beat === Math.floor(loopStart);
-                                      const isLoopEnd = loopEnd !== null && beat === Math.floor(loopEnd) - 1;
-                                      return (
-                                        <div
-                                          key={`bg-${beatIndex}`}
-                                          className={`absolute top-0 bottom-0 pointer-events-none ${isLoopStart || isLoopEnd ? 'hover:cursor-col-resize' : ''}`}
-                                          style={{
-                                            left: `${beatIndex * CELL_WIDTH}px`,
-                                            width: `${CELL_WIDTH}px`,
-                                            backgroundColor: inLoop ? '#C8A570' : 'transparent'
-                                          }}
-                                        />
-                                      );
-                                    })}
+                                    {(() => {
+                                      // Check if this measure has any selected notes
+                                      const measureNotes = cantusFirmus.filter(n => {
+                                        const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
+                                        return noteMeasure === measureIndex;
+                                      });
+                                      const measureHasSelection = measureNotes.some(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                      
+                                      return Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
+                                        const beat = measureStartBeat + beatIndex;
+                                        const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+                                        const isLoopStart = loopStart !== null && beat === Math.floor(loopStart);
+                                        const isLoopEnd = loopEnd !== null && beat === Math.floor(loopEnd) - 1;
+                                        return (
+                                          <div
+                                            key={`bg-${beatIndex}`}
+                                            className={`absolute top-0 bottom-0 pointer-events-none ${isLoopStart || isLoopEnd ? 'hover:cursor-col-resize' : ''}`}
+                                            style={{
+                                              left: `${beatIndex * CELL_WIDTH}px`,
+                                              width: `${CELL_WIDTH}px`,
+                                              backgroundColor: inLoop ? '#C8A570' : measureHasSelection ? 'rgba(212, 175, 55, 0.25)' : 'transparent'
+                                            }}
+                                          />
+                                        );
+                                      });
+                                    })()}
                                     
                                     {/* Loop edge indicators with resize cursors */}
                                     {loopStart !== null && loopEnd !== null && (
