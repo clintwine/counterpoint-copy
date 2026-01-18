@@ -2348,10 +2348,42 @@ export default function NoteGrid({
                                    onClick={(e) => {
                                      // Only trigger if not dragging loop region
                                      if (!isLoopSelecting) {
-                                       const beat = getBeatFromHeaderPosition(e.clientX);
-                                       if (beat !== null) {
-                                         const seekBeat = snapToGrid ? Math.round(beat / quantizeGrid) * quantizeGrid : beat;
-                                         onSeek?.(seekBeat);
+                                       // Select/deselect all notes in this measure
+                                       const measureNotes = cantusFirmus.filter(n => {
+                                         const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
+                                         return noteMeasure === measureIndex;
+                                       });
+                                       
+                                       if (measureNotes.length > 0) {
+                                         const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+                                         
+                                         if (e.shiftKey) {
+                                           // Add/remove measure to/from selection
+                                           const allAlreadySelected = measureNotes.every(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                           
+                                           if (allAlreadySelected) {
+                                             // Remove this measure from selection
+                                             setSelectedNotes(prev => {
+                                               const next = new Set(prev);
+                                               measureKeys.forEach(k => next.delete(k));
+                                               return next;
+                                             });
+                                           } else {
+                                             // Add this measure to selection
+                                             setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
+                                           }
+                                         } else {
+                                           // Regular click - toggle selection of just this measure
+                                           const allAlreadySelected = measureNotes.every(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                           
+                                           if (allAlreadySelected) {
+                                             // Deselect this measure
+                                             setSelectedNotes(new Set());
+                                           } else {
+                                             // Select only this measure
+                                             setSelectedNotes(measureKeys);
+                                           }
+                                         }
                                        }
                                      }
                                    }}
