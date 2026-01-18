@@ -366,9 +366,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     const customConfig = getCustomConfig();
 
     if (customConfig) {
-      // Use custom instrument
-      const oscObj = playNoteWithCustomInstrument(pitch, 2, envelope.sustain, customConfig);
-      activeOscillators.current[pitch] = oscObj;
+      // Use custom instrument - DON'T store the result as it's not a sustaining note
+      playNoteWithCustomInstrument(pitch, 2, envelope.sustain, customConfig);
+      // Mark as playing but don't store oscillator object
+      activeOscillators.current[pitch] = true;
     } else {
       // Use built-in instrument
       const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
@@ -382,12 +383,13 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
     // Notify parent about note press for recording
     onNotePress?.(pitch);
-  }, [instrument, envelope, customInstruments, onPressedNotesChange, onNotePress]);
+  }, [instrument, envelope, customInstruments, onPressedNotesChange, onNotePress, getCustomConfig]);
 
   const endNote = useCallback((pitch) => {
     if (activeOscillators.current[pitch]) {
-      // Only call stopNoteSustain if it's an oscillator object
-      if (typeof activeOscillators.current[pitch] === 'object') {
+      // Only call stopNoteSustain if it's an oscillator object (built-in instruments)
+      // Custom instruments handle their own duration, so we don't need to stop them
+      if (typeof activeOscillators.current[pitch] === 'object' && activeOscillators.current[pitch] !== true) {
         stopNoteSustain(activeOscillators.current[pitch], envelope.release);
       }
       delete activeOscillators.current[pitch];
@@ -401,7 +403,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       // Notify parent about note release for recording
       onNoteRelease?.(pitch);
     }
-  }, [envelope.release, onNoteRelease]);
+  }, [envelope.release, onNoteRelease, onPressedNotesChange]);
 
   const handleMouseDown = useCallback(async (e, note, octave) => {
     e.preventDefault();

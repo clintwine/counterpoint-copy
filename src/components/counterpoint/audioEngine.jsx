@@ -461,6 +461,20 @@ export function getCustomInstruments() {
 export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig, articulation = 'normal', tempo = 80, pitchBend = 0) {
   if (!audioContext) initAudio();
   
+  // Palm mute for Death Metal Guitar (velocity <= 0.4)
+  if (customConfig.name === 'Death Metal Guitar' && volume <= 0.4) {
+    // Create palm muted version: shorter duration, less sustain, damped filter
+    const palmMutedConfig = {
+      ...customConfig,
+      envelope: { ...customConfig.envelope, sustain: 0.2, release: 0.1 },
+      effects: [
+        { type: 'filter', config: { filterType: 'lowpass', frequency: 800, Q: 3 } }
+      ],
+      distortion: 40
+    };
+    return playSingleCustomNote(pitch, duration * 0.3, volume * 0.9, palmMutedConfig, pitchBend);
+  }
+  
   // Handle articulation
   if (articulation && articulation !== 'normal') {
     const sixteenthNoteDuration = (60 / tempo) / 4;
