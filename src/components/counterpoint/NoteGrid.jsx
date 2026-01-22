@@ -1099,6 +1099,13 @@ export default function NoteGrid({
         setTool('marquee');
       } else if (e.key === 'b') {
         setTool('draw');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // Seek to loop start if looping, otherwise to beginning
+        const seekTo = (loopStart !== null && isLooping) ? loopStart : 0;
+        if (onSeek) {
+          onSeek(seekTo);
+        }
       }
     };
 
