@@ -2353,7 +2353,20 @@ export default function NoteGrid({
                                    onClick={(e) => {
                                      // Only trigger if not dragging loop region
                                      if (!isLoopSelecting) {
-                                       // Select/deselect all notes in this measure
+                                       const measureStart = measureStartBeat;
+                                       const measureEnd = measureStartBeat + beatsPerMeasure;
+                                       
+                                       if (e.shiftKey && loopStart !== null && loopEnd !== null) {
+                                         // Extend loop to include this measure
+                                         const newStart = Math.min(loopStart, measureStart);
+                                         const newEnd = Math.max(loopEnd, measureEnd);
+                                         onLoopChange?.(newStart, newEnd);
+                                       } else {
+                                         // Set loop to this measure
+                                         onLoopChange?.(measureStart, measureEnd);
+                                       }
+                                       
+                                       // Also select notes in this measure
                                        const measureNotes = cantusFirmus.filter(n => {
                                          const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
                                          return noteMeasure === measureIndex;
@@ -2363,31 +2376,11 @@ export default function NoteGrid({
                                          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
                                          
                                          if (e.shiftKey) {
-                                           // Add/remove measure to/from selection
-                                           const allAlreadySelected = measureNotes.every(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                           
-                                           if (allAlreadySelected) {
-                                             // Remove this measure from selection
-                                             setSelectedNotes(prev => {
-                                               const next = new Set(prev);
-                                               measureKeys.forEach(k => next.delete(k));
-                                               return next;
-                                             });
-                                           } else {
-                                             // Add this measure to selection
-                                             setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-                                           }
+                                           // Add this measure to selection
+                                           setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
                                          } else {
-                                           // Regular click - toggle selection of just this measure
-                                           const allAlreadySelected = measureNotes.every(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                           
-                                           if (allAlreadySelected) {
-                                             // Deselect this measure
-                                             setSelectedNotes(new Set());
-                                           } else {
-                                             // Select only this measure
-                                             setSelectedNotes(measureKeys);
-                                           }
+                                           // Select only this measure
+                                           setSelectedNotes(measureKeys);
                                          }
                                        }
                                      }
