@@ -472,7 +472,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       ],
       distortion: 40
     };
-    return playSingleCustomNote(pitch, duration, volume * 0.9, palmMutedConfig, pitchBend);
+    return playSingleCustomNote(pitch, duration, volume * 1.3, palmMutedConfig, pitchBend);
   }
   
   // Handle articulation
