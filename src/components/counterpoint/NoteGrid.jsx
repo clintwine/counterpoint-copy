@@ -2351,6 +2351,7 @@ export default function NoteGrid({
                                      backgroundColor: '#3a3a3a'
                                    }}
                                    onClick={(e) => {
+                                     e.stopPropagation();
                                      // Only trigger if not dragging loop region
                                      if (!isLoopSelecting) {
                                        const measureStart = measureStartBeat;
@@ -2360,14 +2361,18 @@ export default function NoteGrid({
                                        const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
                                        
                                        if (isAlreadyLooped && !e.shiftKey) {
-                                         // Toggle off - clear loop
-                                         onLoopChange?.(null, null);
+                                         // Toggle off - clear loop and selection
+                                         if (onLoopChange) {
+                                           onLoopChange(null, null);
+                                         }
                                          setSelectedNotes(new Set());
                                        } else if (e.shiftKey && loopStart !== null && loopEnd !== null) {
                                          // Extend loop to include this measure
                                          const newStart = Math.min(loopStart, measureStart);
                                          const newEnd = Math.max(loopEnd, measureEnd);
-                                         onLoopChange?.(newStart, newEnd);
+                                         if (onLoopChange) {
+                                           onLoopChange(newStart, newEnd);
+                                         }
                                          
                                          // Add notes to selection
                                          const measureNotes = cantusFirmus.filter(n => {
@@ -2380,7 +2385,9 @@ export default function NoteGrid({
                                          }
                                        } else {
                                          // Set loop to this measure
-                                         onLoopChange?.(measureStart, measureEnd);
+                                         if (onLoopChange) {
+                                           onLoopChange(measureStart, measureEnd);
+                                         }
                                          
                                          // Select notes in this measure
                                          const measureNotes = cantusFirmus.filter(n => {
