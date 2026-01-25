@@ -2356,30 +2356,39 @@ export default function NoteGrid({
                                        const measureStart = measureStartBeat;
                                        const measureEnd = measureStartBeat + beatsPerMeasure;
                                        
-                                       if (e.shiftKey && loopStart !== null && loopEnd !== null) {
+                                       // Check if this measure is already selected as the loop
+                                       const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
+                                       
+                                       if (isAlreadyLooped && !e.shiftKey) {
+                                         // Toggle off - clear loop
+                                         onLoopChange?.(null, null);
+                                         setSelectedNotes(new Set());
+                                       } else if (e.shiftKey && loopStart !== null && loopEnd !== null) {
                                          // Extend loop to include this measure
                                          const newStart = Math.min(loopStart, measureStart);
                                          const newEnd = Math.max(loopEnd, measureEnd);
                                          onLoopChange?.(newStart, newEnd);
+                                         
+                                         // Add notes to selection
+                                         const measureNotes = cantusFirmus.filter(n => {
+                                           const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
+                                           return noteMeasure === measureIndex;
+                                         });
+                                         if (measureNotes.length > 0) {
+                                           const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+                                           setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
+                                         }
                                        } else {
                                          // Set loop to this measure
                                          onLoopChange?.(measureStart, measureEnd);
-                                       }
-                                       
-                                       // Also select notes in this measure
-                                       const measureNotes = cantusFirmus.filter(n => {
-                                         const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
-                                         return noteMeasure === measureIndex;
-                                       });
-                                       
-                                       if (measureNotes.length > 0) {
-                                         const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
                                          
-                                         if (e.shiftKey) {
-                                           // Add this measure to selection
-                                           setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-                                         } else {
-                                           // Select only this measure
+                                         // Select notes in this measure
+                                         const measureNotes = cantusFirmus.filter(n => {
+                                           const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
+                                           return noteMeasure === measureIndex;
+                                         });
+                                         if (measureNotes.length > 0) {
+                                           const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
                                            setSelectedNotes(measureKeys);
                                          }
                                        }
