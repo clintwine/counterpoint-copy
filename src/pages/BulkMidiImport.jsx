@@ -110,18 +110,43 @@ export default function BulkMidiImport() {
     setProgress(0);
     const importResults = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    // Parse all MIDI files in parallel
+    const parsePromises = files.map(file => 
+      parseMidiFile(file)
+        .then(songData => ({ file: file.name, songData, success: true }))
+        .catch(error => ({ file: file.name, success: false, error: error.message }))
+    );
+
+    const parsedResults = await Promise.all(parsePromises);
+    setProgress(50); // Parsing complete
+
+    // Create song records in batches for better performance
+    const successfulParses = parsedResults.filter(r => r.success);
+    
+    if (successfulParses.length > 0) {
       try {
-        const songData = await parseMidiFile(file);
-        await base44.entities.Song.create(songData);
-        importResults.push({ file: file.name, success: true });
+        // Bulk create all songs at once
+        const songDataArray = successfulParses.map(r => r.songData);
+        await base44.entities.Song.bulkCreate(songDataArray);
+        
+        // Mark all as successful
+        successfulParses.forEach(r => {
+          importResults.push({ file: r.file, success: true });
+        });
       } catch (error) {
-        importResults.push({ file: file.name, success: false, error: error.message });
+        // If bulk create fails, mark all as failed
+        successfulParses.forEach(r => {
+          importResults.push({ file: r.file, success: false, error: 'Bulk import failed' });
+        });
       }
-      setProgress(((i + 1) / files.length) * 100);
     }
 
+    // Add parse failures to results
+    parsedResults.filter(r => !r.success).forEach(r => {
+      importResults.push({ file: r.file, success: false, error: r.error });
+    });
+
+    setProgress(100);
     setResults(importResults);
     setImporting(false);
   };
