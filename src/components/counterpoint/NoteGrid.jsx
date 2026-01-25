@@ -2350,6 +2350,9 @@ export default function NoteGrid({
                                      width: CELL_WIDTH * beatsPerMeasure,
                                      backgroundColor: '#3a3a3a'
                                    }}
+                                   onMouseDown={(e) => {
+                                     e.stopPropagation();
+                                   }}
                                    onClick={(e) => {
                                      e.stopPropagation();
                                      // Only trigger if not dragging loop region
