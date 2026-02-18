@@ -149,6 +149,12 @@ export default function AIChatbot({
     
     const getUserIntent = (message) => {
       const msg = message.toLowerCase();
+      if (msg.includes('death metal') || msg.includes('heavy metal') || msg.includes('brutal')) {
+        return `🎸 STYLE DETECTED: Death Metal → Ultra-aggressive palm-muted riffs, chromatic runs, tremolo picking, breakdowns. Use LOW octaves (C2-C3), rapid 16th notes (0.25), power chords, dissonant intervals (tritones, minor seconds). Heavy distortion implied. Velocities: 0.3-0.4 for palm mutes, 0.95+ for power chords. Include breakdowns (syncopated rhythm, open strings).`;
+      }
+      if (msg.includes('electric guitar') || msg.includes('guitar solo') || msg.includes('shred')) {
+        return `🎸 STYLE DETECTED: Electric Guitar → Blistering runs, string bends, vibrato, power chords. Use techniques: tremolo-picking (rapid repeated notes), sweep arpeggios, hammer-ons/pull-offs (slurred 32nd notes), dive bombs (pitch bend down). Velocity dynamics: muted picking (0.3), clean (0.5-0.7), power chords (0.95+). Range C3-C6.`;
+      }
       if (msg.includes('virtuosic') || msg.includes('fast') || msg.includes('brilliant')) {
         return `🎭 STYLE DETECTED: Virtuosic → Use dense 16th note runs, wide leaps, dynamic contrasts`;
       }
