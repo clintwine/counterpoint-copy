@@ -480,7 +480,18 @@ TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and v
                   pitch: { type: "string" },
                   beat: { type: "number" },
                   duration: { type: "number" },
-                  velocity: { type: "number", description: "Dynamic level 0.4-1.0 for expressive shaping" }
+                  velocity: { type: "number", description: "Dynamic level 0.3-1.0. Use 0.3-0.4 for palm mutes, 0.5-0.7 normal, 0.95+ power chords" },
+                  articulation: { type: "string", description: "staccato, legato, accent, tremolo-ultra, grace, trill" },
+                  pitchBend: { 
+                    type: "object",
+                    description: "For guitar bends/vibrato. {start: cents, end: cents, startTime: 0-1, endTime: 0-1}",
+                    properties: {
+                      start: { type: "number" },
+                      end: { type: "number" },
+                      startTime: { type: "number" },
+                      endTime: { type: "number" }
+                    }
+                  }
                 },
                 required: ["pitch", "beat", "duration"]
               }
