@@ -292,6 +292,8 @@ ADVANCED COMPOSITIONAL PRINCIPLES:
    - Baroque: sequences, consistent motor rhythm, ornaments
    - Classical: balanced phrases, clear cadences, alberti bass patterns
    - Romantic: wide range, expressive leaps, rubato feel
+   - Death Metal/Heavy: LOW register (C2-C3), chromatic riffs, palm mutes (velocity 0.3-0.4), power chords (velocity 0.95+), breakdowns, tritones
+   - Electric Guitar: String bends (pitch bend envelopes), vibrato, tremolo picking, sweep arpeggios, hammer-ons (slurred runs), dive bombs
 
 ═══════════════════════════════════════════════════════
 CURRENT COMPOSITION CONTEXT:
