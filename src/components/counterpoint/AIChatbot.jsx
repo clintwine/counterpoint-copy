@@ -417,13 +417,22 @@ GENERATION PARAMETERS:
 
 🎸 GUITAR TECHNIQUES (when appropriate):
 1. **Palm Muting**: Velocity 0.3-0.4 for tight, percussive attack
-2. **Power Chords**: Root + perfect 5th + octave, velocity 0.95+ for full aggression
+2. **Power Chords**: Root + perfect 5th + octave, velocity 0.95+ for full aggression - BUILD ON SCALE DEGREES (I, ii, iii, IV, V, vi)
 3. **Tremolo Picking**: Rapid alternating picking - use articulation "tremolo-ultra" or dense 0.25 durations
 4. **String Bends**: Use pitchBend property: {start: 0, end: 2} for whole-step bend
 5. **Dive Bombs**: {start: 0, end: -12} pitch envelope for whammy bar dive
-6. **Chromatic Runs**: Sequential semitone motion for aggressive sound
+6. **Chromatic Runs**: Use sparingly as PASSING TONES only - approach scale tones chromatically but resolve to key
 7. **Breakdowns**: Syncopated rhythm on low strings, long sustained chords
-8. **Sweep Arpeggios**: Fast arpeggios across multiple octaves (0.125 duration notes)
+8. **Sweep Arpeggios**: Fast arpeggios outlining chords IN THE KEY (I, IV, V, vi chords) - e.g., C major arpeggio = C-E-G-C ascending
+
+⚠️ CRITICAL - TONALITY IN METAL/GUITAR:
+• Death metal and guitar solos MUST stay in the key signature
+• Use scale tones as main melodic content: ${settings.key} ${settings.mode} scale
+• Chromatic notes are EMBELLISHMENTS only (passing tones between scale degrees)
+• Power chords must be built on scale degrees (root notes from the key)
+• Sweep arpeggios outline I, IV, V, vi chords using key signature notes
+• Example for C major: Sweep C-E-G-C (I chord), then F-A-C-F (IV chord), then G-B-D-G (V chord)
+• DO NOT generate random chromatic sequences - this sounds atonal and wrong
 
 ${currentNotes && currentNotes.length > 0 ? `
 🔍 EXISTING MELODY ANALYSIS:
