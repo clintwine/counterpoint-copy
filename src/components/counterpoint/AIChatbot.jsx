@@ -413,6 +413,17 @@ GENERATION PARAMETERS:
    - Tonic arpeggio: ${settings.key}, ${getThird(settings.key, settings.mode)}, ${getFifth(settings.key)}
    - Dominant arpeggio: ${getFifth(settings.key)}, leading tone, dominant
    - Diminished 7th: Dramatic tension builders
+   - Power chords (for metal/rock): Root + P5 + octave with velocity 0.95+
+
+🎸 GUITAR TECHNIQUES (when appropriate):
+1. **Palm Muting**: Velocity 0.3-0.4 for tight, percussive attack
+2. **Power Chords**: Root + perfect 5th + octave, velocity 0.95+ for full aggression
+3. **Tremolo Picking**: Rapid alternating picking - use articulation "tremolo-ultra" or dense 0.25 durations
+4. **String Bends**: Use pitchBend property: {start: 0, end: 2} for whole-step bend
+5. **Dive Bombs**: {start: 0, end: -12} pitch envelope for whammy bar dive
+6. **Chromatic Runs**: Sequential semitone motion for aggressive sound
+7. **Breakdowns**: Syncopated rhythm on low strings, long sustained chords
+8. **Sweep Arpeggios**: Fast arpeggios across multiple octaves (0.125 duration notes)
 
 ${currentNotes && currentNotes.length > 0 ? `
 🔍 EXISTING MELODY ANALYSIS:
