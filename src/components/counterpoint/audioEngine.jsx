@@ -440,16 +440,16 @@ const INSTRUMENT_CONFIGS = {
     filterQ: 1.8,
     distortion: 5
   },
-  sonicBass: {
+  sonicBassResonant: {
     oscillators: [
-      { waveform: 'square', detune: 0, gain: 0.8, harmonic: 1 },
-      { waveform: 'square', detune: -7, gain: 0.5, harmonic: 2 },
-      { waveform: 'sawtooth', detune: 3, gain: 0.3, harmonic: 1 }
+      { waveform: 'square', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -5, gain: 0.6, harmonic: 2 },
+      { waveform: 'square', detune: 4, gain: 0.4, harmonic: 3 }
     ],
-    attack: 0.008,
-    filterFreq: 2800,
-    filterQ: 4,
-    distortion: 1
+    attack: 0.005,
+    filterFreq: 3400,
+    filterQ: 8,
+    distortion: 0
   }
 };
 
