@@ -1281,14 +1281,14 @@ export default function NoteGrid({
                 // Handle painting in draw mode (only if paintMode is enabled)
                 if (isPainting && tool === 'draw' && paintMode) {
               if (cell) {
-                const noteKey = getNoteKey(cell.pitch, cell.beat);
-                const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === cell.beat);
+                // Normalize beat for duplicate check - use same rounding as note addition
+                const beatValue = snapToGrid ? Math.round(cell.beat / quantizeGrid) * quantizeGrid : Math.round(cell.beat * 1000) / 1000;
+                const normalizedKey = getNoteKey(cell.pitch, beatValue);
+                const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && Math.abs(n.beat - beatValue) < 0.001);
 
                 // Only add if not already painted in this stroke and no existing note
-                if (!paintedNotesRef.current.has(noteKey) && !hasNote) {
-                  paintedNotesRef.current.add(noteKey);
-                  // Preserve fractional beats when painting
-                  const beatValue = snapToGrid ? Math.round(cell.beat / quantizeGrid) * quantizeGrid : Math.round(cell.beat * 1000) / 1000;
+                if (!paintedNotesRef.current.has(normalizedKey) && !hasNote) {
+                  paintedNotesRef.current.add(normalizedKey);
                   const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: beatValue, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
                   // Save to history immediately for paint mode (not during playback typically)
                   if (!isPlaying) {
