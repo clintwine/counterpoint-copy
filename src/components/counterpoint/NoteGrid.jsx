@@ -1482,48 +1482,8 @@ export default function NoteGrid({
   };
 
   const handlePointerUp = (e) => {
-        // Add pending note if in draw mode and mouse hasn't moved much
-        console.log('[NoteGrid] PointerUp', { hasPendingNote: !!pendingNote, hasDragState: !!dragState, hasOriginalDragNotes: !!originalDragNotesRef.current });
-        // Don't add pending note if we started a drag operation (even if dragState hasn't updated yet)
-        if (pendingNote && !dragState && !originalDragNotesRef.current) {
-          const coords = e?.clientX !== undefined ? e : getEventCoords(e || {});
-          const deltaX = Math.abs(coords.clientX - pendingNote.clickX);
-          const deltaY = Math.abs(coords.clientY - pendingNote.clickY);
-
-          console.log('[NoteGrid] Checking pending note', { deltaX, deltaY, pendingNote });
-          // Only add note if mouse hasn't moved significantly (not a drag) and we're not in a drag state
-          if (deltaX < 15 && deltaY < 15) {
-          // Check if note already exists at this position
-          const noteExists = cantusFirmus.some(n => n.pitch === pendingNote.pitch && n.beat === pendingNote.beat);
-          if (!noteExists) {
-          const newNotes = [...cantusFirmus, { 
-          pitch: pendingNote.pitch, 
-          beat: pendingNote.beat, 
-          duration: lastNoteDuration, 
-          velocity: 0.8 
-          }].sort((a, b) => a.beat - b.beat);
-          
-          // Save to history only if not playing to avoid interruption
-          if (!isPlaying) {
-            saveToHistory(newNotes);
-          }
-          onNotesUpdate(newNotes);
-
-          // Auto-expand if adding note in last measure
-          const lastMeasureStart = (measures - 1) * beatsPerMeasure;
-          if (pendingNote.beat >= lastMeasureStart && window.expandMeasures) {
-          window.expandMeasures();
-          }
-
-          // Play the note with proper duration for feedback
-          playNoteSound(pendingNote.pitch);
-          } else {
-          console.log('[NoteGrid] Note already exists at this position, not adding duplicate');
-          }
-          }
-
-          setPendingNote(null);
-        }
+        // Clear pending note on mouseup
+        setPendingNote(null);
 
         // Save history after painting stroke
         if (isPainting && paintedNotesRef.current.size > 0) {
