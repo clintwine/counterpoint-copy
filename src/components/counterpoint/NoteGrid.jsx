@@ -234,10 +234,10 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
                     <span>{inst.label}</span>
                     <button
                       onClick={(e) => handlePreview(inst.value, e)}
-                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 px-2 py-1 rounded hover:bg-slate-700 transition-opacity text-sm"
                       title="Preview sound"
                     >
-                      ▶
+                      ▶ Play
                     </button>
                   </CommandItem>
                 ))}
