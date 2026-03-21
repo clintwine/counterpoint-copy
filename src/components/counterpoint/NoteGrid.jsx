@@ -1187,6 +1187,12 @@ export default function NoteGrid({
             lastTapRef.current = { key: noteKey, time: now };
 
             if (!isDoubleTap) {
+              // Initialize paint tracking before adding note
+              if (paintMode) {
+                setIsPainting(true);
+                paintedNotesRef.current = new Set([noteKey]);
+              }
+
               // Add note immediately on mousedown
               const noteExists = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
               if (!noteExists) {
@@ -1213,12 +1219,6 @@ export default function NoteGrid({
                 
                 // Play the note with proper duration for feedback
                 playNoteSound(pitch);
-              }
-              
-              // Enable painting mode if paintMode is on
-              if (paintMode) {
-                setIsPainting(true);
-                paintedNotesRef.current = new Set([noteKey]);
               }
 
               // Clear selection and loop
