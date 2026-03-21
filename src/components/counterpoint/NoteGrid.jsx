@@ -1199,10 +1199,11 @@ export default function NoteGrid({
                   velocity: 0.8 
                 }].sort((a, b) => a.beat - b.beat);
                 
-                // Don't save to history or update until mouseup to avoid playback interruption
-                // Store as pending instead
-                setPendingNote({ pitch, beat: beatValue, clickX: coords.clientX, clickY: coords.clientY });
-                return; // Early return - wait for mouseup
+                // Add note immediately - don't wait for mouseup
+                if (!isPlaying) {
+                  saveToHistory(newNotes);
+                }
+                onNotesUpdate(newNotes);
                 
                 // Auto-expand if adding note in last measure
                 const lastMeasureStart = (measures - 1) * beatsPerMeasure;
@@ -1211,9 +1212,7 @@ export default function NoteGrid({
                 }
                 
                 // Play the note with proper duration for feedback
-                initAudio();
-                const instrument = voices[activeVoice]?.instrument || 'organ';
-                playNote(pitch, 0.5, 0.7, 0, instrument);
+                playNoteSound(pitch);
               }
               
               // Enable painting mode if paintMode is on
