@@ -456,6 +456,9 @@ const INSTRUMENT_CONFIGS = {
 // Custom instruments storage
 let customInstruments = {};
 
+// Register sonicBassResonant as a named instrument for searchability
+INSTRUMENT_CONFIGS['Sonic Bass Resonant'] = INSTRUMENT_CONFIGS.sonicBassResonant;
+
 export function registerCustomInstrument(name, config) {
   customInstruments[name] = config;
 }
