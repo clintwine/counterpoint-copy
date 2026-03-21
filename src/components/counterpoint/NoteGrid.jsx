@@ -2788,7 +2788,7 @@ export default function NoteGrid({
                                       className="absolute rounded flex items-center justify-start pl-1 shadow-lg pointer-events-none z-10"
                                       style={{
                                         left: 56 + newBeat * CELL_WIDTH + 2,
-                                        top: 28 + newPitchIdx * CELL_HEIGHT + 2,
+                                        top: 28 + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2,
                                         width: noteWidth,
                                         height: CELL_HEIGHT - 4,
                                         backgroundColor: velocityColor,
