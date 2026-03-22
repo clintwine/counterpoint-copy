@@ -28,7 +28,21 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Drag ghost notes - fixed positioning */}
+      {/* Playhead vertical line - inside grid, scrolls with content */}
+      <div
+        className="absolute z-30 pointer-events-none"
+        style={{
+          left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
+          top: 28,
+          transform: 'translateX(-50%)',
+          width: Math.max(2, 3 * zoom),
+          height: pitches.length * CELL_HEIGHT,
+          backgroundColor: '#ef4444',
+          boxShadow: '0 0 8px rgba(239,68,68,0.6)'
+        }}
+      />
+
+      {/* Drag ghost notes - absolute positioning inside grid */}
       {dragState?.isDragging && originalDragNotes && (
         <>
           {originalDragNotes.map((note, idx) => {
@@ -44,10 +58,10 @@ export default function GridOverlays({
             return (
               <div
                 key={`ghost-${idx}`}
-                className="fixed rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
+                className="absolute rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
                 style={{
-                  left: `${gridRect.left + 56 + newBeat * CELL_WIDTH + 2 - viewportState.scrollLeft}px`,
-                  top: `${gridRect.top + 28 + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2}px`,
+                  left: `${56 + newBeat * CELL_WIDTH + 2}px`,
+                  top: `${28 + newPitchIdx * CELL_HEIGHT + 2}px`,
                   width: noteWidth,
                   height: CELL_HEIGHT - 4,
                   backgroundColor: velocityColor,
