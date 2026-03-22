@@ -1381,13 +1381,8 @@ export default function CounterpointGenerator() {
     }
   };
 
-  // Track changes to notes and settings
-  useEffect(() => {
-    // Mark as changed whenever notes or settings change
-    if (cantusFirmus.length > 0 || generatedVoices.length > 0) {
-      setHasUnsavedChanges(true);
-    }
-  }, [cantusFirmus, generatedVoices, settings]);
+  const isLoadingProjectRef = useRef(false);
+  useEffect(() => { if (!isLoadingProjectRef.current && (cantusFirmus.length > 0 || generatedVoices.length > 0)) setHasUnsavedChanges(true); }, [cantusFirmus, generatedVoices, settings]);
 
   // Handle note press during recording
   const handleNotePress = useCallback((pitch) => {
