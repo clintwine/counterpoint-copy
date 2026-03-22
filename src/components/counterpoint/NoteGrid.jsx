@@ -2758,138 +2758,31 @@ export default function NoteGrid({
               );
             })()}
 
-            <DragGhost 
-              dragState={dragState} 
-              dragOffset={dragOffset} 
-              originalDragNotes={originalDragNotesRef.current?.notes} 
-              pitches={pitches} 
-              CELL_WIDTH={CELL_WIDTH} 
-              CELL_HEIGHT={CELL_HEIGHT} 
-              DEFAULT_DURATION={DEFAULT_DURATION} 
-              getVelocityColor={getVelocityColor} 
-              viewportState={viewportState} 
+            <GridOverlays
+              marquee={marquee}
+              dragState={dragState}
+              dragOffset={dragOffset}
+              originalDragNotes={originalDragNotesRef.current?.notes}
+              pitches={pitches}
+              CELL_WIDTH={CELL_WIDTH}
+              CELL_HEIGHT={CELL_HEIGHT}
+              DEFAULT_DURATION={DEFAULT_DURATION}
+              getVelocityColor={getVelocityColor}
+              viewportState={viewportState}
+              gridRef={gridRef}
+              smoothPlayhead={smoothPlayhead}
+              zoom={zoom}
+              isPlaying={isPlaying}
+              currentBeat={currentBeat}
+              onSeek={onSeek}
+              snapToGrid={snapToGrid}
+              quantizeGrid={quantizeGrid}
+              totalBeats={totalBeats}
+              setIsScrubbing={setIsScrubbing}
+              setScrubPosition={setScrubPosition}
             />
           </div>
         </div>
-
-        {/* Playhead triangle marker - fixed at header top */}
-        <div
-          className="fixed cursor-ew-resize"
-          style={{
-            left: `${gridRef.current ? gridRef.current.getBoundingClientRect().left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft : 0}px`,
-            top: `${gridRef.current ? gridRef.current.getBoundingClientRect().top : 0}px`,
-            width: 0,
-            height: 0,
-            pointerEvents: 'auto',
-            zIndex: 51,
-            transform: 'translateX(-50%)'
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setIsScrubbing(true);
-
-            const handleMouseMove = (moveEvent) => {
-              if (!gridRef.current) return;
-              const gridRect = gridRef.current.getBoundingClientRect();
-              const scrollLeft = gridRef.current.scrollLeft;
-              const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
-              let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
-
-              // Apply snapping if enabled
-              if (snapToGrid) {
-                beat = Math.round(beat / quantizeGrid) * quantizeGrid;
-              }
-
-              setScrubPosition(beat);
-              onSeek && onSeek(beat);
-            };
-
-            const handleMouseUp = () => {
-              setIsScrubbing(false);
-              setScrubPosition(null);
-              document.removeEventListener('mousemove', handleMouseMove);
-              document.removeEventListener('mouseup', handleMouseUp);
-            };
-
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setIsScrubbing(true);
-
-            const handleTouchMove = (moveEvent) => {
-              if (!gridRef.current || !moveEvent.touches[0]) return;
-              const gridRect = gridRef.current.getBoundingClientRect();
-              const scrollLeft = gridRef.current.scrollLeft;
-              const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
-              let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
-
-              // Apply snapping if enabled
-              if (snapToGrid) {
-                beat = Math.round(beat / quantizeGrid) * quantizeGrid;
-              }
-
-              setScrubPosition(beat);
-              onSeek && onSeek(beat);
-            };
-
-            const handleTouchEnd = () => {
-              setIsScrubbing(false);
-              setScrubPosition(null);
-              document.removeEventListener('touchmove', handleTouchMove);
-              document.removeEventListener('touchend', handleTouchEnd);
-            };
-
-            document.addEventListener('touchmove', handleTouchMove);
-            document.addEventListener('touchend', handleTouchEnd);
-          }}
-        >
-          {/* Triangle marker pointing down */}
-          <div 
-            className="absolute"
-            style={{
-              left: '50%',
-              top: '0px',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: `${Math.max(10, 12 * zoom)}px solid transparent`,
-              borderRight: `${Math.max(10, 12 * zoom)}px solid transparent`,
-              borderTop: `${Math.max(12, 14 * zoom)}px solid #ef4444`,
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }}
-          />
-        </div>
-
-                    {/* Playhead vertical line - scrolls with content */}
-                                <div
-                                  className="absolute z-30 pointer-events-none"
-                                  style={{
-                                    left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-                                    top: 28,
-                                    transform: 'translateX(-50%)',
-                                    width: Math.max(2, 3 * zoom),
-                                    height: pitches.length * CELL_HEIGHT,
-                                    backgroundColor: '#ef4444',
-                                    boxShadow: '0 0 8px rgba(239,68,68,0.6)'
-                                  }}
-                                />
-
-        {/* Marquee selection rectangle */}
-        {marquee && (
-          <div
-            className="fixed border-2 border-amber-400 bg-amber-400/10 pointer-events-none z-50"
-            style={{
-              left: Math.min(marquee.startX, marquee.endX),
-              top: Math.min(marquee.startY, marquee.endY),
-              width: Math.abs(marquee.endX - marquee.startX),
-              height: Math.abs(marquee.endY - marquee.startY),
-            }}
-          />
-        )}
         </div>
 
       <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px]">
