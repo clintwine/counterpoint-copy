@@ -2240,26 +2240,13 @@ export default function CounterpointGenerator() {
                                 setSaveDialogOpen(true);
                               }}
                               onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                              onLoadProject={() => { setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
+                              onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
                               onBrowseSongs={() => setSongDialogOpen(true)}
                               onExport={handleExport}
                               onAIComposer={async () => {
                                 const isAuth = await base44.auth.isAuthenticated();
-                                if (!isAuth) {
-                                  base44.auth.redirectToLogin(window.location.href);
-                                  return;
-                                }
-                                setChatbotActive(prev => {
-                                  const newState = !prev;
-                                  if (newState) {
-                                    setChatbotOpen(true);
-                                    setChatbotMinimized(false);
-                                  } else {
-                                    setChatbotOpen(false);
-                                    setChatbotMinimized(false);
-                                  }
-                                  return newState;
-                                });
+                                if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; }
+                                setChatbotActive(prev => { const newState = !prev; if (newState) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return newState; });
                               }}
                               onGenerate={handleGenerate}
                               canGenerate={cantusFirmus.length > 0}
@@ -2267,37 +2254,14 @@ export default function CounterpointGenerator() {
                               onExportMidi={() => {
                                 toast.loading('Exporting MIDI...', { id: 'export-midi' });
                                 try {
-                                  const midiData = {
-                                    tempo,
-                                    timeSignature: [4, 4],
-                                    tracks: allVoices.map((voice, idx) => ({
-                                      name: voice.name,
-                                      notes: voice.notes?.map(n => ({
-                                        pitch: n.pitch,
-                                        startTime: n.beat * (60 / tempo),
-                                        duration: (n.duration || 1) * (60 / tempo),
-                                        velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                      })) || []
-                                    }))
-                                  };
+                                  const midiData = { tempo, timeSignature: [4, 4], tracks: allVoices.map((voice) => ({ name: voice.name, notes: voice.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat * (60 / tempo), duration: (n.duration || 1) * (60 / tempo), velocity: Math.round((n.velocity ?? 0.8) * 100) })) || [] })) };
                                   const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                  const url = URL.createObjectURL(blob);
-                                  const a = document.createElement('a');
-                                  a.href = url;
-                                  a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                  a.click();
-                                  URL.revokeObjectURL(url);
+                                  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url);
                                   toast.success('MIDI exported successfully', { id: 'export-midi' });
-                                } catch (error) {
-                                  toast.error('Failed to export MIDI', { id: 'export-midi' });
-                                }
+                                } catch (error) { toast.error('Failed to export MIDI', { id: 'export-midi' }); }
                               }}
                               onImportMidi={handleImportMidi}
-                              onOpenWaveEditor={() => {
-                              setShowPianoPanel(true);
-                              setOpenWaveEditor(true);
-                              setTimeout(() => setOpenWaveEditor(false), 100);
-                              }}
+                              onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
                               customInstruments={customInstruments}
                               snapToGrid={snapToGrid}
                               onSnapToGridChange={setSnapToGrid}
