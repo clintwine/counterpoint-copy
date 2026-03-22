@@ -1663,18 +1663,14 @@ export default function NoteGrid({
                 New Project
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onLoadProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                <FolderOpen className="w-4 h-4 mr-2" />
-                Load Project
+                <FolderOpen className="w-4 h-4 mr-2" />Browse All Projects
               </DropdownMenuItem>
+              {(() => { const recent = JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]').slice(-5).reverse(); return recent.length > 0 ? (<><DropdownMenuSeparator className="bg-[#3A3A3A]" /><div className="px-2 py-0.5 text-[10px] text-white/40 uppercase tracking-wider">Recent</div>{recent.map(p => (<DropdownMenuItem key={p.id} onClick={() => onLoadProject && window.__loadRecentProject?.(p)} className="text-white/75 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white text-xs py-1.5"><FolderOpen className="w-3 h-3 mr-2 flex-shrink-0 opacity-50" /><span className="truncate">{p.name}</span></DropdownMenuItem>))}<DropdownMenuSeparator className="bg-[#3A3A3A]" /></>) : <DropdownMenuSeparator className="bg-[#3A3A3A]" />; })()}
               <DropdownMenuItem onClick={onSaveProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                <Save className="w-4 h-4 mr-2" />
-                Save Project
-                <span className="ml-auto text-xs text-white/40">⌘S</span>
+                <Save className="w-4 h-4 mr-2" />Save Project<span className="ml-auto text-xs text-white/40">⌘S</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onSaveProjectAs} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                <FilePlus className="w-4 h-4 mr-2" />
-                Save Project As...
-                <span className="ml-auto text-xs text-white/40">⌘⇧S</span>
+                <FilePlus className="w-4 h-4 mr-2" />Save Project As...<span className="ml-auto text-xs text-white/40">⌘⇧S</span>
               </DropdownMenuItem>
               {onSaveSong && (
                 <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
