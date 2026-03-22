@@ -2557,8 +2557,8 @@ export default function NoteGrid({
                                     key={`${voiceIndex}-${note.beat.toFixed(3)}-${note.pitch}`}
                                     onMouseDown={async (e) => {
                                               e.stopPropagation();
-                                              console.log('[NoteGrid] Existing note mousedown', { pitch, beat, hasPendingNote: !!pendingNote });
                                               setPendingNote(null); // Clear any pending note when clicking existing note
+                                              if (onLoopChange) onLoopChange(null, null); // Clear loop region on note click
 
                                               const coords = getEventCoords(e);
                                               const rect = e.currentTarget.getBoundingClientRect();
