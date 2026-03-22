@@ -2289,8 +2289,8 @@ export default function NoteGrid({
                                     }}
                                    onClick={(e) => {
                                      e.stopPropagation();
-                                     // Only trigger if not dragging loop region and not just finished marquee
-                                     if (!isLoopSelecting && !marquee) {
+                                     // Only trigger if not dragging loop region
+                                     if (!isLoopSelecting) {
                                        const measureStart = measureStartBeat;
                                        const measureEnd = measureStartBeat + beatsPerMeasure;
                                        
