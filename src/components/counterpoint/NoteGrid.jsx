@@ -1601,7 +1601,7 @@ export default function NoteGrid({
 
   // Calculate drag preview offset
   const getDragOffset = () => {
-    if (!dragState || !dragState.isDragging) return { pitchDelta: 0, beatDelta: 0 };
+    if (!dragState) return { pitchDelta: 0, beatDelta: 0 };
     return {
       pitchDelta: dragState.currentPitchIndex - dragState.startPitchIndex,
       beatDelta: dragState.currentBeat - dragState.startBeat
