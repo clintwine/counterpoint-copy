@@ -778,8 +778,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    setHasUnsavedChanges(false);
-    setSongDialogOpen(false);
+    isLoadingProjectRef.current = true; setHasUnsavedChanges(false); setSongDialogOpen(false);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
     };
 
   const handlePreviewSong = (song, e) => {
