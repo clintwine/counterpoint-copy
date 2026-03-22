@@ -2543,10 +2543,10 @@ export default function NoteGrid({
                                 const duration = note.duration || DEFAULT_DURATION;
                                 const noteWidth = duration * CELL_WIDTH - 4;
                                 const nKey = getNoteKey(note.pitch, note.beat);
-                                // Hide original note only when actively dragging (mouse has moved enough)
-                                const isBeingDragged = originalDragNotesRef.current?.keys.has(nKey) && dragState?.isDragging;
+                                // Always render the original note — the ghost renders on top when dragging
+                                const isBeingDragged = false;
 
-                                if (isBeingDragged) return null;
+                                // Never hide the original
 
                                 const noteVelocity = note.velocity ?? 0.8;
                                 const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex];
