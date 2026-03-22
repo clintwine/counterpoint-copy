@@ -103,9 +103,8 @@ export default function CounterpointGenerator() {
   
   // Auto-expand and auto-shrink measures functionality
   useEffect(() => {
-    window.expandMeasures = () => {
-      setSettings(prev => ({ ...prev, measures: prev.measures + 5 }));
-    };
+    window.__loadRecentProject = handleLoadProject;
+    window.expandMeasures = () => { setSettings(prev => ({ ...prev, measures: prev.measures + 5 })); };
     window.autoAdjustMeasures = (notes) => {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
       
