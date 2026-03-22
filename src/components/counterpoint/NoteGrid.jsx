@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 import NoteControls from './NoteControls';
-import DragGhost from './DragGhost'; import { DEFAULT_INSTRUMENTS } from './instrumentsList';
+import GridOverlays from './GridOverlays'; import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import toast from 'react-hot-toast';
 
 // Full 88-key piano range: A0 to C8
