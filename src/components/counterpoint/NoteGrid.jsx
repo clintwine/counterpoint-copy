@@ -2770,7 +2770,7 @@ export default function NoteGrid({
             })()}
 
             {/* Drag preview notes */}
-                            {dragState && (dragState.isDragging || dragOffset.beatDelta !== 0 || dragOffset.pitchDelta !== 0) && originalDragNotesRef.current?.notes && (
+                            {dragState && dragState.isDragging && originalDragNotesRef.current?.notes && (
                               <>
                                 {originalDragNotesRef.current.notes.map(note => {
                                   const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
