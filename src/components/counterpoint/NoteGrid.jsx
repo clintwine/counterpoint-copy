@@ -286,8 +286,7 @@ export default function NoteGrid({
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
+  // canvasRef moved to AudioVisualizer component
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
