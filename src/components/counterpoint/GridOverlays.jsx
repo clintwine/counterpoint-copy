@@ -168,20 +168,6 @@ export default function GridOverlays({
         />
       </div>
 
-      {/* Playhead vertical line - scrolls with content */}
-      <div
-        className="absolute z-30 pointer-events-none"
-        style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-          top: 28,
-          transform: 'translateX(-50%)',
-          width: Math.max(2, 3 * zoom),
-          height: pitches.length * CELL_HEIGHT,
-          backgroundColor: '#ef4444',
-          boxShadow: '0 0 8px rgba(239,68,68,0.6)'
-        }}
-      />
-
       {/* Marquee selection rectangle */}
       {marquee && (
         <div
