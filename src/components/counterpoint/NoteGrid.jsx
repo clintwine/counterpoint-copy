@@ -2543,8 +2543,8 @@ export default function NoteGrid({
                                 const duration = note.duration || DEFAULT_DURATION;
                                 const noteWidth = duration * CELL_WIDTH - 4;
                                 const nKey = getNoteKey(note.pitch, note.beat);
-                                // Hide note only when actually dragging (ghost is showing)
-                                const isBeingDragged = originalDragNotesRef.current?.keys.has(nKey) && dragState?.isDragging && (dragOffset.pitchDelta !== 0 || dragOffset.beatDelta !== 0);
+                                // Hide original note only when ghost has moved to a different position
+                                const isBeingDragged = originalDragNotesRef.current?.keys.has(nKey) && dragState?.isDragging && (dragOffset.pitchDelta !== 0 || Math.abs(dragOffset.beatDelta) >= 0.5);
 
                                 if (isBeingDragged) return null;
 
