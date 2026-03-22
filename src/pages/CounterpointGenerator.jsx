@@ -2120,7 +2120,7 @@ export default function CounterpointGenerator() {
                                     setSaveDialogOpen(true);
                                   }}
                                   onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                                  onLoadProject={() => { setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
+                                  onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
                                   onBrowseSongs={() => setSongDialogOpen(true)}
                                   onExport={handleExport}
                                   onAIComposer={async () => {
