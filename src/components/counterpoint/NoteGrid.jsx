@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
-import NoteControls from './NoteControls'; import { DEFAULT_INSTRUMENTS } from './instrumentsList';
+import NoteControls from './NoteControls';
+import DragGhost from './DragGhost'; import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import toast from 'react-hot-toast';
 
 // Full 88-key piano range: A0 to C8
@@ -2757,40 +2758,17 @@ export default function NoteGrid({
               );
             })()}
 
-            {/* Drag preview notes */}
-                            {dragState?.isDragging && originalDragNotesRef.current?.notes && (
-                              <>
-                                {originalDragNotesRef.current.notes.map(note => {
-                                  const newPitchIdx = pitches.indexOf(note.pitch) + dragOffset.pitchDelta;
-                                  const newBeat = note.beat + dragOffset.beatDelta;
-                                  if (newPitchIdx < 0 || newPitchIdx >= pitches.length || newBeat < 0 || newBeat >= totalBeats) return null;
-
-                                  const duration = note.duration || DEFAULT_DURATION;
-                                  const noteWidth = duration * CELL_WIDTH - 4;
-                                  const noteVelocity = note.velocity ?? 0.8;
-                                  const velocityColor = getVelocityColor(noteVelocity);
-
-                                  return (
-                                    <div
-                                      key={`preview-${note.pitch}-${note.beat}`}
-                                      className="absolute rounded flex items-center justify-start pl-1 shadow-lg pointer-events-none z-10"
-                                      style={{
-                                        left: 56 + newBeat * CELL_WIDTH + 2 - viewportState.scrollLeft,
-                                        top: 28 + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2,
-                                        width: noteWidth,
-                                        height: CELL_HEIGHT - 4,
-                                        backgroundColor: velocityColor,
-                                        opacity: 0.8
-                                      }}
-                                    >
-                                      <span className="text-[10px] font-bold text-slate-900">
-                                        {pitches[newPitchIdx].replace(/\d/, '')}
-                                      </span>
-                                    </div>
-                                  );
-                                })}
-                              </>
-                            )}
+            <DragGhost 
+              dragState={dragState} 
+              dragOffset={dragOffset} 
+              originalDragNotes={originalDragNotesRef.current?.notes} 
+              pitches={pitches} 
+              CELL_WIDTH={CELL_WIDTH} 
+              CELL_HEIGHT={CELL_HEIGHT} 
+              DEFAULT_DURATION={DEFAULT_DURATION} 
+              getVelocityColor={getVelocityColor} 
+              viewportState={viewportState} 
+            />
           </div>
         </div>
 
