@@ -1980,28 +1980,19 @@ export default function CounterpointGenerator() {
                     <p className="text-white/70">You have unsaved changes. What would you like to do?</p>
                     <div className="flex flex-col gap-2">
                       <Button
-                        onClick={async () => {
-                          await handleSaveProject(true);
-                          setUnsavedChangesDialog(false);
-                          setHasUnsavedChanges(false);
-                          
-                          // Execute pending action after clearing unsaved flag
-                          if (pendingAction) {
-                            setTimeout(() => {
-                              if (pendingAction.type === 'loadSong') {
-                                handleLoadSong(pendingAction.data);
-                              } else if (pendingAction.type === 'loadProject') {
-                                handleLoadProject(pendingAction.data);
-                              } else if (pendingAction.type === 'newProject') {
-                                handleNewProject();
-                              }
-                              setPendingAction(null);
-                            }, 50);
-                          }
-                        }}
-                        className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
+                       onClick={async () => {
+                         const action = pendingAction;
+                         await handleSaveProject(true);
+                         setUnsavedChangesDialog(false); setHasUnsavedChanges(false); setPendingAction(null);
+                         if (action) setTimeout(() => {
+                           if (action.type === 'loadSong') handleLoadSong(action.data);
+                           else if (action.type === 'loadProject') handleLoadProject(action.data);
+                           else if (action.type === 'newProject') handleNewProject();
+                         }, 50);
+                       }}
+                       className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
                       >
-                        Save and Continue
+                       Save and Continue
                       </Button>
                       <Button
                         onClick={() => {
