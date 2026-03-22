@@ -128,10 +128,7 @@ export default function CounterpointGenerator() {
         return prev;
       });
     };
-    return () => { 
-      delete window.expandMeasures; 
-      delete window.autoAdjustMeasures;
-    };
+    return () => { delete window.expandMeasures; delete window.autoAdjustMeasures; delete window.__loadRecentProject; };
   }, [generatedVoices, settings.timeSignature]);
   
   const queryClient = useQueryClient();
