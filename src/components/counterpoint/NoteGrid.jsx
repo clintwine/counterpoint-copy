@@ -13,11 +13,12 @@ import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
+import NoteControls from './NoteControls';
+import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import toast from 'react-hot-toast';
 
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
-const OCTAVES = [8, 7, 6, 5, 4, 3, 2, 1, 0];
 
 // Pre-generate all 88 pitches (static)
 const ALL_PITCHES = (() => {
@@ -38,37 +39,24 @@ const TIME_SIGNATURES = [
 ];
 
 const NOTE_COLORS = {
-  0: '#D4AF37', // Voice 1 - Logic Pro Gold
-  1: '#5F9EA0', // Voice 2 - Logic Pro Teal
-  2: '#9370DB', // Voice 3 - Logic Pro Purple
-  3: '#CD853F', // Voice 4 - Logic Pro Bronze
+  0: '#D4AF37',
+  1: '#5F9EA0',
+  2: '#9370DB',
+  3: '#CD853F',
 };
 
-// Velocity to color gradient: blue → green → yellow → red (0-125 scale)
+// Velocity to color gradient: blue → green → yellow → red
 const getVelocityColor = (velocity) => {
-  const v = Math.max(0, Math.min(1, velocity)); // Clamp between 0 and 1 (0-125 internally)
-  
+  const v = Math.max(0, Math.min(1, velocity));
   if (v < 0.4) {
-    // Blue to Green
     const t = v / 0.4;
-    const r = Math.round(0 + t * 0);
-    const g = Math.round(100 + t * 155);
-    const b = Math.round(255 - t * 55);
-    return `rgb(${r}, ${g}, ${b})`;
+    return `rgb(${Math.round(t * 0)}, ${Math.round(100 + t * 155)}, ${Math.round(255 - t * 55)})`;
   } else if (v < 0.7) {
-    // Green to Yellow
     const t = (v - 0.4) / 0.3;
-    const r = Math.round(0 + t * 255);
-    const g = Math.round(255);
-    const b = Math.round(200 - t * 200);
-    return `rgb(${r}, ${g}, ${b})`;
+    return `rgb(${Math.round(t * 255)}, 255, ${Math.round(200 - t * 200)})`;
   } else {
-    // Yellow to Red - reaches pure red at v=1.0 (velocity 125)
     const t = (v - 0.7) / 0.3;
-    const r = Math.round(255);
-    const g = Math.round(255 - t * 255);
-    const b = Math.round(0);
-    return `rgb(${r}, ${g}, ${b})`;
+    return `rgb(255, ${Math.round(255 - t * 255)}, 0)`;
   }
 };
 
@@ -77,102 +65,8 @@ const BASE_CELL_HEIGHT = 28;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
-const MIN_DURATION = 0.125; // Eighth of a beat (128th note)
-const DEFAULT_DURATION = 1; // 1 beat (16th note by default)
-
-const NOTE_DURATIONS = [
-  { value: 0.125, label: '128th', beats: '1/8' },
-  { value: 0.25, label: '64th', beats: '1/4' },
-  { value: 0.5, label: '32nd', beats: '1/2' },
-  { value: 1, label: '16th', beats: '1' },
-  { value: 2, label: '8th', beats: '2' },
-  { value: 3, label: '8th Trip', beats: '2.67' },
-  { value: 4, label: '1/4', beats: '4' },
-  { value: 6, label: '1/4 Trip', beats: '5.33' },
-  { value: 8, label: '1/2', beats: '8' },
-  { value: 12, label: '1/2 Trip', beats: '10.67' },
-  { value: 16, label: 'Whole', beats: '16' },
-];
-
-
-
-const PRESET_LIBRARY_CONFIGS = [
-  {
-    name: 'Warm Pad',
-    oscillators: [
-      { waveform: 'sawtooth', detune: 0, gain: 0.5 },
-      { waveform: 'sawtooth', detune: 7, gain: 0.5 }
-    ],
-    envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
-    filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
-  },
-  {
-    name: 'Bright Lead',
-    oscillators: [
-      { waveform: 'sawtooth', detune: 0, gain: 0.7 },
-      { waveform: 'square', detune: 12, gain: 0.3 }
-    ],
-    envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
-    filter: { type: 'lowpass', frequency: 4000, Q: 2 }
-  },
-  {
-    name: 'Sub Bass',
-    oscillators: [
-      { waveform: 'sine', detune: 0, gain: 1.0 }
-    ],
-    envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
-    filter: { type: 'lowpass', frequency: 500, Q: 1 }
-  },
-  {
-    name: 'Pluck',
-    oscillators: [
-      { waveform: 'triangle', detune: 0, gain: 0.8 },
-      { waveform: 'square', detune: 0, gain: 0.2 }
-    ],
-    envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
-    filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
-  },
-  {
-    name: 'Bell',
-    oscillators: [
-      { waveform: 'sine', detune: 0, gain: 0.6 },
-      { waveform: 'sine', detune: 700, gain: 0.3 },
-      { waveform: 'sine', detune: 1200, gain: 0.1 }
-    ],
-    envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
-    filter: { type: 'highpass', frequency: 500, Q: 0.5 }
-  },
-  {
-    name: 'Choir',
-    oscillators: [
-      { waveform: 'sawtooth', detune: -5, gain: 0.4 },
-      { waveform: 'sawtooth', detune: 5, gain: 0.4 },
-      { waveform: 'sine', detune: 0, gain: 0.2 }
-    ],
-    envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
-    filter: { type: 'bandpass', frequency: 1500, Q: 2 }
-  },
-  {
-    name: 'Reese Bass',
-    oscillators: [
-      { waveform: 'sawtooth', detune: -10, gain: 0.5 },
-      { waveform: 'sawtooth', detune: 10, gain: 0.5 }
-    ],
-    envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
-    filter: { type: 'lowpass', frequency: 800, Q: 3 }
-  },
-  {
-    name: 'Flutey',
-    oscillators: [
-      { waveform: 'sine', detune: 0, gain: 0.9 },
-      { waveform: 'triangle', detune: 0, gain: 0.1 }
-    ],
-    envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
-    filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
-  }
-];
-
-const PRESET_LIBRARY = PRESET_LIBRARY_CONFIGS.map((config, i) => ({ value: `preset_${i}`, label: config.name }));
+const MIN_DURATION = 0.125;
+const DEFAULT_DURATION = 1;
 
 
 
