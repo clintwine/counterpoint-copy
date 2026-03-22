@@ -1381,8 +1381,8 @@ export default function NoteGrid({
       
       const prevPitchIndex = dragState.currentPitchIndex;
 
-      // Set dragging to true if we've moved at all
-      const hasMoved = beatDelta !== 0 || pitchDelta !== 0;
+      // Require pixel threshold before flagging as drag (avoid note flash on click)
+      const hasMoved = (Math.abs(coords.clientX - dragState.clickOffsetX) > 4 || Math.abs(coords.clientY - dragState.clickOffsetY) > 4) && (beatDelta !== 0 || pitchDelta !== 0);
       
       // Play note sound when pitch changes during drag
       if ((dragState.isDragging || hasMoved) && newPitchIndex !== prevPitchIndex && newPitchIndex >= 0 && newPitchIndex < pitches.length) {
