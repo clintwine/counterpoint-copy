@@ -156,3 +156,8 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide notes being dragged when ghost is visible */
+[data-dragging="true"] {
+  opacity: 0 !important;
+}
