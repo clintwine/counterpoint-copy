@@ -2287,57 +2287,7 @@ export default function NoteGrid({
                                    onMouseDown={(e) => {
                                       // Don't stop propagation — let parent handle loop drag
                                     }}
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     // Only trigger if not dragging loop region
-                                     if (!isLoopSelecting) {
-                                       const measureStart = measureStartBeat;
-                                       const measureEnd = measureStartBeat + beatsPerMeasure;
-                                       
-                                       // Check if this measure is already selected as the loop
-                                       const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
-                                       
-                                       if (isAlreadyLooped && !e.shiftKey) {
-                                         // Toggle off - clear loop and selection
-                                         if (onLoopChange) {
-                                           onLoopChange(null, null);
-                                         }
-                                         setSelectedNotes(new Set());
-                                       } else if (e.shiftKey && loopStart !== null && loopEnd !== null) {
-                                         // Extend loop to include this measure
-                                         const newStart = Math.min(loopStart, measureStart);
-                                         const newEnd = Math.max(loopEnd, measureEnd);
-                                         if (onLoopChange) {
-                                           onLoopChange(newStart, newEnd);
-                                         }
-                                         
-                                         // Add notes to selection
-                                         const measureNotes = cantusFirmus.filter(n => {
-                                           const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
-                                           return noteMeasure === measureIndex;
-                                         });
-                                         if (measureNotes.length > 0) {
-                                           const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-                                           setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-                                         }
-                                       } else {
-                                         // Set loop to this measure
-                                         if (onLoopChange) {
-                                           onLoopChange(measureStart, measureEnd);
-                                         }
-                                         
-                                         // Select notes in this measure
-                                         const measureNotes = cantusFirmus.filter(n => {
-                                           const noteMeasure = Math.floor(n.beat / beatsPerMeasure);
-                                           return noteMeasure === measureIndex;
-                                         });
-                                         if (measureNotes.length > 0) {
-                                           const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-                                           setSelectedNotes(measureKeys);
-                                         }
-                                       }
-                                     }
-                                   }}
+                                   onClick={(e) => {e.stopPropagation(); if (!isLoopSelecting && selectedNotes.size === 0) {const measureStart = measureStartBeat; const measureEnd = measureStartBeat + beatsPerMeasure; const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd; if (isAlreadyLooped && !e.shiftKey) {if (onLoopChange) onLoopChange(null, null); setSelectedNotes(new Set());} else if (e.shiftKey && loopStart !== null && loopEnd !== null) {const newStart = Math.min(loopStart, measureStart); const newEnd = Math.max(loopEnd, measureEnd); if (onLoopChange) onLoopChange(newStart, newEnd); const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex); if (measureNotes.length > 0) {const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat))); setSelectedNotes(prev => new Set([...prev, ...measureKeys]));}} else {if (onLoopChange) onLoopChange(measureStart, measureEnd); const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex); if (measureNotes.length > 0) {const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat))); setSelectedNotes(measureKeys);}}}}
                                    >
                                     <span className="text-white font-bold pointer-events-none relative z-10">
                                       {measureIndex + 1}
