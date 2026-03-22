@@ -76,6 +76,66 @@ export default function GridOverlays({
           zIndex: 51,
           transform: 'translateX(-50%)'
         }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsScrubbing(true);
+
+          const handleMouseMove = (moveEvent) => {
+            if (!gridRef.current) return;
+            const gridRect = gridRef.current.getBoundingClientRect();
+            const scrollLeft = gridRef.current.scrollLeft;
+            const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
+            let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+
+            if (snapToGrid) {
+              beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+            }
+
+            setScrubPosition(beat);
+            onSeek && onSeek(beat);
+          };
+
+          const handleMouseUp = () => {
+            setIsScrubbing(false);
+            setScrubPosition(null);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsScrubbing(true);
+
+          const handleTouchMove = (moveEvent) => {
+            if (!gridRef.current || !moveEvent.touches[0]) return;
+            const gridRect = gridRef.current.getBoundingClientRect();
+            const scrollLeft = gridRef.current.scrollLeft;
+            const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
+            let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+
+            if (snapToGrid) {
+              beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+            }
+
+            setScrubPosition(beat);
+            onSeek && onSeek(beat);
+          };
+
+          const handleTouchEnd = () => {
+            setIsScrubbing(false);
+            setScrubPosition(null);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+          };
+
+          document.addEventListener('touchmove', handleTouchMove);
+          document.addEventListener('touchend', handleTouchEnd);
+        }}
       >
         {/* Triangle marker pointing down */}
         <div 
