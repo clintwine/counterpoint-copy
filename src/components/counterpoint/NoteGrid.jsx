@@ -1281,8 +1281,8 @@ export default function NoteGrid({
                 // Handle painting in draw mode (only if paintMode is enabled)
                 if (isPainting && tool === 'draw' && paintMode) {
               if (cell) {
-                // Normalize beat exactly like single-click draw mode
-                const beatValue = snapToGrid ? Math.round(cell.beat / quantizeGrid) * quantizeGrid : Math.max(0, Math.min(totalBeats - 0.125, Math.round(cell.beat * 1000) / 1000));
+                // Floor the beat so we only paint the cell the mouse is actually over (rounding can snap into the next cell)
+                const beatValue = Math.max(0, Math.min(totalBeats - 1, Math.floor((coords.clientX - (gridRef.current?.getBoundingClientRect().left ?? 0) - 56 + (gridRef.current?.scrollLeft ?? 0)) / CELL_WIDTH)));
                 const normalizedKey = getNoteKey(cell.pitch, beatValue);
                 const hasNote = cantusFirmus.some(n => n.pitch === cell.pitch && n.beat === beatValue);
 
