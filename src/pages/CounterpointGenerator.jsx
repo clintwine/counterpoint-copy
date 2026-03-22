@@ -1995,28 +1995,24 @@ export default function CounterpointGenerator() {
                        Save and Continue
                       </Button>
                       <Button
-                        onClick={() => {
-                          setUnsavedChangesDialog(false);
-                          setHasUnsavedChanges(false);
-                          
-                          // Execute pending action without saving after clearing unsaved flag
-                          setTimeout(() => {
-                            if (pendingAction) {
-                              if (pendingAction.type === 'loadSong') {
-                                handleLoadSong(pendingAction.data);
-                              } else if (pendingAction.type === 'loadProject') {
-                                handleLoadProject(pendingAction.data);
-                              } else if (pendingAction.type === 'newProject') {
-                                handleNewProject();
-                              }
-                              setPendingAction(null);
-                            }
-                          }, 50);
-                        }}
-                        variant="outline"
-                        className="border-[#3A3A3A] text-white hover:bg-[#3A3A3A]"
+                       onClick={() => {
+                         const action = pendingAction;
+                         isLoadingProjectRef.current = true;
+                         setUnsavedChangesDialog(false); setHasUnsavedChanges(false); setPendingAction(null);
+                         setTimeout(() => {
+                           if (action?.type === 'newProject') {
+                             setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
+                             setProjectName(''); setCurrentProjectId(null); setTempo(80);
+                             setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+                           } else if (action?.type === 'loadProject') { handleLoadProject(action.data);
+                           } else if (action?.type === 'loadSong') { handleLoadSong(action.data); }
+                           setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
+                         }, 50);
+                       }}
+                       variant="outline"
+                       className="border-[#3A3A3A] text-white hover:bg-[#3A3A3A]"
                       >
-                        Don't Save
+                       Don't Save
                       </Button>
                       <Button
                         onClick={() => {
