@@ -687,8 +687,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    setHasUnsavedChanges(false);
-    setLoadDialogOpen(false);
+    isLoadingProjectRef.current = true; setHasUnsavedChanges(false); setLoadDialogOpen(false);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
   };
 
   // Stop preview when modal closes
