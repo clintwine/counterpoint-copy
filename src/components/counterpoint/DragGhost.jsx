@@ -1,7 +1,10 @@
 import React from 'react';
 
-export default function DragGhost({ dragState, dragOffset, originalDragNotes, pitches, CELL_WIDTH, CELL_HEIGHT, DEFAULT_DURATION, getVelocityColor, viewportState }) {
+export default function DragGhost({ dragState, dragOffset, originalDragNotes, pitches, CELL_WIDTH, CELL_HEIGHT, DEFAULT_DURATION, getVelocityColor, viewportState, gridRef }) {
   if (!dragState?.isDragging || !originalDragNotes) return null;
+
+  if (!gridRef?.current) return null;
+  const gridRect = gridRef.current.getBoundingClientRect();
 
   return (
     <>
@@ -18,15 +21,15 @@ export default function DragGhost({ dragState, dragOffset, originalDragNotes, pi
         return (
           <div
             key={`ghost-${idx}`}
-            className="absolute rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
+            className="fixed rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
             style={{
-              left: `${56 + newBeat * CELL_WIDTH + 2 - viewportState.scrollLeft}px`,
-              top: `${28 + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2}px`,
+              left: `${gridRect.left + 56 + newBeat * CELL_WIDTH + 2 - viewportState.scrollLeft}px`,
+              top: `${gridRect.top + 28 + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2}px`,
               width: noteWidth,
               height: CELL_HEIGHT - 4,
               backgroundColor: velocityColor,
               opacity: 0.9,
-              zIndex: 40
+              zIndex: 50
             }}
           >
             <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
