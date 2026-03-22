@@ -989,22 +989,13 @@ export default function CounterpointGenerator() {
   };
 
   const handleNewProject = () => {
-    if (hasUnsavedChanges) {
-      setPendingAction({ type: 'newProject' });
-      setUnsavedChangesDialog(true);
-      return;
-    }
-    
-    setSettings(DEFAULT_SETTINGS);
-    setCantusFirmus([]);
-    setGeneratedVoices([]);
-    setVoices(DEFAULT_VOICES);
-    setProjectName('');
-    setCurrentProjectId(null);
-    setTempo(80);
-    setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
-    setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+    if (hasUnsavedChanges) { setPendingAction({ type: 'newProject' }); setUnsavedChangesDialog(true); return; }
+    isLoadingProjectRef.current = true;
+    setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
+    setProjectName(''); setCurrentProjectId(null); setTempo(80);
+    setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
     setHasUnsavedChanges(false);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
   };
 
   // Initialize audio on first interaction
