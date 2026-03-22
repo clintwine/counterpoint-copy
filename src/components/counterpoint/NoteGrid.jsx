@@ -2284,8 +2284,8 @@ export default function NoteGrid({
                                      backgroundColor: '#3a3a3a'
                                    }}
                                    onMouseDown={(e) => {
-                                     e.stopPropagation();
-                                   }}
+                                      // Don't stop propagation — let parent handle loop drag
+                                    }}
                                    onClick={(e) => {
                                      e.stopPropagation();
                                      // Only trigger if not dragging loop region
