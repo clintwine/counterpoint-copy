@@ -43,6 +43,7 @@ export default function NoteCell({
       className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${
         selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : noteInLoop && isLooping ? 'ring-2 ring-amber-400/60' : ''
       }`}
+      data-dragging={isBeingDragged}
       style={{ 
         left: `${(note.beat - Math.floor(note.beat)) * CELL_WIDTH + 2}px`,
         width: noteWidth,
@@ -50,9 +51,7 @@ export default function NoteCell({
         backgroundColor: velocityColor,
         boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${velocityColor}` : undefined,
         cursor: resizeState ? 'ew-resize' : 'grab',
-        zIndex: 5,
-        opacity: isBeingDragged ? 0 : 1,
-        transition: 'opacity 0.1s'
+        zIndex: 5
       }}
     >
       <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
