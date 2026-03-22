@@ -15,7 +15,13 @@ export default function GridOverlays({
   smoothPlayhead,
   zoom,
   isPlaying,
-  currentBeat
+  currentBeat,
+  onSeek,
+  snapToGrid,
+  quantizeGrid,
+  totalBeats,
+  setIsScrubbing,
+  setScrubPosition
 }) {
   if (!gridRef?.current) return null;
   const gridRect = gridRef.current.getBoundingClientRect();
