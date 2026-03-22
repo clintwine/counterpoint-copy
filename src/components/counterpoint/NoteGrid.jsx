@@ -13,12 +13,11 @@ import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
-import NoteControls from './NoteControls';
-import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import toast from 'react-hot-toast';
 
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
+const OCTAVES = [8, 7, 6, 5, 4, 3, 2, 1, 0];
 
 // Pre-generate all 88 pitches (static)
 const ALL_PITCHES = (() => {
@@ -39,24 +38,37 @@ const TIME_SIGNATURES = [
 ];
 
 const NOTE_COLORS = {
-  0: '#D4AF37',
-  1: '#5F9EA0',
-  2: '#9370DB',
-  3: '#CD853F',
+  0: '#D4AF37', // Voice 1 - Logic Pro Gold
+  1: '#5F9EA0', // Voice 2 - Logic Pro Teal
+  2: '#9370DB', // Voice 3 - Logic Pro Purple
+  3: '#CD853F', // Voice 4 - Logic Pro Bronze
 };
 
-// Velocity to color gradient: blue → green → yellow → red
+// Velocity to color gradient: blue → green → yellow → red (0-125 scale)
 const getVelocityColor = (velocity) => {
-  const v = Math.max(0, Math.min(1, velocity));
+  const v = Math.max(0, Math.min(1, velocity)); // Clamp between 0 and 1 (0-125 internally)
+  
   if (v < 0.4) {
+    // Blue to Green
     const t = v / 0.4;
-    return `rgb(${Math.round(t * 0)}, ${Math.round(100 + t * 155)}, ${Math.round(255 - t * 55)})`;
+    const r = Math.round(0 + t * 0);
+    const g = Math.round(100 + t * 155);
+    const b = Math.round(255 - t * 55);
+    return `rgb(${r}, ${g}, ${b})`;
   } else if (v < 0.7) {
+    // Green to Yellow
     const t = (v - 0.4) / 0.3;
-    return `rgb(${Math.round(t * 255)}, 255, ${Math.round(200 - t * 200)})`;
+    const r = Math.round(0 + t * 255);
+    const g = Math.round(255);
+    const b = Math.round(200 - t * 200);
+    return `rgb(${r}, ${g}, ${b})`;
   } else {
+    // Yellow to Red - reaches pure red at v=1.0 (velocity 125)
     const t = (v - 0.7) / 0.3;
-    return `rgb(255, ${Math.round(255 - t * 255)}, 0)`;
+    const r = Math.round(255);
+    const g = Math.round(255 - t * 255);
+    const b = Math.round(0);
+    return `rgb(${r}, ${g}, ${b})`;
   }
 };
 
@@ -65,8 +77,102 @@ const BASE_CELL_HEIGHT = 28;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
-const MIN_DURATION = 0.125;
-const DEFAULT_DURATION = 1;
+const MIN_DURATION = 0.125; // Eighth of a beat (128th note)
+const DEFAULT_DURATION = 1; // 1 beat (16th note by default)
+
+const NOTE_DURATIONS = [
+  { value: 0.125, label: '128th', beats: '1/8' },
+  { value: 0.25, label: '64th', beats: '1/4' },
+  { value: 0.5, label: '32nd', beats: '1/2' },
+  { value: 1, label: '16th', beats: '1' },
+  { value: 2, label: '8th', beats: '2' },
+  { value: 3, label: '8th Trip', beats: '2.67' },
+  { value: 4, label: '1/4', beats: '4' },
+  { value: 6, label: '1/4 Trip', beats: '5.33' },
+  { value: 8, label: '1/2', beats: '8' },
+  { value: 12, label: '1/2 Trip', beats: '10.67' },
+  { value: 16, label: 'Whole', beats: '16' },
+];
+
+
+
+const PRESET_LIBRARY_CONFIGS = [
+  {
+    name: 'Warm Pad',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 7, gain: 0.5 }
+    ],
+    envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
+    filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
+  },
+  {
+    name: 'Bright Lead',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.7 },
+      { waveform: 'square', detune: 12, gain: 0.3 }
+    ],
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 4000, Q: 2 }
+  },
+  {
+    name: 'Sub Bass',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 1.0 }
+    ],
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
+    filter: { type: 'lowpass', frequency: 500, Q: 1 }
+  },
+  {
+    name: 'Pluck',
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.8 },
+      { waveform: 'square', detune: 0, gain: 0.2 }
+    ],
+    envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
+  },
+  {
+    name: 'Bell',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.6 },
+      { waveform: 'sine', detune: 700, gain: 0.3 },
+      { waveform: 'sine', detune: 1200, gain: 0.1 }
+    ],
+    envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
+    filter: { type: 'highpass', frequency: 500, Q: 0.5 }
+  },
+  {
+    name: 'Choir',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.4 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.4 },
+      { waveform: 'sine', detune: 0, gain: 0.2 }
+    ],
+    envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
+    filter: { type: 'bandpass', frequency: 1500, Q: 2 }
+  },
+  {
+    name: 'Reese Bass',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -10, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 10, gain: 0.5 }
+    ],
+    envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
+    filter: { type: 'lowpass', frequency: 800, Q: 3 }
+  },
+  {
+    name: 'Flutey',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.9 },
+      { waveform: 'triangle', detune: 0, gain: 0.1 }
+    ],
+    envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
+    filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
+  }
+];
+
+const PRESET_LIBRARY = PRESET_LIBRARY_CONFIGS.map((config, i) => ({ value: `preset_${i}`, label: config.name }));
 
 
 
@@ -286,7 +392,8 @@ export default function NoteGrid({
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
-  // (AudioVisualizer handles its own canvas)
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
@@ -311,7 +418,147 @@ export default function NoteGrid({
   // Consider fullscreen if window height is very large
   const isFullscreen = windowHeight > 900;
 
-  // Audio visualizer moved to AudioVisualizer component
+  // Audio visualizer
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const smoothingFactor = 0.7;
+    let previousData = null;
+    
+    const draw = () => {
+      animationRef.current = requestAnimationFrame(draw);
+      
+      const analyserNode = getAnalyser();
+      if (!analyserNode) {
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(0, 0, rect.width, rect.height);
+        return;
+      }
+      
+      const bufferLength = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserNode.getByteFrequencyData(dataArray);
+      
+      if (previousData) {
+        for (let i = 0; i < bufferLength; i++) {
+          dataArray[i] = previousData[i] * smoothingFactor + dataArray[i] * (1 - smoothingFactor);
+        }
+      }
+      previousData = new Uint8Array(dataArray);
+      
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, rect.height);
+      bgGradient.addColorStop(0, '#1A1A1A');
+      bgGradient.addColorStop(1, '#0F0F0F');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      
+      const numBars = 80;
+      const barWidth = rect.width / numBars;
+      const gap = 1.5;
+      
+      for (let i = 0; i < numBars; i++) {
+        const startIdx = Math.floor((i / numBars) * bufferLength);
+        const endIdx = Math.floor(((i + 1) / numBars) * bufferLength);
+        let sum = 0;
+        let count = 0;
+        for (let j = startIdx; j < endIdx; j++) {
+          sum += dataArray[j];
+          count++;
+        }
+        const value = count > 0 ? sum / count : 0;
+
+        // Apply non-linear scaling for better visual representation
+        const normalized = value / 255;
+        const boosted = Math.pow(normalized, 0.7) * 255; // Power scaling
+
+        const labelSpace = 16;
+        const barHeight = (boosted / 255) * (rect.height - labelSpace) * 1.8;
+        const x = i * barWidth;
+        
+        const gradient = ctx.createLinearGradient(x, rect.height - barHeight, x, rect.height);
+        
+        if (barHeight < rect.height * 0.3) {
+          gradient.addColorStop(0, '#00D4FF');
+          gradient.addColorStop(1, '#0088FF');
+        } else if (barHeight < rect.height * 0.6) {
+          gradient.addColorStop(0, '#00FF88');
+          gradient.addColorStop(0.5, '#88FF00');
+          gradient.addColorStop(1, '#00D4FF');
+        } else if (barHeight < rect.height * 0.8) {
+          gradient.addColorStop(0, '#FFCC00');
+          gradient.addColorStop(0.5, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        } else {
+          gradient.addColorStop(0, '#FF3333');
+          gradient.addColorStop(0.3, '#FFAA00');
+          gradient.addColorStop(0.6, '#00FF88');
+          gradient.addColorStop(1, '#00D4FF');
+        }
+        
+        ctx.fillStyle = gradient;
+        
+        const radius = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, rect.height);
+        ctx.lineTo(x, rect.height - barHeight + radius);
+        ctx.arcTo(x, rect.height - barHeight, x + barWidth - gap, rect.height - barHeight, radius);
+        ctx.lineTo(x + barWidth - gap, rect.height);
+        ctx.closePath();
+        ctx.fill();
+        
+        if (value > 180) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = barHeight > rect.height * 0.8 ? '#FF3333' : '#00FF88';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const y = (rect.height / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(rect.width, y);
+        ctx.stroke();
+      }
+      
+      const freqMarkers = [
+        { freq: '20Hz', pos: 0.02 },
+        { freq: '100Hz', pos: 0.15 },
+        { freq: '500Hz', pos: 0.35 },
+        { freq: '1kHz', pos: 0.5 },
+        { freq: '5kHz', pos: 0.75 },
+        { freq: '10kHz', pos: 0.9 }
+      ];
+      
+      ctx.font = '8px monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.textAlign = 'center';
+      freqMarkers.forEach(marker => {
+        const x = marker.pos * rect.width;
+        ctx.fillText(marker.freq, x, 10);
+      });
+    };
+    
+    draw();
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [canvasRef.current]);
 
   // Update piano highlights based on interaction state
   useEffect(() => {
@@ -615,13 +862,231 @@ export default function NoteGrid({
   }, []); // No dependencies - use refs for current values
 
   // Keyboard shortcuts
-  useNoteGridKeyboard({
-    deleteSelected, copySelected, paste, selectAll, undo, redo,
-    cantusFirmus, selectedNotes, getNoteKey, pitches, totalBeats,
-    setSelectedNotes, setMarquee, onNotesUpdate, saveToHistory,
-    loopStart, loopEnd, isLooping, onSeek, quantize, setTool,
-    DEFAULT_DURATION
-  });
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        deleteSelected();
+      } else if (e.key === 'x' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        copySelected();
+        deleteSelected();
+      } else if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        copySelected();
+      } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        paste();
+      } else if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        selectAll();
+      } else if (e.key === 'z' && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if ((e.key === 'z' && (e.metaKey || e.ctrlKey) && e.shiftKey) || (e.key === 'y' && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        redo();
+      } else if (e.key === 'Escape') {
+        setSelectedNotes(new Set());
+        setMarquee(null);
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        // Spacebar is handled by parent for play/pause
+      } else if (e.key === 'ArrowUp' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes up one octave (12 semitones)
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx - 12;
+            if (newIdx >= 0) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowDown' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes down one octave (12 semitones)
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx + 12;
+            if (newIdx < pitches.length) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowUp' && !e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes up one semitone
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx - 1;
+            if (newIdx >= 0) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowDown' && !e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes down one semitone
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentIdx = pitches.indexOf(n.pitch);
+            const newIdx = currentIdx + 1;
+            if (newIdx < pitches.length) {
+              const newPitch = pitches[newIdx];
+              newSelectedKeys.add(getNoteKey(newPitch, n.beat));
+              return { ...n, pitch: newPitch };
+            } else {
+              newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
+            }
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowLeft' && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes left one beat
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const newBeat = Math.max(0, n.beat - 1);
+            newSelectedKeys.add(getNoteKey(n.pitch, newBeat));
+            return { ...n, beat: newBeat };
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'ArrowRight' && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Move selected notes right one beat
+        const newSelectedKeys = new Set();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const newBeat = Math.min(totalBeats - 1, n.beat + 1);
+            newSelectedKeys.add(getNoteKey(n.pitch, newBeat));
+            return { ...n, beat: newBeat };
+          }
+          return n;
+        });
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'q' && cantusFirmus.length > 0) {
+        e.preventDefault();
+        quantize();
+      } else if (e.key === 'H' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Horizontally reverse selected notes
+        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const minBeat = Math.min(...selectedNotesList.map(n => n.beat));
+        const maxBeat = Math.max(...selectedNotesList.map(n => n.beat + (n.duration || DEFAULT_DURATION)));
+        const center = (minBeat + maxBeat) / 2;
+        
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const distanceFromCenter = n.beat - center;
+            const newBeat = center - distanceFromCenter - (n.duration || DEFAULT_DURATION);
+            return { ...n, beat: Math.max(0, Math.min(totalBeats - 0.125, newBeat)) };
+          }
+          return n;
+        });
+        
+        const newSelectedKeys = new Set(selectedNotesList.map(n => {
+          const distanceFromCenter = n.beat - center;
+          const newBeat = center - distanceFromCenter - (n.duration || DEFAULT_DURATION);
+          return getNoteKey(n.pitch, Math.max(0, Math.min(totalBeats - 0.125, newBeat)));
+        }));
+        
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'V' && e.shiftKey && selectedNotes.size > 0) {
+        e.preventDefault();
+        // Vertically flip selected notes
+        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const pitchIndices = selectedNotesList.map(n => pitches.indexOf(n.pitch));
+        const minPitchIdx = Math.min(...pitchIndices);
+        const maxPitchIdx = Math.max(...pitchIndices);
+        const centerPitchIdx = (minPitchIdx + maxPitchIdx) / 2;
+        
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            const currentPitchIdx = pitches.indexOf(n.pitch);
+            const distanceFromCenter = currentPitchIdx - centerPitchIdx;
+            const newPitchIdx = Math.round(centerPitchIdx - distanceFromCenter);
+            const clampedIdx = Math.max(0, Math.min(pitches.length - 1, newPitchIdx));
+            return { ...n, pitch: pitches[clampedIdx] };
+          }
+          return n;
+        });
+        
+        const newSelectedKeys = new Set(selectedNotesList.map(n => {
+          const currentPitchIdx = pitches.indexOf(n.pitch);
+          const distanceFromCenter = currentPitchIdx - centerPitchIdx;
+          const newPitchIdx = Math.round(centerPitchIdx - distanceFromCenter);
+          const clampedIdx = Math.max(0, Math.min(pitches.length - 1, newPitchIdx));
+          return getNoteKey(pitches[clampedIdx], n.beat);
+        }));
+        
+        setSelectedNotes(newSelectedKeys);
+        saveToHistory(newNotes);
+        onNotesUpdate(newNotes);
+      } else if (e.key === 'v') {
+        setTool('select');
+      } else if (e.key === 'm') {
+        setTool('marquee');
+      } else if (e.key === 'b') {
+        setTool('draw');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // Seek to loop start if looping, otherwise to beginning
+        const seekTo = (loopStart !== null && isLooping) ? loopStart : 0;
+        if (onSeek) {
+          onSeek(seekTo);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteSelected, copySelected, paste, selectAll, undo, redo]);
 
   const getBeatFromHeaderPosition = (clientX) => {
     if (!gridRef.current) return null;
@@ -2494,25 +2959,296 @@ export default function NoteGrid({
         </div>
 
         {/* Center - note controls */}
-        {selectedNotes.size > 0 && (
+        {selectedNotes.size > 0 && (<div className="flex-1 min-w-0">
           <div className="flex-1 min-w-0">
-            <NoteControls
-              selectedNotes={selectedNotes}
-              cantusFirmus={cantusFirmus}
-              getNoteKey={getNoteKey}
-              onNotesUpdate={onNotesUpdate}
-              saveToHistory={saveToHistory}
-              voices={voices}
-              getInstrumentConfig={getInstrumentConfig}
-              tempo={tempo}
-            />
-          </div>
-        )}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-amber-400 text-xs flex-shrink-0">{selectedNotes.size} selected</span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-white/50 text-[10px]">Vel</span>
+                <Slider
+                  value={[(() => {
+                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                    return (firstSelected?.velocity ?? 0.8) * 125;
+                  })()]}
+                  onValueChange={([value]) => {
+                    const velocity = value / 125;
+                    const newNotes = cantusFirmus.map(n => 
+                      selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                        ? { ...n, velocity } 
+                        : n
+                    );
+                    onNotesUpdate(newNotes);
+                  }}
+                  onValueCommit={([value]) => {
+                    saveToHistory(cantusFirmus);
+                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                    if (firstSelected) {
+                      initAudio();
+                      const instrument = voices[0]?.instrument || 'organ';
+                      const customConfig = getInstrumentConfig(instrument);
+                      const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
+                      const pitchBend = hasBend ? {
+                        start: firstSelected.bendStart ?? 0,
+                        end: firstSelected.bendEnd ?? 0,
+                        startTime: firstSelected.bendStartTime ?? 0,
+                        endTime: firstSelected.bendEndTime ?? 1
+                      } : 0;
+                      const sixteenthNoteDuration = (60 / tempo) / 4;
+                      const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                      if (customConfig) {
+                        playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, value / 125, customConfig, firstSelected.articulation || 'normal', tempo, pitchBend);
+                      } else {
+                        playNote(firstSelected.pitch, actualDuration, value / 125, 0, instrument, pitchBend);
+                      }
+                    }
+                  }}
+                  min={25}
+                  max={125}
+                  step={5}
+                  className="w-16 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
+                />
+                <span className="text-white/70 text-[10px] w-6">
+                  {Math.round(((() => {
+                    const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                    return (firstSelected?.velocity ?? 0.8) * 125;
+                  })()))}
+                </span>
+              </div>
+              <div className="w-px h-3 bg-slate-600" />
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-white/50 text-[10px]">Bend</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-24 justify-between bg-slate-700 border-slate-600 text-white text-[10px] px-2"
+                    >
+                      {(() => {
+                        const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                        const start = firstSelected?.bendStart ?? 0;
+                        const end = firstSelected?.bendEnd ?? 0;
+                        if (start === 0 && end === 0) return 'None';
+                        if (start === 0 && end === 1) return '↗ +1';
+                        if (start === 0 && end === 2) return '↗ +2';
+                        if (start === 0 && end === -1) return '↘ -1';
+                        if (start === 0 && end === -2) return '↘ -2';
+                        if (start === -1 && end === 0) return '↗↘ +1';
+                        if (start === -2 && end === 0) return '↗↘ +2';
+                        if (start === 1 && end === 0) return '↘↗ -1';
+                        if (start === 2 && end === 0) return '↘↗ -2';
+                        if (start === 0 && end === 0.5) return '↗ +½';
+                        if (start === 0 && end === -0.5) return '↘ -½';
+                        if (start === 0 && end === 3) return '↗ +3';
+                        if (start === 0 && end === -3) return '↘ -3';
+                        return 'None';
+                      })()}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-48">
+                    {[
+                      { label: 'None', start: 0, end: 0 },
+                      { label: '↗ Up +½ semitone', start: 0, end: 0.5 },
+                      { label: '↗ Up +1 semitone', start: 0, end: 1 },
+                      { label: '↗ Up +2 semitones', start: 0, end: 2 },
+                      { label: '↗ Up +3 semitones', start: 0, end: 3 },
+                      { label: '↘ Down -½ semitone', start: 0, end: -0.5 },
+                      { label: '↘ Down -1 semitone', start: 0, end: -1 },
+                      { label: '↘ Down -2 semitones', start: 0, end: -2 },
+                      { label: '↘ Down -3 semitones', start: 0, end: -3 },
+                      { label: '↗↘ Return from +1', start: -1, end: 0 },
+                      { label: '↗↘ Return from +2', start: -2, end: 0 },
+                      { label: '↘↗ Return from -1', start: 1, end: 0 },
+                      { label: '↘↗ Return from -2', start: 2, end: 0 },
+                    ].map((bendType) => (
+                      <DropdownMenuItem
+                        key={bendType.label}
+                        className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                        onSelect={() => {
+                          const newNotes = cantusFirmus.map(n => 
+                            selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                              ? { ...n, bendStart: bendType.start, bendEnd: bendType.end } 
+                              : n
+                          );
+                          saveToHistory(newNotes);
+                          onNotesUpdate(newNotes);
+                          
+                          const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                          if (firstSelected) {
+                            initAudio();
+                            const instrument = voices[0]?.instrument || 'organ';
+                            const customConfig = getInstrumentConfig(instrument);
+                            const pitchBend = {
+                              start: bendType.start,
+                              end: bendType.end,
+                              startTime: firstSelected?.bendStartTime ?? 0,
+                              endTime: firstSelected?.bendEndTime ?? 1
+                            };
+                            const sixteenthNoteDuration = (60 / tempo) / 4;
+                            const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                            if (customConfig) {
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, firstSelected.articulation || 'normal', tempo, pitchBend);
+                            } else {
+                              playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
+                            }
+                          }
+                        }}
+                      >
+                        <span>{bendType.label}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                            if (firstSelected) {
+                              initAudio();
+                              const instrument = voices[0]?.instrument || 'organ';
+                              const customConfig = getInstrumentConfig(instrument);
+                              const pitchBend = {
+                                start: bendType.start,
+                                end: bendType.end,
+                                startTime: firstSelected?.bendStartTime ?? 0,
+                                endTime: firstSelected?.bendEndTime ?? 1
+                              };
+                              const sixteenthNoteDuration = (60 / tempo) / 4;
+                              const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                              if (customConfig) {
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig);
+                              } else {
+                                playNote(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, pitchBend);
+                              }
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                          title="Preview"
+                        >
+                          ▶
+                        </button>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-white/50 text-[10px]">Style</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-24 justify-between bg-slate-700 border-slate-600 text-white text-[10px] px-2"
+                    >
+                      {(() => {
+                        const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                        const articulation = firstSelected?.articulation || 'normal';
+                        return articulation.charAt(0).toUpperCase() + articulation.slice(1);
+                      })()}
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-800 border-slate-700 w-48">
+                    {[
+                      { value: 'normal', label: 'Normal', desc: 'Standard articulation' },
+                      { value: 'staccato', label: 'Staccato', desc: 'Short & detached' },
+                      { value: 'legato', label: 'Legato', desc: 'Smooth & connected' },
+                      { value: 'accent', label: 'Accent', desc: 'Emphasized' },
+                      { value: 'trill', label: 'Trill', desc: 'Rapid alternation' },
+                      { value: 'grace', label: 'Grace Note', desc: 'Quick ornament' },
+                      { value: 'tremolo-slow', label: 'Tremolo Slow', desc: '16th note picks' },
+                      { value: 'tremolo-medium', label: 'Tremolo Medium', desc: '32nd note picks' },
+                      { value: 'tremolo-fast', label: 'Tremolo Fast', desc: '64th note picks' },
+                      { value: 'tremolo-ultra', label: 'Tremolo Ultra', desc: '128th note picks' },
+                    ].map((style) => (
+                      <DropdownMenuItem
+                        key={style.value}
+                        className="text-white text-xs cursor-pointer flex items-center justify-between group"
+                        onSelect={() => {
+                          const newNotes = cantusFirmus.map(n => 
+                            selectedNotes.has(getNoteKey(n.pitch, n.beat)) 
+                              ? { ...n, articulation: style.value } 
+                              : n
+                          );
+                          saveToHistory(newNotes);
+                          onNotesUpdate(newNotes);
+                          
+                          const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                          if (firstSelected) {
+                            initAudio();
+                            const instrument = voices[0]?.instrument || 'organ';
+                            const customConfig = getInstrumentConfig(instrument);
+                            const sixteenthNoteDuration = (60 / tempo) / 4;
+                            const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                            const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
+                            const pitchBend = hasBend ? {
+                              start: firstSelected.bendStart ?? 0,
+                              end: firstSelected.bendEnd ?? 0,
+                              startTime: firstSelected.bendStartTime ?? 0,
+                              endTime: firstSelected.bendEndTime ?? 1
+                            } : 0;
+                            
+                            if (customConfig) {
+                              playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, style.value, tempo, pitchBend);
+                            } else {
+                              import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                                playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
+                              });
+                            }
+                          }
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium">{style.label}</div>
+                          <div className="text-[10px] text-white/50">{style.desc}</div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                            if (firstSelected) {
+                              initAudio();
+                              const instrument = voices[0]?.instrument || 'organ';
+                              const customConfig = getInstrumentConfig(instrument);
+                              const sixteenthNoteDuration = (60 / tempo) / 4;
+                              const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
+                              const hasBend = firstSelected.bendStart !== undefined || firstSelected.bendEnd !== undefined;
+                              const pitchBend = hasBend ? {
+                                start: firstSelected.bendStart ?? 0,
+                                end: firstSelected.bendEnd ?? 0,
+                                startTime: firstSelected.bendStartTime ?? 0,
+                                endTime: firstSelected.bendEndTime ?? 1
+                              } : 0;
+
+                              if (customConfig) {
+                                playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, style.value, tempo, pitchBend);
+                              } else {
+                                import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
+                                  playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, style.value, tempo, pitchBend);
+                                });
+                              }
+                              }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                              title="Preview"
+                              >
+                              ▶
+                              </button>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+                  </div>
+                  </div></div>
+                  )}
                   </div>
 
                   {/* Audio Visualizer - right side */}
                   <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-10">
-                    <AudioVisualizer />
+                  <canvas 
+                  ref={canvasRef}
+                  className="rounded w-full h-full block"
+                  />
                   </div>
                   </div>
 
