@@ -85,52 +85,13 @@ export default function MeasureHeader({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  const handleMeasureClick = (e) => {
-    e.stopPropagation();
-    if (mouseDownPos.current) {
-      const dx = Math.abs(e.clientX - mouseDownPos.current.x);
-      const dy = Math.abs(e.clientY - mouseDownPos.current.y);
-      if (dx > 5 || dy > 5) return;
-    }
-
-    const measureStart = measureStartBeat;
-    const measureEnd = measureStartBeat + beatsPerMeasure;
-    const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
-
-    // Toggle off: if this measure is already selected, clear it
-    if (isAlreadyLooped && !e.shiftKey) {
-      if (onLoopChange) onLoopChange(null, null);
-      setSelectedNotes(new Set());
-      return;
-    }
-
-    if (!isLoopSelecting) {
-      if (e.shiftKey && loopStart !== null && loopEnd !== null) {
-        const newStart = Math.min(loopStart, measureStart);
-        const newEnd = Math.max(loopEnd, measureEnd);
-        if (onLoopChange) onLoopChange(newStart, newEnd);
-        const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-        if (measureNotes.length > 0) {
-          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-          setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-        }
-      } else {
-        if (onLoopChange) onLoopChange(measureStart, measureEnd);
-        const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-        if (measureNotes.length > 0) {
-          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-          setSelectedNotes(measureKeys);
-        }
-      }
-    }
-  };
+  // click logic is handled inside handleMeasureMouseDown
 
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a' }}
       onMouseDown={handleMeasureMouseDown}
-      onClick={handleMeasureClick}
     >
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
