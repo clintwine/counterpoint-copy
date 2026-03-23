@@ -1000,6 +1000,8 @@ export default function NoteGrid({
             }
           });
           setSelectedNotes(newSelected);
+          // Clear loop region when making a new marquee selection
+          if (onLoopChange) onLoopChange(null, null);
         }
       }
       setMarquee(null);
