@@ -1,22 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Wand2, 
-  Download, 
-  RefreshCw, 
-  Music2, 
-  Settings, 
-  Layers,
-  Save,
-  FolderOpen,
-  Sparkles,
-  X,
-  Edit2,
-  Trash2,
-  Search
-} from 'lucide-react';
-
+import { Wand2, Download, RefreshCw, Music2, Settings, Layers, Save, FolderOpen, Sparkles, X, Edit2, Trash2, Search } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AIChatbot from '@/components/counterpoint/AIChatbot';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { Midi } from '@tonejs/midi';
+import toast from 'react-hot-toast';
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
 import VoiceEditor from '@/components/counterpoint/VoiceEditor';
