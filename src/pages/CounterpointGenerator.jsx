@@ -16,16 +16,7 @@ import {
   Trash2,
   Search
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AIChatbot from '@/components/counterpoint/AIChatbot';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { Midi } from '@tonejs/midi';
-import toast from 'react-hot-toast';
+
 
 import NoteGrid from '@/components/counterpoint/NoteGrid';
 import VoiceEditor from '@/components/counterpoint/VoiceEditor';
@@ -33,6 +24,7 @@ import PlaybackControls from '@/components/counterpoint/PlaybackControls';
 import PianoKeyboard from '@/components/counterpoint/PianoKeyboard';
 import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
+import UnsavedChangesDialog from '@/components/counterpoint/UnsavedChangesDialog';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
 import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument } from '@/components/counterpoint/audioEngine';
 
@@ -1971,63 +1963,47 @@ export default function CounterpointGenerator() {
               </Dialog>
 
               {/* Unsaved Changes Dialog */}
-              <Dialog open={unsavedChangesDialog} onOpenChange={setUnsavedChangesDialog}>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Unsaved Changes</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-white/70">You have unsaved changes. What would you like to do?</p>
-                    <div className="flex flex-col gap-2">
-                      <Button
-                       onClick={async () => {
-                         const action = pendingAction;
-                         await handleSaveProject(true);
-                         setUnsavedChangesDialog(false); setHasUnsavedChanges(false); setPendingAction(null);
-                         if (action) setTimeout(() => {
-                           if (action.type === 'loadSong') handleLoadSong(action.data);
-                           else if (action.type === 'loadProject') handleLoadProject(action.data);
-                           else if (action.type === 'newProject') handleNewProject();
-                         }, 50);
-                       }}
-                       className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                      >
-                       Save and Continue
-                      </Button>
-                      <Button
-                       onClick={() => {
-                         const action = pendingAction;
-                         isLoadingProjectRef.current = true;
-                         setUnsavedChangesDialog(false); setHasUnsavedChanges(false); setPendingAction(null);
-                         setTimeout(() => {
-                           if (action?.type === 'newProject') {
-                             setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
-                             setProjectName(''); setCurrentProjectId(null); setTempo(80);
-                             setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
-                           } else if (action?.type === 'loadProject') { handleLoadProject(action.data);
-                           } else if (action?.type === 'loadSong') { handleLoadSong(action.data); }
-                           setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
-                         }, 50);
-                       }}
-                       variant="outline"
-                       className="border-[#3A3A3A] text-white hover:bg-[#3A3A3A]"
-                      >
-                       Don't Save
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUnsavedChangesDialog(false);
-                          setPendingAction(null);
-                        }}
-                        variant="ghost"
-                        className="text-white/70 hover:text-white hover:bg-[#3A3A3A]"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <UnsavedChangesDialog
+                open={unsavedChangesDialog}
+                onOpenChange={setUnsavedChangesDialog}
+                pendingAction={pendingAction}
+                onSaveAndContinue={async (action) => {
+                  setUnsavedChangesDialog(false);
+                  setHasUnsavedChanges(false);
+                  setPendingAction(null);
+                  setSaveDialogOpen(false);
+                  await handleSaveProject(true);
+                  if (action) {
+                    setTimeout(() => {
+                      if (action.type === 'loadSong') handleLoadSong(action.data);
+                      else if (action.type === 'loadProject') handleLoadProject(action.data);
+                      else if (action.type === 'newProject') handleNewProject();
+                    }, 50);
+                  }
+                }}
+                onDontSave={(action) => {
+                  isLoadingProjectRef.current = true;
+                  setUnsavedChangesDialog(false);
+                  setHasUnsavedChanges(false);
+                  setPendingAction(null);
+                  setTimeout(() => {
+                    if (action?.type === 'newProject') {
+                      setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
+                      setProjectName(''); setCurrentProjectId(null); setTempo(80);
+                      setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+                    } else if (action?.type === 'loadProject') {
+                      handleLoadProject(action.data);
+                    } else if (action?.type === 'loadSong') {
+                      handleLoadSong(action.data);
+                    }
+                    setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
+                  }, 50);
+                }}
+                onCancel={() => {
+                  setUnsavedChangesDialog(false);
+                  setPendingAction(null);
+                }}
+              />
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
