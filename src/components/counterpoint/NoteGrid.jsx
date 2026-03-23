@@ -991,8 +991,8 @@ export default function NoteGrid({
             const duration = note.duration || DEFAULT_DURATION;
             const noteEndBeat = note.beat + duration;
             
-            // Select note if it overlaps with marquee at all (more lenient)
-            const overlapsHorizontally = noteEndBeat > minBeat && note.beat <= maxBeat;
+            // Select note if it overlaps with marquee
+            const overlapsHorizontally = noteEndBeat > minBeat && note.beat < maxBeat;
             const overlapsVertically = pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx;
             
             if (overlapsHorizontally && overlapsVertically) {
