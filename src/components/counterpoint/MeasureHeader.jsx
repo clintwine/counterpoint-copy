@@ -19,8 +19,20 @@ export default function MeasureHeader({
   quantizeGrid,
   totalBeats
 }) {
+  const mouseDownPos = React.useRef(null);
+
+  const handleMeasureMouseDown = (e) => {
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
+  };
+
   const handleMeasureClick = (e) => {
     e.stopPropagation();
+    // Don't treat as a click if the mouse moved significantly (was a drag)
+    if (mouseDownPos.current) {
+      const dx = Math.abs(e.clientX - mouseDownPos.current.x);
+      const dy = Math.abs(e.clientY - mouseDownPos.current.y);
+      if (dx > 5 || dy > 5) return;
+    }
     if (!isLoopSelecting && selectedNotes.size === 0) {
       const measureStart = measureStartBeat;
       const measureEnd = measureStartBeat + beatsPerMeasure;
