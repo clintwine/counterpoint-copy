@@ -18,6 +18,7 @@ import MeasureHeader from './MeasureHeader';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import toast from 'react-hot-toast';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
+import { useAudioVisualizer } from './useAudioVisualizer';
 
 // Full 88-key piano range: A0 to C8
 const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
