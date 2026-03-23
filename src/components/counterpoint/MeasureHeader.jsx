@@ -18,7 +18,6 @@ export default function MeasureHeader({
   const mouseDownPos = React.useRef(null);
 
   const handleMeasureMouseDown = (e) => {
-    e.stopPropagation();
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
   };
 
