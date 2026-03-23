@@ -633,8 +633,8 @@ export default function CounterpointGenerator() {
     });
   };
 
-  const handleLoadProject = (project) => {
-    if (hasUnsavedChanges) {
+  const handleLoadProject = (project, force = false) => {
+    if (!force && hasUnsavedChanges) {
       setPendingAction({ type: 'loadProject', data: project });
       setUnsavedChangesDialog(true);
       return;
@@ -703,8 +703,8 @@ export default function CounterpointGenerator() {
     }
   }, [songDialogOpen]);
 
-  const handleLoadSong = (song) => {
-    if (hasUnsavedChanges) {
+  const handleLoadSong = (song, force = false) => {
+    if (!force && hasUnsavedChanges) {
       setPendingAction({ type: 'loadSong', data: song });
       setUnsavedChangesDialog(true);
       return;
@@ -988,8 +988,8 @@ export default function CounterpointGenerator() {
     previewTimeoutRef.current = timeouts;
   };
 
-  const handleNewProject = () => {
-    if (hasUnsavedChanges) { setPendingAction({ type: 'newProject' }); setUnsavedChangesDialog(true); return; }
+  const handleNewProject = (force = false) => {
+    if (!force && hasUnsavedChanges) { setPendingAction({ type: 'newProject' }); setUnsavedChangesDialog(true); return; }
     isLoadingProjectRef.current = true;
     setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
     setProjectName(''); setCurrentProjectId(null); setTempo(80);
@@ -1985,9 +1985,9 @@ export default function CounterpointGenerator() {
                          await handleSaveProject(true);
                          setUnsavedChangesDialog(false); setHasUnsavedChanges(false); setPendingAction(null);
                          if (action) setTimeout(() => {
-                           if (action.type === 'loadSong') handleLoadSong(action.data);
-                           else if (action.type === 'loadProject') handleLoadProject(action.data);
-                           else if (action.type === 'newProject') handleNewProject();
+                           if (action.type === 'loadSong') handleLoadSong(action.data, true);
+                           else if (action.type === 'loadProject') handleLoadProject(action.data, true);
+                           else if (action.type === 'newProject') handleNewProject(true);
                          }, 50);
                        }}
                        className="bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
