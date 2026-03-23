@@ -1742,7 +1742,7 @@ export default function NoteGrid({
                                 document.addEventListener('mouseup', handleMouseUp);
                               }}
                             >
-                              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} />);})}
+                              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})}
                             </div>
 
             {/* Virtualized Note grid rows - only render visible rows */}
