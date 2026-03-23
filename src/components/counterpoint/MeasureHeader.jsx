@@ -14,11 +14,75 @@ export default function MeasureHeader({
   getNoteKey,
   onLoopChange,
   setSelectedNotes,
+  gridRef,
 }) {
   const mouseDownPos = React.useRef(null);
+  const isDragging = React.useRef(false);
+
+  const getBeatFromClientX = (clientX) => {
+    if (!gridRef?.current) return null;
+    const rect = gridRef.current.getBoundingClientRect();
+    const scrollLeft = gridRef.current.scrollLeft;
+    const x = clientX - rect.left - 56 + scrollLeft;
+    return Math.max(0, Math.floor(x / CELL_WIDTH));
+  };
 
   const handleMeasureMouseDown = (e) => {
+    e.stopPropagation();
+    isDragging.current = false;
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
+
+    const startBeat = getBeatFromClientX(e.clientX);
+    if (startBeat === null) return;
+
+    const handleMouseMove = (moveEvent) => {
+      const dx = Math.abs(moveEvent.clientX - mouseDownPos.current.x);
+      if (dx > 5) isDragging.current = true;
+
+      if (isDragging.current) {
+        const moveBeat = getBeatFromClientX(moveEvent.clientX);
+        if (moveBeat !== null) {
+          const start = Math.min(startBeat, moveBeat);
+          const end = Math.max(startBeat, moveBeat) + 1;
+          onLoopChange?.(start, end);
+        }
+      }
+    };
+
+    const handleMouseUp = (upEvent) => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+
+      if (!isDragging.current) {
+        // It was a click — handle toggle
+        const measureStart = measureStartBeat;
+        const measureEnd = measureStartBeat + beatsPerMeasure;
+        const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
+
+        if (isAlreadyLooped && !upEvent.shiftKey) {
+          onLoopChange?.(null, null);
+          setSelectedNotes(new Set());
+        } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
+          const newStart = Math.min(loopStart, measureStart);
+          const newEnd = Math.max(loopEnd, measureEnd);
+          onLoopChange?.(newStart, newEnd);
+          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          if (measureNotes.length > 0) {
+            const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+            setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
+          }
+        } else {
+          onLoopChange?.(measureStart, measureEnd);
+          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+          setSelectedNotes(measureKeys);
+        }
+      }
+      isDragging.current = false;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleMeasureClick = (e) => {
