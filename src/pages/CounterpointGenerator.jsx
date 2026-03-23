@@ -64,11 +64,7 @@ export default function CounterpointGenerator() {
   
   const [isPlaying, setIsPlaying] = useState(false);
   
-  // Debug: Log every state change
-  useEffect(() => {
-    console.log('[DEBUG] isPlaying changed to:', isPlaying);
-    console.trace();
-  }, [isPlaying]);
+
   const [currentBeat, setCurrentBeat] = useState(0);
   const [playheadPosition, setPlayheadPosition] = useState(0); // Smooth floating point position
   const [tempo, setTempo] = useState(80);
@@ -373,6 +369,9 @@ export default function CounterpointGenerator() {
         setCurrentProjectId(saved.id);
         hasUnsavedRef.current = false;
         toast.success('Project saved locally');
+      } else {
+        saveProjectMutation.mutate(projectData);
+      }
       return;
     }
 
