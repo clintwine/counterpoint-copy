@@ -22,6 +22,7 @@ export default function MeasureHeader({
   const mouseDownPos = React.useRef(null);
 
   const handleMeasureMouseDown = (e) => {
+    e.stopPropagation();
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
   };
 
@@ -33,33 +34,19 @@ export default function MeasureHeader({
       const dy = Math.abs(e.clientY - mouseDownPos.current.y);
       if (dx > 5 || dy > 5) return;
     }
-    if (!isLoopSelecting && selectedNotes.size === 0) {
-      const measureStart = measureStartBeat;
-      const measureEnd = measureStartBeat + beatsPerMeasure;
-      const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
-      
-      if (isAlreadyLooped && !e.shiftKey) {
-        if (onLoopChange) onLoopChange(null, null);
-        setSelectedNotes(new Set());
-      } else if (e.shiftKey && loopStart !== null && loopEnd !== null) {
-        const newStart = Math.min(loopStart, measureStart);
-        const newEnd = Math.max(loopEnd, measureEnd);
-        if (onLoopChange) onLoopChange(newStart, newEnd);
-        const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-        if (measureNotes.length > 0) {
-          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-          setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-        }
-      } else {
-        if (onLoopChange) onLoopChange(measureStart, measureEnd);
-        const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-        if (measureNotes.length > 0) {
-          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-          setSelectedNotes(measureKeys);
-        }
-      }
+    const measureStart = measureStartBeat;
+    const measureEnd = measureStartBeat + beatsPerMeasure;
+    const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
+
+    // Toggle off: if this measure is already selected, clear it
+    if (isAlreadyLooped && !e.shiftKey) {
+      if (onLoopChange) onLoopChange(null, null);
+      setSelectedNotes(new Set());
+      return;
     }
-  };
+
+    if (!isLoopSelecting) {
+      if (e.shiftKey && loopStart !== null && loopEnd !== null) {
 
   return (
     <div 
