@@ -333,15 +333,11 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
         }
       });
 
-      const rawNotes = response?.notes || [];
+      // Handle nested response structure from LLM
+      const actualResponse = response?.response || response;
+      const rawNotes = actualResponse?.notes || [];
       
-      // Debug: log response structure
-      console.log('[AIChatbot] Full response object:', JSON.stringify(response, null, 2));
-      console.log('[AIChatbot] Response keys:', Object.keys(response || {}));
-      console.log('[AIChatbot] Raw notes:', rawNotes, 'count:', rawNotes.length);
-      if (rawNotes.length === 0) {
-        console.error('[AIChatbot] ERROR: Notes array is empty! Response:', response);
-      }
+      console.log('[AIChatbot] Extracted notes count:', rawNotes.length);
       
       // Post-process: sort by beat, clamp durations, remove overlapping
       const processedNotes = rawNotes
@@ -362,12 +358,12 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
           return note;
         });
 
-      const aiEditMode = response.editMode || 'replace';
+      const aiEditMode = actualResponse.editMode || 'replace';
 
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isGenerating);
-        const ca = response?.compositionAnalysis;
-        let analysisText = `${response?.description || 'Composition generated.'}\n\n`;
+        const ca = actualResponse?.compositionAnalysis;
+        let analysisText = `${actualResponse?.description || 'Composition generated.'}\n\n`;
         if (ca) {
           analysisText += `📊 **Analysis**: Form: ${ca.form || '?'} | Climax: ${ca.climaxLocation || '?'}\n`;
           if (ca.motivicContent) analysisText += `🎵 ${ca.motivicContent}\n`;
