@@ -513,7 +513,7 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
         )}
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 space-y-3 select-text">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[90%] rounded-2xl px-3 py-2.5 ${
@@ -521,7 +521,7 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
                   ? 'bg-amber-500 text-slate-900'
                   : 'bg-slate-800 text-white'
               }`}>
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed select-text cursor-text">{msg.content}</p>
                 {msg.notes?.length > 0 && (
                   <div className="mt-3 pt-2 border-t border-slate-700/50 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
