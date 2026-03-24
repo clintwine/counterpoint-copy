@@ -165,6 +165,7 @@ Dynamics 0.6-0.95. Articulation mix: legato runs with staccato accents.`;
     const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : 64;
     const existingAnalysis = analyzeNotes(currentNotes);
     const scaleNotes = getScaleNotes(settings.key, settings.mode);
+    const isCounterpointRequest = /counterpoint|harmony|voice|soprano|alto|tenor|bass|second\s+voice|accompaniment/i.test(userMessage);
     const isExtendRequest = /extend|continue|add\s+more|append/i.test(userMessage);
     const isEditRequest = /edit|modify|change|replace\s+measure/i.test(userMessage);
     const startBeat = (isExtendRequest && existingAnalysis) ? existingAnalysis.maxBeat : 0;
@@ -289,7 +290,9 @@ SCALE TO USE (root notes for ${settings.key} ${settings.mode}):
 ALL melodic content should use: ${scaleNotes.join(', ')} (across octaves C2-C7)
 Chromatic notes are PASSING TONES only – always resolve to scale tones.
 
-Generate a musically sophisticated, technically impressive composition.`,
+Generate a musically sophisticated, technically impressive composition.
+
+${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voice. Generate notes that harmonize with the existing melody (if any). Use consonant intervals (3rds, 6ths, octaves, 5ths) against the main melody. Avoid parallel 5ths and octaves. The counterpoint line should have its own melodic identity while complementing the existing melody.` : ''}`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -330,7 +333,7 @@ Generate a musically sophisticated, technically impressive composition.`,
         }
       });
 
-      const rawNotes = response.notes || [];
+      const rawNotes = response?.notes || [];
       
       // Post-process: sort by beat, clamp durations, remove overlapping
       const processedNotes = rawNotes
@@ -355,8 +358,8 @@ Generate a musically sophisticated, technically impressive composition.`,
 
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isGenerating);
-        const ca = response.compositionAnalysis;
-        let analysisText = `${response.description}\n\n`;
+        const ca = response?.compositionAnalysis;
+        let analysisText = `${response?.description || 'Composition generated.'}\n\n`;
         if (ca) {
           analysisText += `📊 **Analysis**: Form: ${ca.form || '?'} | Climax: ${ca.climaxLocation || '?'}\n`;
           if (ca.motivicContent) analysisText += `🎵 ${ca.motivicContent}\n`;

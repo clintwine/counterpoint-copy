@@ -1187,12 +1187,10 @@ export default function NoteGrid({
                 Download as Audio
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              {!showPianoPanel && (
-                <DropdownMenuItem onClick={onTogglePianoPanel} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                  <Keyboard className="w-4 h-4 mr-2" />
-                  Show Piano
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem onClick={onTogglePianoPanel} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+                <Keyboard className="w-4 h-4 mr-2" />
+                {showPianoPanel ? 'Hide Piano' : 'Show Piano'}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Guitar className="w-4 h-4 mr-2" />
                 Create Instrument
