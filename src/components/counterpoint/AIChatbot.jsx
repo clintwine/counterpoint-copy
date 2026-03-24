@@ -336,8 +336,12 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
       const rawNotes = response?.notes || [];
       
       // Debug: log response structure
-      console.log('[AIChatbot] Raw response:', response);
+      console.log('[AIChatbot] Full response object:', JSON.stringify(response, null, 2));
+      console.log('[AIChatbot] Response keys:', Object.keys(response || {}));
       console.log('[AIChatbot] Raw notes:', rawNotes, 'count:', rawNotes.length);
+      if (rawNotes.length === 0) {
+        console.error('[AIChatbot] ERROR: Notes array is empty! Response:', response);
+      }
       
       // Post-process: sort by beat, clamp durations, remove overlapping
       const processedNotes = rawNotes
