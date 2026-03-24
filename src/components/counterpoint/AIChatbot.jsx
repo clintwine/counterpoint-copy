@@ -1,12 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Send, Loader2, Sparkles, Play, Square, Music } from 'lucide-react';
+import { X, Send, Loader2, Sparkles, Play, Square, Music, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { initAudio, playNote, stopAllNotes, playNoteWithCustomInstrument } from './audioEngine';
 import toast from 'react-hot-toast';
+
+const QUICK_PROMPTS = [
+  "Compose a 64-note Bach-style invention in the current key",
+  "Create a virtuosic 32-note descending run with ornaments",
+  "Write a lyrical 48-note singing melody with long phrases",
+  "Generate a death metal riff with palm mutes and power chords",
+  "Create a jazz-inflected melody with chromatic passing tones",
+  "Write a fugue subject followed by its answer",
+  "Compose a dramatic romantic melody with wide leaps",
+  "Generate a fast baroque sequence with triplets",
+];
 
 export default function AIChatbot({ 
   isOpen, 
@@ -14,11 +25,13 @@ export default function AIChatbot({
   settings,
   tempo = 80,
   onApplyMelody,
+  onApplyHarmony,
   currentNotes,
   messages,
   onMessagesChange,
   instrument = 'organ',
-  customInstruments = []
+  customInstruments = [],
+  voices = []
 }) {
   const setMessages = onMessagesChange;
   const [input, setInput] = useState('');
@@ -26,9 +39,7 @@ export default function AIChatbot({
   const messagesEndRef = useRef(null);
   const [previewPlaying, setPreviewPlaying] = useState(null);
   const previewTimeoutRef = useRef(null);
-  const abortControllerRef = useRef(null);
 
-  // Fetch Bach Inventions for training
   const { data: songs = [] } = useQuery({
     queryKey: ['songs-training'],
     queryFn: () => base44.entities.Song.list('-created_date'),
@@ -38,6 +49,109 @@ export default function AIChatbot({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // ── Music theory helpers ──────────────────────────────
+  const parsePitchToMidi = (pitch) => {
+    const noteMap = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
+    const m = pitch?.match(/^([A-G]#?)(\d+)$/);
+    if (!m) return 60;
+    return (parseInt(m[2]) + 1) * 12 + (noteMap[m[1]] ?? 0);
+  };
+
+  const getScaleNotes = (key, mode) => {
+    const chromatic = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const majorIntervals = [0,2,4,5,7,9,11];
+    const minorIntervals = [0,2,3,5,7,8,10];
+    const intervals = mode === 'minor' ? minorIntervals : majorIntervals;
+    const root = chromatic.indexOf(key);
+    return intervals.map(i => chromatic[(root + i) % 12]);
+  };
+
+  const analyzeNotes = (notes) => {
+    if (!notes?.length) return null;
+    const intervals = [];
+    for (let i = 1; i < notes.length; i++) {
+      intervals.push(parsePitchToMidi(notes[i].pitch) - parsePitchToMidi(notes[i-1].pitch));
+    }
+    const durations = notes.map(n => n.duration || 1);
+    const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+    const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
+    const steps = intervals.filter(i => Math.abs(i) <= 2).length;
+    const leaps = intervals.filter(i => Math.abs(i) > 2).length;
+    const ascending = intervals.filter(i => i > 0).length;
+    const descending = intervals.filter(i => i < 0).length;
+    return {
+      noteCount: notes.length,
+      maxBeat,
+      avgDuration: avgDuration.toFixed(2),
+      density: (notes.length / (maxBeat / 4)).toFixed(2),
+      stepPercent: ((steps / Math.max(1, intervals.length)) * 100).toFixed(0),
+      leapPercent: ((leaps / Math.max(1, intervals.length)) * 100).toFixed(0),
+      tendency: ascending > descending ? 'ascending' : 'descending',
+      pitchRange: `${notes[0]?.pitch} – ${notes[notes.length - 1]?.pitch}`,
+      rhythmicCharacter: avgDuration < 0.5 ? 'rapid/virtuosic' : avgDuration < 1 ? 'flowing/eighth-note' : avgDuration < 2 ? 'moderate' : 'sustained/chorale',
+      articulationsUsed: [...new Set(notes.map(n => n.articulation).filter(Boolean))].join(', ') || 'none',
+      velocityRange: `${Math.min(...notes.map(n => n.velocity || 0.8)).toFixed(2)} – ${Math.max(...notes.map(n => n.velocity || 0.8)).toFixed(2)}`,
+      bendsUsed: notes.filter(n => n.bendStart !== undefined || n.bendEnd !== undefined).length,
+    };
+  };
+
+  const buildTrainingContext = () => {
+    const examples = songs.slice(0, 8).map(song => {
+      const notes = song.cantusFirmus || [];
+      const a = analyzeNotes(notes);
+      if (!a) return '';
+      return `【${song.name}】 Key: ${song.settings?.key} ${song.settings?.mode} | Tempo: ${song.settings?.tempo}
+Notes: ${a.noteCount} | Density: ${a.density}/quarter | Range: ${a.pitchRange} | Steps: ${a.stepPercent}% Leaps: ${a.leapPercent}%
+Sample (first 20): ${JSON.stringify(notes.slice(0, 20))}`;
+    }).filter(Boolean).join('\n\n');
+    return examples;
+  };
+
+  const getStyleHints = (msg) => {
+    const m = msg.toLowerCase();
+    if (m.includes('death metal') || m.includes('brutal') || m.includes('metal')) {
+      return `STYLE=DeathMetal: Low register C2-C4. Palm mutes velocity 0.2-0.35 duration 0.25. Power chords velocity 0.95-1.0. 
+Tritones + minor seconds for dissonance. Breakdowns: syncopated quarters on low strings. 
+Tremolo picking: articulation:"tremolo-ultra", duration 0.25, velocity 0.85. 
+chromatic PASSING TONES only – root notes from scale. Example riff: C2(0.25,vm0.3) C2(0.25,vm0.3) C2(0.25,vm0.3) F#2(0.25,vm0.35) G2(0.5,vc0.95) G2(0.5,vc0.95)`;
+    }
+    if (m.includes('guitar') || m.includes('shred') || m.includes('solo')) {
+      return `STYLE=ElectricGuitar: String bends bendStart:0,bendEnd:2 (whole step) or bendEnd:1 (half step). 
+Vibrato: bendStart:-0.3,bendEnd:0.3,startTime:0.3,endTime:1. Dive bombs: bendEnd:-12. 
+Sweep arpeggios: fast ascending/descending arpeggio on I/IV/V chords velocity 0.7-0.85. 
+Hammer-ons/pull-offs: slurred rapid 0.25 notes velocity 0.55-0.65. 
+Whammy dive: long note with bendEnd:-12. Pinch harmonics: velocity 0.95, short duration.`;
+    }
+    if (m.includes('jazz')) {
+      return `STYLE=Jazz: Chromatic approach notes (half step below target), anticipations (beat early), 
+blue notes (b3, b5, b7 of scale). Swing feel: alternating 0.67/0.33 eighth notes. 
+Bebop runs: chromatic passing tones between scale degrees. 
+Altered dominants: b9, #9, b13 on V chords.`;
+    }
+    if (m.includes('romantic') || m.includes('chopin') || m.includes('liszt')) {
+      return `STYLE=Romantic: Wide leaps (6ths, octaves, 10ths). Rubato feel (varied note lengths). 
+Long cantabile lines with expressive dynamics 0.3→0.95 crescendo. 
+Chromatic voice leading. Virtuosic cadenzas. Ornaments: turns, trills, grace notes.`;
+    }
+    if (m.includes('baroque') || m.includes('bach') || m.includes('fugue') || m.includes('counterpoint')) {
+      return `STYLE=Baroque: Continuous motivic development. Sequences (motif transposed by 2nd/3rd repeatedly). 
+Ornaments: mordents (main-lower-main rapid), trills, appoggiaturas. 
+Motor rhythm: consistent 8th or 16th note pulse. Terraced dynamics (no crescendo). 
+Imitation and invertible counterpoint. Clear cadential formulas on I and V.`;
+    }
+    if (m.includes('lyrical') || m.includes('singing') || m.includes('vocal')) {
+      return `STYLE=Lyrical: Long breath-like phrases 8-16 notes. Stepwise predominantly. 
+Duration variety: quarters (1), halves (2), occasional 8ths (0.5). 
+Dynamic arch: soft start → bloom → soft end. Legato articulation on most notes.`;
+    }
+    if (m.includes('virtuosic') || m.includes('fast') || m.includes('brilliant')) {
+      return `STYLE=Virtuosic: Dense 16th note (0.25) passages. Wide range (3+ octaves). 
+Sequences of scalar runs alternating ascending/descending. 
+Dynamics 0.6-0.95. Articulation mix: legato runs with staccato accents.`;
+    }
+    return '';
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -45,591 +159,258 @@ export default function AIChatbot({
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
-    
-    // Add generating message
-    setMessages(prev => [...prev, { 
-      role: 'assistant', 
-      content: '🎵 Composing your melody... analyzing Bach patterns and generating notes...',
-      isGenerating: true
-    }]);
+    setMessages(prev => [...prev, { role: 'assistant', content: '🎵 Composing with advanced theory...', isGenerating: true }]);
 
-    // Detect requested note count
     const noteCountMatch = userMessage.match(/(\d+)\s*notes?/i);
     const requestedNoteCount = noteCountMatch ? parseInt(noteCountMatch[1]) : 64;
+    const existingAnalysis = analyzeNotes(currentNotes);
+    const scaleNotes = getScaleNotes(settings.key, settings.mode);
+    const isExtendRequest = /extend|continue|add\s+more|append/i.test(userMessage);
+    const isEditRequest = /edit|modify|change|replace\s+measure/i.test(userMessage);
+    const startBeat = (isExtendRequest && existingAnalysis) ? existingAnalysis.maxBeat : 0;
+    const styleHints = getStyleHints(userMessage);
+    const trainingData = buildTrainingContext();
 
-    // Helper functions for analysis
-    const parsePitchToMidi = (pitch) => {
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-      const match = pitch.match(/^([A-G]#?)(\d+)$/);
-      if (!match) return 60;
-      const [, note, octave] = match;
-      return (parseInt(octave) + 1) * 12 + notes.indexOf(note);
-    };
-    
-    const getIntervalDistribution = (intervals) => {
-      const dist = {};
-      intervals.forEach(int => {
-        const abs = Math.abs(int);
-        dist[abs] = (dist[abs] || 0) + 1;
-      });
-      return Object.entries(dist).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([int, count]) => `±${int}(${count})`).join(', ');
-    };
-    
-    const findSequences = (notes) => {
-      const sequences = [];
-      for (let len = 3; len <= 8; len++) {
-        for (let i = 0; i <= notes.length - len * 2; i++) {
-          const pattern = notes.slice(i, i + len);
-          let reps = 1;
-          for (let j = i + len; j <= notes.length - len; j += len) {
-            const next = notes.slice(j, j + len);
-            const transposition = parsePitchToMidi(next[0].pitch) - parsePitchToMidi(pattern[0].pitch);
-            const isSequence = pattern.every((n, k) => {
-              const expectedMidi = parsePitchToMidi(n.pitch) + transposition;
-              const actualMidi = parsePitchToMidi(next[k]?.pitch || '');
-              return Math.abs(expectedMidi - actualMidi) <= 1;
-            });
-            if (isSequence) reps++;
-            else break;
-          }
-          if (reps >= 2) sequences.push({ length: len, repetitions: reps, startIndex: i });
-        }
-      }
-      return sequences.slice(0, 3);
-    };
-    
-    const getScaleDegrees = (key, mode) => {
-      const major = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
-      const minor = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
-      return mode === 'minor' ? minor.join(', ') : major.join(', ');
-    };
-    
-    const getPitchRange = (notes) => {
-      if (!notes.length) return 'N/A';
-      const pitches = notes.map(n => n.pitch);
-      return `${pitches[0]} to ${pitches[pitches.length - 1]}`;
-    };
-    
-    const getThird = (key, mode) => {
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-      const rootIdx = notes.indexOf(key);
-      const interval = mode === 'minor' ? 3 : 4;
-      return notes[(rootIdx + interval) % 12];
-    };
-    
-    const getFifth = (key) => {
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-      const rootIdx = notes.indexOf(key);
-      return notes[(rootIdx + 7) % 12];
-    };
-    
-    const analyzeMelodicTendency = (notes) => {
-      if (notes.length < 2) return 'insufficient data';
-      let ascending = 0, descending = 0;
-      for (let i = 1; i < notes.length; i++) {
-        const prev = parsePitchToMidi(notes[i-1].pitch);
-        const curr = parsePitchToMidi(notes[i].pitch);
-        if (curr > prev) ascending++;
-        if (curr < prev) descending++;
-      }
-      return ascending > descending ? 'ascending' : descending > ascending ? 'descending' : 'balanced';
-    };
-    
-    const analyzeRhythmicCharacter = (notes) => {
-      const durations = notes.map(n => n.duration || 1);
-      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
-      const fastNotes = durations.filter(d => d <= 0.5).length;
-      const slowNotes = durations.filter(d => d >= 2).length;
-      
-      if (avgDuration < 0.6) return 'rapid/virtuosic';
-      if (avgDuration > 1.5) return 'sustained/chorale';
-      if (fastNotes > slowNotes * 2) return 'ornamental';
-      return 'moderate/balanced';
-    };
-    
-    const getUserIntent = (message) => {
-      const msg = message.toLowerCase();
-      if (msg.includes('death metal') || msg.includes('heavy metal') || msg.includes('brutal')) {
-        return `🎸 STYLE DETECTED: Death Metal → Ultra-aggressive palm-muted riffs, chromatic runs, tremolo picking, breakdowns. Use LOW octaves (C2-C3), rapid 16th notes (0.25), power chords, dissonant intervals (tritones, minor seconds). Heavy distortion implied. Velocities: 0.3-0.4 for palm mutes, 0.95+ for power chords. Include breakdowns (syncopated rhythm, open strings).`;
-      }
-      if (msg.includes('electric guitar') || msg.includes('guitar solo') || msg.includes('shred')) {
-        return `🎸 STYLE DETECTED: Electric Guitar → Blistering runs, string bends, vibrato, power chords. Use techniques: tremolo-picking (rapid repeated notes), sweep arpeggios, hammer-ons/pull-offs (slurred 32nd notes), dive bombs (pitch bend down). Velocity dynamics: muted picking (0.3), clean (0.5-0.7), power chords (0.95+). Range C3-C6.`;
-      }
-      if (msg.includes('virtuosic') || msg.includes('fast') || msg.includes('brilliant')) {
-        return `🎭 STYLE DETECTED: Virtuosic → Use dense 16th note runs, wide leaps, dynamic contrasts`;
-      }
-      if (msg.includes('lyrical') || msg.includes('singing') || msg.includes('expressive')) {
-        return `🎭 STYLE DETECTED: Lyrical → Flowing stepwise motion, longer note values, cantabile`;
-      }
-      if (msg.includes('energetic') || msg.includes('lively') || msg.includes('dance')) {
-        return `🎭 STYLE DETECTED: Energetic → Strong rhythmic drive, syncopation, motor rhythm`;
-      }
-      if (msg.includes('contemplative') || msg.includes('slow') || msg.includes('meditative')) {
-        return `🎭 STYLE DETECTED: Contemplative → Sparse texture, long notes, minimal ornamentation`;
-      }
-      if (msg.includes('baroque')) {
-        return `🎭 STYLE DETECTED: Baroque → Sequences, continuous motion, ornaments, terraced dynamics`;
-      }
-      if (msg.includes('classical')) {
-        return `🎭 STYLE DETECTED: Classical → Balanced phrases, clear cadences, alberti figures`;
-      }
-      if (msg.includes('romantic')) {
-        return `🎭 STYLE DETECTED: Romantic → Wide range, expressive leaps, rubato implications`;
-      }
-      return ``;
-    };
-
-    // Build sophisticated training context from Bach Inventions with deep analysis
-    const trainingExamples = songs.slice(0, 12).map(song => {
-      const notes = song.cantusFirmus || [];
-      const durations = notes.map(n => n.duration || 1);
-      const pitches = notes.map(n => n.pitch);
-      
-      // Analyze intervals
-      const intervals = [];
-      for (let i = 1; i < notes.length; i++) {
-        const prev = pitches[i - 1];
-        const curr = pitches[i];
-        const prevMidi = parsePitchToMidi(prev);
-        const currMidi = parsePitchToMidi(curr);
-        intervals.push(currMidi - prevMidi);
-      }
-      
-      // Analyze melodic shape
-      const leaps = intervals.filter(int => Math.abs(int) > 2).length;
-      const steps = intervals.filter(int => Math.abs(int) <= 2).length;
-      const direction = intervals.filter(int => int > 0).length > intervals.filter(int => int < 0).length ? 'ascending tendency' : 'descending tendency';
-      
-      // Find sequences (repeating patterns at different pitch levels)
-      const sequences = findSequences(notes);
-      
-      return `
-━━━ ${song.name} ━━━
-Key: ${song.settings?.key || 'C'} ${song.settings?.mode || 'major'} | Tempo: ${song.settings?.tempo || 80} BPM
-Total: ${notes.length} notes | Range: ${pitches[0]} to ${pitches[pitches.length - 1]}
-
-RHYTHM ANALYSIS:
-• Duration types: ${new Set(durations).size} different values (${Array.from(new Set(durations)).sort((a, b) => a - b).join(', ')})
-• Rhythmic density: ${(notes.length / Math.max(...notes.map(n => n.beat + (n.duration || 1))) * 4).toFixed(2)} notes/quarter
-• Pattern: ${durations.slice(0, 24).join(',')}
-
-MELODIC ANALYSIS:
-• Steps vs Leaps: ${steps} steps (${((steps / intervals.length) * 100).toFixed(0)}%), ${leaps} leaps (${((leaps / intervals.length) * 100).toFixed(0)}%)
-• Direction: ${direction}
-• Interval distribution: ${getIntervalDistribution(intervals)}
-• Sequences found: ${sequences.length > 0 ? sequences.map(s => `${s.length} notes × ${s.repetitions}`).join(', ') : 'none detected'}
-
-FULL SCORE (first 30 notes):
-${JSON.stringify(notes.slice(0, 30), null, 2)}`;
-    }).join('\n\n');
+    // Build scale pitch lists for all octaves
+    const scalePitchesAllOctaves = [];
+    for (let oct = 2; oct <= 7; oct++) {
+      scaleNotes.forEach(n => scalePitchesAllOctaves.push(`${n}${oct}`));
+    }
 
     try {
-      // Create abort controller for this request
-      abortControllerRef.current = new AbortController();
-      
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a MASTER composer with deep knowledge of Baroque counterpoint, classical form, and advanced music theory. You have analyzed thousands of works by Bach, Palestrina, Fux, Mozart, and Beethoven. Your compositions are sophisticated, musical, and theoretically sound.
+        model: 'claude_sonnet_4_6',
+        prompt: `You are an elite master composer with encyclopedic knowledge of Baroque counterpoint, Classical form, Romantic expression, Jazz harmony, and modern guitar techniques. You generate compositions of extraordinary musical depth and technical sophistication.
 
-═══════════════════════════════════════════════════════
-TRAINING CORPUS - BACH'S TWO-PART INVENTIONS (ANALYZED):
-═══════════════════════════════════════════════════════
+════════════════════════════════════════════
+TRAINING CORPUS – REAL COMPOSITIONS IN THIS APP:
+════════════════════════════════════════════
+${trainingData || 'No songs in library yet – compose from first principles.'}
 
-${trainingExamples}
+════════════════════════════════════════════
+FULL FEATURE SET – USE EVERYTHING AVAILABLE:
+════════════════════════════════════════════
 
-═══════════════════════════════════════════════════════
-ADVANCED COMPOSITIONAL PRINCIPLES:
-═══════════════════════════════════════════════════════
+1. PITCH: Any standard pitch string like "C4", "F#3", "Bb5" (use # not b for sharps)
+   Scale of ${settings.key} ${settings.mode}: ${scaleNotes.join(', ')}
+   All available octaves: ${scalePitchesAllOctaves.slice(0, 24).join(', ')} ...
 
-🎼 RHYTHM & METER (CRITICAL):
-1. **Rhythmic Hierarchy**: Establish strong vs weak beats. Longer notes on downbeats, shorter on offbeats
-2. **Motivic Rhythm**: Create a distinctive rhythmic motif (e.g., [0.25, 0.25, 0.5, 1]) and develop it
-3. **Hemiola & Syncopation**: Use cross-rhythms (3 against 2) for sophistication
-4. **Duration Variety**: Mix 16ths (0.25), 8ths (0.5), quarters (1), halves (2), whole notes (4)
-5. **Density Curve**: Start sparse → build to climax with dense runs → resolve with space
-6. **Triplet Integration**: Use triplet subdivisions (duration 2.67, 5.33) for variety
+2. BEAT: Fractional beat positioning (e.g., 0, 0.25, 0.5, 1, 1.333 for triplets)
+   Total available beats: 0 to ${settings.measures * 16}
+   ${isExtendRequest ? `⚡ EXTEND MODE: Start notes at beat ${startBeat}` : ''}
 
-🎵 MELODIC CONSTRUCTION (MASTERCLASS):
-1. **Motif Development**: 
-   - Create a 3-5 note motif with distinctive rhythm + pitch contour
-   - Develop through: sequence, inversion, retrograde, augmentation, diminution
-2. **Sequences**: 
-   - Repeat motifs at different pitch levels (up/down 2nd, 3rd, 4th)
-   - Use 2-4 repetitions before breaking the pattern
-3. **Scalar Passages**:
-   - 8-16 note runs using scale tones (diatonic scales in the given key)
-   - Alternate direction every 1-2 octaves
-4. **Arpeggiation**:
-   - Outline I, IV, V, vi chords using arpeggios
-   - Mix broken chords with passing tones
-5. **Climax Architecture**:
-   - Build tension to highest note around 60-70% through
-   - Use wider intervals, faster rhythms approaching climax
-   - Resolve with descending motion and longer durations
-6. **Interval Usage**:
-   - 70% steps (M2, m2), 20% small leaps (m3, M3), 10% larger leaps (4th, 5th, 6th)
-   - Follow leaps with stepwise motion in opposite direction
-7. **Neighbor Tones & Passing Tones**:
-   - Use upper/lower neighbors for ornamentation
-   - Fill in leaps with passing tones
+3. DURATION (16th-note units):
+   • 0.125 = 32nd note (ultra-fast)
+   • 0.25 = 16th note (fast, use heavily for runs)
+   • 0.333 = 16th triplet
+   • 0.5 = 8th note
+   • 0.667 = 8th triplet
+   • 1 = quarter note
+   • 1.5 = dotted quarter
+   • 2 = half note
+   • 3 = dotted half
+   • 4 = whole note
 
-🎯 HARMONIC AWARENESS:
-1. **Implied Harmony**: Even single lines imply chords - outline tonic, dominant, subdominant
-2. **Cadences**: Create clear phrase endings (V-I, IV-I patterns in final measures)
-3. **Non-Chord Tones**: Use suspensions, appoggiaturas, escape tones
-4. **Voice Leading**: Smooth connection between phrases
+4. VELOCITY: 0.0–1.0 (VARY this! Don't use same value everywhere)
+   • 0.2–0.35: very soft, palm-muted, whisper
+   • 0.4–0.55: soft, piano
+   • 0.6–0.75: medium, mezzo-forte
+   • 0.8–0.9: loud, forte
+   • 0.95–1.0: fff, accent, power chord
 
-🏗️ FORM & STRUCTURE:
-1. **Phrase Length**: 4 or 8 measure phrases (16 or 32 beats)
-2. **Antecedent-Consequent**: Question phrase → answer phrase
-3. **ABA Form**: Statement → contrasting middle → return
-4. **Spinning Out**: Continuous development without clear phrase breaks (Fortspinnung)
+5. ARTICULATION (string, optional):
+   • "staccato" – short, detached, bouncy
+   • "legato" – smooth, connected, no gap
+   • "accent" – emphasized attack + short
+   • "trill" – rapid alternation (use with duration >= 1)
+   • "tremolo-ultra" – extremely rapid same-pitch repetition
+   • "grace" – grace note (very short, ornamental)
 
-⚡ EXPRESSION & CHARACTER:
-1. **Dynamic Shaping**: Use velocity variations (0.4-1.0) to create crescendo/diminuendo
-2. **Articulation Variety**: Mix legato passages with staccato accents
-3. **Mood Consistency**: Maintain character (energetic, lyrical, dramatic, playful)
-4. **Stylistic Idioms**: 
-   - Baroque: sequences, consistent motor rhythm, ornaments
-   - Classical: balanced phrases, clear cadences, alberti bass patterns
-   - Romantic: wide range, expressive leaps, rubato feel
-   - Death Metal/Heavy: LOW register (C2-C3), chromatic riffs, palm mutes (velocity 0.3-0.4), power chords (velocity 0.95+), breakdowns, tritones
-   - Electric Guitar: String bends (pitch bend envelopes), vibrato, tremolo picking, sweep arpeggios, hammer-ons (slurred runs), dive bombs
+6. PITCH BEND (object, optional – for guitar/expressive playing):
+   Properties: bendStart (semitones), bendEnd (semitones), startTime (0-1), endTime (0-1)
+   • Half-step bend: {bendStart:0, bendEnd:1, startTime:0.1, endTime:0.9}
+   • Whole-step bend: {bendStart:0, bendEnd:2, startTime:0.1, endTime:0.9}
+   • Vibrato: {bendStart:-0.3, bendEnd:0.3, startTime:0.4, endTime:1.0}
+   • Dive bomb: {bendStart:0, bendEnd:-12, startTime:0.1, endTime:0.95}
+   • Pre-bend + release: {bendStart:2, bendEnd:0, startTime:0, endTime:0.8}
+   ⚠️ Use fields: bendStart, bendEnd, bendStartTime, bendEndTime (NOT pitchBend object)
 
-═══════════════════════════════════════════════════════
+════════════════════════════════════════════
 CURRENT COMPOSITION CONTEXT:
-═══════════════════════════════════════════════════════
+════════════════════════════════════════════
 
-📊 MUSICAL PARAMETERS:
-• Key: ${settings.key} ${settings.mode}
-• Tempo: ${tempo} BPM (${tempo < 80 ? 'slow/contemplative' : tempo < 120 ? 'moderate' : tempo < 160 ? 'energetic' : 'virtuosic'})
-• Time signature: ${settings.timeSignature || '4/4'}
-• Total measures: ${settings.measures}
-• Available beat range: 0 to ${settings.measures * 16}
-• Scale degrees: ${getScaleDegrees(settings.key, settings.mode)}
+Musical parameters:
+• Key: ${settings.key} ${settings.mode} | Tempo: ${tempo} BPM | Time sig: ${settings.timeSignature || '4/4'}
+• Measures: ${settings.measures} | Beat range: 0–${settings.measures * 16}
+• Scale notes: ${scaleNotes.join(', ')}
+• Instrument: ${instrument}
 
-${currentNotes && currentNotes.length > 0 ? `
-📝 EXISTING MELODY IN SCORE:
-• Total notes: ${currentNotes.length}
-• Current range: ${getPitchRange(currentNotes)}
-• Density: ${(currentNotes.length / Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) * 4).toFixed(2)} notes/quarter
-• Existing score excerpt:
-${JSON.stringify(currentNotes.slice(0, 30), null, 2)}
-${currentNotes.length > 30 ? `\n... (${currentNotes.length - 30} more notes)` : ''}
+${existingAnalysis ? `Existing melody analysis:
+• ${existingAnalysis.noteCount} notes | Range: ${existingAnalysis.pitchRange} | Density: ${existingAnalysis.density} notes/quarter
+• Steps: ${existingAnalysis.stepPercent}% | Leaps: ${existingAnalysis.leapPercent}% | Tendency: ${existingAnalysis.tendency}
+• Rhythm: ${existingAnalysis.rhythmicCharacter} | AvgDur: ${existingAnalysis.avgDuration}
+• Articulations used: ${existingAnalysis.articulationsUsed}
+• Velocity range: ${existingAnalysis.velocityRange} | Pitch bends: ${existingAnalysis.bendsUsed}
+• Last 10 notes: ${JSON.stringify(currentNotes?.slice(-10))}
+${isExtendRequest ? `→ EXTEND: Start at beat ${existingAnalysis.maxBeat}, develop from last note ${currentNotes?.[currentNotes.length-1]?.pitch}` : ''}
+${isEditRequest ? '→ EDIT MODE: Replace only specified range, output just those notes' : ''}` : '✨ Fresh composition – no existing notes'}
 
-⚠️ EDIT MODE: The user may want to extend/modify this melody rather than replace it!` : '✨ FRESH COMPOSITION - No existing melody'}
+════════════════════════════════════════════
+STYLE DIRECTIVE:
+════════════════════════════════════════════
+${styleHints || 'No specific style directive – use best musical judgment for the request.'}
 
-🎯 USER REQUEST: "${userMessage}"
+════════════════════════════════════════════
+USER REQUEST: "${userMessage}"
+════════════════════════════════════════════
 
-${getUserIntent(userMessage)}
+COMPOSITIONAL REQUIREMENTS:
+1. Generate EXACTLY ${requestedNoteCount}+ notes (more is better – do not stop early)
+2. Every note MUST have pitch, beat, duration, velocity
+3. No two notes should have the same beat position unless intended (chords/ornaments)
+4. Beats must be ASCENDING – sort all notes by beat
+5. Duration + beat of last note must not exceed ${settings.measures * 16}
+6. USE ARTICULATIONS on at least 30% of notes
+7. USE VELOCITY VARIATION – create dynamic curves, not flat dynamics
+8. Use PITCH BENDS for expressive passages when stylistically appropriate
+9. Create clear MUSICAL FORM: introduction → development → climax → resolution
+10. Apply advanced techniques: sequences, imitation, invertible counterpoint, motivic development
 
-═══════════════════════════════════════════════════════
-TASK INSTRUCTIONS:
-═══════════════════════════════════════════════════════
+ADVANCED TECHNIQUES TO EMPLOY:
+• Sequences: repeat a 3-6 note motif transposed by 2nd/3rd (3-4 times)
+• Scalar runs: 8-16 stepwise notes ascending or descending  
+• Arpeggiation: outline I, IV, V, vi chords in the key
+• Rhythmic augmentation/diminution: stretch or compress motif rhythmically
+• Dynamic shaping: velocity arc 0.5→0.9→0.5 matching phrase rise/fall
+• Ornaments: grace notes (dur 0.125), mordents (3 fast notes), trills (long dur)
+• Syncopation: notes starting on offbeats (0.5, 1.5, 2.5)
 
-📋 EDIT MODE DETECTION:
-${currentNotes.length > 0 ? `
-• EXTENDING: If user says "extend", "continue", or "add more" → START at beat ${Math.max(...currentNotes.map(n => n.beat + (n.duration || 1)))}
-• EDITING MEASURES: If user specifies "edit measures 5-8" → ONLY generate for that range
-• PARTIAL EDIT: Output ONLY new/changed notes, system merges with existing
-• REPLACE: If user says "new", "fresh", or "replace" → Start from beat 0, ignore existing` : `
-• FRESH START: No existing melody, create from scratch starting at beat 0`}
+SCALE TO USE (root notes for ${settings.key} ${settings.mode}):
+ALL melodic content should use: ${scaleNotes.join(', ')} (across octaves C2-C7)
+Chromatic notes are PASSING TONES only – always resolve to scale tones.
 
-═══════════════════════════════════════════════════════
-GENERATION PARAMETERS:
-═══════════════════════════════════════════════════════
-
-📊 TARGET METRICS:
-• Note count: ${userMessage.toLowerCase().includes('edit') && userMessage.match(/measure[s]?\s+(\d+)/i) ? 'Match requested measure range only' : `MINIMUM ${requestedNoteCount} notes (more is better!)`}
-• Rhythmic density: ${(requestedNoteCount / (settings.measures * 4)).toFixed(1)} notes per quarter note average
-• Beat range: 0 to ${settings.measures * 16}
-• Pitch range: C3 to C6 (3+ octave range for expressivity)
-
-⚡ RHYTHM GENERATION STRATEGY:
-
-**CRITICAL**: To generate ${requestedNoteCount}+ notes in ${settings.measures} measures:
-• Heavy use of 16th notes (duration 0.25) = 4 notes per beat
-• Moderate 8th notes (duration 0.5) = 2 notes per beat  
-• Strategic longer notes (1, 2, 4) for structural points
-
-**Example 16-beat phrase generating 32+ notes**:
-[0.25,0.25,0.25,0.25, 0.5,0.5, 0.25,0.25,0.25,0.25, 1, 0.25,0.25,0.25,0.25, 0.25,0.25,0.25,0.25, 0.5,0.5, 0.25,0.25,0.25,0.25, 2]
-= 28 notes in 16 beats (1.75 notes/beat)
-
-**Rhythmic Vocabulary**:
-• Fast runs: [0.25, 0.25, 0.25, 0.25] = 16th note stream
-• Ornamental turns: [0.25, 0.25, 0.5] = neighbor-tone figure
-• Syncopation: [0.5, 1, 0.5] = anticipation pattern
-• Hemiola: [2.67, 2.67, 2.67] = triplet grouping across barlines
-• Driving rhythm: [0.5, 0.5, 0.5, 0.5] = steady 8th notes
-
-🎼 MELODIC GENERATION ALGORITHM:
-
-**PHASE 1 - EXPOSITION (measures 1-${Math.ceil(settings.measures * 0.3)})**:
-1. Introduce PRIMARY MOTIF (4-5 notes with distinctive rhythm)
-2. Immediately sequence it (repeat +2nd, +3rd, or -2nd)
-3. Add connective scalar passage (6-10 notes ascending/descending)
-4. Close first phrase with cadential gesture (slower rhythm → tonic)
-
-**PHASE 2 - DEVELOPMENT (measures ${Math.ceil(settings.measures * 0.3) + 1}-${Math.ceil(settings.measures * 0.7)})**:
-1. Transform motif: invert intervals, retrograde, change rhythm
-2. Increase rhythmic density with 16th note runs
-3. Explore different pitch areas (move through I, IV, V harmonic centers)
-4. Build sequences: 3-4 repetitions of a pattern rising or falling by step
-5. Introduce CLIMAX (highest note, loudest dynamic, densest rhythm)
-
-**PHASE 3 - RECAPITULATION (measures ${Math.ceil(settings.measures * 0.7) + 1}-${settings.measures})**:
-1. Return to opening motif (possibly varied)
-2. Wind down rhythmic activity (fewer 16ths, more quarters/halves)
-3. Cadential formula: descending scale or arpeggio to tonic
-4. Final note on tonic (${settings.key}) with longer duration (2-4 beats)
-
-🎨 INTERVAL & CONTOUR GUIDELINES:
-• **Steps (M2, m2)**: 65-75% of intervals - foundation of melody
-• **Small leaps (m3, M3)**: 15-20% - adds interest
-• **Medium leaps (P4, P5)**: 8-12% - structural boundaries
-• **Large leaps (m6, M6, 8ve)**: 2-5% - dramatic moments (compensate opposite direction!)
-• **Melodic shape**: Arch form (rise to climax, fall to resolution) or wave form (undulating)
-• **Compensatory motion**: After leap >P4, move stepwise in opposite direction
-
-🔬 ADVANCED TECHNIQUES:
-
-1. **Sequence Types**:
-   - Ascending by step: Motif at C, D, E, F...
-   - Descending by third: Motif at G, E, C, A...
-   - Chromatic sequence: Include chromatic passing tones
-   - Rosalia: Sequential repetition (name from famous pattern)
-
-2. **Ornamentation**:
-   - Turns: [main, upper, main, lower, main] with durations [0.25, 0.25, 0.25, 0.25]
-   - Mordents: [main, lower, main] rapid
-   - Appoggiaturas: Dissonant note → resolution on beat
-
-3. **Rhythmic Motifs**:
-   - Scotch snap: [0.25, 0.75] (short-long)
-   - Lombardic rhythm: [0.75, 0.25] (long-short)  
-   - Dotted rhythms: [0.75, 0.25] or [1.5, 0.5]
-
-4. **Harmonic Outlining**:
-   - Tonic arpeggio: ${settings.key}, ${getThird(settings.key, settings.mode)}, ${getFifth(settings.key)}
-   - Dominant arpeggio: ${getFifth(settings.key)}, leading tone, dominant
-   - Diminished 7th: Dramatic tension builders
-   - Power chords (for metal/rock): Root + P5 + octave with velocity 0.95+
-
-🎸 GUITAR TECHNIQUES (when appropriate):
-1. **Palm Muting**: Velocity 0.3-0.4 for tight, percussive attack
-2. **Power Chords**: Root + perfect 5th + octave, velocity 0.95+ for full aggression - BUILD ON SCALE DEGREES (I, ii, iii, IV, V, vi)
-3. **Tremolo Picking**: Rapid alternating picking - use articulation "tremolo-ultra" or dense 0.25 durations
-4. **String Bends**: Use pitchBend property: {start: 0, end: 2} for whole-step bend
-5. **Dive Bombs**: {start: 0, end: -12} pitch envelope for whammy bar dive
-6. **Chromatic Runs**: Use sparingly as PASSING TONES only - approach scale tones chromatically but resolve to key
-7. **Breakdowns**: Syncopated rhythm on low strings, long sustained chords
-8. **Sweep Arpeggios**: Fast arpeggios outlining chords IN THE KEY (I, IV, V, vi chords) - e.g., C major arpeggio = C-E-G-C ascending
-
-⚠️ CRITICAL - TONALITY IN METAL/GUITAR:
-• Death metal and guitar solos MUST stay in the key signature
-• Use scale tones as main melodic content: ${settings.key} ${settings.mode} scale
-• Chromatic notes are EMBELLISHMENTS only (passing tones between scale degrees)
-• Power chords must be built on scale degrees (root notes from the key)
-• Sweep arpeggios outline I, IV, V, vi chords using key signature notes
-• Example for C major: Sweep C-E-G-C (I chord), then F-A-C-F (IV chord), then G-B-D-G (V chord)
-• DO NOT generate random chromatic sequences - this sounds atonal and wrong
-
-${currentNotes && currentNotes.length > 0 ? `
-🔍 EXISTING MELODY ANALYSIS:
-• Note count: ${currentNotes.length}
-• Range: ${getPitchRange(currentNotes)}
-• Last note: ${currentNotes[currentNotes.length - 1]?.pitch} at beat ${currentNotes[currentNotes.length - 1]?.beat}
-• Melodic direction tendency: ${analyzeMelodicTendency(currentNotes)}
-• Rhythmic character: ${analyzeRhythmicCharacter(currentNotes)}
-
-💡 CONTINUATION STRATEGY:
-- Maintain stylistic consistency with existing material
-- Develop existing motifs if present
-- Ensure smooth voice leading from last note
-- Balance existing melodic contour` : ''}
-
-🎯 USER REQUEST INTERPRETATION: "${userMessage}"
-
-${getUserIntent(userMessage)}
-
-═══════════════════════════════════════════════════════
-GENERATION ALGORITHM - EXECUTE THIS STEP BY STEP:
-═══════════════════════════════════════════════════════
-
-STEP 1: Design the motif (measures 1-2)
-STEP 2: Sequence the motif (measures 3-4)  
-STEP 3: Add contrasting material (measures 5-6)
-STEP 4: Build to climax (measures 7-8+)
-STEP 5: Resolve to tonic
-
-TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and varied durations.`,
+Generate a musically sophisticated, technically impressive composition.`,
         response_json_schema: {
           type: "object",
           properties: {
             compositionAnalysis: {
               type: "object",
               properties: {
-                form: { type: "string", description: "Overall form (e.g., ABA, through-composed, binary)" },
-                keyAreas: { type: "array", items: { type: "string" }, description: "Harmonic progression through piece" },
-                motivicContent: { type: "string", description: "Description of main motifs and their development" },
-                climaxLocation: { type: "string", description: "Where and how climax occurs" },
-                stylisticFeatures: { type: "array", items: { type: "string" }, description: "Notable compositional techniques used" }
+                form: { type: "string" },
+                keyAreas: { type: "array", items: { type: "string" } },
+                motivicContent: { type: "string" },
+                climaxLocation: { type: "string" },
+                stylisticFeatures: { type: "array", items: { type: "string" } },
+                techniquesSummary: { type: "string" }
               }
             },
-            description: { type: "string", description: "User-friendly description of the composition" },
+            description: { type: "string" },
             noteCount: { type: "number" },
-            rhythmicAnalysis: { type: "string", description: "Analysis of rhythmic structure and patterns" },
-            melodicAnalysis: { type: "string", description: "Analysis of melodic contour and intervals" },
-            theoreticalJustification: { type: "string", description: "Why these compositional choices were made" },
+            editMode: { type: "string", description: "replace, extend, or partial" },
             notes: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
-                  pitch: { type: "string" },
+                  pitch: { type: "string", description: "e.g. C4, F#3, Bb5" },
                   beat: { type: "number" },
                   duration: { type: "number" },
-                  velocity: { type: "number", description: "Dynamic level 0.3-1.0. Use 0.3-0.4 for palm mutes, 0.5-0.7 normal, 0.95+ power chords" },
-                  articulation: { type: "string", description: "staccato, legato, accent, tremolo-ultra, grace, trill" },
-                  pitchBend: { 
-                    type: "object",
-                    description: "For guitar bends/vibrato. {start: cents, end: cents, startTime: 0-1, endTime: 0-1}",
-                    properties: {
-                      start: { type: "number" },
-                      end: { type: "number" },
-                      startTime: { type: "number" },
-                      endTime: { type: "number" }
-                    }
-                  }
+                  velocity: { type: "number", description: "0.0–1.0" },
+                  articulation: { type: "string", description: "staccato|legato|accent|trill|tremolo-ultra|grace" },
+                  bendStart: { type: "number", description: "Semitones at start of bend" },
+                  bendEnd: { type: "number", description: "Semitones at end of bend" },
+                  bendStartTime: { type: "number", description: "0–1 normalized position" },
+                  bendEndTime: { type: "number", description: "0–1 normalized position" }
                 },
-                required: ["pitch", "beat", "duration"]
+                required: ["pitch", "beat", "duration", "velocity"]
               }
             }
           },
-          required: ["compositionAnalysis", "description", "noteCount", "notes"]
+          required: ["compositionAnalysis", "description", "noteCount", "notes", "editMode"]
         }
       });
 
-      const notes = response.notes || [];
+      const rawNotes = response.notes || [];
+      
+      // Post-process: sort by beat, clamp durations, remove overlapping
+      const processedNotes = rawNotes
+        .filter(n => n.pitch && typeof n.beat === 'number' && typeof n.duration === 'number')
+        .sort((a, b) => a.beat - b.beat)
+        .map(n => {
+          const note = {
+            pitch: n.pitch,
+            beat: Math.round(n.beat * 1000) / 1000,
+            duration: Math.max(0.125, Math.round(n.duration * 1000) / 1000),
+            velocity: Math.max(0.1, Math.min(1.0, n.velocity ?? 0.7)),
+          };
+          if (n.articulation) note.articulation = n.articulation;
+          if (n.bendStart !== undefined) note.bendStart = n.bendStart;
+          if (n.bendEnd !== undefined) note.bendEnd = n.bendEnd;
+          if (n.bendStartTime !== undefined) note.bendStartTime = n.bendStartTime;
+          if (n.bendEndTime !== undefined) note.bendEndTime = n.bendEndTime;
+          return note;
+        });
 
-      // Detect edit mode based on user request
-      const isPartialEdit = userMessage.toLowerCase().includes('edit') || 
-                            userMessage.toLowerCase().includes('modify') ||
-                            userMessage.match(/measure[s]?\s+\d+/i);
+      const aiEditMode = response.editMode || 'replace';
 
-      // Remove generating message and add result with detailed analysis
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isGenerating);
-        
-        // Build rich response with analysis
-        let analysisText = response.description + '\n\n';
-        
-        if (response.compositionAnalysis) {
-          analysisText += `📊 **Musical Analysis**:\n`;
-          analysisText += `• Form: ${response.compositionAnalysis.form || 'N/A'}\n`;
-          analysisText += `• Key areas: ${response.compositionAnalysis.keyAreas?.join(' → ') || 'N/A'}\n`;
-          analysisText += `• Motifs: ${response.compositionAnalysis.motivicContent || 'N/A'}\n`;
-          analysisText += `• Climax: ${response.compositionAnalysis.climaxLocation || 'N/A'}\n`;
-          if (response.compositionAnalysis.stylisticFeatures?.length > 0) {
-            analysisText += `• Techniques: ${response.compositionAnalysis.stylisticFeatures.join(', ')}\n`;
-          }
-          analysisText += `\n`;
+        const ca = response.compositionAnalysis;
+        let analysisText = `${response.description}\n\n`;
+        if (ca) {
+          analysisText += `📊 **Analysis**: Form: ${ca.form || '?'} | Climax: ${ca.climaxLocation || '?'}\n`;
+          if (ca.motivicContent) analysisText += `🎵 ${ca.motivicContent}\n`;
+          if (ca.techniquesSummary) analysisText += `🔬 ${ca.techniquesSummary}\n`;
+          if (ca.stylisticFeatures?.length) analysisText += `✨ Techniques: ${ca.stylisticFeatures.join(', ')}`;
         }
-        
-        if (response.rhythmicAnalysis) {
-          analysisText += `🎵 ${response.rhythmicAnalysis}\n`;
-        }
-        
-        if (response.melodicAnalysis) {
-          analysisText += `🎼 ${response.melodicAnalysis}\n`;
-        }
-        
-        if (response.theoreticalJustification) {
-          analysisText += `\n💭 ${response.theoreticalJustification}`;
-        }
-        
-        return [...filtered, { 
-          role: 'assistant', 
+        return [...filtered, {
+          role: 'assistant',
           content: analysisText,
-          notes: notes,
-          editMode: isPartialEdit ? 'partial' : 'replace',
-          analysis: response.compositionAnalysis
+          notes: processedNotes,
+          editMode: aiEditMode,
+          analysis: ca
         }];
       });
     } catch (error) {
-      // Check if it was an abort
-      if (error.name === 'AbortError') {
-        setMessages(prev => {
-          const filtered = prev.filter(m => !m.isGenerating);
-          return [...filtered, { 
-            role: 'assistant', 
-            content: "Generation stopped."
-          }];
-        });
-      } else {
-        setMessages(prev => {
-          const filtered = prev.filter(m => !m.isGenerating);
-          return [...filtered, { 
-            role: 'assistant', 
-            content: "Sorry, I had trouble generating that melody. Please try again."
-          }];
-        });
-      }
+      setMessages(prev => {
+        const filtered = prev.filter(m => !m.isGenerating);
+        return [...filtered, {
+          role: 'assistant',
+          content: `Sorry, composition failed: ${error.message}. Please try again.`
+        }];
+      });
     } finally {
       setIsLoading(false);
-      abortControllerRef.current = null;
-    }
-  };
-
-  const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
     }
   };
 
   const handleApplyNotes = (notes, editMode = 'replace') => {
-    if (!notes || notes.length === 0 || !onApplyMelody) return;
+    if (!notes?.length || !onApplyMelody) return;
     
-    // Detect if this is an edit/extension based on the AI's response
-    const minNewBeat = Math.min(...notes.map(n => n.beat));
-    const maxNewBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
-    
-    // If AI generated notes that start after existing notes, it's an extension
-    const isExtension = currentNotes.length > 0 && minNewBeat >= Math.max(...currentNotes.map(n => n.beat + (n.duration || 1))) - 2;
-    
-    // If AI only covered a small portion of the score, it's likely an edit
-    const totalBeats = settings.measures * 16;
-    const coverageRatio = (maxNewBeat - minNewBeat) / totalBeats;
-    const isPartialEdit = coverageRatio < 0.8 && currentNotes.length > 0;
-    
-    if (isExtension) {
-      // Append new notes to existing
-      const combined = [...currentNotes, ...notes].sort((a, b) => a.beat - b.beat);
+    if (editMode === 'extend' || (currentNotes?.length > 0 && Math.min(...notes.map(n => n.beat)) >= (analyzeNotes(currentNotes)?.maxBeat || 0) - 2)) {
+      const combined = [...(currentNotes || []), ...notes].sort((a, b) => a.beat - b.beat);
       onApplyMelody(combined);
-      toast.success(`Extended melody with ${notes.length} new notes`);
-    } else if (isPartialEdit) {
-      // Replace notes only in the edited range, keep the rest
-      const notesOutsideRange = currentNotes.filter(n => n.beat < minNewBeat || n.beat >= maxNewBeat);
-      const combined = [...notesOutsideRange, ...notes].sort((a, b) => a.beat - b.beat);
+      toast.success(`Extended with ${notes.length} new notes`);
+    } else if (editMode === 'partial' && currentNotes?.length > 0) {
+      const minBeat = Math.min(...notes.map(n => n.beat));
+      const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
+      const kept = currentNotes.filter(n => n.beat < minBeat || n.beat >= maxBeat);
+      const combined = [...kept, ...notes].sort((a, b) => a.beat - b.beat);
       onApplyMelody(combined);
-      toast.success(`Updated ${notes.length} notes in selected range`);
+      toast.success(`Updated ${notes.length} notes in range`);
     } else {
-      // Full replacement
       onApplyMelody(notes);
-      toast.success(`Applied ${notes.length} AI-generated notes to score`);
+      toast.success(`Applied ${notes.length} AI-generated notes`);
     }
   };
 
   const handlePreview = (notes, messageIndex) => {
     if (previewPlaying === messageIndex) {
       stopAllNotes();
-      if (previewTimeoutRef.current) {
-        previewTimeoutRef.current.forEach(t => clearTimeout(t));
-      }
+      previewTimeoutRef.current?.forEach(t => clearTimeout(t));
       setPreviewPlaying(null);
       return;
     }
-
     initAudio();
     stopAllNotes();
     setPreviewPlaying(messageIndex);
@@ -638,60 +419,41 @@ TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and v
     const msPerBeat = sixteenthNoteDuration * 1000;
     const timeouts = [];
 
-    // Get custom config if using custom instrument
     const getCustomConfig = () => {
-      if (instrument.startsWith('custom_')) {
-        const index = parseInt(instrument.split('_')[1]);
-        return customInstruments[index];
-      }
+      if (instrument.startsWith('custom_')) return customInstruments[parseInt(instrument.split('_')[1])];
       if (instrument.startsWith('preset_')) {
-        const index = parseInt(instrument.split('_')[1]);
-        const PRESET_LIBRARY = [
+        const PRESETS = [
           { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
           { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
-          { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
-          { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
-          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
-          { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
-          { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
-          { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
+          { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } }
         ];
-        return PRESET_LIBRARY[index];
+        return PRESETS[parseInt(instrument.split('_')[1])];
       }
       return null;
     };
 
     const customConfig = getCustomConfig();
-
-    notes.forEach((note) => {
-      const startTime = (note.beat || 0) * msPerBeat;
-      const timeout = setTimeout(() => {
+    notes.forEach(note => {
+      const t = setTimeout(() => {
         const duration = (note.duration || 1) * sixteenthNoteDuration * 0.9;
-        if (customConfig) {
-          playNoteWithCustomInstrument(note.pitch, duration, 0.7, customConfig);
-        } else {
-          playNote(note.pitch, duration, 0.7, 0, instrument);
-        }
-      }, startTime);
-      timeouts.push(timeout);
+        const pitchBend = (note.bendStart !== undefined || note.bendEnd !== undefined) ? {
+          start: note.bendStart ?? 0, end: note.bendEnd ?? 0,
+          startTime: note.bendStartTime ?? 0, endTime: note.bendEndTime ?? 1
+        } : 0;
+        if (customConfig) playNoteWithCustomInstrument(note.pitch, duration, note.velocity ?? 0.7, customConfig);
+        else playNote(note.pitch, duration, note.velocity ?? 0.7, 0, instrument, pitchBend);
+      }, (note.beat || 0) * msPerBeat);
+      timeouts.push(t);
     });
 
     const maxBeat = Math.max(...notes.map(n => (n.beat || 0) + (n.duration || 1)));
-    const totalDuration = maxBeat * msPerBeat;
-    
-    const endTimeout = setTimeout(() => {
-      setPreviewPlaying(null);
-    }, totalDuration + 500);
-    timeouts.push(endTimeout);
-
+    timeouts.push(setTimeout(() => setPreviewPlaying(null), maxBeat * msPerBeat + 500));
     previewTimeoutRef.current = timeouts;
   };
 
   useEffect(() => {
     return () => {
-      if (previewTimeoutRef.current) {
-        previewTimeoutRef.current.forEach(t => clearTimeout(t));
-      }
+      previewTimeoutRef.current?.forEach(t => clearTimeout(t));
       stopAllNotes();
     };
   }, []);
@@ -700,7 +462,6 @@ TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and v
 
   return (
     <>
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -708,117 +469,129 @@ TARGET: Generate ${requestedNoteCount}+ notes with proper beat positioning and v
         className="fixed inset-0 bg-black/20 z-40"
         onClick={onClose}
       />
-      
-      {/* Panel */}
       <motion.div
-        initial={{ opacity: 0, x: -300 }}
+        initial={{ opacity: 0, x: -320 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -300 }}
-        className="fixed left-4 top-20 bottom-4 w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
+        exit={{ opacity: 0, x: -320 }}
+        className="fixed left-4 top-16 bottom-4 w-84 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl flex flex-col z-50"
+        style={{ width: 340 }}
       >
-      {/* Header */}
-      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <h3 className="text-white font-medium">AI Composer</h3>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onClose} 
-          className="text-white/60 hover:text-white h-8 w-8"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-              msg.role === 'user' 
-                ? 'bg-amber-500 text-slate-900' 
-                : 'bg-slate-800 text-white'
-            }`}>
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-              {msg.notes?.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Music className="w-3 h-3 text-amber-400" />
-                    <span className="text-xs text-white/70">{msg.notes.length} notes generated</span>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button
-                      size="sm"
-                      onClick={() => handlePreview(msg.notes, i)}
-                      className={`text-xs h-8 font-medium ${
-                        previewPlaying === i 
-                          ? 'bg-red-500 hover:bg-red-600 text-white' 
-                          : 'bg-blue-600 hover:bg-blue-700 text-white border-0'
-                      }`}
-                    >
-                      {previewPlaying === i ? (
-                        <><Square className="w-3.5 h-3.5 mr-1.5" />Stop Preview</>
-                      ) : (
-                        <><Play className="w-3.5 h-3.5 mr-1.5" />Preview</>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleApplyNotes(msg.notes, msg.editMode)}
-                      className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-8 font-medium"
-                    >
-                      Apply to Score
-                    </Button>
-                  </div>
-                </div>
-              )}
+        {/* Header */}
+        <div className="p-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+            <div>
+              <h3 className="text-white font-semibold text-sm">AI Composer</h3>
+              <p className="text-white/40 text-[10px]">Claude Sonnet · All features enabled</p>
             </div>
           </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-slate-800 rounded-2xl px-4 py-3">
-              <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-white/60 hover:text-white h-8 w-8">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Quick prompts */}
+        {messages.length <= 1 && (
+          <div className="px-3 pt-2 pb-1 flex flex-col gap-1 flex-shrink-0 border-b border-slate-800">
+            <p className="text-white/40 text-[10px] uppercase tracking-wider px-1 pb-0.5">Quick Prompts</p>
+            <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
+              {QUICK_PROMPTS.map((prompt, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setInput(prompt); }}
+                  className="text-left text-xs text-white/60 hover:text-amber-400 hover:bg-slate-800 rounded px-2 py-1 transition-colors flex items-center gap-1.5"
+                >
+                  <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                  {prompt}
+                </button>
+              ))}
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Input */}
-      <div className="p-3 border-t border-slate-700">
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSend()}
-            placeholder="Describe your melody..."
-            className="bg-slate-800 border-slate-700 text-white placeholder:text-white/40 h-9 text-sm"
-            disabled={isLoading}
-          />
-          {isLoading ? (
-            <Button
-              onClick={handleStop}
-              size="sm"
-              className="bg-red-500 hover:bg-red-600 text-white h-9 w-9 p-0"
-            >
-              <Square className="w-4 h-4" />
-            </Button>
-          ) : (
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[90%] rounded-2xl px-3 py-2.5 ${
+                msg.role === 'user'
+                  ? 'bg-amber-500 text-slate-900'
+                  : 'bg-slate-800 text-white'
+              }`}>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                {msg.notes?.length > 0 && (
+                  <div className="mt-3 pt-2 border-t border-slate-700/50 space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs text-amber-400">
+                        <Music className="w-3 h-3" />
+                        {msg.notes.length} notes
+                      </span>
+                      {msg.notes.filter(n => n.articulation).length > 0 && (
+                        <span className="text-xs text-blue-400">
+                          {msg.notes.filter(n => n.articulation).length} articulated
+                        </span>
+                      )}
+                      {msg.notes.filter(n => n.bendEnd !== undefined).length > 0 && (
+                        <span className="text-xs text-purple-400">
+                          {msg.notes.filter(n => n.bendEnd !== undefined).length} bends
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handlePreview(msg.notes, i)}
+                        className={`text-xs h-7 flex-1 ${previewPlaying === i ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                      >
+                        {previewPlaying === i ? <><Square className="w-3 h-3 mr-1" />Stop</> : <><Play className="w-3 h-3 mr-1" />Preview</>}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleApplyNotes(msg.notes, msg.editMode)}
+                        className="bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs h-7 flex-1 font-semibold"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-slate-800 rounded-2xl px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                <span className="text-white/60 text-xs">Claude Sonnet composing...</span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="p-3 border-t border-slate-700 flex-shrink-0">
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSend()}
+              placeholder="Describe your composition..."
+              className="bg-slate-800 border-slate-700 text-white placeholder:text-white/30 h-9 text-sm"
+              disabled={isLoading}
+            />
             <Button
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading}
               size="sm"
-              className="bg-amber-500 hover:bg-amber-600 text-slate-900 h-9 w-9 p-0"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-900 h-9 w-9 p-0 flex-shrink-0"
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
-          )}
+          </div>
+          <p className="text-white/25 text-[10px] text-center mt-1.5">Uses claude_sonnet_4_6 · more credits per request</p>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
     </>
   );
 }
