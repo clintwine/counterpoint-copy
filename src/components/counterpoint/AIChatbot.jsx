@@ -335,6 +335,10 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
 
       const rawNotes = response?.notes || [];
       
+      // Debug: log response structure
+      console.log('[AIChatbot] Raw response:', response);
+      console.log('[AIChatbot] Raw notes:', rawNotes, 'count:', rawNotes.length);
+      
       // Post-process: sort by beat, clamp durations, remove overlapping
       const processedNotes = rawNotes
         .filter(n => n.pitch && typeof n.beat === 'number' && typeof n.duration === 'number')
