@@ -28,6 +28,10 @@ export function useNoteGridKeyboard({
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+      // If the user has selected text in the page, allow native copy/paste/cut
+      const hasTextSelection = window.getSelection()?.toString().length > 0;
+      if (hasTextSelection && (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'a') && (e.metaKey || e.ctrlKey)) return;
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteSelected();
