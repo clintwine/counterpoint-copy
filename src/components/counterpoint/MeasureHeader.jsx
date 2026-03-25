@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 export default function MeasureHeader({
   measureIndex,
@@ -16,8 +16,13 @@ export default function MeasureHeader({
   setSelectedNotes,
   gridRef,
 }) {
-  const mouseDownPos = React.useRef(null);
-  const isDragging = React.useRef(false);
+  const mouseDownPos = useRef(null);
+  const isDragging = useRef(false);
+
+  const hasSelection = cantusFirmus.some(n => {
+    const b = n.beat;
+    return b >= measureStartBeat && b < measureStartBeat + beatsPerMeasure && selectedNotes.has(getNoteKey(n.pitch, n.beat));
+  });
 
   const getBeatFromClientX = (clientX) => {
     if (!gridRef?.current) return null;
@@ -90,9 +95,13 @@ export default function MeasureHeader({
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
-      style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a' }}
+      style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
       onMouseDown={handleMeasureMouseDown}
     >
+      {hasSelection && (
+        <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundColor: 'rgba(251, 191, 36, 0.18)' }} />
+      )}
+
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
       </span>
