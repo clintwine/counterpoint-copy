@@ -210,6 +210,7 @@ export default function NoteGrid({
   const touchStartRef = useRef(null); // Track touch start for scroll detection
   const activeTouchIdRef = useRef(null); // Track which touch is active for dragging
   const [lastNoteDuration, setLastNoteDuration] = useState(DEFAULT_DURATION); // Track last used duration
+  const [lastNoteVelocity, setLastNoteVelocity] = useState(0.8); // Track last used velocity
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -645,7 +646,7 @@ export default function NoteGrid({
                   pitch, 
                   beat: beatValue, 
                   duration: lastNoteDuration, 
-                  velocity: 0.8 
+                  velocity: lastNoteVelocity 
                 }].sort((a, b) => a.beat - b.beat);
                 
                 // Add note immediately - don't wait for mouseup
@@ -757,7 +758,7 @@ export default function NoteGrid({
                 // Only add if not already painted in this stroke and no existing note
                 if (!paintedNotesRef.current.has(normalizedKey) && !hasNote) {
                   paintedNotesRef.current.add(normalizedKey);
-                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: beatValue, duration: lastNoteDuration, velocity: 0.8 }].sort((a, b) => a.beat - b.beat);
+                  const newNotes = [...cantusFirmus, { pitch: cell.pitch, beat: beatValue, duration: lastNoteDuration, velocity: lastNoteVelocity }].sort((a, b) => a.beat - b.beat);
                   // Save to history immediately for paint mode (not during playback typically)
                   if (!isPlaying) {
                     saveToHistory(newNotes);
@@ -1933,7 +1934,7 @@ export default function NoteGrid({
         {/* Center - note controls */}
         {selectedNotes.size > 0 && (
           <div className="flex-1 min-w-0">
-            <NoteControls selectedNotes={selectedNotes} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onNotesUpdate={onNotesUpdate} saveToHistory={saveToHistory} voices={voices} tempo={tempo} getInstrumentConfig={getInstrumentConfig} />
+            <NoteControls selectedNotes={selectedNotes} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onNotesUpdate={onNotesUpdate} saveToHistory={saveToHistory} voices={voices} tempo={tempo} getInstrumentConfig={getInstrumentConfig} onVelocityChange={setLastNoteVelocity} />
           </div>
         )}
                   </div>

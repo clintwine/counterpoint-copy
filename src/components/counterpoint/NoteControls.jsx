@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ChevronDown } from 'lucide-react';
 import { initAudio, playNote, playNoteWithCustomInstrument } from './audioEngine';
 
-export default function NoteControls({ selectedNotes, cantusFirmus, getNoteKey, onNotesUpdate, saveToHistory, voices, tempo, getInstrumentConfig }) {
+export default function NoteControls({ selectedNotes, cantusFirmus, getNoteKey, onNotesUpdate, saveToHistory, voices, tempo, getInstrumentConfig, onVelocityChange }) {
   if (selectedNotes.size === 0) return null;
 
   const firstSelected = cantusFirmus.find(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
@@ -74,8 +74,10 @@ export default function NoteControls({ selectedNotes, cantusFirmus, getNoteKey, 
             onNotesUpdate(cantusFirmus.map(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)) ? { ...n, velocity: v } : n));
           }}
           onValueCommit={([value]) => {
+            const v = value / 125;
             saveToHistory(cantusFirmus);
-            if (firstSelected) { initAudio(); playNote(firstSelected.pitch, 0.3, value / 125, 0, voices[0]?.instrument || 'organ'); }
+            onVelocityChange?.(v);
+            if (firstSelected) { initAudio(); playNote(firstSelected.pitch, 0.3, v, 0, voices[0]?.instrument || 'organ'); }
           }}
           min={25} max={125} step={5}
           className="w-16 h-8 [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-0 [&_[role=slider]]:w-3 [&_[role=slider]]:h-3"
