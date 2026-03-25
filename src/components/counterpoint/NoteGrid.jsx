@@ -1703,13 +1703,7 @@ export default function NoteGrid({
                                       const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
 
                                       if (dragDistance === 0) {
-                                        // Single click - seek to position
-                                        if (snapToGrid) {
-                                          upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
-                                        }
-                                        if (onSeek) {
-                                          onSeek(upBeat);
-                                        }
+                                        // Single click - don't seek, keep playhead where it is
                                         if (onLoopChange) {
                                           onLoopChange(null, null);
                                         }
