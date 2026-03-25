@@ -65,7 +65,8 @@ export default function MeasureHeader({
         const measureEnd = measureStartBeat + beatsPerMeasure;
         const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
 
-        if (isAlreadyLooped && !upEvent.shiftKey) {
+        if (isAlreadyLooped) {
+          // Already looped — deselect regardless of shift
           onLoopChange?.(null, null);
           setSelectedNotes(new Set());
         } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
