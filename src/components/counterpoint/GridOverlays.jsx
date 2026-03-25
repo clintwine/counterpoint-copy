@@ -28,12 +28,12 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Playhead vertical line - inside grid, scrolls with content */}
-      <div
-        className="absolute z-30 pointer-events-none"
-        style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-          top: 28,
+      {/* Playhead vertical line - extends from header */}
+        <div
+          className="absolute z-30 pointer-events-none"
+          style={{
+            left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
+            top: 0,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
           height: pitches.length * CELL_HEIGHT,
@@ -168,18 +168,7 @@ export default function GridOverlays({
         />
       </div>
 
-      {/* Marquee selection rectangle */}
-      {marquee && (
-        <div
-          className="fixed border-2 border-amber-400 bg-amber-400/10 pointer-events-none z-50"
-          style={{
-            left: Math.min(marquee.startX, marquee.endX),
-            top: Math.min(marquee.startY, marquee.endY),
-            width: Math.abs(marquee.endX - marquee.startX),
-            height: Math.abs(marquee.endY - marquee.startY),
-          }}
-        />
-      )}
+
     </>
   );
 }
