@@ -1025,6 +1025,7 @@ export default function NoteGrid({
       } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
         // Simple click without drag - update selection now
         if (shouldUpdateSelection) {
+          onLoopChange?.(null, null);
           if (!shiftKey) {
             setSelectedNotes(new Set([targetKey]));
           } else {
