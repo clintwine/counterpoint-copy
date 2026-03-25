@@ -60,33 +60,20 @@ export default function MeasureHeader({
       document.removeEventListener('mouseup', handleMouseUp);
 
       if (!isDragging.current) {
-        // It was a click — handle toggle
-        const measureStart = measureStartBeat;
-        const measureEnd = measureStartBeat + beatsPerMeasure;
+        // It was just a click — move playhead only
         const clickedBeat = getBeatFromClientX(upEvent.clientX);
-        const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
-
-        if (isClickInLoop) {
-          // Clicking within existing loop — deselect it
-          onLoopChange?.(null, null);
-          setSelectedNotes(new Set());
-        } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
-          const newStart = Math.min(loopStart, measureStart);
-          const newEnd = Math.max(loopEnd, measureEnd);
-          onLoopChange?.(newStart, newEnd);
-          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-          if (measureNotes.length > 0) {
-            const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-            setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
+        if (clickedBeat !== null) {
+          // Move playhead to clicked position
+          if (clickedBeat >= 0 && clickedBeat < measureStartBeat + beatsPerMeasure) {
+            // Round to nearest beat for cleaner seeking
+            const seekBeat = Math.round(clickedBeat);
+            // Call onSeek if available from parent, otherwise just set loop to null to clear selection
+            if (typeof window !== 'undefined' && window.__onSeekFromHeader) {
+              window.__onSeekFromHeader(seekBeat);
+            }
           }
-        } else {
-          onLoopChange?.(measureStart, measureEnd);
-          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-          setSelectedNotes(measureKeys);
         }
       }
-      isDragging.current = false;
     };
 
     document.addEventListener('mousemove', handleMouseMove);
