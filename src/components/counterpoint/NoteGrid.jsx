@@ -1667,9 +1667,6 @@ export default function NoteGrid({
                                 const handleMouseMove = (moveEvent) => {
                                   const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
                                   if (moveBeat !== null) {
-                                    // Update playhead position in real-time during drag
-                                    setScrubPosition(moveBeat);
-                                    
                                     if (dragMode === 'start') {
                                       // Dragging left edge - adjust loop start
                                       const newStart = Math.floor(moveBeat);
@@ -1691,6 +1688,45 @@ export default function NoteGrid({
                                       }
                                     }
                                   }
+                                };
+
+                                const handleMouseUp = (upEvent) => {
+                                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
+                                  if (upBeat !== null) {
+                                    if (dragMode === 'start' || dragMode === 'end') {
+                                      // Edge drag complete - keep the adjusted loop
+                                      // Already updated via handleMouseMove
+                                    } else {
+                                      // New loop creation
+                                      const snappedBeat = Math.floor(beat);
+                                      const snappedUpBeat = Math.floor(upBeat);
+                                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
+
+                                      if (dragDistance === 0) {
+                                        // Single click - seek to position
+                                        if (snapToGrid) {
+                                          upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
+                                        }
+                                        if (onSeek) {
+                                          onSeek(upBeat);
+                                        }
+                                        if (onLoopChange) {
+                                          onLoopChange(null, null);
+                                        }
+                                      } else {
+                                        // Drag - create loop region (always use full beats for loops)
+                                        const start = Math.min(snappedBeat, snappedUpBeat);
+                                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
+                                        if (onLoopChange) {
+                                          onLoopChange(start, end);
+                                        }
+                                      }
+                                    }
+                                  }
+                                  setIsLoopSelecting(false);
+                                  setLoopSelectStart(null);
+                                  document.removeEventListener('mousemove', handleMouseMove);
+                                  document.removeEventListener('mouseup', handleMouseUp);
                                 };
 
                                 document.addEventListener('mousemove', handleMouseMove);
