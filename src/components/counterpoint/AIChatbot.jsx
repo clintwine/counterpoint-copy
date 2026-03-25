@@ -339,7 +339,8 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
       
       console.log('[AIChatbot] Extracted notes count:', rawNotes.length);
       
-      // Post-process: sort by beat, clamp durations, remove overlapping
+      // Post-process: sort by beat, clamp durations, deduplicate by pitch+beat
+      const seenKeys = new Set();
       const processedNotes = rawNotes
         .filter(n => n.pitch && typeof n.beat === 'number' && typeof n.duration === 'number')
         .sort((a, b) => a.beat - b.beat)
@@ -356,6 +357,12 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
           if (n.bendStartTime !== undefined) note.bendStartTime = n.bendStartTime;
           if (n.bendEndTime !== undefined) note.bendEndTime = n.bendEndTime;
           return note;
+        })
+        .filter(note => {
+          const key = `${note.pitch}-${note.beat}`;
+          if (seenKeys.has(key)) return false;
+          seenKeys.add(key);
+          return true;
         });
 
       const aiEditMode = actualResponse.editMode || 'replace';
