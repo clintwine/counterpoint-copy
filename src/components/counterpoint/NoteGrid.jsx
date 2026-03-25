@@ -1863,36 +1863,36 @@ export default function NoteGrid({
             <NoteControls selectedNotes={selectedNotes} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onNotesUpdate={onNotesUpdate} saveToHistory={saveToHistory} voices={voices} tempo={tempo} getInstrumentConfig={getInstrumentConfig} onVelocityChange={setLastNoteVelocity} />
           </div>
         )}
-                  </div>
 
-                  {/* Audio Visualizer - right side */}
-                  <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-10">
-                  <canvas 
-                  ref={canvasRef}
-                  className="rounded w-full h-full block"
-                  />
-                  </div>
-                  </div>
+        {/* Audio Visualizer - right side */}
+        <div className="flex-shrink-0 bg-[#1A1A1A] rounded-lg border border-[#3A3A3A] p-1.5 hidden sm:block w-48 h-10">
+          <canvas 
+            ref={canvasRef}
+            className="rounded w-full h-full block"
+          />
+        </div>
+        </div>
 
-                  {/* Minimap - positioned absolutely */}
-      <div className={`absolute right-8 z-50 ${showPianoPanel ? 'bottom-[273px]' : 'bottom-[89px]'}`}>
-        <ScoreMinimap
-          notes={cantusFirmus}
-          totalBeats={totalBeats}
-          totalPitches={pitches.length}
-          viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
-          viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
-          viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
-          viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
-          currentBeat={currentBeat}
-          onSeek={(beat) => {
-            onSeek?.(beat);
-            if (gridRef.current) {
-              gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
-            }
-          }}
-          pitches={pitches}
-        />
+        {/* Minimap - positioned absolutely */}
+        <div className={`absolute right-8 z-50 ${showPianoPanel ? 'bottom-[273px]' : 'bottom-[89px]'}`}>
+          <ScoreMinimap
+            notes={cantusFirmus}
+            totalBeats={totalBeats}
+            totalPitches={pitches.length}
+            viewportStart={Math.floor(viewportState.scrollLeft / CELL_WIDTH)}
+            viewportEnd={Math.floor((viewportState.scrollLeft + (gridRef.current?.clientWidth || 400) - 56) / CELL_WIDTH)}
+            viewportPitchStart={Math.floor(viewportState.scrollTop / CELL_HEIGHT)}
+            viewportPitchEnd={Math.floor((viewportState.scrollTop + (gridRef.current?.clientHeight || 300) - 28) / CELL_HEIGHT)}
+            currentBeat={currentBeat}
+            onSeek={(beat) => {
+              onSeek?.(beat);
+              if (gridRef.current) {
+                gridRef.current.scrollLeft = beat * CELL_WIDTH - 100;
+              }
+            }}
+            pitches={pitches}
+          />
+        </div>
       </div>
       </div>
       );
