@@ -29,11 +29,11 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Playhead vertical line - absolute positioning inside grid scrollable area */}
+      {/* Playhead vertical line - fixed positioning aligned with scrubber */}
       <div
         className="absolute z-30 pointer-events-none"
         style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: 28,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
@@ -79,12 +79,12 @@ export default function GridOverlays({
         </>
       )}
 
-      {/* Playhead triangle marker - absolute positioning inside beat header */}
+      {/* Playhead triangle marker - fixed at header top */}
       <div
-        className="absolute cursor-ew-resize"
+        className="fixed cursor-ew-resize"
         style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH}px`,
-          top: `0px`,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          top: `${gridRect.top}px`,
           width: 0,
           height: 0,
           pointerEvents: 'auto',
