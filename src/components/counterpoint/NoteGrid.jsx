@@ -1667,8 +1667,8 @@ export default function NoteGrid({
                                 const handleMouseMove = (moveEvent) => {
                                   const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
                                   if (moveBeat !== null) {
-                                    // Update playhead to follow dragging
-                                    if (onSeek) onSeek(moveBeat);
+                                    // Update playhead position in real-time during drag
+                                    setScrubPosition(moveBeat);
                                     
                                     if (dragMode === 'start') {
                                       // Dragging left edge - adjust loop start
