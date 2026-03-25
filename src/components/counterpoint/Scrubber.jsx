@@ -40,10 +40,19 @@ export default function Scrubber({
             style={{ left: `${i * CELL_WIDTH}px`, width: `${CELL_WIDTH}px` }}
           />
         ))}
-        {/* Playhead position indicator */}
+        {/* Red triangle playhead - centered on beat */}
         <div 
-          className="absolute top-0 bottom-0 w-1.5 bg-amber-400 pointer-events-none shadow-lg shadow-amber-400/50"
-          style={{ left: `${(smoothPlayhead % totalBeats) * CELL_WIDTH - 0.75}px`, zIndex: 50 }}
+          className="absolute top-0 pointer-events-none"
+          style={{
+            left: `${(smoothPlayhead % totalBeats) * CELL_WIDTH - 6}px`,
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '12px solid rgb(239, 68, 68)',
+            zIndex: 50,
+            filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.5))'
+          }}
         />
       </div>
     </div>
