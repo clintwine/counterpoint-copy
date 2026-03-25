@@ -97,8 +97,8 @@ export default function MeasureHeader({
 
   return (
     <div
-      className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
-      style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
+      className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible sticky top-0 z-10 ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
+      style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'sticky' }}
       onMouseDown={handleMeasureMouseDown}
     >
       {selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map(beatOffset => (
