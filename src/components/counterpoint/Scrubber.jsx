@@ -43,7 +43,7 @@ export default function Scrubber({
         {/* Playhead position indicator */}
         <div 
           className="absolute top-0 bottom-0 w-1.5 bg-amber-400 pointer-events-none shadow-lg shadow-amber-400/50"
-          style={{ left: `${(smoothPlayhead % totalBeats) * CELL_WIDTH - 0.75}px`, zIndex: 50 }}
+          style={{ left: `${smoothPlayhead * CELL_WIDTH - 0.75}px`, zIndex: 50 }}
         />
       </div>
     </div>
