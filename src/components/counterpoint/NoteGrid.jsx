@@ -1462,7 +1462,7 @@ export default function NoteGrid({
           <div 
                   ref={gridRef}
                   tabIndex={0}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none`}
+                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none max-h-[calc(100vh-320px)]`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
