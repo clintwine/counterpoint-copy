@@ -13,12 +13,12 @@ export default function Scrubber({
       onMouseDown={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const scrollLeft = gridRef.current?.scrollLeft || 0;
-        const x = e.clientX - rect.left - 56 + scrollLeft;
+        const x = e.clientX - rect.left + scrollLeft;
         const beat = Math.max(0, Math.min(totalBeats - 0.125, x / CELL_WIDTH));
         onSeek?.(beat);
         
         const handleMouseMove = (moveEvent) => {
-          const moveX = moveEvent.clientX - rect.left - 56 + (gridRef.current?.scrollLeft || 0);
+          const moveX = moveEvent.clientX - rect.left + (gridRef.current?.scrollLeft || 0);
           const moveBeat = Math.max(0, Math.min(totalBeats - 0.125, moveX / CELL_WIDTH));
           onSeek?.(moveBeat);
         };
