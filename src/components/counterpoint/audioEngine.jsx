@@ -531,8 +531,8 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
         for (let i = 0; i < numSlowPicks; i++) {
           setTimeout(() => {
             if (isPalmMutedSlow) {
-              // Muted tremolo: ultra-short, muted bursts with reduced sustain for buzzing effect
-              playSingleCustomNote(pitch, tremoloSlowSpeed * 0.3, volume * 0.6, customConfig, pitchBend);
+              // Muted tremolo: same tone as regular palm mute, just faster picks
+              playSingleCustomNote(pitch, tremoloSlowSpeed * 0.8, volume, customConfig, pitchBend);
             } else {
               slowChordPitches.forEach((chordPitch, chordIdx) => {
                 playSingleCustomNote(chordPitch, tremoloSlowSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
@@ -550,7 +550,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
         for (let i = 0; i < numMedPicks; i++) {
           setTimeout(() => {
             if (isPalmMutedMed) {
-              playSingleCustomNote(pitch, tremoloMedSpeed * 0.25, volume * 0.6, customConfig, pitchBend);
+              playSingleCustomNote(pitch, tremoloMedSpeed * 0.8, volume, customConfig, pitchBend);
             } else {
               medChordPitches.forEach((chordPitch, chordIdx) => {
                 playSingleCustomNote(chordPitch, tremoloMedSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
@@ -568,7 +568,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
         for (let i = 0; i < numFastPicks; i++) {
           setTimeout(() => {
             if (isPalmMutedFast) {
-              playSingleCustomNote(pitch, tremoloFastSpeed * 0.2, volume * 0.55, customConfig, pitchBend);
+              playSingleCustomNote(pitch, tremoloFastSpeed * 0.8, volume, customConfig, pitchBend);
             } else {
               fastChordPitches.forEach((chordPitch, chordIdx) => {
                 playSingleCustomNote(chordPitch, tremoloFastSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
@@ -586,7 +586,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
         for (let i = 0; i < numUltraPicks; i++) {
           setTimeout(() => {
             if (isPalmMutedUltra) {
-              playSingleCustomNote(pitch, tremoloUltraSpeed * 0.15, volume * 0.5, customConfig, pitchBend);
+              playSingleCustomNote(pitch, tremoloUltraSpeed * 0.8, volume, customConfig, pitchBend);
             } else {
               ultraChordPitches.forEach((chordPitch, chordIdx) => {
                 playSingleCustomNote(chordPitch, tremoloUltraSpeed * 0.8, volume * 0.85 * (1 - chordIdx * 0.1), customConfig, pitchBend);
