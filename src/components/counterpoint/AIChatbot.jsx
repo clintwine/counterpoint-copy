@@ -398,22 +398,32 @@ ${isCounterpointRequest ? `COUNTERPOINT NOTE: The user wants a counterpoint voic
     }
   };
 
+  const dedup = (notes) => {
+    const seen = new Set();
+    return notes.filter(n => {
+      const k = `${n.pitch}-${Math.round(n.beat * 1000) / 1000}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  };
+
   const handleApplyNotes = (notes, editMode = 'replace') => {
     if (!notes?.length || !onApplyMelody) return;
     
     if (editMode === 'extend' || (currentNotes?.length > 0 && Math.min(...notes.map(n => n.beat)) >= (analyzeNotes(currentNotes)?.maxBeat || 0) - 2)) {
-      const combined = [...(currentNotes || []), ...notes].sort((a, b) => a.beat - b.beat);
+      const combined = dedup([...(currentNotes || []), ...notes].sort((a, b) => a.beat - b.beat));
       onApplyMelody(combined);
       toast.success(`Extended with ${notes.length} new notes`);
     } else if (editMode === 'partial' && currentNotes?.length > 0) {
       const minBeat = Math.min(...notes.map(n => n.beat));
       const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
       const kept = currentNotes.filter(n => n.beat < minBeat || n.beat >= maxBeat);
-      const combined = [...kept, ...notes].sort((a, b) => a.beat - b.beat);
+      const combined = dedup([...kept, ...notes].sort((a, b) => a.beat - b.beat));
       onApplyMelody(combined);
       toast.success(`Updated ${notes.length} notes in range`);
     } else {
-      onApplyMelody(notes);
+      onApplyMelody(dedup(notes));
       toast.success(`Applied ${notes.length} AI-generated notes`);
     }
   };
