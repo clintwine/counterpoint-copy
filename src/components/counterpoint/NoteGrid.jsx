@@ -1105,6 +1105,7 @@ export default function NoteGrid({
                 variant="ghost"
                 size="sm"
                 className="h-8 px-3 text-white hover:text-white hover:bg-slate-700/50 gap-2"
+                onClick={() => setTimeout(() => gridRef.current?.focus(), 0)}
               >
                 <Menu className="w-4 h-4" />
                 <span className="font-semibold text-sm">{projectName || 'File'}</span>
@@ -1460,13 +1461,8 @@ export default function NoteGrid({
 
           <div 
                   ref={gridRef}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 ${
-                    isFullscreen
-                      ? (showPianoPanel ? 'h-[calc(100vh-390px)]' : 'h-[calc(100vh-220px)]')
-                      : (showPianoPanel 
-                          ? 'max-h-[47vh] sm:max-h-[488px]'
-                          : 'max-h-[66vh] sm:max-h-[648px]')
-                  }`}
+                  tabIndex={0}
+                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
