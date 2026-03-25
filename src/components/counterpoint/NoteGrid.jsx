@@ -1111,28 +1111,28 @@ export default function NoteGrid({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A] min-w-[220px] shadow-xl">
-              <DropdownMenuItem onClick={onNewProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onNewProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FileText className="w-4 h-4 mr-2" />
                 New Project
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onLoadProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onLoadProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FolderOpen className="w-4 h-4 mr-2" />Browse All Projects
               </DropdownMenuItem>
-              {(() => { const recent = JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]').slice(-5).reverse(); return recent.length > 0 ? (<><DropdownMenuSeparator className="bg-[#3A3A3A]" /><div className="px-2 py-0.5 text-[10px] text-white/40 uppercase tracking-wider">Recent</div>{recent.map(p => (<DropdownMenuItem key={p.id} onClick={() => window.__loadRecentProject?.(p)} className="text-white/75 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white text-xs py-1.5"><FolderOpen className="w-3 h-3 mr-2 flex-shrink-0 opacity-50" /><span className="truncate">{p.name}</span></DropdownMenuItem>))}<DropdownMenuSeparator className="bg-[#3A3A3A]" /></>) : <DropdownMenuSeparator className="bg-[#3A3A3A]" />; })()}
-              <DropdownMenuItem onClick={onSaveProject} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              {(() => { const recent = JSON.parse(localStorage.getItem('counterpoint-local-projects') || '[]').slice(-5).reverse(); return recent.length > 0 ? (<><DropdownMenuSeparator className="bg-[#3A3A3A]" /><div className="px-2 py-0.5 text-[10px] text-white/40 uppercase tracking-wider">Recent</div>{recent.map(p => (<DropdownMenuItem key={p.id} onClick={() => { window.__loadRecentProject?.(p); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/75 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white text-xs py-1.5"><FolderOpen className="w-3 h-3 mr-2 flex-shrink-0 opacity-50" /><span className="truncate">{p.name}</span></DropdownMenuItem>))}<DropdownMenuSeparator className="bg-[#3A3A3A]" /></>) : <DropdownMenuSeparator className="bg-[#3A3A3A]" />; })()}
+              <DropdownMenuItem onClick={() => { onSaveProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Save className="w-4 h-4 mr-2" />Save Project<span className="ml-auto text-xs text-white/40">⌘S</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onSaveProjectAs} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onSaveProjectAs(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FilePlus className="w-4 h-4 mr-2" />Save Project As...<span className="ml-auto text-xs text-white/40">⌘⇧S</span>
               </DropdownMenuItem>
               {onSaveSong && (
-                <DropdownMenuItem onClick={onSaveSong} className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
+                <DropdownMenuItem onClick={() => { onSaveSong(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer font-semibold hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
                   <Save className="w-4 h-4 mr-2" />
                   Save as Song (Admin)
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              <DropdownMenuItem onClick={onBrowseSongs} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
+              <DropdownMenuItem onClick={() => { onBrowseSongs(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
                 <Music className="w-4 h-4 mr-2" />
                 Browse Songs
               </DropdownMenuItem>
@@ -1170,16 +1170,16 @@ export default function NoteGrid({
                 Download as Audio
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              <DropdownMenuItem onClick={onTogglePianoPanel} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onTogglePianoPanel(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Keyboard className="w-4 h-4 mr-2" />
                 {showPianoPanel ? 'Hide Piano' : 'Show Piano'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenWaveEditor} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onOpenWaveEditor(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Guitar className="w-4 h-4 mr-2" />
                 Create Instrument
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              <DropdownMenuItem onClick={onAIComposer} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+              <DropdownMenuItem onClick={() => { onAIComposer(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Composer
                 {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
