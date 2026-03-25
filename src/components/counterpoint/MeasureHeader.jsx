@@ -67,7 +67,7 @@ export default function MeasureHeader({
         const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
 
         if (isClickInLoop) {
-          // Clicking within existing loop — deselect it
+          // Clicking within existing loop — deselect it (keep playhead where it is)
           onLoopChange?.(null, null);
           setSelectedNotes(new Set());
         } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
