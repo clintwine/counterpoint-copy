@@ -941,8 +941,12 @@ export default function NoteGrid({
         if (resizeState.edge === 'left') {
         const newSelectedKeys = new Set();
         cantusFirmus.forEach(n => {
-          // Find if this note matches any of the original resize notes by pitch
-          const wasResizing = resizeState.startNotes.some(startNote => startNote.pitch === n.pitch);
+          // Match by pitch AND by end point (end point stays fixed during left-edge resize)
+          const wasResizing = resizeState.startNotes.some(startNote => {
+            const originalEndPoint = startNote.beat + startNote.duration;
+            const currentEndPoint = n.beat + (n.duration || 1);
+            return startNote.pitch === n.pitch && Math.abs(currentEndPoint - originalEndPoint) < 0.01;
+          });
           if (wasResizing) {
             newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
           }
