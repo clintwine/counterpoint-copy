@@ -9,7 +9,7 @@ export default function Scrubber({
 }) {
   return (
     <div 
-      className="flex h-6 border-b border-amber-900/50 select-none relative bg-[#2B2B2B] cursor-pointer hover:bg-[#383838] transition-colors"
+      className="flex h-6 border-b border-amber-900/50 select-none sticky top-0 z-30 bg-[#2B2B2B] cursor-pointer hover:bg-[#383838] transition-colors"
       onMouseDown={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const scrollLeft = gridRef.current?.scrollLeft || 0;
