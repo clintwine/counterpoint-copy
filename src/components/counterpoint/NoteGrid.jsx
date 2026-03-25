@@ -788,49 +788,34 @@ export default function NoteGrid({
 
       // Update note durations in real-time (group resize if multiple selected)
       const newNotes = cantusFirmus.map(n => {
-        // Check if this note is one of the original resize targets
-        const originalKey = `${n.pitch}-${resizeState.startNotes.find(s => s.pitch === n.pitch)?.beat}`;
-        const startNote = resizeState.startNotes.find(s => s.pitch === n.pitch);
-        
+        // Match by pitch AND original beat to avoid resizing wrong notes with same pitch
+        const startNote = resizeState.startNotes.find(s =>
+          s.pitch === n.pitch && Math.abs(n.beat - s.beat) < 0.01
+        );
         if (startNote) {
           if (resizeState.edge === 'right') {
-            // Right edge: extend duration, beat stays fixed
             const newDuration = Math.max(MIN_DURATION, Math.round((startNote.duration + deltaDuration) * 8) / 8);
             return { ...n, duration: newDuration };
           } else {
-            // Left edge: adjust beat and duration (beat moves, end point stays fixed)
-            const endPoint = startNote.beat + startNote.duration; // Fixed end point
+            const endPoint = startNote.beat + startNote.duration;
             let newBeat = startNote.beat + deltaDuration;
-            
-            // Clamp to not go below 0
             newBeat = Math.max(0, newBeat);
-            
-            // Calculate duration to maintain fixed end point
             let newDuration = endPoint - newBeat;
-            
-            // Clamp minimum duration
-            if (newDuration < MIN_DURATION) {
-              newDuration = MIN_DURATION;
-              newBeat = endPoint - MIN_DURATION;
-            }
-            
-            // Quantize if needed
+            if (newDuration < MIN_DURATION) { newDuration = MIN_DURATION; newBeat = endPoint - MIN_DURATION; }
             if (snapToGrid) {
               newBeat = Math.round(newBeat / quantizeGrid) * quantizeGrid;
-              newDuration = endPoint - newBeat;
-              newDuration = Math.max(MIN_DURATION, Math.round(newDuration * 8) / 8);
+              newDuration = Math.max(MIN_DURATION, Math.round((endPoint - newBeat) * 8) / 8);
             } else {
               newBeat = Math.round(newBeat * 1000) / 1000;
               newDuration = Math.round((endPoint - newBeat) * 1000) / 1000;
             }
-            
             return { ...n, beat: Math.max(0, newBeat), duration: Math.max(MIN_DURATION, newDuration) };
           }
         }
         return n;
       });
       onNotesUpdate(newNotes);
-    } else if (marquee) {
+      } else if (marquee) {
             setMarquee(prev => ({ ...prev, endX: coords.clientX, endY: coords.clientY }));
           } else if (dragState && (selectedNotes.size > 0 || originalDragNotesRef.current)) {
             // Calculate delta from original click position for smooth dragging
