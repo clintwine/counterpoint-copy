@@ -25,14 +25,15 @@ export default function GridOverlays({
 }) {
   if (!gridRef?.current) return null;
   const gridRect = gridRef.current.getBoundingClientRect();
+  const containerRect = gridRef.current.parentElement?.getBoundingClientRect();
 
   return (
     <>
-      {/* Playhead vertical line - inside grid, scrolls with content */}
+      {/* Playhead vertical line - fixed positioning aligned with scrubber */}
       <div
         className="absolute z-30 pointer-events-none"
         style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: 28,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
