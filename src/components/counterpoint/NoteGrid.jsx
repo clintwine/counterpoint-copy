@@ -14,7 +14,7 @@ import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNot
 import ScoreMinimap from './ScoreMinimap';
 import NoteControls from './NoteControls';
 import GridOverlays from './GridOverlays';
-import MeasureHeader from './MeasureHeader';
+import BeatHeader from './BeatHeader';
 import Scrubber from './Scrubber';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
@@ -1459,10 +1459,30 @@ export default function NoteGrid({
       </div>
 
 
-          <div 
+          <div className="mx-2 sm:mx-5">
+            {/* Beat header - fixed at top */}
+            <BeatHeader 
+              measures={measures}
+              beatsPerMeasure={beatsPerMeasure}
+              CELL_WIDTH={CELL_WIDTH}
+              loopStart={loopStart}
+              loopEnd={loopEnd}
+              isLooping={isLooping}
+              selectedNotes={selectedNotes}
+              isLoopSelecting={isLoopSelecting}
+              cantusFirmus={cantusFirmus}
+              getNoteKey={getNoteKey}
+              onLoopChange={onLoopChange}
+              setSelectedNotes={setSelectedNotes}
+              gridRef={gridRef}
+              getBeatFromHeaderPosition={getBeatFromHeaderPosition}
+            />
+
+            {/* Scrollable grid container */}
+            <div 
                   ref={gridRef}
                   tabIndex={0}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none max-h-[calc(100vh-320px)]`}
+                  className={`overflow-auto relative select-none focus:outline-none max-h-[calc(100vh-345px)]`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
@@ -1559,7 +1579,7 @@ export default function NoteGrid({
         <div className="inline-flex min-w-full" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
                                       <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
-                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a' }} />
+                                        <div className="h-7 border-b border-amber-900/50" style={{ backgroundColor: '#3a3a3a' }} />
                           {pitches.map((pitch) => {
                                                                         const isSharp = pitch.includes('#');
                                                                         const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
@@ -1631,104 +1651,6 @@ export default function NoteGrid({
               onSeek={onSeek}
               gridRef={gridRef}
             />
-            
-            {/* Beat numbers header */}
-                            <div 
-                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
-                              style={{ backgroundColor: '#3a3a3a' }}
-                              onMouseDown={(e) => {
-                                // Allow note selection within measures - only handle direct header clicks
-                                if (e.target !== e.currentTarget && e.target?.closest('span')) return;
-                                
-                                const beat = getBeatFromHeaderPosition(e.clientX);
-                                if (beat === null) return;
-
-                                // Check if clicking near edges of existing loop region
-                                const edgeThreshold = 2; // beats
-                                let dragMode = 'new'; // 'new', 'start', 'end'
-                                
-                                if (loopStart !== null && loopEnd !== null) {
-                                  if (Math.abs(beat - loopStart) <= edgeThreshold) {
-                                    dragMode = 'start';
-                                  } else if (Math.abs(beat - loopEnd) <= edgeThreshold) {
-                                    dragMode = 'end';
-                                  }
-                                }
-
-                                setIsLoopSelecting(true);
-                                setLoopSelectStart(beat);
-                                
-                                if (dragMode === 'new') {
-                                  if (onLoopChange) {
-                                    onLoopChange(beat, beat);
-                                  }
-                                }
-
-                                const handleMouseMove = (moveEvent) => {
-                                  const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
-                                  if (moveBeat !== null) {
-                                    if (dragMode === 'start') {
-                                      // Dragging left edge - adjust loop start
-                                      const newStart = Math.floor(moveBeat);
-                                      if (newStart < loopEnd) {
-                                        onLoopChange?.(newStart, loopEnd);
-                                      }
-                                    } else if (dragMode === 'end') {
-                                      // Dragging right edge - adjust loop end
-                                      const newEnd = Math.floor(moveBeat) + 1;
-                                      if (newEnd > loopStart) {
-                                        onLoopChange?.(loopStart, newEnd);
-                                      }
-                                    } else {
-                                      // Creating new loop
-                                      const start = Math.min(beat, moveBeat);
-                                      const end = Math.max(beat, moveBeat);
-                                      if (onLoopChange) {
-                                        onLoopChange(start, end);
-                                      }
-                                    }
-                                  }
-                                };
-
-                                const handleMouseUp = (upEvent) => {
-                                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
-                                  if (upBeat !== null) {
-                                    if (dragMode === 'start' || dragMode === 'end') {
-                                      // Edge drag complete - keep the adjusted loop
-                                      // Already updated via handleMouseMove
-                                    } else {
-                                      // New loop creation
-                                      const snappedBeat = Math.floor(beat);
-                                      const snappedUpBeat = Math.floor(upBeat);
-                                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
-
-                                      if (dragDistance === 0) {
-                                        // Single click - don't seek, keep playhead where it is
-                                        if (onLoopChange) {
-                                          onLoopChange(null, null);
-                                        }
-                                      } else {
-                                        // Drag - create loop region (always use full beats for loops)
-                                        const start = Math.min(snappedBeat, snappedUpBeat);
-                                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
-                                        if (onLoopChange) {
-                                          onLoopChange(start, end);
-                                        }
-                                      }
-                                    }
-                                  }
-                                  setIsLoopSelecting(false);
-                                  setLoopSelectStart(null);
-                                  document.removeEventListener('mousemove', handleMouseMove);
-                                  document.removeEventListener('mouseup', handleMouseUp);
-                                };
-
-                                document.addEventListener('mousemove', handleMouseMove);
-                                document.addEventListener('mouseup', handleMouseUp);
-                              }}
-                            >
-                              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})} 
-                            </div>
 
             {/* Virtualized Note grid rows - only render visible rows */}
             {(() => {
@@ -1899,9 +1821,9 @@ export default function NoteGrid({
               setIsScrubbing={setIsScrubbing}
               setScrubPosition={setScrubPosition}
             />
-          </div>
+            </div>
         </div>
-        </div>
+      </div>
 
       <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px]">
         <div className="flex items-center gap-2 flex-1 min-w-0">
