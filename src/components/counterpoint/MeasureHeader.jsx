@@ -103,7 +103,7 @@ export default function MeasureHeader({
         <div
           key={`sel-${beatOffset}`}
           className="absolute top-0 bottom-0 pointer-events-none z-0"
-          style={{ left: `${beatOffset * CELL_WIDTH}px`, width: `${CELL_WIDTH}px`, backgroundColor: 'rgba(251, 191, 36, 0.25)' }}
+          style={{ left: `${beatOffset * CELL_WIDTH}px`, width: `${CELL_WIDTH}px`, backgroundColor: '#C8A570' }}
         />
       ))}
 
