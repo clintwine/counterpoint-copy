@@ -1634,7 +1634,8 @@ export default function NoteGrid({
             
             {/* Beat numbers header */}
                             <div 
-                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
+                              className="flex h-7 border-b border-amber-900/50 select-none sticky z-30 relative cursor-pointer"
+                              style={{ top: '40px' }}
                               style={{ backgroundColor: '#3a3a3a' }}
                               onMouseDown={(e) => {
                                 // Allow note selection within measures - only handle direct header clicks
