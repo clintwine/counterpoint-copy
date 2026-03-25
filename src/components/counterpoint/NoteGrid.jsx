@@ -936,35 +936,22 @@ export default function NoteGrid({
         paintedNotesRef.current.clear();
 
         if (resizeState) {
-        // Save to history after resize and update last duration
-        // Update selection keys if beat positions changed (left edge resize)
-        if (resizeState.edge === 'left') {
-        const newSelectedKeys = new Set();
-        cantusFirmus.forEach(n => {
-          // Match by pitch AND by end point (end point stays fixed during left-edge resize)
-          const wasResizing = resizeState.startNotes.some(startNote => {
-            const originalEndPoint = startNote.beat + startNote.duration;
-            const currentEndPoint = n.beat + (n.duration || 1);
-            return startNote.pitch === n.pitch && Math.abs(currentEndPoint - originalEndPoint) < 0.01;
+          const newKeys = new Set();
+          cantusFirmus.forEach(n => {
+            const match = resizeState.startNotes.find(s => {
+              if (s.pitch !== n.pitch) return false;
+              if (resizeState.edge === 'left') return Math.abs((n.beat + (n.duration||1)) - (s.beat + s.duration)) < 0.01;
+              return Math.abs(n.beat - s.beat) < 0.01;
+            });
+            if (match) newKeys.add(getNoteKey(n.pitch, n.beat));
           });
-          if (wasResizing) {
-            newSelectedKeys.add(getNoteKey(n.pitch, n.beat));
-          }
-        });
-        if (newSelectedKeys.size > 0) {
-          setSelectedNotes(newSelectedKeys);
-        }
-        }
-
-        const resizedNote = cantusFirmus.find(n => {
-        return resizeState.startNotes.some(startNote => startNote.pitch === n.pitch);
-        });
-        if (resizedNote) {
-        setLastNoteDuration(resizedNote.duration || DEFAULT_DURATION);
-        }
-        saveToHistory(cantusFirmus);
-        setResizeState(null);
-        return;
+          if (newKeys.size > 0) setSelectedNotes(newKeys);
+          const s0 = resizeState.startNotes[0];
+          const rn = s0 && cantusFirmus.find(n => n.pitch === s0.pitch && Math.abs(n.beat - s0.beat) < 0.5);
+          if (rn) setLastNoteDuration(rn.duration || DEFAULT_DURATION);
+          saveToHistory(cantusFirmus);
+          setResizeState(null);
+          return;
         }
     
     if (marquee) {
