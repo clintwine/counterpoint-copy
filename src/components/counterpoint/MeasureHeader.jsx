@@ -19,10 +19,11 @@ export default function MeasureHeader({
   const mouseDownPos = useRef(null);
   const isDragging = useRef(false);
 
-  const hasSelection = cantusFirmus.some(n => {
-    const b = n.beat;
-    return b >= measureStartBeat && b < measureStartBeat + beatsPerMeasure && selectedNotes.has(getNoteKey(n.pitch, n.beat));
-  });
+  const selectedBeatsInMeasure = new Set(
+    cantusFirmus
+      .filter(n => n.beat >= measureStartBeat && n.beat < measureStartBeat + beatsPerMeasure && selectedNotes.has(getNoteKey(n.pitch, n.beat)))
+      .map(n => Math.floor(n.beat) - measureStartBeat)
+  );
 
   const getBeatFromClientX = (clientX) => {
     if (!gridRef?.current) return null;
@@ -98,9 +99,13 @@ export default function MeasureHeader({
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
       onMouseDown={handleMeasureMouseDown}
     >
-      {hasSelection && (
-        <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundColor: 'rgba(251, 191, 36, 0.18)' }} />
-      )}
+      {selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map(beatOffset => (
+        <div
+          key={`sel-${beatOffset}`}
+          className="absolute top-0 bottom-0 pointer-events-none z-0"
+          style={{ left: `${beatOffset * CELL_WIDTH}px`, width: `${CELL_WIDTH}px`, backgroundColor: 'rgba(251, 191, 36, 0.25)' }}
+        />
+      ))}
 
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
