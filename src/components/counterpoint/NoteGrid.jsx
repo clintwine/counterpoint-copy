@@ -63,8 +63,6 @@ const ZOOM_STEP = 0.1;
 const MIN_DURATION = 0.125;
 const DEFAULT_DURATION = 1;
 
-
-
 import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import InstrumentSelect from './InstrumentSelectComponent';
 
@@ -120,6 +118,7 @@ export default function NoteGrid({
               currentUser
             }) {
   const gridRef = useRef(null);
+  const headerScrollRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -1070,9 +1069,9 @@ export default function NoteGrid({
   };
 
   return (
-          <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
+          <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full flex flex-col h-screen">
             {/* Main Toolbar */}
-          <div className="flex items-center justify-between px-2 sm:px-5 py-1 sm:py-1.5 border-b border-[#3A3A3A] overflow-x-auto gap-2">
+          <div className="flex items-center justify-between px-2 sm:px-5 py-1 sm:py-1.5 border-b border-[#3A3A3A] overflow-x-auto gap-2 flex-shrink-0">
             {/* Left: User Avatar + File Menu */}
             <div className="flex items-center gap-2">
               {/* User avatar */}
@@ -1149,7 +1148,7 @@ export default function NoteGrid({
               <DropdownMenuItem onClick={async () => {
                 const toastId = 'audio-export';
                 try {
-                  toast.loading('Generating audio file...', { id: toastId });
+                  // toast.loading('Generating audio file...', { id: toastId });
                   const { renderToWav } = await import('./audioExporter');
                   const blob = await renderToWav(cantusFirmus, tempo, voices[0]?.instrument || 'organ');
                   
@@ -1161,10 +1160,10 @@ export default function NoteGrid({
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Audio file downloaded', { id: toastId });
+                  // toast.success('Audio file downloaded', { id: toastId });
                 } catch (error) {
                   console.error('Export audio error:', error);
-                  toast.error('Failed to export audio: ' + error.message, { id: toastId });
+                  // toast.error('Failed to export audio: ' + error.message, { id: toastId });
                 }
               }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Download className="w-4 h-4 mr-2" />
@@ -1198,7 +1197,7 @@ export default function NoteGrid({
         </div>
 
       {/* Secondary Toolbar - Tool Controls */}
-      <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525]">
+      <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525] flex-shrink-0">
         <div className="flex items-center gap-1">
           <Button
             variant={tool === 'select' ? 'default' : 'ghost'}
@@ -1458,172 +1457,15 @@ export default function NoteGrid({
         </div>
       </div>
 
-
+      {/* Grid container with fixed headers and scrollable content */}
+      <div className="flex flex-col flex-1 mx-2 sm:mx-5 overflow-hidden">
+        {/* Fixed Scrubber */}
+        <div className="flex flex-shrink-0">
+          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
           <div 
-                  ref={gridRef}
-                  tabIndex={0}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none max-h-[calc(100vh-320px)]`}
-                style={{ 
-                  scrollbarWidth: 'thin', 
-                  scrollbarColor: '#505050 transparent',
-                  touchAction: tool === 'marquee' ? 'none' : 'auto',
-                  backgroundColor: '#232323'
-                }}
-        onMouseMove={handlePointerMove}
-                      onMouseUp={(e) => {
-                        handlePointerUp(e);
-                        // Stop sustained piano note on mouse up
-                        setIsDraggingPiano(false);
-                        lastPianoPitchRef.current = null;
-                        if (pianoSustainRef.current) {
-                          stopNoteSustain(pianoSustainRef.current, 0.3);
-                          pianoSustainRef.current = null;
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        setHoveredCell(null);
-                        handlePointerUp(e);
-                        // Don't stop piano note on mouse leave - only on mouse up
-                      }}
-                      onTouchMove={(e) => { 
-                                                                                // Handle pinch to zoom first
-                                                                                if (e.touches.length === 2) {
-                                                                                  e.preventDefault();
-                                                                                  const touch1 = e.touches[0];
-                                                                                  const touch2 = e.touches[1];
-                                                                                  const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
-
-                                                                                  if (pinchState) {
-                                                                                    const scale = currentDist / pinchState.initialDist;
-                                                                                    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
-                                                                                    const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
-                                                                                    setZoom(newZoom);
-                                                                                    setZoomY(newZoomY);
-                                                                                  }
-                                                                                  return;
-                                                                                }
-
-                                                                                // Prevent scrolling when any editing gesture is active
-                                                                                if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
-                                                                                  e.preventDefault();
-                                                                                  // Find the active touch
-                                                                                  let activeTouch = null;
-                                                                                  for (let i = 0; i < e.touches.length; i++) {
-                                                                                    if (e.touches[i].identifier === activeTouchIdRef.current) {
-                                                                                      activeTouch = e.touches[i];
-                                                                                      break;
-                                                                                    }
-                                                                                  }
-                                                                                  if (activeTouch) {
-                                                                                    handlePointerMove({ clientX: activeTouch.clientX, clientY: activeTouch.clientY });
-                                                                                  } else if (e.touches.length > 0) {
-                                                                                    handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-                                                                                  }
-                                                                                }
-                                                                              }}
-                                    onTouchStart={(e) => {
-                                      // Detect pinch start
-                                      if (e.touches.length === 2) {
-                                        const touch1 = e.touches[0];
-                                        const touch2 = e.touches[1];
-                                        const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
-                                        setPinchState({ initialDist: dist, initialZoom: zoom, initialZoomY: zoomY });
-                                      }
-                                    }}
-                                    onTouchEnd={(e) => {
-                                      // Check if the ended touch is our active one
-                                      let wasActiveTouch = false;
-                                      for (let i = 0; i < e.changedTouches.length; i++) {
-                                        if (e.changedTouches[i].identifier === activeTouchIdRef.current) {
-                                          wasActiveTouch = true;
-                                          break;
-                                        }
-                                      }
-                                      if (wasActiveTouch) {
-                                        handlePointerUp();
-                                        activeTouchIdRef.current = null;
-                                      }
-                                      if (e.touches.length < 2) {
-                                        setPinchState(null);
-                                      }
-                                    }}
-                                    onTouchCancel={() => {
-                                      handlePointerUp();
-                                      setPinchState(null);
-                                      activeTouchIdRef.current = null;
-                                    }}
-        onScroll={(e) => {
-        setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
-      }}
-      >
-        <div className="inline-flex min-w-full" ref={containerRef}>
-          {/* Pitch labels - fixed column on left, allows vertical scrolling */}
-                                      <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
-                                        <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a' }} />
-                          {pitches.map((pitch) => {
-                                                                        const isSharp = pitch.includes('#');
-                                                                        const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
-                                                                        const isPianoPressed = pressedPianoNotes.has(pitch);
-                                                                        
-                                                                        const startPianoNote = async () => {
-                                                                          await initAudio();
-
-                                                                          // Stop previous note if any
-                                                                          if (pianoSustainRef.current) {
-                                                                            stopNoteSustain(pianoSustainRef.current, 0.1);
-                                                                            pianoSustainRef.current = null;
-                                                                          }
-
-                                                                          lastPianoPitchRef.current = pitch;
-                                                                          const customConfig = getInstrumentConfig(pianoInstrument);
-
-                                                                          if (customConfig) {
-                                                                            // For custom instruments, use timed note (no sustain support yet)
-                                                                            await playNoteWithCustomInstrument(pitch, 2, 0.7, customConfig);
-                                                                          } else {
-                                                                            // Use sustain for built-in instruments
-                                                                            pianoSustainRef.current = playNoteSustain(pitch, 0.7, 0, pianoInstrument);
-                                                                          }
-                                                                        };
-                                                                        
-                                                                        return (
-                                                                          <div 
-                                                                            key={pitch}
-                                                                            onMouseDown={(e) => {
-                                                                              e.stopPropagation();
-                                                                              setIsDraggingPiano(true);
-                                                                              startPianoNote();
-                                                                            }}
-                                                                            onMouseEnter={() => {
-                                                                              if (isDraggingPiano && lastPianoPitchRef.current !== pitch) {
-                                                                                startPianoNote();
-                                                                              }
-                                                                            }}
-                                                                            onTouchEnd={(e) => {
-                                                                              e.stopPropagation();
-                                                                              if (!e.defaultPrevented) {
-                                                                                startPianoNote();
-                                                                                setTimeout(() => {
-                                                                                  if (pianoSustainRef.current) {
-                                                                                    stopNoteSustain(pianoSustainRef.current, 0.3);
-                                                                                    pianoSustainRef.current = null;
-                                                                                  }
-                                                                                }, 500);
-                                                                              }
-                                                                            }}
-                                                                            className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
-                                                                              isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-slate-900 font-semibold' : isSharp ? 'text-white/50' : 'text-slate-900'
-                                                                            }`}
-                                                                            style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? '#D4A574' : isSharp ? '#1E293B' : '#F5F5F5' }}
-                                                                          >
-                                                                            {pitch}
-                                                                          </div>
-                                                                        );
-                                                                      })}
-                        </div>
-
-          {/* Grid area */}
-          <div className="flex-shrink-0">
+            className="flex-1 overflow-hidden"
+            style={{ backgroundColor: '#2B2B2B' }}
+          >
             <Scrubber 
               smoothPlayhead={smoothPlayhead}
               totalBeats={totalBeats}
@@ -1631,279 +1473,446 @@ export default function NoteGrid({
               onSeek={onSeek}
               gridRef={gridRef}
             />
-            
-            {/* Beat numbers header */}
-                            <div 
-                              className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
-                              style={{ backgroundColor: '#3a3a3a' }}
-                              onMouseDown={(e) => {
-                                // Allow note selection within measures - only handle direct header clicks
-                                if (e.target !== e.currentTarget && e.target?.closest('span')) return;
-                                
-                                const beat = getBeatFromHeaderPosition(e.clientX);
-                                if (beat === null) return;
-
-                                // Check if clicking near edges of existing loop region
-                                const edgeThreshold = 2; // beats
-                                let dragMode = 'new'; // 'new', 'start', 'end'
-                                
-                                if (loopStart !== null && loopEnd !== null) {
-                                  if (Math.abs(beat - loopStart) <= edgeThreshold) {
-                                    dragMode = 'start';
-                                  } else if (Math.abs(beat - loopEnd) <= edgeThreshold) {
-                                    dragMode = 'end';
-                                  }
-                                }
-
-                                setIsLoopSelecting(true);
-                                setLoopSelectStart(beat);
-                                
-                                if (dragMode === 'new') {
-                                  if (onLoopChange) {
-                                    onLoopChange(beat, beat);
-                                  }
-                                }
-
-                                const handleMouseMove = (moveEvent) => {
-                                  const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
-                                  if (moveBeat !== null) {
-                                    if (dragMode === 'start') {
-                                      // Dragging left edge - adjust loop start
-                                      const newStart = Math.floor(moveBeat);
-                                      if (newStart < loopEnd) {
-                                        onLoopChange?.(newStart, loopEnd);
-                                      }
-                                    } else if (dragMode === 'end') {
-                                      // Dragging right edge - adjust loop end
-                                      const newEnd = Math.floor(moveBeat) + 1;
-                                      if (newEnd > loopStart) {
-                                        onLoopChange?.(loopStart, newEnd);
-                                      }
-                                    } else {
-                                      // Creating new loop
-                                      const start = Math.min(beat, moveBeat);
-                                      const end = Math.max(beat, moveBeat);
-                                      if (onLoopChange) {
-                                        onLoopChange(start, end);
-                                      }
-                                    }
-                                  }
-                                };
-
-                                const handleMouseUp = (upEvent) => {
-                                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
-                                  if (upBeat !== null) {
-                                    if (dragMode === 'start' || dragMode === 'end') {
-                                      // Edge drag complete - keep the adjusted loop
-                                      // Already updated via handleMouseMove
-                                    } else {
-                                      // New loop creation
-                                      const snappedBeat = Math.floor(beat);
-                                      const snappedUpBeat = Math.floor(upBeat);
-                                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
-
-                                      if (dragDistance === 0) {
-                                        // Single click - don't seek, keep playhead where it is
-                                        if (onLoopChange) {
-                                          onLoopChange(null, null);
-                                        }
-                                      } else {
-                                        // Drag - create loop region (always use full beats for loops)
-                                        const start = Math.min(snappedBeat, snappedUpBeat);
-                                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
-                                        if (onLoopChange) {
-                                          onLoopChange(start, end);
-                                        }
-                                      }
-                                    }
-                                  }
-                                  setIsLoopSelecting(false);
-                                  setLoopSelectStart(null);
-                                  document.removeEventListener('mousemove', handleMouseMove);
-                                  document.removeEventListener('mouseup', handleMouseUp);
-                                };
-
-                                document.addEventListener('mousemove', handleMouseMove);
-                                document.addEventListener('mouseup', handleMouseUp);
-                              }}
-                            >
-                              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})} 
-                            </div>
-
-            {/* Virtualized Note grid rows - only render visible rows */}
-            {(() => {
-              // Calculate visible range with buffer
-              const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
-              const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + viewportState.height) / CELL_HEIGHT) + 5);
-
-              // Calculate visible beat range
-              const visibleStartBeat = Math.max(0, Math.floor(viewportState.scrollLeft / CELL_WIDTH) - 2);
-              const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + viewportState.width) / CELL_WIDTH) + 2);
-              
-              return (
-                <>
-                  {/* Spacer for rows above visible area */}
-                  {visibleStartRow > 0 && (
-                    <div style={{ height: visibleStartRow * CELL_HEIGHT }} />
-                  )}
-                  
-                  {pitches.slice(visibleStartRow, visibleEndRow).map((pitch, idx) => {
-                    const pitchIndex = visibleStartRow + idx;
-                    const isCLine = pitch.startsWith('C') && !pitch.startsWith('C#');
-                    const isSharpLine = pitch.includes('#');
-                    
-                    return (
-                      <div key={pitch} className="flex" style={{ height: CELL_HEIGHT }}>
-                        {/* Spacer for beats before visible area */}
-                        {visibleStartBeat > 0 && (
-                          <div style={{ width: visibleStartBeat * CELL_WIDTH, flexShrink: 0 }} />
-                        )}
-                        
-                        {Array.from({ length: visibleEndBeat - visibleStartBeat }).map((_, i) => {
-                          const beat = visibleStartBeat + i;
-                          const isBarLine = beat % beatsPerMeasure === 0 && beat !== 0;
-                          const noteKey = getNoteKey(pitch, beat);
-                          const isSelected = selectedNotes.has(noteKey);
-                          const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
-                          const isCurrentBeat = currentBeat === beat;
-                          const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
-
-                          return (
-                            <div
-                              key={beat}
-                              onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
-                                    onTouchStart={(e) => { 
-                                      const touch = e.touches[0];
-                                      const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
-
-                                      // For marquee tool, prevent scrolling immediately
-                                      if (tool === 'marquee') {
-                                        e.preventDefault();
-                                        activeTouchIdRef.current = touch.identifier;
-                                        handlePointerDown(e, pitch, beat);
-                                        return;
-                                      }
-
-                                      // If we have selected notes and tapping on empty cell, start drag immediately
-                                      if (!hasNote && selectedNotes.size > 0 && tool === 'select') {
-                                        e.preventDefault();
-                                        activeTouchIdRef.current = touch.identifier;
-
-                                        // Store notes for dragging
-                                        const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
-                                        const notesToStore = selectedNotesList.map(n => ({
-                                          pitch: n.pitch,
-                                          beat: n.beat,
-                                          duration: n.duration || DEFAULT_DURATION,
-                                          velocity: n.velocity,
-                                          articulation: n.articulation,
-                                          bendStart: n.bendStart,
-                                          bendEnd: n.bendEnd,
-                                          bendStartTime: n.bendStartTime,
-                                          bendEndTime: n.bendEndTime
-                                        }));
-                                        originalDragNotesRef.current = {
-                                          keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
-                                          notes: notesToStore
-                                        };
-
-                                        const currentPitchIdx = pitches.indexOf(pitch);
-                                        setDragState({
-                                          startPitch: pitch,
-                                          startBeat: beat,
-                                          startPitchIndex: currentPitchIdx,
-                                          currentPitchIndex: currentPitchIdx,
-                                          currentBeat: beat,
-                                          isDragging: true,
-                                          clickOffsetX: touch.clientX,
-                                          clickOffsetY: touch.clientY
-                                        });
-                                        return;
-                                      }
-
-                                      // Store touch start position to detect scrolling vs tapping
-                                      touchStartRef.current = { 
-                                        x: touch.clientX, 
-                                        y: touch.clientY, 
-                                        pitch, 
-                                        beat,
-                                        time: Date.now()
-                                      };
-                                    }}
-                                    onTouchEnd={(e) => {
-                                      if (!touchStartRef.current) return;
-                                      const touch = e.changedTouches[0];
-                                      const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
-                                      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-                                      const deltaTime = Date.now() - touchStartRef.current.time;
-
-                                      // Only trigger note action if it was a tap (small movement, quick touch)
-                                      if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
-                                        e.preventDefault();
-                                        handlePointerDown(e, touchStartRef.current.pitch, touchStartRef.current.beat);
-                                      }
-                                      touchStartRef.current = null;
-                                    }}
-                              className={`flex-shrink-0 border-b relative cursor-pointer
-                                ${isBarLine ? 'border-l-2 border-l-slate-600' : 'border-l border-l-slate-700/40'} 
-                                hover:bg-slate-700/30
-                              `}
-                              style={{ 
-                                width: CELL_WIDTH, 
-                                height: CELL_HEIGHT,
-                                backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323'),
-                                borderBottomColor: '#404040'
-                              }}
-                            >
-                              {notesAtPosition.map(({ voiceIndex, note }) => {const duration = note.duration || DEFAULT_DURATION; const noteWidth = duration * CELL_WIDTH - 4; const nKey = getNoteKey(note.pitch, note.beat); const isBeingDragged = dragState?.isDragging && originalDragNotesRef.current?.keys?.has(nKey); const noteVelocity = note.velocity ?? 0.8; const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex]; const noteInLoop = loopStart !== null && loopEnd !== null && note.beat >= loopStart && note.beat < loopEnd; return (<div key={`${voiceIndex}-${note.beat.toFixed(3)}-${note.pitch}`} onMouseDown={async (e) => {e.stopPropagation(); setPendingNote(null); if (onLoopChange) onLoopChange(null, null); const coords = getEventCoords(e); const rect = e.currentTarget.getBoundingClientRect(); const clickX = coords.clientX - rect.left; await playNoteSound(pitch, note); if (clickX > rect.width - 10) {const startNotes = []; if (selectedNotes.has(nKey) && selectedNotes.size > 0) {cantusFirmus.forEach(n => {if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) startNotes.push({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION });})} else {startNotes.push({ pitch: note.pitch, beat: note.beat, duration: note.duration || DEFAULT_DURATION })} setResizeState({ startX: coords.clientX, startNotes, edge: 'right' });} else if (clickX < 10) {const startNotes = []; if (selectedNotes.has(nKey) && selectedNotes.size > 0) {cantusFirmus.forEach(n => {if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) startNotes.push({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION });})} else {startNotes.push({ pitch: note.pitch, beat: note.beat, duration: note.duration || DEFAULT_DURATION })} setResizeState({ startX: coords.clientX, startNotes, edge: 'left' });} else {const wasSelected = selectedNotes.has(nKey); const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]); const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION, velocity: n.velocity, articulation: n.articulation, bendStart: n.bendStart, bendEnd: n.bendEnd, bendStartTime: n.bendStartTime, bendEndTime: n.bendEndTime})); originalDragNotesRef.current = {keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))), notes: notesToStore, shouldUpdateSelection: !wasSelected, shiftKey: e.shiftKey, targetKey: nKey}; setDragState({startPitch: pitch, startBeat: beat, startPitchIndex: pitches.indexOf(pitch), currentPitchIndex: pitches.indexOf(pitch), currentBeat: beat, isDragging: false, clickOffsetX: coords.clientX, clickOffsetY: coords.clientY}); console.log('[NoteGrid] Set drag state for existing note', { pitch, beat }); setPendingNote(null);}}} className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : noteInLoop && isLooping ? 'ring-2 ring-amber-400/60' : ''}`} style={{left: `${(note.beat - Math.floor(note.beat)) * CELL_WIDTH + 2}px`, width: noteWidth, minWidth: 20, backgroundColor: velocityColor, boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${velocityColor}` : undefined, cursor: resizeState ? 'ew-resize' : 'grab', zIndex: 5, opacity: isBeingDragged ? 0 : 1}}><span className="text-[10px] font-bold text-slate-900 pointer-events-none">{note.pitch.replace(/\d/, '')}</span>{((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (<span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">↕</span>)}<div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-l" /><div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" /></div>);})}
-                            </div>
-                          );
-                        })}
-                        
-                        {/* Spacer for beats after visible area */}
-                        {visibleEndBeat < totalBeats && (
-                          <div style={{ width: (totalBeats - visibleEndBeat) * CELL_WIDTH, flexShrink: 0 }} />
-                        )}
-                      </div>
-                    );
-                  })}
-                  
-                  {/* Spacer for rows below visible area */}
-                  {visibleEndRow < pitches.length && (
-                    <div style={{ height: (pitches.length - visibleEndRow) * CELL_HEIGHT }} />
-                  )}
-                </>
-              );
-            })()}
-
-            <GridOverlays
-              marquee={marquee}
-              dragState={dragState}
-              dragOffset={dragOffset}
-              originalDragNotes={originalDragNotesRef.current?.notes}
-              pitches={pitches}
-              CELL_WIDTH={CELL_WIDTH}
-              CELL_HEIGHT={CELL_HEIGHT}
-              DEFAULT_DURATION={DEFAULT_DURATION}
-              getVelocityColor={getVelocityColor}
-              viewportState={viewportState}
-              gridRef={gridRef}
-              smoothPlayhead={smoothPlayhead}
-              zoom={zoom}
-              isPlaying={isPlaying}
-              currentBeat={currentBeat}
-              onSeek={onSeek}
-              snapToGrid={snapToGrid}
-              quantizeGrid={quantizeGrid}
-              totalBeats={totalBeats}
-              setIsScrubbing={setIsScrubbing}
-              setScrubPosition={setScrubPosition}
-            />
           </div>
         </div>
+
+        {/* Fixed Beat Header */}
+        <div className="flex flex-shrink-0">
+          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#3a3a3a' }} />
+          <div 
+            className="flex-1 overflow-x-hidden"
+            ref={headerScrollRef}
+            style={{ backgroundColor: '#3a3a3a' }}
+            onScroll={(e) => {
+              if (gridRef.current) {
+                gridRef.current.scrollLeft = e.currentTarget.scrollLeft;
+              }
+            }}
+          >
+            <div 
+              className="flex h-7 border-b border-amber-900/50 select-none relative cursor-pointer"
+              style={{ backgroundColor: '#3a3a3a', width: `${totalBeats * CELL_WIDTH}px` }}
+              onMouseDown={(e) => {
+                // Allow note selection within measures - only handle direct header clicks
+                if (e.target !== e.currentTarget && e.target?.closest('span')) return;
+                
+                const beat = getBeatFromHeaderPosition(e.clientX);
+                if (beat === null) return;
+
+                // Check if clicking near edges of existing loop region
+                const edgeThreshold = 2; // beats
+                let dragMode = 'new'; // 'new', 'start', 'end'
+                
+                if (loopStart !== null && loopEnd !== null) {
+                  if (Math.abs(beat - loopStart) <= edgeThreshold) {
+                    dragMode = 'start';
+                  } else if (Math.abs(beat - loopEnd) <= edgeThreshold) {
+                    dragMode = 'end';
+                  }
+                }
+
+                setIsLoopSelecting(true);
+                setLoopSelectStart(beat);
+                
+                if (dragMode === 'new') {
+                  if (onLoopChange) {
+                    onLoopChange(beat, beat);
+                  }
+                }
+
+                const handleMouseMove = (moveEvent) => {
+                  const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
+                  if (moveBeat !== null) {
+                    if (dragMode === 'start') {
+                      // Dragging left edge - adjust loop start
+                      const newStart = Math.floor(moveBeat);
+                      if (newStart < loopEnd) {
+                        onLoopChange?.(newStart, loopEnd);
+                      }
+                    } else if (dragMode === 'end') {
+                      // Dragging right edge - adjust loop end
+                      const newEnd = Math.floor(moveBeat) + 1;
+                      if (newEnd > loopStart) {
+                        onLoopChange?.(loopStart, newEnd);
+                      }
+                    } else {
+                      // Creating new loop
+                      const start = Math.min(beat, moveBeat);
+                      const end = Math.max(beat, moveBeat);
+                      if (onLoopChange) {
+                        onLoopChange(start, end);
+                      }
+                    }
+                  }
+                };
+
+                const handleMouseUp = (upEvent) => {
+                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
+                  if (upBeat !== null) {
+                    if (dragMode === 'start' || dragMode === 'end') {
+                      // Edge drag complete - keep the adjusted loop
+                      // Already updated via handleMouseMove
+                    } else {
+                      // New loop creation
+                      const snappedBeat = Math.floor(beat);
+                      const snappedUpBeat = Math.floor(upBeat);
+                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
+
+                      if (dragDistance === 0) {
+                        // Single click - don't seek, keep playhead where it is
+                        if (onLoopChange) {
+                          onLoopChange(null, null);
+                        }
+                      } else {
+                        // Drag - create loop region (always use full beats for loops)
+                        const start = Math.min(snappedBeat, snappedUpBeat);
+                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
+                        if (onLoopChange) {
+                          onLoopChange(start, end);
+                        }
+                      }
+                    }
+                  }
+                  setIsLoopSelecting(false);
+                  setLoopSelectStart(null);
+                  document.removeEventListener('mousemove', handleMouseMove);
+                  document.removeEventListener('mouseup', handleMouseUp);
+                };
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+              }}
+            >
+              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})} 
+            </div>
+          </div>
         </div>
 
-      <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px]">
+        {/* Scrollable Grid Content */}
+        <div 
+          ref={gridRef}
+          tabIndex={0}
+          className="overflow-auto relative select-none focus:outline-none flex-1"
+          style={{ 
+            scrollbarWidth: 'thin', 
+            scrollbarColor: '#505050 transparent',
+            touchAction: tool === 'marquee' ? 'none' : 'auto',
+            backgroundColor: '#232323'
+          }}
+          onScroll={(e) => {
+            setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
+            if (headerScrollRef.current) {
+              headerScrollRef.current.scrollLeft = e.target.scrollLeft;
+            }
+          }}
+          onMouseMove={handlePointerMove}
+          onMouseUp={(e) => {
+            handlePointerUp(e);
+            setIsDraggingPiano(false);
+            lastPianoPitchRef.current = null;
+            if (pianoSustainRef.current) {
+              stopNoteSustain(pianoSustainRef.current, 0.3);
+              pianoSustainRef.current = null;
+            }
+          }}
+          onMouseLeave={(e) => {
+            setHoveredCell(null);
+            handlePointerUp(e);
+          }}
+          onTouchMove={(e) => { 
+            if (e.touches.length === 2) {
+              e.preventDefault();
+              const touch1 = e.touches[0];
+              const touch2 = e.touches[1];
+              const currentDist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+
+              if (pinchState) {
+                const scale = currentDist / pinchState.initialDist;
+                const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoom * scale));
+                const newZoomY = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchState.initialZoomY * scale));
+                setZoom(newZoom);
+                setZoomY(newZoomY);
+              }
+              return;
+            }
+
+            if (marquee || tool === 'marquee' || (isPainting && paintMode) || resizeState || dragState) {
+              e.preventDefault();
+              let activeTouch = null;
+              for (let i = 0; i < e.touches.length; i++) {
+                if (e.touches[i].identifier === activeTouchIdRef.current) {
+                  activeTouch = e.touches[i];
+                  break;
+                }
+              }
+              if (activeTouch) {
+                handlePointerMove({ clientX: activeTouch.clientX, clientY: activeTouch.clientY });
+              } else if (e.touches.length > 0) {
+                handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+              }
+            }
+          }}
+          onTouchStart={(e) => {
+            if (e.touches.length === 2) {
+              const touch1 = e.touches[0];
+              const touch2 = e.touches[1];
+              const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+              setPinchState({ initialDist: dist, initialZoom: zoom, initialZoomY: zoomY });
+            }
+          }}
+          onTouchEnd={(e) => {
+            let wasActiveTouch = false;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              if (e.changedTouches[i].identifier === activeTouchIdRef.current) {
+                wasActiveTouch = true;
+                break;
+              }
+            }
+            if (wasActiveTouch) {
+              handlePointerUp();
+              activeTouchIdRef.current = null;
+            }
+            if (e.touches.length < 2) {
+              setPinchState(null);
+            }
+          }}
+          onTouchCancel={() => {
+            handlePointerUp();
+            setPinchState(null);
+            activeTouchIdRef.current = null;
+          }}
+        >
+          <div className="inline-flex min-w-full" ref={containerRef}>
+            {/* Pitch labels - fixed column on left */}
+            <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
+              <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a' }} />
+              {pitches.map((pitch) => {
+                const isSharp = pitch.includes('#');
+                const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
+                const isPianoPressed = pressedPianoNotes.has(pitch);
+                
+                const startPianoNote = async () => {
+                  await initAudio();
+
+                  // Stop previous note if any
+                  if (pianoSustainRef.current) {
+                    stopNoteSustain(pianoSustainRef.current, 0.1);
+                    pianoSustainRef.current = null;
+                  }
+
+                  lastPianoPitchRef.current = pitch;
+                  const customConfig = getInstrumentConfig(pianoInstrument);
+
+                  if (customConfig) {
+                    await playNoteWithCustomInstrument(pitch, 2, 0.7, customConfig);
+                  } else {
+                    pianoSustainRef.current = playNoteSustain(pitch, 0.7, 0, pianoInstrument);
+                  }
+                };
+                
+                return (
+                  <div 
+                    key={pitch}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setIsDraggingPiano(true);
+                      startPianoNote();
+                    }}
+                    onMouseEnter={() => {
+                      if (isDraggingPiano && lastPianoPitchRef.current !== pitch) {
+                        startPianoNote();
+                      }
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                      if (!e.defaultPrevented) {
+                        startPianoNote();
+                        setTimeout(() => {
+                          if (pianoSustainRef.current) {
+                            stopNoteSustain(pianoSustainRef.current, 0.3);
+                            pianoSustainRef.current = null;
+                          }
+                        }, 500);
+                      }
+                    }}
+                    className={`w-14 flex items-center justify-end pr-2 text-xs border-b border-slate-700 cursor-pointer hover:bg-slate-600/50 transition-colors sticky left-0 ${
+                      isPianoPressed ? 'text-amber-300 font-bold' : isC ? 'text-slate-900 font-semibold' : isSharp ? 'text-white/50' : 'text-slate-900'
+                    }`}
+                    style={{ height: CELL_HEIGHT, backgroundColor: isPianoPressed ? '#D4A574' : isSharp ? '#1E293B' : '#F5F5F5' }}
+                  >
+                    {pitch}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Grid content */}
+            <div className="flex-shrink-0">
+              {(() => {
+                // Calculate visible range with buffer
+                const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
+                const visibleEndRow = Math.min(pitches.length, Math.ceil((viewportState.scrollTop + viewportState.height) / CELL_HEIGHT) + 5);
+
+                // Calculate visible beat range
+                const visibleStartBeat = Math.max(0, Math.floor(viewportState.scrollLeft / CELL_WIDTH) - 2);
+                const visibleEndBeat = Math.min(totalBeats, Math.ceil((viewportState.scrollLeft + viewportState.width) / CELL_WIDTH) + 2);
+                
+                return (
+                  <>
+                    {visibleStartRow > 0 && (
+                      <div style={{ height: visibleStartRow * CELL_HEIGHT }} />
+                    )}
+                    
+                    {pitches.slice(visibleStartRow, visibleEndRow).map((pitch, idx) => {
+                      const pitchIndex = visibleStartRow + idx;
+                      const isCLine = pitch.startsWith('C') && !pitch.startsWith('C#');
+                      const isSharpLine = pitch.includes('#');
+                      
+                      return (
+                        <div key={pitch} className="flex" style={{ height: CELL_HEIGHT }}>
+                          {visibleStartBeat > 0 && (
+                            <div style={{ width: visibleStartBeat * CELL_WIDTH, flexShrink: 0 }} />
+                          )}
+                          
+                          {Array.from({ length: visibleEndBeat - visibleStartBeat }).map((_, i) => {
+                            const beat = visibleStartBeat + i;
+                            const isBarLine = beat % beatsPerMeasure === 0 && beat !== 0;
+                            const noteKey = getNoteKey(pitch, beat);
+                            const isSelected = selectedNotes.has(noteKey);
+                            const notesAtPosition = notesMap.get(`${pitch}-${beat}`) || [];
+                            const isCurrentBeat = currentBeat === beat;
+                            const inLoopRegion = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+
+                            return (
+                              <div
+                                key={beat}
+                                onMouseDown={(e) => handlePointerDown(e, pitch, beat)}
+                                onTouchStart={(e) => { 
+                                  const touch = e.touches[0];
+                                  const hasNote = cantusFirmus.some(n => n.pitch === pitch && n.beat === beat);
+
+                                  if (tool === 'marquee') {
+                                    e.preventDefault();
+                                    activeTouchIdRef.current = touch.identifier;
+                                    handlePointerDown(e, pitch, beat);
+                                    return;
+                                  }
+
+                                  if (!hasNote && selectedNotes.size > 0 && tool === 'select') {
+                                    e.preventDefault();
+                                    activeTouchIdRef.current = touch.identifier;
+
+                                    const selectedNotesList = cantusFirmus.filter(n => selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+                                    const notesToStore = selectedNotesList.map(n => ({
+                                      pitch: n.pitch,
+                                      beat: n.beat,
+                                      duration: n.duration || DEFAULT_DURATION,
+                                      velocity: n.velocity,
+                                      articulation: n.articulation,
+                                      bendStart: n.bendStart,
+                                      bendEnd: n.bendEnd,
+                                      bendStartTime: n.bendStartTime,
+                                      bendEndTime: n.bendEndTime
+                                    }));
+                                    originalDragNotesRef.current = {
+                                      keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))),
+                                      notes: notesToStore
+                                    };
+
+                                    const currentPitchIdx = pitches.indexOf(pitch);
+                                    setDragState({
+                                      startPitch: pitch,
+                                      startBeat: beat,
+                                      startPitchIndex: currentPitchIdx,
+                                      currentPitchIndex: currentPitchIdx,
+                                      currentBeat: beat,
+                                      isDragging: true,
+                                      clickOffsetX: touch.clientX,
+                                      clickOffsetY: touch.clientY
+                                    });
+                                    return;
+                                  }
+
+                                  touchStartRef.current = { 
+                                    x: touch.clientX, 
+                                    y: touch.clientY, 
+                                    pitch, 
+                                    beat,
+                                    time: Date.now()
+                                  };
+                                }}
+                                onTouchEnd={(e) => {
+                                  if (!touchStartRef.current) return;
+                                  const touch = e.changedTouches[0];
+                                  const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+                                  const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+                                  const deltaTime = Date.now() - touchStartRef.current.time;
+
+                                  if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
+                                    e.preventDefault();
+                                    handlePointerDown(e, touchStartRef.current.pitch, touchStartRef.current.beat);
+                                  }
+                                  touchStartRef.current = null;
+                                }}
+                                className={`flex-shrink-0 border-b relative cursor-pointer
+                                  ${isBarLine ? 'border-l-2 border-l-slate-600' : 'border-l border-l-slate-700/40'} 
+                                  hover:bg-slate-700/30
+                                `}
+                                style={{ 
+                                  width: CELL_WIDTH, 
+                                  height: CELL_HEIGHT,
+                                  backgroundColor: inLoopRegion && isLooping ? 'rgba(251, 191, 36, 0.15)' : (isCLine ? '#2A2A2A' : isSharpLine ? '#1A1A1A' : '#232323'),
+                                  borderBottomColor: '#404040'
+                                }}
+                              >
+                                {notesAtPosition.map(({ voiceIndex, note }) => {const duration = note.duration || DEFAULT_DURATION; const noteWidth = duration * CELL_WIDTH - 4; const nKey = getNoteKey(note.pitch, note.beat); const isBeingDragged = dragState?.isDragging && originalDragNotesRef.current?.keys?.has(nKey); const noteVelocity = note.velocity ?? 0.8; const velocityColor = voiceIndex === 0 ? getVelocityColor(noteVelocity) : NOTE_COLORS[voiceIndex]; const noteInLoop = loopStart !== null && loopEnd !== null && note.beat >= loopStart && note.beat < loopEnd; return (<div key={`${voiceIndex}-${note.beat.toFixed(3)}-${note.pitch}`} onMouseDown={async (e) => {e.stopPropagation(); setPendingNote(null); if (onLoopChange) onLoopChange(null, null); const coords = getEventCoords(e); const rect = e.currentTarget.getBoundingClientRect(); const clickX = coords.clientX - rect.left; await playNoteSound(pitch, note); if (clickX > rect.width - 10) {const startNotes = []; if (selectedNotes.has(nKey) && selectedNotes.size > 0) {cantusFirmus.forEach(n => {if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) startNotes.push({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION });})} else {startNotes.push({ pitch: note.pitch, beat: note.beat, duration: note.duration || DEFAULT_DURATION })} setResizeState({ startX: coords.clientX, startNotes, edge: 'right' });} else if (clickX < 10) {const startNotes = []; if (selectedNotes.has(nKey) && selectedNotes.size > 0) {cantusFirmus.forEach(n => {if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) startNotes.push({ pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION });})} else {startNotes.push({ pitch: note.pitch, beat: note.beat, duration: note.duration || DEFAULT_DURATION })} setResizeState({ startX: coords.clientX, startNotes, edge: 'left' });} else {const wasSelected = selectedNotes.has(nKey); const keysToUse = wasSelected ? new Set(selectedNotes) : new Set([nKey]); const notesToStore = cantusFirmus.filter(n => keysToUse.has(getNoteKey(n.pitch, n.beat))).map(n => ({pitch: n.pitch, beat: n.beat, duration: n.duration || DEFAULT_DURATION, velocity: n.velocity, articulation: n.articulation, bendStart: n.bendStart, bendEnd: n.bendEnd, bendStartTime: n.bendStartTime, bendEndTime: n.bendEndTime})); originalDragNotesRef.current = {keys: new Set(notesToStore.map(n => getNoteKey(n.pitch, n.beat))), notes: notesToStore, shouldUpdateSelection: !wasSelected, shiftKey: e.shiftKey, targetKey: nKey}; setDragState({startPitch: pitch, startBeat: beat, startPitchIndex: pitches.indexOf(pitch), currentPitchIndex: pitches.indexOf(pitch), currentBeat: beat, isDragging: false, clickOffsetX: coords.clientX, clickOffsetY: coords.clientY}); console.log('[NoteGrid] Set drag state for existing note', { pitch, beat }); setPendingNote(null);}}} className={`absolute top-0.5 bottom-0.5 left-0.5 rounded flex items-center justify-start pl-1 shadow-md ${selectedNotes.has(nKey) ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800' : noteInLoop && isLooping ? 'ring-2 ring-amber-400/60' : ''}`} style={{left: `${(note.beat - Math.floor(note.beat)) * CELL_WIDTH + 2}px`, width: noteWidth, minWidth: 20, backgroundColor: velocityColor, boxShadow: isCurrentBeat && isPlaying ? `0 0 8px ${velocityColor}` : undefined, cursor: resizeState ? 'ew-resize' : 'grab', zIndex: 5, opacity: isBeingDragged ? 0 : 1}}><span className="text-[10px] font-bold text-slate-900 pointer-events-none">{note.pitch.replace(/\d/, '')}</span>{((note.bendStart !== undefined && note.bendStart !== 0) || (note.bendEnd !== undefined && note.bendEnd !== 0)) && (<span className="text-[8px] text-slate-900/70 ml-0.5 pointer-events-none">↕</span>)}<div className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-l" /><div className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-white/30 rounded-r" /></div>);})}
+                              </div>
+                            );
+                          })}
+                          
+                          {visibleEndBeat < totalBeats && (
+                            <div style={{ width: (totalBeats - visibleEndBeat) * CELL_WIDTH, flexShrink: 0 }} />
+                          )}
+                        </div>
+                      );
+                    })}
+                    
+                    {visibleEndRow < pitches.length && (
+                      <div style={{ height: (pitches.length - visibleEndRow) * CELL_HEIGHT }} />
+                    )}
+                  </>
+                );
+              })()}
+
+              <GridOverlays
+                marquee={marquee}
+                dragState={dragState}
+                dragOffset={dragOffset}
+                originalDragNotes={originalDragNotesRef.current?.notes}
+                pitches={pitches}
+                CELL_WIDTH={CELL_WIDTH}
+                CELL_HEIGHT={CELL_HEIGHT}
+                DEFAULT_DURATION={DEFAULT_DURATION}
+                getVelocityColor={getVelocityColor}
+                viewportState={viewportState}
+                gridRef={gridRef}
+                smoothPlayhead={smoothPlayhead}
+                zoom={zoom}
+                isPlaying={isPlaying}
+                currentBeat={currentBeat}
+                onSeek={onSeek}
+                snapToGrid={snapToGrid}
+                quantizeGrid={quantizeGrid}
+                totalBeats={totalBeats}
+                setIsScrubbing={setIsScrubbing}
+                setScrubPosition={setScrubPosition}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px] flex-shrink-0">
         <div className="flex items-center gap-2 flex-1 min-w-0">
         {/* Left side - instrument and piano controls */}
         <div className="flex items-center gap-2 flex-shrink-0">
