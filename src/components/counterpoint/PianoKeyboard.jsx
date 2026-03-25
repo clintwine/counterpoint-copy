@@ -458,6 +458,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     const handleKeyUp = (e) => {
       // Don't trigger piano when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
         e.preventDefault();
