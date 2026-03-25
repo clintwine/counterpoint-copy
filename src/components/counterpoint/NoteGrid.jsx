@@ -557,10 +557,10 @@ export default function NoteGrid({
   }, []);
 
   const getBeatFromHeaderPosition = (clientX) => {
-    if (!gridRef.current) return null;
-    const gridRect = gridRef.current.getBoundingClientRect();
-    const scrollLeft = gridRef.current.scrollLeft;
-    const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
+    if (!headerScrollRef.current) return null;
+    const headerRect = headerScrollRef.current.getBoundingClientRect();
+    const scrollLeft = headerScrollRef.current.scrollLeft;
+    const x = clientX - headerRect.left + scrollLeft;
     const beat = Math.floor(x / CELL_WIDTH);
     if (beat >= 0 && beat < totalBeats) {
       return beat;
