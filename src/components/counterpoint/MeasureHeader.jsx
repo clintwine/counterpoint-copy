@@ -69,7 +69,6 @@ export default function MeasureHeader({
         if (isClickInLoop) {
           // Clicking within existing loop — deselect it
           onLoopChange?.(null, null);
-          setSelectedNotes(new Set());
         } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
           const newStart = Math.min(loopStart, measureStart);
           const newEnd = Math.max(loopEnd, measureEnd);
