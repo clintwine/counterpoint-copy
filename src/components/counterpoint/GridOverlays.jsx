@@ -83,7 +83,7 @@ export default function GridOverlays({
       <div
         className="fixed cursor-ew-resize"
         style={{
-          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: `${gridRect.left + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: `${gridRect.top}px`,
           width: 0,
           height: 0,
