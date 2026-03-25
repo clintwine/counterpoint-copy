@@ -15,8 +15,8 @@ import ScoreMinimap from './ScoreMinimap';
 import NoteControls from './NoteControls';
 import GridOverlays from './GridOverlays';
 import MeasureHeader from './MeasureHeader';
+import Scrubber from './Scrubber';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
-import toast from 'react-hot-toast';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
 import { useAudioVisualizer } from './useAudioVisualizer';
 
@@ -1628,6 +1628,14 @@ export default function NoteGrid({
 
           {/* Grid area */}
           <div className="flex-shrink-0">
+            <Scrubber 
+              smoothPlayhead={smoothPlayhead}
+              totalBeats={totalBeats}
+              CELL_WIDTH={CELL_WIDTH}
+              onSeek={onSeek}
+              gridRef={gridRef}
+            />
+            
             {/* Beat numbers header */}
                             <div 
                               className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
