@@ -678,12 +678,9 @@ export default function NoteGrid({
             // Note click is handled by the note element itself
             return;
           } else {
-            // Click on empty cell - deselect and clear loop
+            // Click on empty cell - deselect
             if (!e.shiftKey) {
               setSelectedNotes(new Set());
-              if (onLoopChange) {
-                onLoopChange(null, null);
-              }
             }
             // Start marquee
             setMarquee({
@@ -946,11 +943,8 @@ export default function NoteGrid({
       const deltaY = Math.abs(marquee.endY - marquee.startY);
       
       if (deltaX < 40 && deltaY < 40) {
-        // Just a click - clear selection and loop
+        // Just a click - clear selection
         setSelectedNotes(new Set());
-        if (onLoopChange) {
-          onLoopChange(null, null);
-        }
       } else {
         // Calculate selected notes from marquee
         const startCell = getCellFromPosition(marquee.startX, marquee.startY);
@@ -977,8 +971,6 @@ export default function NoteGrid({
             }
           });
           setSelectedNotes(newSelected);
-          // Clear loop region when making a new marquee selection
-          if (onLoopChange) onLoopChange(null, null);
         }
       }
       setMarquee(null);
