@@ -63,10 +63,11 @@ export default function MeasureHeader({
         // It was a click — handle toggle
         const measureStart = measureStartBeat;
         const measureEnd = measureStartBeat + beatsPerMeasure;
-        const isAlreadyLooped = loopStart === measureStart && loopEnd === measureEnd;
+        const clickedBeat = getBeatFromClientX(upEvent.clientX);
+        const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
 
-        if (isAlreadyLooped) {
-          // Already looped — deselect regardless of shift
+        if (isClickInLoop) {
+          // Clicking within existing loop — deselect it
           onLoopChange?.(null, null);
           setSelectedNotes(new Set());
         } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
