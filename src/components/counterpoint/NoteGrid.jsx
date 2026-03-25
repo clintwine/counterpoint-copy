@@ -958,6 +958,7 @@ export default function NoteGrid({
           const maxPitchIdx = Math.max(startCell.pitchIndex, endCell.pitchIndex);
           
           const newSelected = new Set();
+          const selectedNotesList = [];
           cantusFirmus.forEach(note => {
             const pitchIdx = pitches.indexOf(note.pitch);
             const duration = note.duration || DEFAULT_DURATION;
@@ -969,9 +970,16 @@ export default function NoteGrid({
             
             if (overlapsHorizontally && overlapsVertically) {
               newSelected.add(getNoteKey(note.pitch, note.beat));
+              selectedNotesList.push(note);
             }
           });
-          onLoopChange?.(null, null);
+          if (selectedNotesList.length > 0) {
+            const selMinBeat = Math.floor(Math.min(...selectedNotesList.map(n => n.beat)));
+            const selMaxBeat = Math.ceil(Math.max(...selectedNotesList.map(n => n.beat + (n.duration || DEFAULT_DURATION))));
+            onLoopChange?.(selMinBeat, selMaxBeat);
+          } else {
+            onLoopChange?.(null, null);
+          }
           setSelectedNotes(newSelected);
         }
       }
@@ -1025,7 +1033,10 @@ export default function NoteGrid({
       } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
         // Simple click without drag - update selection now
         if (shouldUpdateSelection) {
-          onLoopChange?.(null, null);
+          const clickedNote = cantusFirmus.find(n => getNoteKey(n.pitch, n.beat) === targetKey);
+          if (clickedNote) {
+            onLoopChange?.(Math.floor(clickedNote.beat), Math.ceil(clickedNote.beat + (clickedNote.duration || DEFAULT_DURATION)));
+          }
           if (!shiftKey) {
             setSelectedNotes(new Set([targetKey]));
           } else {
