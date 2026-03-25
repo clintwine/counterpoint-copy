@@ -60,42 +60,38 @@ export default function MeasureHeader({
       document.removeEventListener('mouseup', handleMouseUp);
 
       if (!isDragging.current) {
-        // It was a click
+        // It was a click — handle toggle
+        const measureStart = measureStartBeat;
+        const measureEnd = measureStartBeat + beatsPerMeasure;
         const clickedBeat = getBeatFromClientX(upEvent.clientX);
-        
-        // If no notes are selected, just seek to that beat
-        if (selectedNotes.size === 0) {
-          if (clickedBeat !== null) {
-            window.onSeek?.(clickedBeat);
+        const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
+
+        if (isClickInLoop) {
+          // Clicking within existing loop — deselect it
+          onLoopChange?.(null, null);
+          setSelectedNotes(new Set());
+        } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
+          const newStart = Math.min(loopStart, measureStart);
+          const newEnd = Math.max(loopEnd, measureEnd);
+          onLoopChange?.(newStart, newEnd);
+          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          if (measureNotes.length > 0) {
+            const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+            setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
           }
         } else {
-          // If notes are selected, handle measure selection logic
-          const measureStart = measureStartBeat;
-          const measureEnd = measureStartBeat + beatsPerMeasure;
-          const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
+          onLoopChange?.(measureStart, measureEnd);
+          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
+          setSelectedNotes(measureKeys);
+        }
+      }
+      isDragging.current = false;
+    };
 
-          if (isClickInLoop) {
-            // Clicking within existing loop — deselect it
-            onLoopChange?.(null, null);
-            setSelectedNotes(new Set());
-          } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
-            const newStart = Math.min(loopStart, measureStart);
-            const newEnd = Math.max(loopEnd, measureEnd);
-            onLoopChange?.(newStart, newEnd);
-            const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-            if (measureNotes.length > 0) {
-              const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-              setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
-            }
-          } else {
-            onLoopChange?.(measureStart, measureEnd);
-            const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
-            const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
-            setSelectedNotes(measureKeys);
-          }
-          }
-          }
-          };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   // click logic is handled inside handleMeasureMouseDown
 
