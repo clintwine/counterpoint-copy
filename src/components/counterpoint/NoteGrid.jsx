@@ -1636,10 +1636,7 @@ export default function NoteGrid({
                             <div 
                               className="flex h-7 border-b border-amber-900/50 select-none sticky top-0 z-30 relative cursor-pointer"
                               style={{ backgroundColor: '#3a3a3a' }}
-                            >
-                              {/* Spacer for pitch labels alignment */}
-                              <div className="flex-shrink-0" style={{ width: '56px' }} />
-                              <div className="flex flex-1" style={{ position: 'relative', cursor: 'pointer' }} onMouseDown={(e) => {
+                              onMouseDown={(e) => {
                                 // Allow note selection within measures - only handle direct header clicks
                                 if (e.target !== e.currentTarget && e.target?.closest('span')) return;
                                 
@@ -1731,7 +1728,6 @@ export default function NoteGrid({
                               }}
                             >
                               {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})} 
-                              </div>
                             </div>
 
             {/* Virtualized Note grid rows - only render visible rows */}
