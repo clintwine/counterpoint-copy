@@ -2216,15 +2216,15 @@ export default function CounterpointGenerator() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setShowPiano(!showPiano)}
+                                  onClick={() => setShowPianoPanel(!showPianoPanel)}
                                   className="text-amber-400 h-7 px-2"
                                 >
-                                  {showPiano ? 'Hide Piano' : 'Show Piano'}
+                                  {showPianoPanel ? 'Hide Piano' : 'Show Piano'}
                                 </Button>
                               </div>
 
                               {showPianoPanel && !pianoPopout && (
-                                <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
+                                <div>
                                   <PianoKeyboard
                                     activeNotes={activeNotes}
                                     instrument={voices[0]?.instrument || 'organ'}
