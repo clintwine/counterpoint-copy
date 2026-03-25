@@ -14,8 +14,7 @@ import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNot
 import ScoreMinimap from './ScoreMinimap';
 import NoteControls from './NoteControls';
 import GridOverlays from './GridOverlays';
-import MeasureHeader from './MeasureHeader';
-import Scrubber from './Scrubber';
+import NoteGridHeader from './NoteGridHeader';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
 import { useAudioVisualizer } from './useAudioVisualizer';
@@ -1622,117 +1621,28 @@ export default function NoteGrid({
                                                                       })}
                         </div>
 
-          {/* Grid area */}
+          {/* Header */}
+          <NoteGridHeader
+            smoothPlayhead={smoothPlayhead}
+            totalBeats={totalBeats}
+            CELL_WIDTH={CELL_WIDTH}
+            onSeek={onSeek}
+            gridRef={gridRef}
+            measures={measures}
+            beatsPerMeasure={beatsPerMeasure}
+            loopStart={loopStart}
+            loopEnd={loopEnd}
+            isLooping={isLooping}
+            selectedNotes={selectedNotes}
+            isLoopSelecting={isLoopSelecting}
+            cantusFirmus={cantusFirmus}
+            getNoteKey={getNoteKey}
+            onLoopChange={onLoopChange}
+            setSelectedNotes={setSelectedNotes}
+            getBeatFromHeaderPosition={getBeatFromHeaderPosition}
+          />
+
           <div className="flex-shrink-0">
-            <Scrubber 
-              smoothPlayhead={smoothPlayhead}
-              totalBeats={totalBeats}
-              CELL_WIDTH={CELL_WIDTH}
-              onSeek={onSeek}
-              gridRef={gridRef}
-            />
-            
-            {/* Beat numbers header */}
-                            <div 
-                              className="flex h-7 border-b border-amber-900/50 select-none sticky z-30 relative cursor-pointer"
-                              style={{ top: '0px' }}
-                              style={{ backgroundColor: '#3a3a3a' }}
-                              onMouseDown={(e) => {
-                                // Allow note selection within measures - only handle direct header clicks
-                                if (e.target !== e.currentTarget && e.target?.closest('span')) return;
-                                
-                                const beat = getBeatFromHeaderPosition(e.clientX);
-                                if (beat === null) return;
-
-                                // Check if clicking near edges of existing loop region
-                                const edgeThreshold = 2; // beats
-                                let dragMode = 'new'; // 'new', 'start', 'end'
-                                
-                                if (loopStart !== null && loopEnd !== null) {
-                                  if (Math.abs(beat - loopStart) <= edgeThreshold) {
-                                    dragMode = 'start';
-                                  } else if (Math.abs(beat - loopEnd) <= edgeThreshold) {
-                                    dragMode = 'end';
-                                  }
-                                }
-
-                                setIsLoopSelecting(true);
-                                setLoopSelectStart(beat);
-                                
-                                if (dragMode === 'new') {
-                                  if (onLoopChange) {
-                                    onLoopChange(beat, beat);
-                                  }
-                                }
-
-                                const handleMouseMove = (moveEvent) => {
-                                  const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
-                                  if (moveBeat !== null) {
-                                    if (dragMode === 'start') {
-                                      // Dragging left edge - adjust loop start
-                                      const newStart = Math.floor(moveBeat);
-                                      if (newStart < loopEnd) {
-                                        onLoopChange?.(newStart, loopEnd);
-                                      }
-                                    } else if (dragMode === 'end') {
-                                      // Dragging right edge - adjust loop end
-                                      const newEnd = Math.floor(moveBeat) + 1;
-                                      if (newEnd > loopStart) {
-                                        onLoopChange?.(loopStart, newEnd);
-                                      }
-                                    } else {
-                                      // Creating new loop
-                                      const start = Math.min(beat, moveBeat);
-                                      const end = Math.max(beat, moveBeat);
-                                      if (onLoopChange) {
-                                        onLoopChange(start, end);
-                                      }
-                                    }
-                                  }
-                                };
-
-                                const handleMouseUp = (upEvent) => {
-                                  let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
-                                  if (upBeat !== null) {
-                                    if (dragMode === 'start' || dragMode === 'end') {
-                                      // Edge drag complete - keep the adjusted loop
-                                      // Already updated via handleMouseMove
-                                    } else {
-                                      // New loop creation
-                                      const snappedBeat = Math.floor(beat);
-                                      const snappedUpBeat = Math.floor(upBeat);
-                                      const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
-
-                                      if (dragDistance === 0) {
-                                        // Single click - deselect loop without seeking
-                                        // Pass a flag to keep playhead position
-                                        if (onLoopChange) {
-                                          onLoopChange(null, null, { keepPlayhead: true });
-                                        }
-                                        setSelectedNotes(new Set());
-                                      } else {
-                                        // Drag - create loop region (always use full beats for loops)
-                                        const start = Math.min(snappedBeat, snappedUpBeat);
-                                        const end = Math.max(snappedBeat, snappedUpBeat) + 1;
-                                        if (onLoopChange) {
-                                          onLoopChange(start, end);
-                                        }
-                                      }
-                                    }
-                                  }
-                                  setIsLoopSelecting(false);
-                                  setLoopSelectStart(null);
-                                  document.removeEventListener('mousemove', handleMouseMove);
-                                  document.removeEventListener('mouseup', handleMouseUp);
-                                };
-
-                                document.addEventListener('mousemove', handleMouseMove);
-                                document.addEventListener('mouseup', handleMouseUp);
-                              }}
-                            >
-                              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})}
-                            </div>
-
             {/* Virtualized Note grid rows - only render visible rows */}
             {(() => {
               // Calculate visible range with buffer
