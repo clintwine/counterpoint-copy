@@ -475,10 +475,9 @@ export function getCustomInstruments() {
 export async function playNoteWithCustomInstrument(pitch, duration, volume, customConfig, articulation = 'normal', tempo = 80, pitchBend = 0) {
   if (!audioContext) initAudio();
   
-  // Palm mute for Death Metal Guitar (velocity <= 0.4)
+  // Palm mute for Death Metal Guitar (velocity <= 0.4): modify config but keep articulation/bend handling
   if (customConfig.name === 'Death Metal Guitar' && volume <= 0.4) {
-    // Create palm muted version: less sustain, damped filter, same duration
-    const palmMutedConfig = {
+    customConfig = {
       ...customConfig,
       envelope: { ...customConfig.envelope, sustain: 0.2, release: 0.1 },
       effects: [
@@ -486,7 +485,8 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       ],
       distortion: 40
     };
-    return playSingleCustomNote(pitch, duration, volume * 1.3, palmMutedConfig, pitchBend);
+    volume = volume * 1.3;
+    // Fall through so articulation and pitch bend are still applied
   }
   
   // Handle articulation
