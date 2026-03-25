@@ -1070,7 +1070,7 @@ export default function NoteGrid({
   };
 
   return (
-          <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full">
+          <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full h-screen flex flex-col">
             {/* Main Toolbar */}
           <div className="flex items-center justify-between px-2 sm:px-5 py-1 sm:py-1.5 border-b border-[#3A3A3A] overflow-x-auto gap-2">
             {/* Left: User Avatar + File Menu */}
@@ -1460,15 +1460,17 @@ export default function NoteGrid({
 
 
           <div 
-                  ref={gridRef}
-                  tabIndex={0}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none flex-1`}
-                style={{ 
-                  scrollbarWidth: 'thin', 
-                  scrollbarColor: '#505050 transparent',
-                  touchAction: tool === 'marquee' ? 'none' : 'auto',
-                  backgroundColor: '#232323'
-                }}
+                 ref={gridRef}
+                 tabIndex={0}
+                 className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none flex-1 min-h-0`}
+               style={{ 
+                 scrollbarWidth: 'thin', 
+                 scrollbarColor: '#505050 transparent',
+                 touchAction: tool === 'marquee' ? 'none' : 'auto',
+                 backgroundColor: '#232323',
+                 display: 'flex',
+                 flexDirection: 'column'
+               }}
         onMouseMove={handlePointerMove}
                       onMouseUp={(e) => {
                         handlePointerUp(e);
@@ -1556,7 +1558,7 @@ export default function NoteGrid({
         setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
       }}
       >
-        <div className="inline-flex min-w-full" ref={containerRef}>
+        <div className="inline-flex min-w-full flex-col" ref={containerRef}>
           {/* Pitch labels - fixed column on left, allows vertical scrolling */}
                                       <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
                                         <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a' }} />
