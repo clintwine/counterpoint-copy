@@ -1703,9 +1703,10 @@ export default function NoteGrid({
                                       const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
 
                                       if (dragDistance === 0) {
-                                        // Single click - deselect loop, keep playhead position
+                                        // Single click - deselect loop without seeking
+                                        // Pass a flag to keep playhead position
                                         if (onLoopChange) {
-                                          onLoopChange(null, null);
+                                          onLoopChange(null, null, { keepPlayhead: true });
                                         }
                                         setSelectedNotes(new Set());
                                       } else {
