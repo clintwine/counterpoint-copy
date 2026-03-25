@@ -33,7 +33,7 @@ export default function GridOverlays({
       <div
         className="absolute z-30 pointer-events-none"
         style={{
-          left: `${gridRect.left + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: `${56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: 28,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
@@ -83,7 +83,7 @@ export default function GridOverlays({
       <div
         className="fixed cursor-ew-resize"
         style={{
-          left: `${gridRect.left + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: `${gridRect.top}px`,
           width: 0,
           height: 0,
