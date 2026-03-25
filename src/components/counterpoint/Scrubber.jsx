@@ -30,7 +30,7 @@ export default function Scrubber({
         document.addEventListener('mouseup', handleMouseUp);
       }}
     >
-      <div className="flex-shrink-0" style={{ width: 56, backgroundColor: '#2B2B2B' }} />
+      <div className="flex-shrink-0" style={{ width: 0, backgroundColor: '#2B2B2B' }} />
       <div className="relative flex-1 h-full" style={{ backgroundColor: '#1F1F1F' }}>
         {/* Beat grid background */}
         {Array.from({ length: Math.ceil(totalBeats) }).map((_, i) => (
