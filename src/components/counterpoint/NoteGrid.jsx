@@ -1462,7 +1462,7 @@ export default function NoteGrid({
           <div 
                   ref={gridRef}
                   tabIndex={0}
-                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none flex-1`}
+                  className={`overflow-auto relative select-none mx-2 sm:mx-5 focus:outline-none`}
                 style={{ 
                   scrollbarWidth: 'thin', 
                   scrollbarColor: '#505050 transparent',
@@ -1703,11 +1703,16 @@ export default function NoteGrid({
                                       const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
 
                                       if (dragDistance === 0) {
-                                        // Single click - deselect loop, keep playhead position
+                                        // Single click - seek to position
+                                        if (snapToGrid) {
+                                          upBeat = Math.round(upBeat / quantizeGrid) * quantizeGrid;
+                                        }
+                                        if (onSeek) {
+                                          onSeek(upBeat);
+                                        }
                                         if (onLoopChange) {
                                           onLoopChange(null, null);
                                         }
-                                        setSelectedNotes(new Set());
                                       } else {
                                         // Drag - create loop region (always use full beats for loops)
                                         const start = Math.min(snappedBeat, snappedUpBeat);
