@@ -526,12 +526,18 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-slow':
         const tremoloSlowSpeed = sixteenthNoteDuration;
         const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
+        const isPalmMutedSlow = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
         const slowChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numSlowPicks; i++) {
           setTimeout(() => {
-            slowChordPitches.forEach((chordPitch, chordIdx) => {
-              playSingleCustomNote(chordPitch, tremoloSlowSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
-            });
+            if (isPalmMutedSlow) {
+              // Muted tremolo: ultra-short, muted bursts with reduced sustain for buzzing effect
+              playSingleCustomNote(pitch, tremoloSlowSpeed * 0.3, volume * 0.6, customConfig, pitchBend);
+            } else {
+              slowChordPitches.forEach((chordPitch, chordIdx) => {
+                playSingleCustomNote(chordPitch, tremoloSlowSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+              });
+            }
           }, i * tremoloSlowSpeed * 1000);
         }
         return null;
@@ -539,12 +545,17 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-medium':
         const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
         const numMedPicks = Math.floor(duration / tremoloMedSpeed);
+        const isPalmMutedMed = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
         const medChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numMedPicks; i++) {
           setTimeout(() => {
-            medChordPitches.forEach((chordPitch, chordIdx) => {
-              playSingleCustomNote(chordPitch, tremoloMedSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
-            });
+            if (isPalmMutedMed) {
+              playSingleCustomNote(pitch, tremoloMedSpeed * 0.25, volume * 0.6, customConfig, pitchBend);
+            } else {
+              medChordPitches.forEach((chordPitch, chordIdx) => {
+                playSingleCustomNote(chordPitch, tremoloMedSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+              });
+            }
           }, i * tremoloMedSpeed * 1000);
         }
         return null;
@@ -552,12 +563,17 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-fast':
         const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
         const numFastPicks = Math.floor(duration / tremoloFastSpeed);
+        const isPalmMutedFast = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
         const fastChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numFastPicks; i++) {
           setTimeout(() => {
-            fastChordPitches.forEach((chordPitch, chordIdx) => {
-              playSingleCustomNote(chordPitch, tremoloFastSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
-            });
+            if (isPalmMutedFast) {
+              playSingleCustomNote(pitch, tremoloFastSpeed * 0.2, volume * 0.55, customConfig, pitchBend);
+            } else {
+              fastChordPitches.forEach((chordPitch, chordIdx) => {
+                playSingleCustomNote(chordPitch, tremoloFastSpeed * 0.8, volume * 0.9 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+              });
+            }
           }, i * tremoloFastSpeed * 1000);
         }
         return null;
@@ -565,12 +581,17 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-ultra':
         const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
         const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
+        const isPalmMutedUltra = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
         const ultraChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numUltraPicks; i++) {
           setTimeout(() => {
-            ultraChordPitches.forEach((chordPitch, chordIdx) => {
-              playSingleCustomNote(chordPitch, tremoloUltraSpeed * 0.8, volume * 0.85 * (1 - chordIdx * 0.1), customConfig, pitchBend);
-            });
+            if (isPalmMutedUltra) {
+              playSingleCustomNote(pitch, tremoloUltraSpeed * 0.15, volume * 0.5, customConfig, pitchBend);
+            } else {
+              ultraChordPitches.forEach((chordPitch, chordIdx) => {
+                playSingleCustomNote(chordPitch, tremoloUltraSpeed * 0.8, volume * 0.85 * (1 - chordIdx * 0.1), customConfig, pitchBend);
+              });
+            }
           }, i * tremoloUltraSpeed * 1000);
         }
         return null;
