@@ -1546,7 +1546,7 @@ export default function CounterpointGenerator() {
             transition={{ delay: 0.2 }}
             className="flex flex-col flex-1 min-h-0 gap-2"
           >
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 h-full">
             <NoteGrid
                                settings={settings}
                                playheadPosition={playheadPosition}
