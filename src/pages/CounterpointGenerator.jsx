@@ -1546,174 +1546,108 @@ export default function CounterpointGenerator() {
             transition={{ delay: 0.2 }}
             className="flex flex-col flex-1 min-h-0 gap-2"
           >
+            <div className="flex-1 min-h-0">
             <NoteGrid
-                              settings={settings}
-                              playheadPosition={playheadPosition}
-                              playbackControls={
-                                <PlaybackControls
-                                  isPlaying={isPlaying}
-                                  onPlayPause={handlePlayPause}
-                                  tempo={tempo}
-                                  onTempoChange={setTempo}
-                                  currentBeat={currentBeat}
-                                  totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
-                                  onSeek={handleSeek}
-                                  onReset={handleReset}
-                                  onStop={handleStop}
-                                  loopStart={loopStart}
-                                  loopEnd={loopEnd}
-                                  onLoopChange={(start, end) => { 
-                                setLoopStart(start); 
-                                setLoopEnd(end);
-                                // Reset playhead when loop is cleared
-                                if (start === null && end === null) {
-                                  setCurrentBeat(0);
-                                  setPlayheadPosition(0);
-                                  lastPlayheadRef.current = 0;
-                                  playedNotesRef.current.clear();
-                                }
-                              }}
-                                  isLooping={isLooping}
-                                  onLoopToggle={() => setIsLooping(!isLooping)}
-                                  timeSignature={settings.timeSignature}
-                                  onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
-                                  metronomeEnabled={metronomeEnabled}
-                                  onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-                                  onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
-                                  onNewProject={handleNewProject}
-                                  onSaveProject={() => {
-                                    setSaveAsMode(false);
-                                    // If existing project, save directly without dialog
-                                    if (currentProjectId && projectName.trim()) {
-                                      handleSaveProject(true);
-                                    } else {
-                                      setSaveDialogOpen(true);
-                                    }
-                                  }}
-                                  onSaveProjectAs={() => {
-                                    setSaveAsMode(true);
-                                    setSaveDialogOpen(true);
-                                  }}
-                                  onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                                  onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
-                                  onBrowseSongs={() => setSongDialogOpen(true)}
-                                  onExport={handleExport}
-                                  onAIComposer={async () => {
-                                    const isAuth = await base44.auth.isAuthenticated();
-                                    if (!isAuth) {
-                                      base44.auth.redirectToLogin(window.location.href);
-                                      return;
-                                    }
-                                    setChatbotActive(prev => {
-                                      const newState = !prev;
-                                      if (newState) {
-                                        setChatbotOpen(true);
-                                        setChatbotMinimized(false);
-                                      } else {
-                                        setChatbotOpen(false);
-                                        setChatbotMinimized(false);
-                                      }
-                                      return newState;
-                                    });
-                                  }}
-                                  onGenerate={handleGenerate}
-                                  canGenerate={cantusFirmus.length > 0}
-                                  isGenerating={isGenerating}
-                                  onExportMidi={() => {
-                                    toast.loading('Exporting MIDI...', { id: 'export-midi' });
-                                    try {
-                                      const midiData = {
-                                        tempo,
-                                        timeSignature: [4, 4],
-                                        tracks: allVoices.map((voice, idx) => ({
-                                          name: voice.name,
-                                          notes: voice.notes?.map(n => ({
-                                            pitch: n.pitch,
-                                            startTime: n.beat * (60 / tempo),
-                                            duration: (n.duration || 1) * (60 / tempo),
-                                            velocity: Math.round((n.velocity ?? 0.8) * 100)
-                                          })) || []
-                                        }))
-                                      };
-                                      const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                      const url = URL.createObjectURL(blob);
-                                      const a = document.createElement('a');
-                                      a.href = url;
-                                      a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`;
-                                      a.click();
-                                      URL.revokeObjectURL(url);
-                                      toast.success('MIDI exported successfully', { id: 'export-midi' });
-                                    } catch (error) {
-                                      toast.error('Failed to export MIDI', { id: 'export-midi' });
-                                    }
-                                  }}
-                                  onImportMidi={handleImportMidi}
-                                  isRecording={isRecording}
-                                  onRecordToggle={handleRecordToggle}
-                                  isCountingIn={isCountingIn}
-                                  countInBeats={countInBeats}
-                                  masterVolume={masterVolume}
-                                  onMasterVolumeChange={(vol) => {
-                                    setMasterVolume(vol);
-                                    setAudioMasterVolume(vol / 100 * 0.4);
-                                  }}
-                                  currentUser={currentUser}
-                                  />
-                                  }
-                                  voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
-                                  currentBeat={currentBeat}
-                                  isPlaying={isPlaying}
-                                  measures={settings.measures}
-                                  cantusFirmus={cantusFirmus}
-                                  onNotesUpdate={setCantusFirmus}
-                                  onSeek={handleSeek}
-                                  activeVoice={activeVoice}
-                                  onActiveVoiceChange={setActiveVoice}
-                                  onSelectionChange={setSelectedNotes}
-                                  tempo={tempo}
-                                  timeSignature={settings.timeSignature}
-                                  scrollToBeatRef={scrollToBeatRef}
-                                  pressedPianoNotes={pressedPianoNotes}
-                                  pianoInstrument={voices[0]?.instrument || 'organ'}
-                                  loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping}
-                                  onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
-                                  onVoiceInstrumentChange={(voiceIndex, instrument) => { const newVoices = [...voices]; if (newVoices[0]) { newVoices[0] = { ...newVoices[0], instrument }; setVoices(newVoices); } }}
-                                  onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
-                                  showPianoPanel={showPianoPanel && !pianoPopout}
-                                  onPopOut={() => setPianoPopout(true)}
-                                  onNewProject={handleNewProject}
-                                  onSaveProject={() => { setSaveAsMode(false); if (currentProjectId && projectName.trim()) { handleSaveProject(true); } else { setSaveDialogOpen(true); } }}
-                                  onSaveProjectAs={() => { setSaveAsMode(true); setSaveDialogOpen(true); }}
-                                  onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                                  onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
-                                  onBrowseSongs={() => setSongDialogOpen(true)}
-                                  onExport={handleExport}
-                                  onAIComposer={async () => { const isAuth = await base44.auth.isAuthenticated(); if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; } setChatbotActive(prev => { const ns = !prev; if (ns) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return ns; }); }}
-                                  onGenerate={handleGenerate}
-                                  canGenerate={cantusFirmus.length > 0}
-                                  isGenerating={isGenerating}
-                                  onExportMidi={() => { toast.loading('Exporting MIDI...', { id: 'export-midi' }); try { const md = { tempo, timeSignature: [4,4], tracks: allVoices.map(v => ({ name: v.name, notes: v.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat*(60/tempo), duration: (n.duration||1)*(60/tempo), velocity: Math.round((n.velocity??0.8)*100) })) || [] })) }; const blob = new Blob([JSON.stringify(md,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url); toast.success('MIDI exported successfully',{id:'export-midi'}); } catch(e) { toast.error('Failed to export MIDI',{id:'export-midi'}); } }}
-                                  onImportMidi={handleImportMidi}
-                                  onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
-                                  customInstruments={customInstruments}
-                                  snapToGrid={snapToGrid} onSnapToGridChange={setSnapToGrid}
-                                  chatbotActive={chatbotActive}
-                                  projectName={projectName}
-                                  currentUser={currentUser}
-                                  />
+                               settings={settings}
+                               playheadPosition={playheadPosition}
+                               playbackControls={
+                                 <PlaybackControls
+                                   isPlaying={isPlaying}
+                                   onPlayPause={handlePlayPause}
+                                   tempo={tempo}
+                                   onTempoChange={setTempo}
+                                   currentBeat={currentBeat}
+                                   totalBeats={settings.measures * getBeatsPerMeasure(settings.timeSignature)}
+                                   onSeek={handleSeek}
+                                   onReset={handleReset}
+                                   onStop={handleStop}
+                                   loopStart={loopStart}
+                                   loopEnd={loopEnd}
+                                   onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
+                                   isLooping={isLooping}
+                                   onLoopToggle={() => setIsLooping(!isLooping)}
+                                   timeSignature={settings.timeSignature}
+                                   onTimeSignatureChange={(ts) => setSettings(prev => ({ ...prev, timeSignature: ts }))}
+                                   metronomeEnabled={metronomeEnabled}
+                                   onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+                                   onScrollToBeat={(beat) => scrollToBeatRef.current?.(beat)}
+                                   onNewProject={handleNewProject}
+                                   onSaveProject={() => { setSaveAsMode(false); if (currentProjectId && projectName.trim()) { handleSaveProject(true); } else { setSaveDialogOpen(true); } }}
+                                   onSaveProjectAs={() => { setSaveAsMode(true); setSaveDialogOpen(true); }}
+                                   onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+                                   onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
+                                   onBrowseSongs={() => setSongDialogOpen(true)}
+                                   onExport={handleExport}
+                                   onAIComposer={async () => { const isAuth = await base44.auth.isAuthenticated(); if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; } setChatbotActive(prev => { const ns = !prev; if (ns) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return ns; }); }}
+                                   onGenerate={handleGenerate}
+                                   canGenerate={cantusFirmus.length > 0}
+                                   isGenerating={isGenerating}
+                                   onExportMidi={() => { toast.loading('Exporting MIDI...', { id: 'export-midi' }); try { const md = { tempo, timeSignature: [4,4], tracks: allVoices.map(v => ({ name: v.name, notes: v.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat*(60/tempo), duration: (n.duration||1)*(60/tempo), velocity: Math.round((n.velocity??0.8)*100) })) || [] })) }; const blob = new Blob([JSON.stringify(md,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url); toast.success('MIDI exported',{id:'export-midi'}); } catch(e) { toast.error('Failed to export MIDI',{id:'export-midi'}); } }}
+                                   onImportMidi={handleImportMidi}
+                                   isRecording={isRecording}
+                                   onRecordToggle={handleRecordToggle}
+                                   isCountingIn={isCountingIn}
+                                   countInBeats={countInBeats}
+                                   masterVolume={masterVolume}
+                                   onMasterVolumeChange={(vol) => { setMasterVolume(vol); setAudioMasterVolume(vol / 100 * 0.4); }}
+                                   currentUser={currentUser}
+                                 />
+                               }
+                               voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
+                               currentBeat={currentBeat}
+                               isPlaying={isPlaying}
+                               measures={settings.measures}
+                               cantusFirmus={cantusFirmus}
+                               onNotesUpdate={setCantusFirmus}
+                               onSeek={handleSeek}
+                               activeVoice={activeVoice}
+                               onActiveVoiceChange={setActiveVoice}
+                               onSelectionChange={setSelectedNotes}
+                               tempo={tempo}
+                               timeSignature={settings.timeSignature}
+                               scrollToBeatRef={scrollToBeatRef}
+                               pressedPianoNotes={pressedPianoNotes}
+                               pianoInstrument={voices[0]?.instrument || 'organ'}
+                               loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping}
+                               onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
+                               onVoiceInstrumentChange={(voiceIndex, instrument) => { const newVoices = [...voices]; if (newVoices[0]) { newVoices[0] = { ...newVoices[0], instrument }; setVoices(newVoices); } }}
+                               onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
+                               showPianoPanel={showPianoPanel && !pianoPopout}
+                               onPopOut={() => setPianoPopout(true)}
+                               onNewProject={handleNewProject}
+                               onSaveProject={() => { setSaveAsMode(false); if (currentProjectId && projectName.trim()) { handleSaveProject(true); } else { setSaveDialogOpen(true); } }}
+                               onSaveProjectAs={() => { setSaveAsMode(true); setSaveDialogOpen(true); }}
+                               onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+                               onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
+                               onBrowseSongs={() => setSongDialogOpen(true)}
+                               onExport={handleExport}
+                               onAIComposer={async () => { const isAuth = await base44.auth.isAuthenticated(); if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; } setChatbotActive(prev => { const ns = !prev; if (ns) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return ns; }); }}
+                               onGenerate={handleGenerate}
+                               canGenerate={cantusFirmus.length > 0}
+                               isGenerating={isGenerating}
+                               onExportMidi={() => { toast.loading('Exporting MIDI...', { id: 'export-midi' }); try { const md = { tempo, timeSignature: [4,4], tracks: allVoices.map(v => ({ name: v.name, notes: v.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat*(60/tempo), duration: (n.duration||1)*(60/tempo), velocity: Math.round((n.velocity??0.8)*100) })) || [] })) }; const blob = new Blob([JSON.stringify(md,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url); toast.success('MIDI exported',{id:'export-midi'}); } catch(e) { toast.error('Failed to export MIDI',{id:'export-midi'}); } }}
+                               onImportMidi={handleImportMidi}
+                               onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
+                               customInstruments={customInstruments}
+                               snapToGrid={snapToGrid} onSnapToGridChange={setSnapToGrid}
+                               chatbotActive={chatbotActive}
+                               projectName={projectName}
+                               currentUser={currentUser}
+                               />
+            </div>
 
-                                  <PianoSection
-                                  showPiano={showPiano} setShowPiano={setShowPiano}
-                                  showPianoPanel={showPianoPanel} pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
-                                  activeNotes={activeNotes} voices={voices} setVoices={setVoices}
-                                  pressedPianoNotes={pressedPianoNotes} setPressedPianoNotes={setPressedPianoNotes}
-                                  handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
-                                  effects={effects} setEffects={setEffects}
-                                  envelope={envelope} setEnvelope={setEnvelope}
-                                  openWaveEditor={openWaveEditor} customInstruments={customInstruments}
-                                  saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
-                                  />
-                                  </motion.main>
+            <PianoSection
+              showPiano={showPiano} setShowPiano={setShowPiano}
+              showPianoPanel={showPianoPanel} pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
+              activeNotes={activeNotes} voices={voices} setVoices={setVoices}
+              pressedPianoNotes={pressedPianoNotes} setPressedPianoNotes={setPressedPianoNotes}
+              handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
+              effects={effects} setEffects={setEffects}
+              envelope={envelope} setEnvelope={setEnvelope}
+              openWaveEditor={openWaveEditor} customInstruments={customInstruments}
+              saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
+            />
+          </motion.main>
           </div>
           </div>
 
