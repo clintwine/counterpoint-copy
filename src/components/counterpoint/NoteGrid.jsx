@@ -185,6 +185,7 @@ export default function NoteGrid({
   }, [selectedNotes, cantusFirmus, onSelectionChange]);
 
   const [dragState, setDragState] = useState(null);
+  const dragStateRef = useRef(null); // always up-to-date mirror of dragState
   const originalDragNotesRef = useRef(null); // Store original notes when drag starts
   const [resizeState, setResizeState] = useState(null); // For resizing note duration (supports group resize, left or right edge)
   const [isPainting, setIsPainting] = useState(false); // For paint mode with pencil tool
@@ -897,12 +898,16 @@ export default function NoteGrid({
                     }
                   }
 
-      setDragState(prev => ({
-        ...prev,
-        currentPitchIndex: newPitchIndex,
-        currentBeat: newBeat,
-        isDragging: prev.isDragging || hasMoved // Set to true if already dragging or if we've moved
-      }));
+      setDragState(prev => {
+        const next = {
+          ...prev,
+          currentPitchIndex: newPitchIndex,
+          currentBeat: newBeat,
+          isDragging: prev.isDragging || hasMoved
+        };
+        dragStateRef.current = next;
+        return next;
+      });
     }
   };
 
@@ -984,14 +989,15 @@ export default function NoteGrid({
       }
       setMarquee(null);
     } else if (dragState && originalDragNotesRef.current) {
-      // Apply drag only if actually moved
-      const pitchDelta = dragState.currentPitchIndex - dragState.startPitchIndex;
-      const beatDelta = dragState.currentBeat - dragState.startBeat;
+      // Use ref for up-to-date values (avoids stale closure from last render)
+      const latestDrag = dragStateRef.current || dragState;
+      const pitchDelta = latestDrag.currentPitchIndex - latestDrag.startPitchIndex;
+      const beatDelta = latestDrag.currentBeat - latestDrag.startBeat;
 
       const { notes: originalNotes, keys: draggedKeys, shouldUpdateSelection, shiftKey, targetKey } = originalDragNotesRef.current;
 
       // Only apply drag if there was actual movement AND dragging was initiated
-      if (originalNotes && originalNotes.length > 0 && dragState.isDragging && (pitchDelta !== 0 || beatDelta !== 0)) {
+      if (originalNotes && originalNotes.length > 0 && latestDrag.isDragging && (pitchDelta !== 0 || beatDelta !== 0)) {
         // Remove original notes and add moved notes at new positions
         const notesWithoutDragged = cantusFirmus.filter(n => !draggedKeys.has(getNoteKey(n.pitch, n.beat)));
 
@@ -1029,7 +1035,7 @@ export default function NoteGrid({
         if (window.autoAdjustMeasures) {
           setTimeout(() => window.autoAdjustMeasures(newNotes), 100);
         }
-      } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
+      } else if (!latestDrag.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
         // Simple click without drag - update selection now
         if (shouldUpdateSelection) {
           const clickedNote = cantusFirmus.find(n => getNoteKey(n.pitch, n.beat) === targetKey);
@@ -1048,6 +1054,7 @@ export default function NoteGrid({
       originalDragNotesRef.current = null;
     }
     setDragState(null);
+    dragStateRef.current = null;
     activeTouchIdRef.current = null;
   };
 
