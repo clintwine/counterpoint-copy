@@ -1546,7 +1546,7 @@ export default function CounterpointGenerator() {
             transition={{ delay: 0.2 }}
             className="flex flex-col flex-1 min-h-0 gap-2"
           >
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
             <NoteGrid
                                settings={settings}
                                playheadPosition={playheadPosition}
@@ -1636,6 +1636,7 @@ export default function CounterpointGenerator() {
                                />
             </div>
 
+            <div className="flex-shrink-0">
             <PianoSection
               showPiano={showPiano} setShowPiano={setShowPiano}
               showPianoPanel={showPianoPanel} pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
@@ -1647,6 +1648,7 @@ export default function CounterpointGenerator() {
               openWaveEditor={openWaveEditor} customInstruments={customInstruments}
               saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
             />
+            </div>
           </motion.main>
           </div>
           </div>
