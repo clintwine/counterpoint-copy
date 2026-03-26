@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wand2, Download, RefreshCw, Music2, Settings, Layers, Save, FolderOpen, Sparkles, X, Edit2, Trash2, Search } from 'lucide-react';
@@ -9,7 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AIChatbot from '@/components/counterpoint/AIChatbot';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import ProjectDialogs from '@/components/counterpoint/ProjectDialogs';
+import PianoSection from '@/components/counterpoint/PianoSection';
+import PianoPopout from '@/components/counterpoint/PianoPopout';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Midi } from '@tonejs/midi';
 import toast from 'react-hot-toast';
 
@@ -86,7 +89,6 @@ export default function CounterpointGenerator() {
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   
-  const dragControls = useDragControls();
   
   // Auto-expand and auto-shrink measures functionality
   useEffect(() => {
@@ -1502,514 +1504,47 @@ export default function CounterpointGenerator() {
         };
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A]">
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A]">
       {/* Ambient background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-[98vw] 2xl:max-w-[99vw] mx-auto px-1 2xl:px-0 pt-1 pb-2 overflow-x-hidden">
+      <div className="relative z-10 flex flex-col flex-1 min-h-0 max-w-[98vw] 2xl:max-w-[99vw] mx-auto px-1 2xl:px-0 pt-1 pb-2 overflow-x-hidden">
         {/* Header */}
-                  <motion.header 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-1"
-                  >
-                                {/* Load Project Dialog */}
-              <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
-                <DialogTrigger asChild>
-                  <div style={{ display: 'none' }} />
-                </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Load Project</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {savedProjects.length === 0 ? (
-                      <p className="text-white/60 text-sm text-center py-4">No saved projects yet</p>
-                    ) : (
-                      savedProjects.map((project) => (
-                        <div
-                          key={project.id}
-                          className="flex items-center justify-between p-3 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer"
-                          onClick={() => handleLoadProject(project)}
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="text-white font-medium">{project.name}</p>
-                              {project.isLocal && (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Local</span>
-                              )}
-                            </div>
-                            <p className="text-white/50 text-xs">
-                              {project.settings?.key} {project.settings?.mode} • {project.cantusFirmus?.length || 0} notes
-                            </p>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteProjectMutation.mutate(project.id);
-                            }}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                          >
-                            ×
-                          </Button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <Button
-                    onClick={() => {
-                      handleNewProject();
-                      setLoadDialogOpen(false);
-                    }}
-                    className="w-full bg-slate-600 text-white hover:bg-slate-500"
-                  >
-                    New Project
-                  </Button>
-                </DialogContent>
-              </Dialog>
-
-              {/* Browse Songs Dialog */}
-              <Dialog open={songDialogOpen} onOpenChange={setSongDialogOpen}>
-                <DialogTrigger asChild>
-                  <div style={{ display: 'none' }} />
-                </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] max-w-2xl [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Browse Library</DialogTitle>
-                  </DialogHeader>
-                  
-                  {/* Search and Sort Controls */}
-                  <div className="flex gap-3 mb-2">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
-                      <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={librarySearchQuery}
-                        onChange={(e) => setLibrarySearchQuery(e.target.value)}
-                        className="w-full bg-[#1A1A1A] border border-[#3A3A3A] rounded-lg px-10 py-2 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
-                      />
-                      {librarySearchQuery && (
-                        <button
-                          onClick={() => setLibrarySearchQuery('')}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                    <Select value={librarySortBy} onValueChange={setLibrarySortBy}>
-                      <SelectTrigger className="w-40 bg-[#1A1A1A] border-[#3A3A3A] text-white text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2D2D2D] border-[#3A3A3A]">
-                        <SelectItem value="updated" className="text-white">Last Updated</SelectItem>
-                        <SelectItem value="created" className="text-white">Date Created</SelectItem>
-                        <SelectItem value="name" className="text-white">Name (A-Z)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Tabs value={libraryActiveTab} onValueChange={setLibraryActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-[#1A1A1A]">
-                      <TabsTrigger value="songs" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
-                        Song Library
-                      </TabsTrigger>
-                      <TabsTrigger value="projects" className="text-white data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1E1E1E]">
-                        My Projects
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="songs" className="mt-4">
-                      <div className="space-y-2 max-h-[400px] min-h-[400px] overflow-y-auto">
-                        {(() => {
-                          const filtered = songs.filter(song => 
-                            song.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
-                          );
-                          
-                          const sorted = [...filtered].sort((a, b) => {
-                            if (librarySortBy === 'updated') {
-                              return new Date(b.updated_date) - new Date(a.updated_date);
-                            } else if (librarySortBy === 'created') {
-                              return new Date(b.created_date) - new Date(a.created_date);
-                            } else {
-                              return a.name.localeCompare(b.name);
-                            }
-                          });
-
-                          if (sorted.length === 0) {
-                            return <p className="text-white/60 text-sm text-center py-4">No songs found</p>;
-                          }
-
-                          return sorted.map((song) => (
-                            <div
-                              key={song.id}
-                              className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
-                              onClick={() => handleLoadSong(song)}
-                            >
-                              <div className="flex-1">
-                                <p className="text-white font-medium text-lg">{song.name}</p>
-                                <div className="flex gap-2 mt-2 flex-wrap">
-                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded font-medium">
-                                    {song.settings?.key || 'C'} {song.settings?.mode || 'major'}
-                                  </span>
-                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded font-medium">
-                                    {song.settings?.timeSignature || '4/4'}
-                                  </span>
-                                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
-                                    {(() => {
-                                      const maxBeat = Math.max(...(song.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
-                                      const tempo = song.settings?.tempo || 80;
-                                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                                      const totalSeconds = maxBeat * sixteenthNoteDuration;
-                                      const minutes = Math.floor(totalSeconds / 60);
-                                      const seconds = Math.floor(totalSeconds % 60);
-                                      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                    })()}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => handlePreviewSong(song, e)}
-                                  className={`${previewingSongId === song.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-amber-500/80 hover:bg-amber-500 text-slate-900'}`}
-                                >
-                                  {previewingSongId === song.id ? (
-                                    <>⏹ Stop</>
-                                  ) : (
-                                    <>▶ Preview</>
-                                  )}
-                                </Button>
-                                {currentUser?.role === 'admin' && (
-                                  <>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditingSong(song);
-                                        setSongName(song.name);
-                                        setSongDescription(song.description || '');
-                                        setEditSongDialogOpen(true);
-                                      }}
-                                      className="text-white/60 hover:text-white"
-                                    >
-                                      <Edit2 className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm(`Delete "${song.name}"?`)) {
-                                          deleteSongMutation.mutate(song.id);
-                                        }
-                                      }}
-                                      className="text-red-400 hover:text-red-300"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-amber-400 hover:text-amber-300"
-                                >
-                                  Load →
-                                </Button>
-                              </div>
-                            </div>
-                          ));
-                        })()}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="projects" className="mt-4">
-                      <div className="space-y-2 max-h-[400px] min-h-[400px] overflow-y-auto">
-                        {(() => {
-                          const filtered = savedProjects.filter(project => 
-                            project.name.toLowerCase().includes(librarySearchQuery.toLowerCase())
-                          );
-                          
-                          const sorted = [...filtered].sort((a, b) => {
-                            if (librarySortBy === 'updated') {
-                              return new Date(b.updated_date) - new Date(a.updated_date);
-                            } else if (librarySortBy === 'created') {
-                              return new Date(b.created_date) - new Date(a.created_date);
-                            } else {
-                              return a.name.localeCompare(b.name);
-                            }
-                          });
-
-                          if (sorted.length === 0) {
-                            return <p className="text-white/60 text-sm text-center py-4">No projects found</p>;
-                          }
-
-                          return sorted.map((project) => (
-                            <div
-                              key={project.id}
-                              className="flex items-center justify-between p-4 bg-[#3A3A3A] rounded-lg hover:bg-[#424242] cursor-pointer border border-[#4A4A4A]"
-                              onClick={() => { handleLoadProject(project); setSongDialogOpen(false); }}
-                            >
-                              <div className="flex-1">
-                                <p className="text-white font-medium text-lg">{project.name}</p>
-                                <div className="flex gap-2 mt-2 flex-wrap">
-                                  <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded font-medium">
-                                    {project.settings?.key || 'C'} {project.settings?.mode || 'major'}
-                                  </span>
-                                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded font-medium">
-                                    {project.settings?.timeSignature || '4/4'}
-                                  </span>
-                                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">
-                                    {(() => {
-                                      const maxBeat = Math.max(...(project.cantusFirmus || []).map(n => n.beat + (n.duration || 1)), 0);
-                                      const tempo = project.settings?.tempo || 80;
-                                      const sixteenthNoteDuration = (60 / tempo) / 4;
-                                      const totalSeconds = maxBeat * sixteenthNoteDuration;
-                                      const minutes = Math.floor(totalSeconds / 60);
-                                      const seconds = Math.floor(totalSeconds % 60);
-                                      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                                    })()}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={(e) => handlePreviewProject(project, e)}
-                                  className={`${previewingProjectId === project.id ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-amber-500/80 hover:bg-amber-500 text-slate-900'}`}
-                                >
-                                  {previewingProjectId === project.id ? (
-                                    <>⏹ Stop</>
-                                  ) : (
-                                    <>▶ Preview</>
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (confirm(`Delete "${project.name}"?`)) {
-                                      deleteProjectMutation.mutate(project.id);
-                                    }
-                                  }}
-                                  className="text-red-400 hover:text-red-300"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-amber-400 hover:text-amber-300"
-                                >
-                                  Load →
-                                </Button>
-                              </div>
-                            </div>
-                          ));
-                        })()}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </DialogContent>
-              </Dialog>
-
-              {/* Save Project Dialog */}
-              <Dialog open={saveDialogOpen} onOpenChange={(open) => {
-                setSaveDialogOpen(open);
-                if (!open) setSaveAsMode(false);
-              }}>
-                <DialogTrigger asChild>
-                  <div style={{ display: 'none' }} />
-                </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">
-                      {saveAsMode ? 'Save Project As' : 'Save Project'}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleSaveProject(false, false); }} className="space-y-4">
-                    <div>
-                      <Label className="text-white/80">Project Name</Label>
-                      <Input
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        placeholder="My Counterpoint"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        type="submit"
-                        disabled={!projectName.trim() || saveProjectMutation.isPending}
-                        className={`${currentUser?.role === 'admin' ? 'flex-1' : 'w-full'} bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]`}
-                      >
-                        {saveAsMode ? 'Save Locally' : (currentProjectId?.startsWith('local_') ? 'Update Local' : 'Save Locally')}
-                      </Button>
-                      {currentUser?.role === 'admin' && (
-                        <Button
-                          type="button"
-                          onClick={(e) => { e.preventDefault(); handleSaveProject(false, true); }}
-                          disabled={!projectName.trim() || saveProjectMutation.isPending}
-                          className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                          {saveProjectMutation.isPending ? 'Saving...' : 'Save to Database'}
-                        </Button>
-                      )}
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              {/* Save Song Dialog (Admin Only) */}
-              <Dialog open={saveSongDialogOpen} onOpenChange={setSaveSongDialogOpen}>
-                <DialogTrigger asChild>
-                  <div style={{ display: 'none' }} />
-                </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Save as Song</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleSaveSong(); }} className="space-y-4">
-                    <div>
-                      <Label className="text-white/80">Song Name</Label>
-                      <Input
-                        value={songName}
-                        onChange={(e) => setSongName(e.target.value)}
-                        placeholder="My Beautiful Song"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-white/80">Description</Label>
-                      <Input
-                        value={songDescription}
-                        onChange={(e) => setSongDescription(e.target.value)}
-                        placeholder="A brief description..."
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={!songName.trim() || saveSongMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
-                      {saveSongMutation.isPending ? 'Saving...' : 'Save Song'}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              {/* Edit Song Dialog (Admin Only) */}
-              <Dialog open={editSongDialogOpen} onOpenChange={(open) => {
-                setEditSongDialogOpen(open);
-                if (!open) {
-                  setEditingSong(null);
-                  setSongName('');
-                  setSongDescription('');
-                }
-              }}>
-                <DialogTrigger asChild>
-                  <div style={{ display: 'none' }} />
-                </DialogTrigger>
-                <DialogContent className="bg-[#2D2D2D] border-[#3A3A3A] [&>button]:text-white/70 [&>button]:hover:text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Edit "{editingSong?.name}"</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={(e) => { e.preventDefault(); handleUpdateSong(); }} className="space-y-4">
-                    <div>
-                      <Label className="text-white/80">Song Name</Label>
-                      <Input
-                        value={songName}
-                        onChange={(e) => setSongName(e.target.value)}
-                        placeholder="My Beautiful Song"
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                        autoFocus
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-white/80">Description</Label>
-                      <Input
-                        value={songDescription}
-                        onChange={(e) => setSongDescription(e.target.value)}
-                        placeholder="A brief description..."
-                        className="bg-[#3A3A3A] border-[#4A4A4A] text-white mt-1"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={!songName.trim() || updateSongMutation.isPending}
-                      className="w-full bg-[#D4AF37] text-[#1E1E1E] hover:bg-[#E5C158]"
-                    >
-                      {updateSongMutation.isPending ? 'Updating...' : 'Update Song'}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              {/* Unsaved Changes Dialog */}
-              <UnsavedChangesDialog
-                open={unsavedChangesDialog}
-                onOpenChange={setUnsavedChangesDialog}
-                pendingAction={pendingAction}
-                onSaveAndContinue={async (action) => {
-                  setUnsavedChangesDialog(false);
-                  setHasUnsavedChanges(false);
-                  setPendingAction(null);
-                  setSaveDialogOpen(false);
-                  await handleSaveProject(true);
-                  if (action) {
-                    setTimeout(() => {
-                      if (action.type === 'loadSong') handleLoadSong(action.data);
-                      else if (action.type === 'loadProject') handleLoadProject(action.data);
-                      else if (action.type === 'newProject') handleNewProject();
-                    }, 50);
-                  }
-                }}
-                onDontSave={(action) => {
-                  isLoadingProjectRef.current = true;
-                  setUnsavedChangesDialog(false);
-                  setHasUnsavedChanges(false);
-                  setPendingAction(null);
-                  setTimeout(() => {
-                    if (action?.type === 'newProject') {
-                      setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
-                      setProjectName(''); setCurrentProjectId(null); setTempo(80);
-                      setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
-                    } else if (action?.type === 'loadProject') {
-                      handleLoadProject(action.data);
-                    } else if (action?.type === 'loadSong') {
-                      handleLoadSong(action.data);
-                    }
-                    setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
-                  }, 50);
-                }}
-                onCancel={() => {
-                  setUnsavedChangesDialog(false);
-                  setPendingAction(null);
-                }}
-              />
+                  <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-1">
+          <ProjectDialogs
+            loadDialogOpen={loadDialogOpen} setLoadDialogOpen={setLoadDialogOpen}
+            savedProjects={savedProjects} handleLoadProject={handleLoadProject} deleteProjectMutation={deleteProjectMutation} handleNewProject={handleNewProject}
+            songDialogOpen={songDialogOpen} setSongDialogOpen={setSongDialogOpen}
+            librarySearchQuery={librarySearchQuery} setLibrarySearchQuery={setLibrarySearchQuery}
+            librarySortBy={librarySortBy} setLibrarySortBy={setLibrarySortBy}
+            libraryActiveTab={libraryActiveTab} setLibraryActiveTab={setLibraryActiveTab}
+            songs={songs} previewingSongId={previewingSongId} handlePreviewSong={handlePreviewSong}
+            previewingProjectId={previewingProjectId} handlePreviewProject={handlePreviewProject}
+            currentUser={currentUser}
+            editingSong={editingSong} setEditingSong={setEditingSong} songName={songName} setSongName={setSongName} songDescription={songDescription} setSongDescription={setSongDescription}
+            setEditSongDialogOpen={setEditSongDialogOpen} editSongDialogOpen={editSongDialogOpen}
+            deleteSongMutation={deleteSongMutation} updateSongMutation={updateSongMutation} handleUpdateSong={handleUpdateSong}
+            saveDialogOpen={saveDialogOpen} setSaveDialogOpen={setSaveDialogOpen} saveAsMode={saveAsMode} setSaveAsMode={setSaveAsMode}
+            projectName={projectName} setProjectName={setProjectName} saveProjectMutation={saveProjectMutation} handleSaveProject={handleSaveProject} currentProjectId={currentProjectId}
+            saveSongDialogOpen={saveSongDialogOpen} setSaveSongDialogOpen={setSaveSongDialogOpen} handleSaveSong={handleSaveSong} saveSongMutation={saveSongMutation}
+            unsavedChangesDialog={unsavedChangesDialog} setUnsavedChangesDialog={setUnsavedChangesDialog} pendingAction={pendingAction} setPendingAction={setPendingAction}
+            hasUnsavedChanges={hasUnsavedChanges} setHasUnsavedChanges={setHasUnsavedChanges} isLoadingProjectRef={isLoadingProjectRef}
+            handleLoadSong={handleLoadSong}
+          />
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="flex flex-col flex-1 min-h-0 gap-2">
 
           {/* Main Area - Score & Playback - Full width */}
           <motion.main 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-2"
+            className="flex flex-col flex-1 min-h-0 gap-2"
           >
             <NoteGrid
                               settings={settings}
@@ -2124,263 +1659,75 @@ export default function CounterpointGenerator() {
                                   }}
                                   currentUser={currentUser}
                                   />
-                              }
-                              voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
-                              currentBeat={currentBeat}
-                              isPlaying={isPlaying}
-                              measures={settings.measures}
-                              cantusFirmus={cantusFirmus}
-                              onNotesUpdate={setCantusFirmus}
-                              onSeek={handleSeek}
-                              activeVoice={activeVoice}
-                              onActiveVoiceChange={setActiveVoice}
-                              onSelectionChange={setSelectedNotes}
-                              tempo={tempo}
-                              timeSignature={settings.timeSignature}
-                              scrollToBeatRef={scrollToBeatRef}
-                              pressedPianoNotes={pressedPianoNotes}
-                              pianoInstrument={voices[0]?.instrument || 'organ'}
-                              loopStart={loopStart}
-                              loopEnd={loopEnd}
-                              isLooping={isLooping}
-                              onLoopChange={(start, end) => { 
-                               setLoopStart(start); 
-                               setLoopEnd(end);
-                               // Reset playhead when loop is cleared
-                               if (start === null && end === null) {
-                                 setCurrentBeat(0);
-                                 setPlayheadPosition(0);
-                                 lastPlayheadRef.current = 0;
-                                 playedNotesRef.current.clear();
-                               }
-                              }}
-                              onVoiceInstrumentChange={(voiceIndex, instrument) => {
-                                const newVoices = [...voices];
-                                // Always update voice 0 (cantus firmus) since that's what's being edited
-                                if (newVoices[0]) {
-                                  newVoices[0] = { ...newVoices[0], instrument };
-                                  setVoices(newVoices);
-                                }
-                              }}
-                              onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
-                              showPianoPanel={showPianoPanel && !pianoPopout}
-                              onPopOut={() => setPianoPopout(true)}
-                              onNewProject={handleNewProject}
-                              onSaveProject={() => {
-                                setSaveAsMode(false);
-                                // If existing project, save directly without dialog
-                                if (currentProjectId && projectName.trim()) {
-                                  handleSaveProject(true);
-                                } else {
-                                  setSaveDialogOpen(true);
-                                }
-                              }}
-                              onSaveProjectAs={() => {
-                                setSaveAsMode(true);
-                                setSaveDialogOpen(true);
-                              }}
-                              onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
-                              onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
-                              onBrowseSongs={() => setSongDialogOpen(true)}
-                              onExport={handleExport}
-                              onAIComposer={async () => {
-                                const isAuth = await base44.auth.isAuthenticated();
-                                if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; }
-                                setChatbotActive(prev => { const newState = !prev; if (newState) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return newState; });
-                              }}
-                              onGenerate={handleGenerate}
-                              canGenerate={cantusFirmus.length > 0}
-                              isGenerating={isGenerating}
-                              onExportMidi={() => {
-                                toast.loading('Exporting MIDI...', { id: 'export-midi' });
-                                try {
-                                  const midiData = { tempo, timeSignature: [4, 4], tracks: allVoices.map((voice) => ({ name: voice.name, notes: voice.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat * (60 / tempo), duration: (n.duration || 1) * (60 / tempo), velocity: Math.round((n.velocity ?? 0.8) * 100) })) || [] })) };
-                                  const blob = new Blob([JSON.stringify(midiData, null, 2)], { type: 'application/json' });
-                                  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url);
-                                  toast.success('MIDI exported successfully', { id: 'export-midi' });
-                                } catch (error) { toast.error('Failed to export MIDI', { id: 'export-midi' }); }
-                              }}
-                              onImportMidi={handleImportMidi}
-                              onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
-                              customInstruments={customInstruments}
-                              snapToGrid={snapToGrid}
-                              onSnapToGridChange={setSnapToGrid}
-                              chatbotActive={chatbotActive}
-                              projectName={projectName}
-                              currentUser={currentUser}
-                              />
-            
-            {/* Piano toggle for mobile */}
-                              <div className="sm:hidden flex items-center justify-between bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-600">
-                                <span className="text-white/70 text-sm">Piano Keyboard</span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setShowPiano(!showPiano)}
-                                  className="text-amber-400 h-7 px-2"
-                                >
-                                  {showPiano ? 'Hide Piano' : 'Show Piano'}
-                                </Button>
-                              </div>
-
-                              {showPianoPanel && !pianoPopout && (
-                                <div className={`${showPiano ? 'block' : 'hidden'} sm:block`}>
-                                  <PianoKeyboard
-                                    activeNotes={activeNotes}
-                                    instrument={voices[0]?.instrument || 'organ'}
-                                    onInstrumentChange={(inst) => {
-                                      const newVoices = [...voices];
-                                      if (newVoices[0]) {
-                                        newVoices[0] = { ...newVoices[0], instrument: inst };
-                                        setVoices(newVoices);
-                                      }
-                                    }}
-                                    onVoiceInstrumentChange={(voiceIndex, inst) => {
-                                      const newVoices = [...voices];
-                                      if (newVoices[voiceIndex]) {
-                                        newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
-                                        setVoices(newVoices);
-                                      }
-                                    }}
-                                    onPressedNotesChange={setPressedPianoNotes}
-                                    onPopOut={() => setPianoPopout(true)}
-                                    onNotePress={handleNotePress}
-                                    onNoteRelease={handleNoteRelease}
-                                    effects={effects}
-                                    onEffectsChange={setEffects}
-                                    envelope={envelope}
-                                    onEnvelopeChange={setEnvelope}
-                                    openWaveEditor={openWaveEditor}
-                                    customInstruments={customInstruments}
-                                    onSaveInstrument={(instrument, index) => {
-                                      saveInstrumentMutation.mutate({ instrument, index });
-                                    }}
-                                    onDeleteInstrument={(index) => {
-                                      deleteInstrumentMutation.mutate(index);
-                                    }}
+                                  }
+                                  voices={allVoices.map((v, i) => ({ ...v, instrument: voices[i]?.instrument || 'organ' }))}
+                                  currentBeat={currentBeat}
+                                  isPlaying={isPlaying}
+                                  measures={settings.measures}
+                                  cantusFirmus={cantusFirmus}
+                                  onNotesUpdate={setCantusFirmus}
+                                  onSeek={handleSeek}
+                                  activeVoice={activeVoice}
+                                  onActiveVoiceChange={setActiveVoice}
+                                  onSelectionChange={setSelectedNotes}
+                                  tempo={tempo}
+                                  timeSignature={settings.timeSignature}
+                                  scrollToBeatRef={scrollToBeatRef}
+                                  pressedPianoNotes={pressedPianoNotes}
+                                  pianoInstrument={voices[0]?.instrument || 'organ'}
+                                  loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping}
+                                  onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
+                                  onVoiceInstrumentChange={(voiceIndex, instrument) => { const newVoices = [...voices]; if (newVoices[0]) { newVoices[0] = { ...newVoices[0], instrument }; setVoices(newVoices); } }}
+                                  onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
+                                  showPianoPanel={showPianoPanel && !pianoPopout}
+                                  onPopOut={() => setPianoPopout(true)}
+                                  onNewProject={handleNewProject}
+                                  onSaveProject={() => { setSaveAsMode(false); if (currentProjectId && projectName.trim()) { handleSaveProject(true); } else { setSaveDialogOpen(true); } }}
+                                  onSaveProjectAs={() => { setSaveAsMode(true); setSaveDialogOpen(true); }}
+                                  onSaveSong={currentUser?.role === 'admin' ? () => setSaveSongDialogOpen(true) : null}
+                                  onLoadProject={() => { window.__loadRecentProject = handleLoadProject; setLibraryActiveTab('projects'); setSongDialogOpen(true); }}
+                                  onBrowseSongs={() => setSongDialogOpen(true)}
+                                  onExport={handleExport}
+                                  onAIComposer={async () => { const isAuth = await base44.auth.isAuthenticated(); if (!isAuth) { base44.auth.redirectToLogin(window.location.href); return; } setChatbotActive(prev => { const ns = !prev; if (ns) { setChatbotOpen(true); setChatbotMinimized(false); } else { setChatbotOpen(false); setChatbotMinimized(false); } return ns; }); }}
+                                  onGenerate={handleGenerate}
+                                  canGenerate={cantusFirmus.length > 0}
+                                  isGenerating={isGenerating}
+                                  onExportMidi={() => { toast.loading('Exporting MIDI...', { id: 'export-midi' }); try { const md = { tempo, timeSignature: [4,4], tracks: allVoices.map(v => ({ name: v.name, notes: v.notes?.map(n => ({ pitch: n.pitch, startTime: n.beat*(60/tempo), duration: (n.duration||1)*(60/tempo), velocity: Math.round((n.velocity??0.8)*100) })) || [] })) }; const blob = new Blob([JSON.stringify(md,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`counterpoint-${settings.key}-${Date.now()}.mid.json`; a.click(); URL.revokeObjectURL(url); toast.success('MIDI exported successfully',{id:'export-midi'}); } catch(e) { toast.error('Failed to export MIDI',{id:'export-midi'}); } }}
+                                  onImportMidi={handleImportMidi}
+                                  onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
+                                  customInstruments={customInstruments}
+                                  snapToGrid={snapToGrid} onSnapToGridChange={setSnapToGrid}
+                                  chatbotActive={chatbotActive}
+                                  projectName={projectName}
+                                  currentUser={currentUser}
                                   />
-                                </div>
-                              )}
-          </motion.main>
+
+                                  <PianoSection
+                                  showPiano={showPiano} setShowPiano={setShowPiano}
+                                  showPianoPanel={showPianoPanel} pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
+                                  activeNotes={activeNotes} voices={voices} setVoices={setVoices}
+                                  pressedPianoNotes={pressedPianoNotes} setPressedPianoNotes={setPressedPianoNotes}
+                                  handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
+                                  effects={effects} setEffects={setEffects}
+                                  envelope={envelope} setEnvelope={setEnvelope}
+                                  openWaveEditor={openWaveEditor} customInstruments={customInstruments}
+                                  saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
+                                  />
+                                  </motion.main>
           </div>
           </div>
 
-      {/* Piano Popout - Draggable & Resizable Window */}
-      <AnimatePresence>
-        {pianoPopout && (
-          <motion.div
-            drag
-            dragListener={false}
-            dragControls={dragControls}
-            dragMomentum={false}
-            dragElastic={0}
-            dragConstraints={{ top: 0, left: 0, right: window.innerWidth - pianoPopoutSize.width - 20, bottom: window.innerHeight - pianoPopoutSize.height - 20 }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed z-[100] bg-[#2D2D2D] border-2 border-[#3A3A3A] rounded-xl shadow-2xl"
-            style={{ 
-              top: '10%', 
-              left: '10%', 
-              width: `${pianoPopoutSize.width}px`,
-              height: `${pianoPopoutSize.height}px`,
-              maxWidth: '90vw',
-              maxHeight: '80vh'
-            }}
-          >
-            <div 
-              className="cursor-move bg-[#1A1A1A] px-4 py-2 border-b border-[#3A3A3A] rounded-t-xl flex items-center justify-between"
-              onPointerDown={(e) => dragControls.start(e)}
-            >
-              <span className="text-white text-sm font-medium">Piano Keyboard</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setPianoPopout(false)}
-                className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-[#3A3A3A]"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="p-4 overflow-auto" style={{ height: 'calc(100% - 40px)' }}>
-              <PianoKeyboard
-                activeNotes={activeNotes}
-                instrument={voices[0]?.instrument || 'organ'}
-                onInstrumentChange={(inst) => {
-                  const newVoices = [...voices];
-                  if (newVoices[0]) {
-                    newVoices[0] = { ...newVoices[0], instrument: inst };
-                    setVoices(newVoices);
-                  }
-                }}
-                onVoiceInstrumentChange={(voiceIndex, inst) => {
-                  const newVoices = [...voices];
-                  if (newVoices[voiceIndex]) {
-                    newVoices[voiceIndex] = { ...newVoices[voiceIndex], instrument: inst };
-                    setVoices(newVoices);
-                  }
-                }}
-                onPressedNotesChange={setPressedPianoNotes}
-                onNotePress={handleNotePress}
-                onNoteRelease={handleNoteRelease}
-                effects={effects}
-                onEffectsChange={setEffects}
-                envelope={envelope}
-                onEnvelopeChange={setEnvelope}
-                openWaveEditor={openWaveEditor}
-                customInstruments={customInstruments}
-                onSaveInstrument={(instrument, index) => {
-                  saveInstrumentMutation.mutate({ instrument, index });
-                }}
-                onDeleteInstrument={(index) => {
-                  deleteInstrumentMutation.mutate(index);
-                }}
-                />
-            </div>
-            
-            {/* Resize handle - bottom right corner */}
-            <div
-              className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize"
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                const startX = e.clientX;
-                const startY = e.clientY;
-                const startWidth = pianoPopoutSize.width;
-                const startHeight = pianoPopoutSize.height;
-                
-                const handleMove = (moveEvent) => {
-                  const deltaX = moveEvent.clientX - startX;
-                  const deltaY = moveEvent.clientY - startY;
-                  setPianoPopoutSize({
-                    width: Math.max(400, Math.min(window.innerWidth * 0.9, startWidth + deltaX)),
-                    height: Math.max(200, Math.min(window.innerHeight * 0.8, startHeight + deltaY))
-                  });
-                };
-                
-                const handleUp = () => {
-                  document.removeEventListener('pointermove', handleMove);
-                  document.removeEventListener('pointerup', handleUp);
-                };
-                
-                document.addEventListener('pointermove', handleMove);
-                document.addEventListener('pointerup', handleUp);
-              }}
-            >
-              <svg 
-                className="absolute bottom-1 right-1 text-white/30"
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12"
-              >
-                <path d="M12 0 L12 12 L0 12" fill="none" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 0 L12 4" stroke="currentColor" strokeWidth="1"/>
-                <path d="M4 8 L12 8 L12 12 L4 12" fill="currentColor" opacity="0.3"/>
-              </svg>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PianoPopout
+        pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
+        pianoPopoutSize={pianoPopoutSize} setPianoPopoutSize={setPianoPopoutSize}
+        activeNotes={activeNotes} voices={voices} setVoices={setVoices}
+        setPressedPianoNotes={setPressedPianoNotes}
+        handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
+        effects={effects} setEffects={setEffects}
+        envelope={envelope} setEnvelope={setEnvelope}
+        openWaveEditor={openWaveEditor} customInstruments={customInstruments}
+        saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
+      />
 
       {/* AI Chatbot - Left side panel like base44 */}
       <AnimatePresence>
