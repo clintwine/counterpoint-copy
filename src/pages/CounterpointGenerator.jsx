@@ -986,8 +986,15 @@ export default function CounterpointGenerator() {
     if (!audioInitialized.current) {
       initAudio();
       audioInitialized.current = true;
+      // Resync envelope and effects after audio initializes
+      import('@/components/counterpoint/audioEngine').then(({ setEnvelope, setEffectLevel }) => {
+        setEnvelope(envelope);
+        setEffectLevel('reverb', effects.reverb);
+        setEffectLevel('delay', effects.delay);
+        setEffectLevel('chorus', effects.chorus);
+      });
     }
-  }, []);
+  }, [envelope, effects]);
 
   // Get all voices for display
   const allVoices = [
