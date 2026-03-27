@@ -12,6 +12,7 @@ export default function PianoSection({
   envelope, setEnvelope,
   openWaveEditor, customInstruments,
   saveInstrumentMutation, deleteInstrumentMutation,
+  showWaveEditor, setShowWaveEditor,
 }) {
   return (
     <>
@@ -48,6 +49,8 @@ export default function PianoSection({
             customInstruments={customInstruments}
             onSaveInstrument={(instrument, index) => saveInstrumentMutation.mutate({ instrument, index })}
             onDeleteInstrument={(index) => deleteInstrumentMutation.mutate(index)}
+            showWaveEditor={showWaveEditor}
+            setShowWaveEditor={setShowWaveEditor}
           />
         </div>
       )}

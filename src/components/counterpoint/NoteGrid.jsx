@@ -1963,16 +1963,7 @@ export default function NoteGrid({
           </div>
         )}
 
-        <EnvelopeEffectsPanel
-          envelope={envelope}
-          effects={effects}
-          onEnvelopeChange={handleEnvelopeChange}
-          onEffectChange={handleEffectChange}
-          showWaveEditor={showWaveEditor}
-          onToggleWaveEditor={setShowWaveEditor}
-          showKeys={showKeys}
-          onToggleKeys={setShowKeys}
-        />
+        <EnvelopeEffectsPanel envelope={envelope} effects={effects} onEnvelopeChange={handleEnvelopeChange} onEffectChange={handleEffectChange} showWaveEditor={showWaveEditor} onToggleWaveEditor={setShowWaveEditor} onOpenWaveEditor={onOpenWaveEditor} showKeys={showKeys} onToggleKeys={setShowKeys} />
                   </div>
 
                   {/* Audio Visualizer - right side */}

@@ -9,6 +9,7 @@ export default function EnvelopeEffectsPanel({
   onEffectChange,
   showWaveEditor,
   onToggleWaveEditor,
+  onOpenWaveEditor,
   showKeys,
   onToggleKeys
 }) {
@@ -149,8 +150,11 @@ export default function EnvelopeEffectsPanel({
           variant="ghost"
           size="sm"
           onClick={() => {
-            console.log('[EnvelopeEffectsPanel] Wave Editor toggle - current:', showWaveEditor, 'toggling to:', !showWaveEditor);
-            onToggleWaveEditor(!showWaveEditor);
+            if (onOpenWaveEditor) {
+              onOpenWaveEditor();
+            } else {
+              onToggleWaveEditor(!showWaveEditor);
+            }
           }}
           className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
           <Waves className="w-3.5 h-3.5 mr-1" />

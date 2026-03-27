@@ -1631,6 +1631,7 @@ export default function CounterpointGenerator() {
               envelope={envelope} setEnvelope={setEnvelope}
               openWaveEditor={openWaveEditor} customInstruments={customInstruments}
               saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
+              showWaveEditor={openWaveEditor} setShowWaveEditor={setOpenWaveEditor}
             />
             </div>
           </motion.main>
