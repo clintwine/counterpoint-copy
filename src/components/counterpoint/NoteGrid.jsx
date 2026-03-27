@@ -945,6 +945,7 @@ export default function NoteGrid({
       if (deltaX < 40 && deltaY < 40) {
         // Just a click - clear selection
         setSelectedNotes(new Set());
+        onLoopChange?.(null, null);
       } else {
         // Calculate selected notes from marquee
         const startCell = getCellFromPosition(marquee.startX, marquee.startY);
