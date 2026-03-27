@@ -31,10 +31,10 @@ export default function GridOverlays({
     <>
       {/* Playhead vertical line - fixed positioning aligned with scrubber */}
       <div
-        className="absolute z-30 pointer-events-none"
+        className="fixed z-30 pointer-events-none"
         style={{
-          left: `${56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
-          top: 28,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          top: gridRect.top + 28,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
           height: pitches.length * CELL_HEIGHT,
