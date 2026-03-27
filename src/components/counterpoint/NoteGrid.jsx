@@ -575,8 +575,8 @@ export default function NoteGrid({
     // Calculate position relative to the grid viewport, accounting for scroll
     const scrollLeft = gridRef.current.scrollLeft;
     const scrollTop = gridRef.current.scrollTop;
-    const x = clientX - gridRect.left - 56 + scrollLeft; // 56 = pitch label width
-    const y = clientY - gridRect.top - 28 + scrollTop; // 28 = header height (h-7 = 1.75rem = 28px)
+    const x = clientX - gridRect.left + scrollLeft; // Only account for scroll, pitch label is part of grid
+    const y = clientY - gridRect.top + scrollTop; // Only account for scroll, header is above grid
 
     // Support fractional beats - snap only if snapToGrid is enabled
     let beat = x / CELL_WIDTH;
@@ -591,7 +591,7 @@ export default function NoteGrid({
       return { pitch: pitches[pitchIndex], beat, pitchIndex };
     }
     return null;
-  };
+  }
 
   // Check if clicking on the edges of a note (for resizing)
   const isOnNoteEdge = (e, note) => {
