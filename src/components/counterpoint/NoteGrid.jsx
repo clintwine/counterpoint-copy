@@ -1911,7 +1911,7 @@ export default function NoteGrid({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px] flex-shrink-0 relative z-10" style={{backgroundColor: '#2D2D2D'}}>
+      <div className="flex items-center justify-between gap-2 border-t border-b border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px] flex-shrink-0 relative z-10" style={{backgroundColor: '#2D2D2D'}}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
         {/* Left side - instrument and piano controls */}
         <div className="flex items-center gap-2 flex-shrink-0">
