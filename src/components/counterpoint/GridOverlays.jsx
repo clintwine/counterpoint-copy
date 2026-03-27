@@ -37,7 +37,7 @@ export default function GridOverlays({
           top: `${gridRect.top}px`,
           transform: 'translateX(-50%)',
           pointerEvents: 'auto',
-          zIndex: 15,
+          zIndex: 5,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
