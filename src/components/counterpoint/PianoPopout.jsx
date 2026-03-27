@@ -12,6 +12,7 @@ export default function PianoPopout({
   handleNotePress, handleNoteRelease,
   effects, setEffects,
   envelope, setEnvelope,
+  showKeys, onToggleKeys,
   openWaveEditor, customInstruments,
   saveInstrumentMutation, deleteInstrumentMutation,
 }) {
@@ -50,11 +51,13 @@ export default function PianoPopout({
               onEffectsChange={setEffects}
               envelope={envelope}
               onEnvelopeChange={setEnvelope}
+              showKeys={showKeys}
+              onToggleKeys={onToggleKeys}
               openWaveEditor={openWaveEditor}
               customInstruments={customInstruments}
               onSaveInstrument={(instrument, index) => saveInstrumentMutation.mutate({ instrument, index })}
               onDeleteInstrument={(index) => deleteInstrumentMutation.mutate(index)}
-            />
+              />
           </div>
           <div
             className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize"

@@ -222,7 +222,6 @@ export default function NoteGrid({
   const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
   const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
   const [showWaveEditor, setShowWaveEditor] = useState(false);
-  const [showKeys, setShowKeys] = useState(false);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
@@ -1963,7 +1962,7 @@ export default function NoteGrid({
           </div>
         )}
 
-        <EnvelopeEffectsPanel envelope={envelope} effects={effects} onEnvelopeChange={handleEnvelopeChange} onEffectChange={handleEffectChange} showWaveEditor={showWaveEditor} onToggleWaveEditor={setShowWaveEditor} onOpenWaveEditor={onOpenWaveEditor} showKeys={showKeys} onToggleKeys={setShowKeys} />
+        <EnvelopeEffectsPanel envelope={envelope} effects={effects} onEnvelopeChange={handleEnvelopeChange} onEffectChange={handleEffectChange} showWaveEditor={showWaveEditor} onToggleWaveEditor={setShowWaveEditor} onOpenWaveEditor={onOpenWaveEditor} showKeys={showKeys} onToggleKeys={onToggleKeys} />
                   </div>
 
                   {/* Audio Visualizer - right side */}

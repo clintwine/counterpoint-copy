@@ -10,6 +10,7 @@ export default function PianoSection({
   handleNotePress, handleNoteRelease,
   effects, setEffects,
   envelope, setEnvelope,
+  showKeys, onToggleKeys,
   openWaveEditor, customInstruments,
   saveInstrumentMutation, deleteInstrumentMutation,
   showWaveEditor, setShowWaveEditor,
@@ -45,6 +46,8 @@ export default function PianoSection({
             onEffectsChange={setEffects}
             envelope={envelope}
             onEnvelopeChange={setEnvelope}
+            showKeys={showKeys}
+            onToggleKeys={onToggleKeys}
             openWaveEditor={openWaveEditor}
             customInstruments={customInstruments}
             onSaveInstrument={(instrument, index) => saveInstrumentMutation.mutate({ instrument, index })}
