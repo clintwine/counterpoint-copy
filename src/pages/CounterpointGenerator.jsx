@@ -149,7 +149,6 @@ export default function CounterpointGenerator() {
   const [openWaveEditor, setOpenWaveEditor] = useState(false);
   const [customInstruments, setCustomInstruments] = useState([]);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [showKeys, setShowKeys] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [unsavedChangesDialog, setUnsavedChangesDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -1615,7 +1614,6 @@ export default function CounterpointGenerator() {
                                onOpenWaveEditor={() => { setShowPianoPanel(true); setOpenWaveEditor(true); setTimeout(() => setOpenWaveEditor(false), 100); }}
                                customInstruments={customInstruments}
                                snapToGrid={snapToGrid} onSnapToGridChange={setSnapToGrid}
-                               showKeys={showKeys} onToggleKeys={setShowKeys}
                                chatbotActive={chatbotActive}
                                projectName={projectName}
                                currentUser={currentUser}
@@ -1631,7 +1629,6 @@ export default function CounterpointGenerator() {
               handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
               effects={effects} setEffects={setEffects}
               envelope={envelope} setEnvelope={setEnvelope}
-              showKeys={showKeys} onToggleKeys={setShowKeys}
               openWaveEditor={openWaveEditor} customInstruments={customInstruments}
               saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
               showWaveEditor={openWaveEditor} setShowWaveEditor={setOpenWaveEditor}
@@ -1649,7 +1646,6 @@ export default function CounterpointGenerator() {
         handleNotePress={handleNotePress} handleNoteRelease={handleNoteRelease}
         effects={effects} setEffects={setEffects}
         envelope={envelope} setEnvelope={setEnvelope}
-        showKeys={showKeys} onToggleKeys={setShowKeys}
         openWaveEditor={openWaveEditor} customInstruments={customInstruments}
         saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
       />

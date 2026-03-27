@@ -257,8 +257,9 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
 
 }
 
-export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, onNoteRelease, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, showKeys = false, onToggleKeys, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
+export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', onInstrumentChange, onPressedNotesChange, onTogglePanel, onPopOut, onNotePress, onNoteRelease, effects: externalEffects, onEffectsChange: externalOnEffectsChange, envelope: externalEnvelope, onEnvelopeChange: externalOnEnvelopeChange, openWaveEditor: externalOpenWaveEditor, customInstruments: externalCustomInstruments = [], onSaveInstrument, onDeleteInstrument, onVoiceInstrumentChange }) {
   const octaves = FULL_PIANO_OCTAVES;
+  const [showKeys, setShowKeys] = useState(false);
   const [pressedNotes, setPressedNotes] = useState(new Set());
   const effects = externalEffects || { reverb: 0.3, delay: 0, chorus: 0 };
   const setEffects = externalOnEffectsChange || (() => {});
