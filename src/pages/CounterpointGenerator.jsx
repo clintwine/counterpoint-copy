@@ -1514,7 +1514,7 @@ export default function CounterpointGenerator() {
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex flex-col flex-1 min-h-0 max-w-[98vw] 2xl:max-w-[99vw] mx-auto px-1 2xl:px-0 pt-1 pb-2 overflow-x-hidden">
+      <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full overflow-x-hidden">
         {/* Header */}
                   <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-1">
           <ProjectDialogs
