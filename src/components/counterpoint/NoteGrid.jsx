@@ -1742,8 +1742,7 @@ export default function NoteGrid({
 
             {/* Grid content */}
             <div className="flex-shrink-0">
-              {/* Spacer to match pitch label column's sticky h-7 header, aligning grid rows with pitch labels */}
-              <div style={{ height: 28 }} />
+
               {(() => {
                 // Calculate visible range with buffer
                 const visibleStartRow = Math.max(0, Math.floor(viewportState.scrollTop / CELL_HEIGHT) - 5);
