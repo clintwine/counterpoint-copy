@@ -29,15 +29,10 @@ export default function GridOverlays({
   const headerRect = headerRef?.current?.getBoundingClientRect() || gridRect;
   const containerRect = gridRef.current.parentElement?.getBoundingClientRect();
   const scrollLeft = gridRef.current.scrollLeft;
-  
-  // Hide playhead if it's outside the visible grid area
-  const playheadX = gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft;
-  const isPlayheadInBounds = playheadX >= gridRect.left && playheadX <= gridRect.right;
 
   return (
     <>
       {/* Playhead - single combined element: triangle + line */}
-      {isPlayheadInBounds && (
       <div
         className="fixed cursor-ew-resize"
         style={{
@@ -122,7 +117,6 @@ export default function GridOverlays({
           flexShrink: 0,
         }} />
       </div>
-      )}
 
       {/* Drag ghost notes - fixed positioning with scroll offset */}
       {dragState?.isDragging && originalDragNotes && (
