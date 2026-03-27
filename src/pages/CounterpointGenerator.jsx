@@ -791,6 +791,9 @@ export default function CounterpointGenerator() {
           const index = parseInt(instrument.split('_')[1]);
           return customInstruments[index];
         }
+        if (instrument === 'preset_death_metal') {
+          return PRESET_LIBRARY_CONFIGS.find(p => p.name === 'Death Metal Guitar');
+        }
         if (instrument.startsWith('preset_')) {
           const index = parseInt(instrument.split('_')[1]);
           const PRESET_LIBRARY = [
@@ -892,6 +895,9 @@ export default function CounterpointGenerator() {
         if (instrument.startsWith('custom_')) {
           const index = parseInt(instrument.split('_')[1]);
           return customInstruments[index];
+        }
+        if (instrument === 'preset_death_metal') {
+          return PRESET_LIBRARY_CONFIGS.find(p => p.name === 'Death Metal Guitar');
         }
         if (instrument.startsWith('preset_')) {
           const index = parseInt(instrument.split('_')[1]);
@@ -1120,6 +1126,9 @@ export default function CounterpointGenerator() {
       if (instrument.startsWith('custom_')) {
         const index = parseInt(instrument.split('_')[1]);
         return customInstruments[index];
+      }
+      if (instrument === 'preset_death_metal') {
+        return PRESET_LIBRARY_CONFIGS.find(p => p.name === 'Death Metal Guitar');
       }
       if (instrument.startsWith('preset_')) {
         const index = parseInt(instrument.split('_')[1]);
