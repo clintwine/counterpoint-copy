@@ -148,7 +148,7 @@ export default function EnvelopeEffectsPanel({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onToggleWaveEditor?.(!showWaveEditor)}
+          onClick={() => onToggleWaveEditor(!showWaveEditor)}
           className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
           <Waves className="w-3.5 h-3.5 mr-1" />
           Instrument Editor
@@ -156,7 +156,7 @@ export default function EnvelopeEffectsPanel({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onToggleKeys?.(!showKeys)}
+          onClick={() => onToggleKeys(!showKeys)}
           className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
           <Keyboard className="w-3.5 h-3.5 mr-1" />
           Keys
