@@ -193,6 +193,15 @@ export default function CounterpointGenerator() {
    });
   }, [envelope]);
 
+  // Sync effects to audio engine when they change
+  useEffect(() => {
+   import('@/components/counterpoint/audioEngine').then(({ setEffectLevel }) => {
+     setEffectLevel('reverb', effects.reverb);
+     setEffectLevel('delay', effects.delay);
+     setEffectLevel('chorus', effects.chorus);
+   });
+  }, [effects]);
+
   // Load local instruments
   const [localInstruments, setLocalInstruments] = useState([]);
   
