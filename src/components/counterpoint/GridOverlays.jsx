@@ -31,7 +31,7 @@ export default function GridOverlays({
     <>
       {/* Playhead vertical line - fixed positioning aligned with scrubber */}
       <div
-        className="fixed z-30 pointer-events-none"
+        className="fixed z-[5] pointer-events-none"
         style={{
           left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
           top: gridRect.top + 28,
@@ -88,7 +88,7 @@ export default function GridOverlays({
           width: 0,
           height: 0,
           pointerEvents: 'auto',
-          zIndex: 51,
+          zIndex: 15,
           transform: 'translateX(-50%)'
         }}
         onMouseDown={(e) => {
