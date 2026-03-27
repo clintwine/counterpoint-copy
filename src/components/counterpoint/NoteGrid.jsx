@@ -1679,7 +1679,7 @@ export default function NoteGrid({
           <div className="inline-flex min-w-full" ref={containerRef}>
             {/* Pitch labels - fixed column on left */}
             <div className="sticky left-0 z-20 flex-shrink-0" style={{ backgroundColor: '#2B2B2B' }}>
-              <div className="h-7 border-b border-amber-900/50 sticky top-0 z-10" style={{ backgroundColor: '#3a3a3a', visibility: 'hidden' }} />
+
               {pitches.map((pitch) => {
                 const isSharp = pitch.includes('#');
                 const isC = pitch.startsWith('C') && !pitch.startsWith('C#');
@@ -1742,8 +1742,7 @@ export default function NoteGrid({
 
             {/* Grid content */}
             <div className="flex-shrink-0">
-              {/* Spacer to align grid rows with pitch labels (matches sticky header height) */}
-              <div style={{ height: 28 }} />
+
 
               {(() => {
                 // Calculate visible range with buffer
