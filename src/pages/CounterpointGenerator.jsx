@@ -181,26 +181,10 @@ export default function CounterpointGenerator() {
   });
 
   // Fetch custom instruments from database
-   const { data: dbInstruments = [] } = useQuery({
-     queryKey: ['custom-instruments'],
-     queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
-   });
-
-  // Sync envelope to audio engine when it changes
-  useEffect(() => {
-   import('@/components/counterpoint/audioEngine').then(({ setEnvelope }) => {
-     setEnvelope(envelope);
-   });
-  }, [envelope]);
-
-  // Sync effects to audio engine when they change
-  useEffect(() => {
-   import('@/components/counterpoint/audioEngine').then(({ setEffectLevel }) => {
-     setEffectLevel('reverb', effects.reverb);
-     setEffectLevel('delay', effects.delay);
-     setEffectLevel('chorus', effects.chorus);
-   });
-  }, [effects]);
+  const { data: dbInstruments = [] } = useQuery({
+    queryKey: ['custom-instruments'],
+    queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
+  });
 
   // Load local instruments
   const [localInstruments, setLocalInstruments] = useState([]);
@@ -986,15 +970,8 @@ export default function CounterpointGenerator() {
     if (!audioInitialized.current) {
       initAudio();
       audioInitialized.current = true;
-      // Resync envelope and effects after audio initializes
-      import('@/components/counterpoint/audioEngine').then(({ setEnvelope, setEffectLevel }) => {
-        setEnvelope(envelope);
-        setEffectLevel('reverb', effects.reverb);
-        setEffectLevel('delay', effects.delay);
-        setEffectLevel('chorus', effects.chorus);
-      });
     }
-  }, [envelope, effects]);
+  }, []);
 
   // Get all voices for display
   const allVoices = [
@@ -1654,7 +1631,6 @@ export default function CounterpointGenerator() {
               envelope={envelope} setEnvelope={setEnvelope}
               openWaveEditor={openWaveEditor} customInstruments={customInstruments}
               saveInstrumentMutation={saveInstrumentMutation} deleteInstrumentMutation={deleteInstrumentMutation}
-              showWaveEditor={openWaveEditor} setShowWaveEditor={setOpenWaveEditor}
             />
             </div>
           </motion.main>

@@ -65,7 +65,6 @@ const DEFAULT_DURATION = 1;
 
 import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import InstrumentSelect from './InstrumentSelectComponent';
-import EnvelopeEffectsPanel from './EnvelopeEffectsPanel';
 
 export default function NoteGrid({ 
               voices, 
@@ -219,21 +218,9 @@ export default function NoteGrid({
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
   const lastPianoPitchRef = useRef(null);
-  const [envelope, setEnvelope] = useState({ attack: 0.02, sustain: 0.7, release: 0.3 });
-  const [effects, setEffects] = useState({ reverb: 0.3, delay: 0, chorus: 0 });
-  const [showWaveEditor, setShowWaveEditor] = useState(false);
-  const [showKeys, setShowKeys] = useState(false);
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
-
-  const handleEnvelopeChange = (param, value) => {
-    setEnvelope(prev => ({ ...prev, [param]: value }));
-  };
-
-  const handleEffectChange = (param, value) => {
-    setEffects(prev => ({ ...prev, [param]: value }));
-  };
 
   // Detect window size changes (including fullscreen)
   useEffect(() => {
@@ -1924,7 +1911,7 @@ export default function NoteGrid({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 border-t border-b border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px] flex-shrink-0 relative z-10" style={{backgroundColor: '#2D2D2D'}}>
+      <div className="flex items-center justify-between gap-2 border-t border-slate-700 px-2 sm:px-5 py-2 sm:py-3 min-h-[64px] flex-shrink-0 relative z-10" style={{backgroundColor: '#2D2D2D'}}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
         {/* Left side - instrument and piano controls */}
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -1962,8 +1949,6 @@ export default function NoteGrid({
             <NoteControls selectedNotes={selectedNotes} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onNotesUpdate={onNotesUpdate} saveToHistory={saveToHistory} voices={voices} tempo={tempo} getInstrumentConfig={getInstrumentConfig} onVelocityChange={setLastNoteVelocity} />
           </div>
         )}
-
-        <EnvelopeEffectsPanel envelope={envelope} effects={effects} onEnvelopeChange={handleEnvelopeChange} onEffectChange={handleEffectChange} showWaveEditor={showWaveEditor} onToggleWaveEditor={setShowWaveEditor} onOpenWaveEditor={onOpenWaveEditor} />
                   </div>
 
                   {/* Audio Visualizer - right side */}
