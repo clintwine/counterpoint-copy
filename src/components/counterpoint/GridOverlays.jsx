@@ -34,7 +34,7 @@ export default function GridOverlays({
         className="fixed z-[1] pointer-events-none"
         style={{
           left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
-          top: gridRect.top,
+          top: gridRect.top + 28,
           transform: 'translateX(-50%)',
           width: Math.max(2, 3 * zoom),
           height: pitches.length * CELL_HEIGHT,
