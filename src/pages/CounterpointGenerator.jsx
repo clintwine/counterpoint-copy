@@ -1566,7 +1566,7 @@ export default function CounterpointGenerator() {
                                    onStop={handleStop}
                                    loopStart={loopStart}
                                    loopEnd={loopEnd}
-                                   onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
+                                   onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
                                    isLooping={isLooping}
                                    onLoopToggle={() => setIsLooping(!isLooping)}
                                    timeSignature={settings.timeSignature}
@@ -1612,7 +1612,7 @@ export default function CounterpointGenerator() {
                                pressedPianoNotes={pressedPianoNotes}
                                pianoInstrument={voices[0]?.instrument || 'organ'}
                                loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping}
-                               onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); if (start === null && end === null) { setCurrentBeat(0); setPlayheadPosition(0); lastPlayheadRef.current = 0; playedNotesRef.current.clear(); } }}
+                               onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
                                onVoiceInstrumentChange={(voiceIndex, instrument) => { const newVoices = [...voices]; if (newVoices[0]) { newVoices[0] = { ...newVoices[0], instrument }; setVoices(newVoices); } }}
                                onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
                                showPianoPanel={showPianoPanel && !pianoPopout}
