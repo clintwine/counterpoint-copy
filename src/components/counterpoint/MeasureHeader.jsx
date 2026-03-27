@@ -22,7 +22,7 @@ export default function MeasureHeader({
   const selectedBeatsInMeasure = new Set(
     cantusFirmus
       .filter(n => n.beat >= measureStartBeat && n.beat < measureStartBeat + beatsPerMeasure && selectedNotes.has(getNoteKey(n.pitch, n.beat)))
-      .map(n => Math.floor(n.beat) - measureStartBeat)
+      .map(n => (n.beat - measureStartBeat))
   );
 
   const getBeatFromClientX = (clientX) => {
@@ -101,13 +101,19 @@ export default function MeasureHeader({
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
       onMouseDown={handleMeasureMouseDown}
     >
-      {selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map(beatOffset => (
-        <div
-          key={`sel-${beatOffset}`}
-          className="absolute top-0 bottom-0 pointer-events-none z-0"
-          style={{ left: `${beatOffset * CELL_WIDTH}px`, width: `${CELL_WIDTH}px`, backgroundColor: '#C8A570' }}
-        />
-      ))}
+      {selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map((beatOffset, idx) => {
+        const notes = cantusFirmus.filter(n => n.beat >= measureStartBeat + beatOffset && n.beat < measureStartBeat + beatOffset + 1 && selectedNotes.has(getNoteKey(n.pitch, n.beat)));
+        const minBeat = Math.min(...notes.map(n => n.beat));
+        const maxBeat = Math.max(...notes.map(n => n.beat + (n.duration || 1)));
+        const duration = maxBeat - minBeat;
+        return (
+          <div
+            key={`sel-${beatOffset}-${idx}`}
+            className="absolute top-0 bottom-0 pointer-events-none z-0"
+            style={{ left: `${(minBeat - measureStartBeat) * CELL_WIDTH}px`, width: `${duration * CELL_WIDTH}px`, backgroundColor: '#C8A570' }}
+          />
+        );
+      })}
 
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
