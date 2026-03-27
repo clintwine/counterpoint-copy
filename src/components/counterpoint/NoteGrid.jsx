@@ -1944,11 +1944,9 @@ export default function NoteGrid({
         </div>
 
         {/* ADSR and Effects - placeholder for instrument controls */}
-        {!showPianoPanel && (
-          <div className="flex items-center gap-2 flex-wrap hidden sm:flex">
-            <span className="text-[10px] text-white/40">Controls when piano open</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 flex-wrap hidden sm:flex">
+          <span className="text-[10px] text-white/40">Controls when piano open</span>
+        </div>
 
         {/* Center - note controls */}
         {selectedNotes.size > 0 && (
