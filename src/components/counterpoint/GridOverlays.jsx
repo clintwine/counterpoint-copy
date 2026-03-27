@@ -29,19 +29,91 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Playhead vertical line - fixed positioning aligned with scrubber */}
+      {/* Playhead - single combined element: triangle + line */}
       <div
-        className="fixed z-[1] pointer-events-none"
+        className="fixed cursor-ew-resize"
         style={{
           left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
-          top: gridRect.top + 28,
+          top: `${gridRect.top}px`,
           transform: 'translateX(-50%)',
+          pointerEvents: 'auto',
+          zIndex: 15,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsScrubbing(true);
+
+          const handleMouseMove = (moveEvent) => {
+            if (!gridRef.current) return;
+            const gridRect = gridRef.current.getBoundingClientRect();
+            const scrollLeft = gridRef.current.scrollLeft;
+            const x = moveEvent.clientX - gridRect.left - 56 + scrollLeft;
+            let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+            if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+            setScrubPosition(beat);
+            onSeek && onSeek(beat);
+          };
+
+          const handleMouseUp = () => {
+            setIsScrubbing(false);
+            setScrubPosition(null);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsScrubbing(true);
+
+          const handleTouchMove = (moveEvent) => {
+            if (!gridRef.current || !moveEvent.touches[0]) return;
+            const gridRect = gridRef.current.getBoundingClientRect();
+            const scrollLeft = gridRef.current.scrollLeft;
+            const x = moveEvent.touches[0].clientX - gridRect.left - 56 + scrollLeft;
+            let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+            if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+            setScrubPosition(beat);
+            onSeek && onSeek(beat);
+          };
+
+          const handleTouchEnd = () => {
+            setIsScrubbing(false);
+            setScrubPosition(null);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+          };
+
+          document.addEventListener('touchmove', handleTouchMove);
+          document.addEventListener('touchend', handleTouchEnd);
+        }}
+      >
+        {/* Triangle */}
+        <div style={{
+          width: 0,
+          height: 0,
+          borderLeft: `${Math.max(10, 12 * zoom)}px solid transparent`,
+          borderRight: `${Math.max(10, 12 * zoom)}px solid transparent`,
+          borderTop: `${Math.max(12, 14 * zoom)}px solid #ef4444`,
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+          flexShrink: 0,
+        }} />
+        {/* Line */}
+        <div style={{
           width: Math.max(2, 3 * zoom),
           height: pitches.length * CELL_HEIGHT,
           backgroundColor: '#ef4444',
-          boxShadow: '0 0 8px rgba(239,68,68,0.6)'
-        }}
-      />
+          boxShadow: '0 0 8px rgba(239,68,68,0.6)',
+          flexShrink: 0,
+        }} />
+      </div>
 
       {/* Drag ghost notes - absolute positioning inside grid */}
       {dragState?.isDragging && originalDragNotes && (
