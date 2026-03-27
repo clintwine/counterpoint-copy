@@ -101,7 +101,7 @@ export default function MeasureHeader({
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
       onMouseDown={handleMeasureMouseDown}
     >
-      {false && selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map(beatOffset => (
+      {selectedBeatsInMeasure.size > 0 && Array.from(selectedBeatsInMeasure).map(beatOffset => (
         <div
           key={`sel-${beatOffset}`}
           className="absolute top-0 bottom-0 pointer-events-none z-0"
