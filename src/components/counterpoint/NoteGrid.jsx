@@ -1742,6 +1742,8 @@ export default function NoteGrid({
 
             {/* Grid content */}
             <div className="flex-shrink-0">
+              {/* Spacer to align grid rows with pitch labels (matches sticky header height) */}
+              <div style={{ height: 28 }} />
 
               {(() => {
                 // Calculate visible range with buffer
