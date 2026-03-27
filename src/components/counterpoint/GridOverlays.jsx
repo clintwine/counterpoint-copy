@@ -117,7 +117,7 @@ export default function GridOverlays({
         }} />
       </div>
 
-      {/* Drag ghost notes - absolute positioning inside grid */}
+      {/* Drag ghost notes - fixed positioning with scroll offset */}
       {dragState?.isDragging && originalDragNotes && (
         <>
           {originalDragNotes.map((note, idx) => {
@@ -133,27 +133,27 @@ export default function GridOverlays({
             return (
               <div
                 key={`ghost-${idx}`}
-                className="absolute rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
+                className="fixed rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
                 style={{
-                  left: `${56 + newBeat * CELL_WIDTH + 2}px`,
-                  top: `${28 + newPitchIdx * CELL_HEIGHT + 2}px`,
+                  left: `${gridRect.left + 56 + newBeat * CELL_WIDTH - viewportState.scrollLeft + 2}px`,
+                  top: `${gridRect.top + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2}px`,
                   width: noteWidth,
                   height: CELL_HEIGHT - 4,
                   backgroundColor: velocityColor,
                   opacity: 0.9,
                   zIndex: 50
                 }}
-              >
+                >
                 <span className="text-[10px] font-bold text-slate-900 pointer-events-none">
                   {pitches[newPitchIdx].replace(/\d/, '')}
                 </span>
-              </div>
-            );
-          })}
-        </>
-      )}
+                </div>
+                );
+                })}
+                </>
+                )}
 
-      {/* Playhead triangle marker - fixed at header top */}
+                {/* Playhead triangle marker - fixed at header top */}
       <div
         className="fixed cursor-ew-resize"
         style={{
