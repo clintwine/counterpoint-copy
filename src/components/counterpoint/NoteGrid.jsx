@@ -119,6 +119,7 @@ export default function NoteGrid({
             }) {
   const gridRef = useRef(null);
   const headerScrollRef = useRef(null);
+  const headerRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -1461,7 +1462,7 @@ export default function NoteGrid({
       {/* Grid container with fixed headers and scrollable content */}
       <div className="flex flex-col flex-1 overflow-hidden mx-1">
         {/* Fixed Beat Header (measures) */}
-        <div className="flex flex-shrink-0">
+        <div className="flex flex-shrink-0" ref={headerRef}>
           <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#3a3a3a' }} />
           <div 
             className="flex-1 overflow-x-hidden"
@@ -1892,6 +1893,7 @@ export default function NoteGrid({
                 getVelocityColor={getVelocityColor}
                 viewportState={viewportState}
                 gridRef={gridRef}
+                headerRef={headerRef}
                 smoothPlayhead={smoothPlayhead}
                 zoom={zoom}
                 isPlaying={isPlaying}

@@ -21,10 +21,12 @@ export default function GridOverlays({
   quantizeGrid,
   totalBeats,
   setIsScrubbing,
-  setScrubPosition
+  setScrubPosition,
+  headerRef
 }) {
   if (!gridRef?.current) return null;
   const gridRect = gridRef.current.getBoundingClientRect();
+  const headerRect = headerRef?.current?.getBoundingClientRect() || gridRect;
   const containerRect = gridRef.current.parentElement?.getBoundingClientRect();
 
   return (
@@ -34,7 +36,7 @@ export default function GridOverlays({
         className="fixed cursor-ew-resize"
         style={{
           left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
-          top: `${gridRect.top}px`,
+          top: `${headerRect.top}px`,
           transform: 'translateX(-50%)',
           pointerEvents: 'auto',
           zIndex: 5,
@@ -156,7 +158,7 @@ export default function GridOverlays({
         className="fixed cursor-ew-resize"
         style={{
           left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
-          top: `${gridRect.top}px`,
+          top: `${headerRect.top}px`,
           width: 0,
           height: 0,
           pointerEvents: 'auto',
