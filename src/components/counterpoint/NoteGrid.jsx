@@ -826,7 +826,8 @@ export default function NoteGrid({
       if (snapToGrid) {
         beatDelta = Math.round(beatDelta / quantizeGrid) * quantizeGrid;
       }
-      const pitchDelta = Math.round(deltaY / CELL_HEIGHT);
+      // Require meaningful vertical movement before registering pitch change (dead zone)
+      const pitchDelta = Math.abs(deltaY) >= CELL_HEIGHT / 2 ? Math.round(deltaY / CELL_HEIGHT) : 0;
 
       const newPitchIndex = dragState.startPitchIndex + pitchDelta;
       const newBeat = dragState.startBeat + beatDelta;
