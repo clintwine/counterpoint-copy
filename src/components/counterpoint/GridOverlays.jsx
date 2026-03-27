@@ -28,6 +28,7 @@ export default function GridOverlays({
   const gridRect = gridRef.current.getBoundingClientRect();
   const headerRect = headerRef?.current?.getBoundingClientRect() || gridRect;
   const containerRect = gridRef.current.parentElement?.getBoundingClientRect();
+  const scrollLeft = gridRef.current.scrollLeft;
 
   return (
     <>
@@ -129,14 +130,15 @@ export default function GridOverlays({
             const noteWidth = duration * CELL_WIDTH - 4;
             const noteVelocity = note.velocity ?? 0.8;
             const velocityColor = getVelocityColor(noteVelocity);
+            const scrollTop = gridRef.current.scrollTop;
 
             return (
               <div
                 key={`ghost-${idx}`}
                 className="fixed rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
                 style={{
-                  left: `${gridRect.left + 56 + newBeat * CELL_WIDTH - viewportState.scrollLeft + 2}px`,
-                  top: `${gridRect.top + newPitchIdx * CELL_HEIGHT - viewportState.scrollTop + 2}px`,
+                  left: `${gridRect.left + 56 + newBeat * CELL_WIDTH - scrollLeft + 2}px`,
+                  top: `${gridRect.top + newPitchIdx * CELL_HEIGHT - scrollTop + 2}px`,
                   width: noteWidth,
                   height: CELL_HEIGHT - 4,
                   backgroundColor: velocityColor,
@@ -157,7 +159,7 @@ export default function GridOverlays({
       <div
         className="fixed cursor-ew-resize"
         style={{
-          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - scrollLeft}px`,
           top: `${headerRect.top}px`,
           width: 0,
           height: 0,
