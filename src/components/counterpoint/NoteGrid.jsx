@@ -1949,6 +1949,168 @@ export default function NoteGrid({
             <NoteControls selectedNotes={selectedNotes} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onNotesUpdate={onNotesUpdate} saveToHistory={saveToHistory} voices={voices} tempo={tempo} getInstrumentConfig={getInstrumentConfig} onVelocityChange={setLastNoteVelocity} />
           </div>
         )}
+
+
+                <div className="flex items-center gap-2 flex-wrap">
+          {/* ADSR Envelope Knobs - hidden on mobile */}
+                          <div className="hidden sm:flex items-center gap-3">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Attack</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.attack * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.attack * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0.01"
+                    max="1"
+                    step="0.01"
+                    value={envelope.attack}
+                    onChange={(e) => handleEnvelopeChange('attack', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Sustain</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.sustain * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.sustain * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={envelope.sustain}
+                    onChange={(e) => handleEnvelopeChange('sustain', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Release</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #10b981 ${envelope.release * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(envelope.release * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0.05"
+                    max="2"
+                    step="0.01"
+                    value={envelope.release}
+                    onChange={(e) => handleEnvelopeChange('release', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+          </div>
+
+          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
+
+          {/* Effect Knobs - hidden on mobile */}
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Reverb</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.reverb * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.reverb * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={effects.reverb}
+                    onChange={(e) => handleEffectChange('reverb', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Delay</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.delay * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.delay * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={effects.delay}
+                    onChange={(e) => handleEffectChange('delay', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-white/50 uppercase">Chorus</span>
+              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
+                style={{
+                  background: `conic-gradient(from 225deg, #f59e0b ${effects.chorus * 270}deg, #334155 0deg)`
+                }}>
+
+                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-[8px] text-white/70">{Math.round(effects.chorus * 100)}</span>
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={effects.chorus}
+                    onChange={(e) => handleEffectChange('chorus', parseFloat(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+
+              </div>
+            </div>
+          </div>
+
+          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
+
+          <div className="flex items-center gap-1 sm:gap-2">
+                            <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowWaveEditor(!showWaveEditor)}
+                            className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+
+                              <Waves className="w-3.5 h-3.5 mr-1" />
+                              Instrument Editor
+                            </Button>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowKeys(!showKeys)}
+                className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+
+              <Keyboard className="w-3.5 h-3.5 mr-1" />
+              Keys
+            </Button>
+          </div>
+          </div>
                   </div>
 
                   {/* Audio Visualizer - right side */}
