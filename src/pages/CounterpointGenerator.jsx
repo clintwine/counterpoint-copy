@@ -996,8 +996,6 @@ export default function CounterpointGenerator() {
     setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
     setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
     setHasUnsavedChanges(false);
-    setPendingAction(null);
-    setUnsavedChangesDialog(false);
     setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
   }, [hasUnsavedChanges]);
 
