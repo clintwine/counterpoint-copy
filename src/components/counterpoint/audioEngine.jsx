@@ -476,7 +476,8 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
   if (!audioContext) initAudio();
   
   // Palm mute for Death Metal Guitar (velocity <= 0.4): modify config but keep articulation/bend handling
-  if (customConfig.name === 'Death Metal Guitar' && volume <= 0.4) {
+  const isPalmMuted = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
+  if (isPalmMuted) {
     customConfig = {
       ...customConfig,
       envelope: { ...customConfig.envelope, sustain: 0.2, release: 0.1 },
@@ -526,7 +527,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-slow':
         const tremoloSlowSpeed = sixteenthNoteDuration;
         const numSlowPicks = Math.floor(duration / tremoloSlowSpeed);
-        const isPalmMutedSlow = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
+        const isPalmMutedSlow = isPalmMuted;
         const slowChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numSlowPicks; i++) {
           setTimeout(() => {
@@ -545,7 +546,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-medium':
         const tremoloMedSpeed = sixteenthNoteDuration * 0.5;
         const numMedPicks = Math.floor(duration / tremoloMedSpeed);
-        const isPalmMutedMed = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
+        const isPalmMutedMed = isPalmMuted;
         const medChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numMedPicks; i++) {
           setTimeout(() => {
@@ -563,7 +564,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-fast':
         const tremoloFastSpeed = sixteenthNoteDuration * 0.25;
         const numFastPicks = Math.floor(duration / tremoloFastSpeed);
-        const isPalmMutedFast = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
+        const isPalmMutedFast = isPalmMuted;
         const fastChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numFastPicks; i++) {
           setTimeout(() => {
@@ -581,7 +582,7 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
       case 'tremolo-ultra':
         const tremoloUltraSpeed = sixteenthNoteDuration * 0.125;
         const numUltraPicks = Math.floor(duration / tremoloUltraSpeed);
-        const isPalmMutedUltra = customConfig.name === 'Death Metal Guitar' && volume <= 0.4;
+        const isPalmMutedUltra = isPalmMuted;
         const ultraChordPitches = (customConfig.name === 'Electric Guitar' && volume >= 0.95) ? getPowerChordPitches(pitch) : [pitch];
         for (let i = 0; i < numUltraPicks; i++) {
           setTimeout(() => {

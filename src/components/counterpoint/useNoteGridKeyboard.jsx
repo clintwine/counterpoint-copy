@@ -211,6 +211,24 @@ export function useNoteGridKeyboard({
         setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
+      } else if ((e.key === '+' || e.key === '=') && selectedNotes.size > 0) {
+        e.preventDefault();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            return { ...n, velocity: Math.min(1, Math.round(((n.velocity ?? 0.8) + 0.04) * 100) / 100) };
+          }
+          return n;
+        });
+        onNotesUpdate(newNotes);
+      } else if (e.key === '-' && selectedNotes.size > 0) {
+        e.preventDefault();
+        const newNotes = cantusFirmus.map(n => {
+          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+            return { ...n, velocity: Math.max(0.04, Math.round(((n.velocity ?? 0.8) - 0.04) * 100) / 100) };
+          }
+          return n;
+        });
+        onNotesUpdate(newNotes);
       } else if (e.key === 'Enter') {
         e.preventDefault();
         const seekTo = (loopStart !== null && isLooping) ? loopStart : 0;
