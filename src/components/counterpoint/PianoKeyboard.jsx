@@ -662,45 +662,24 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #10b981 ${envelope.sustain * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(envelope.sustain * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={envelope.sustain}
-                    onChange={(e) => handleEnvelopeChange('sustain', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-
-                            <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowWaveEditor(!showWaveEditor)}
-                            className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
-
-                              <Waves className="w-3.5 h-3.5 mr-1" />
-                              Instrument Editor
-                            </Button>
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowKeys(!showKeys)}
-                className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
-
-              <Keyboard className="w-3.5 h-3.5 mr-1" />
-              Keys
-            </Button>
-          </div>
-          </div>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowWaveEditor(!showWaveEditor)}
+            className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+            <Waves className="w-3.5 h-3.5 mr-1" />
+            Instrument Editor
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowKeys(!showKeys)}
+            className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+            <Keyboard className="w-3.5 h-3.5 mr-1" />
+            Keys
+          </Button>
+        </div>
+      </div>
 
           <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
