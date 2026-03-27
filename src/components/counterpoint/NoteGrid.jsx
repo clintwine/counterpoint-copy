@@ -700,6 +700,9 @@ export default function NoteGrid({
       };
 
   const handlePointerMove = (e) => {
+                if (dragState || resizeState || marquee || isPainting) {
+                  e.preventDefault?.();
+                }
                 const coords = e.clientX !== undefined ? e : getEventCoords(e);
 
                 // Handle piano key dragging - early return for performance
@@ -1596,7 +1599,7 @@ export default function NoteGrid({
           style={{ 
             scrollbarWidth: 'thin', 
             scrollbarColor: '#505050 transparent',
-            touchAction: tool === 'marquee' ? 'none' : 'auto',
+            touchAction: (tool === 'marquee' || dragState || resizeState) ? 'none' : 'auto',
             backgroundColor: '#232323'
           }}
           onScroll={(e) => {
