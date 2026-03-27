@@ -1460,24 +1460,7 @@ export default function NoteGrid({
 
       {/* Grid container with fixed headers and scrollable content */}
       <div className="flex flex-col flex-1 mx-2 sm:mx-5 overflow-hidden">
-        {/* Fixed Scrubber */}
-        <div className="flex flex-shrink-0">
-          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
-          <div 
-            className="flex-1 overflow-hidden"
-            style={{ backgroundColor: '#2B2B2B' }}
-          >
-            <Scrubber 
-              smoothPlayhead={smoothPlayhead}
-              totalBeats={totalBeats}
-              CELL_WIDTH={CELL_WIDTH}
-              onSeek={onSeek}
-              gridRef={gridRef}
-            />
-          </div>
-        </div>
-
-        {/* Fixed Beat Header */}
+        {/* Fixed Beat Header (measures) */}
         <div className="flex flex-shrink-0">
           <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#3a3a3a' }} />
           <div 
@@ -1525,19 +1508,16 @@ export default function NoteGrid({
                   const moveBeat = getBeatFromHeaderPosition(moveEvent.clientX);
                   if (moveBeat !== null) {
                     if (dragMode === 'start') {
-                      // Dragging left edge - adjust loop start
                       const newStart = Math.floor(moveBeat);
                       if (newStart < loopEnd) {
                         onLoopChange?.(newStart, loopEnd);
                       }
                     } else if (dragMode === 'end') {
-                      // Dragging right edge - adjust loop end
                       const newEnd = Math.floor(moveBeat) + 1;
                       if (newEnd > loopStart) {
                         onLoopChange?.(loopStart, newEnd);
                       }
                     } else {
-                      // Creating new loop
                       const start = Math.min(beat, moveBeat);
                       const end = Math.max(beat, moveBeat);
                       if (onLoopChange) {
@@ -1551,21 +1531,17 @@ export default function NoteGrid({
                   let upBeat = getBeatFromHeaderPosition(upEvent.clientX);
                   if (upBeat !== null) {
                     if (dragMode === 'start' || dragMode === 'end') {
-                      // Edge drag complete - keep the adjusted loop
-                      // Already updated via handleMouseMove
+                      // Edge drag complete
                     } else {
-                      // New loop creation
                       const snappedBeat = Math.floor(beat);
                       const snappedUpBeat = Math.floor(upBeat);
                       const dragDistance = Math.abs(snappedUpBeat - snappedBeat);
 
                       if (dragDistance === 0) {
-                        // Single click - don't seek, keep playhead where it is
                         if (onLoopChange) {
                           onLoopChange(null, null);
                         }
                       } else {
-                        // Drag - create loop region (always use full beats for loops)
                         const start = Math.min(snappedBeat, snappedUpBeat);
                         const end = Math.max(snappedBeat, snappedUpBeat) + 1;
                         if (onLoopChange) {
@@ -1584,8 +1560,25 @@ export default function NoteGrid({
                 document.addEventListener('mouseup', handleMouseUp);
               }}
             >
-              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})} 
+              {Array.from({ length: measures }).map((_, measureIndex) => {const measureStartBeat = measureIndex * beatsPerMeasure; return (<MeasureHeader key={measureIndex} measureIndex={measureIndex} measureStartBeat={measureStartBeat} beatsPerMeasure={beatsPerMeasure} CELL_WIDTH={CELL_WIDTH} loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping} selectedNotes={selectedNotes} isLoopSelecting={isLoopSelecting} cantusFirmus={cantusFirmus} getNoteKey={getNoteKey} onLoopChange={onLoopChange} setSelectedNotes={setSelectedNotes} gridRef={gridRef} />);})}
             </div>
+          </div>
+        </div>
+
+        {/* Fixed Scrubber */}
+        <div className="flex flex-shrink-0">
+          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
+          <div 
+            className="flex-1 overflow-hidden"
+            style={{ backgroundColor: '#2B2B2B' }}
+          >
+            <Scrubber 
+              smoothPlayhead={smoothPlayhead}
+              totalBeats={totalBeats}
+              CELL_WIDTH={CELL_WIDTH}
+              onSeek={onSeek}
+              gridRef={gridRef}
+            />
           </div>
         </div>
 
