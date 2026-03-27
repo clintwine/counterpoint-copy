@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Waves, Keyboard } from 'lucide-react';
+import { Waves } from 'lucide-react';
 
 export default function EnvelopeEffectsPanel({
   envelope = { attack: 0.02, sustain: 0.7, release: 0.3 },
@@ -9,9 +9,7 @@ export default function EnvelopeEffectsPanel({
   onEffectChange,
   showWaveEditor,
   onToggleWaveEditor,
-  onOpenWaveEditor,
-  showKeys,
-  onToggleKeys
+  onOpenWaveEditor
 }) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -159,17 +157,6 @@ export default function EnvelopeEffectsPanel({
           className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
           <Waves className="w-3.5 h-3.5 mr-1" />
           Instrument Editor
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            console.log('[EnvelopeEffectsPanel] Keys toggle - current:', showKeys, 'toggling to:', !showKeys);
-            onToggleKeys(!showKeys);
-          }}
-          className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
-          <Keyboard className="w-3.5 h-3.5 mr-1" />
-          Keys
         </Button>
       </div>
     </div>
