@@ -106,70 +106,63 @@ const PRESET_LIBRARY = [
     envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 },
     filter: { type: 'lowpass', frequency: 1200, Q: 0.5 }
   },
-{
-  name: 'Bright Lead',
-  oscillators: [
-  { waveform: 'sawtooth', detune: 0, gain: 0.7 },
-  { waveform: 'square', detune: 12, gain: 0.3 }],
-
-  envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
-  filter: { type: 'lowpass', frequency: 4000, Q: 2 }
-},
-{
-  name: 'Sub Bass',
-  oscillators: [
-  { waveform: 'sine', detune: 0, gain: 1.0 }],
-
-  envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
-  filter: { type: 'lowpass', frequency: 500, Q: 1 }
-},
-{
-  name: 'Pluck',
-  oscillators: [
-  { waveform: 'triangle', detune: 0, gain: 0.8 },
-  { waveform: 'square', detune: 0, gain: 0.2 }],
-
-  envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
-  filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
-},
-{
-  name: 'Bell',
-  oscillators: [
-  { waveform: 'sine', detune: 0, gain: 0.6 },
-  { waveform: 'sine', detune: 700, gain: 0.3 },
-  { waveform: 'sine', detune: 1200, gain: 0.1 }],
-
-  envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
-  filter: { type: 'highpass', frequency: 500, Q: 0.5 }
-},
-{
-  name: 'Choir',
-  oscillators: [
-  { waveform: 'sawtooth', detune: -5, gain: 0.4 },
-  { waveform: 'sawtooth', detune: 5, gain: 0.4 },
-  { waveform: 'sine', detune: 0, gain: 0.2 }],
-
-  envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
-  filter: { type: 'bandpass', frequency: 1500, Q: 2 }
-},
-{
-  name: 'Reese Bass',
-  oscillators: [
-  { waveform: 'sawtooth', detune: -10, gain: 0.5 },
-  { waveform: 'sawtooth', detune: 10, gain: 0.5 }],
-
-  envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
-  filter: { type: 'lowpass', frequency: 800, Q: 3 }
-},
-{
-  name: 'Flutey',
-  oscillators: [
-  { waveform: 'sine', detune: 0, gain: 0.9 },
-  { waveform: 'triangle', detune: 0, gain: 0.1 }],
-
-  envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
-  filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
-}];
+  {
+    name: 'Bright Lead',
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.7 },
+      { waveform: 'square', detune: 12, gain: 0.3 }],
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 4000, Q: 2 }
+  },
+  {
+    name: 'Sub Bass',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 1.0 }],
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 },
+    filter: { type: 'lowpass', frequency: 500, Q: 1 }
+  },
+  {
+    name: 'Pluck',
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.8 },
+      { waveform: 'square', detune: 0, gain: 0.2 }],
+    envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 },
+    filter: { type: 'lowpass', frequency: 3000, Q: 1.5 }
+  },
+  {
+    name: 'Bell',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.6 },
+      { waveform: 'sine', detune: 700, gain: 0.3 },
+      { waveform: 'sine', detune: 1200, gain: 0.1 }],
+    envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 },
+    filter: { type: 'highpass', frequency: 500, Q: 0.5 }
+  },
+  {
+    name: 'Choir',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.4 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.4 },
+      { waveform: 'sine', detune: 0, gain: 0.2 }],
+    envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 },
+    filter: { type: 'bandpass', frequency: 1500, Q: 2 }
+  },
+  {
+    name: 'Reese Bass',
+    oscillators: [
+      { waveform: 'sawtooth', detune: -10, gain: 0.5 },
+      { waveform: 'sawtooth', detune: 10, gain: 0.5 }],
+    envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 },
+    filter: { type: 'lowpass', frequency: 800, Q: 3 }
+  },
+  {
+    name: 'Flutey',
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.9 },
+      { waveform: 'triangle', detune: 0, gain: 0.1 }],
+    envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 },
+    filter: { type: 'lowpass', frequency: 3500, Q: 0.3 }
+  }];
 
 
 // Full 88-key piano: A0 to C8
@@ -204,8 +197,6 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
           variant="outline"
           role="combobox"
           aria-expanded={open} className="inline-flex items-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border shadow-sm hover:text-accent-foreground px-4 py-2 w-32 h-8 justify-between bg-slate-700 border-slate-600 text-white text-xs hover:bg-slate-600 hidden\n">
-
-
           <div className="flex items-center gap-1.5">
             <Guitar className="w-4 h-4 text-white/60" />
             <span>{selected?.label || 'Select...'}</span>
@@ -234,22 +225,21 @@ function InstrumentSelect({ value, onChange, instruments, onCreateNew, customIns
                     }}
                     className="text-white text-xs cursor-pointer flex items-center justify-between group"
                   >
-
-                  <span>{inst.label}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onPreview) onPreview(inst.value);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
-                    title="Preview sound"
-                  >
-                    ▶
-                  </button>
+                    <span>{inst.label}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onPreview) onPreview(inst.value);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity"
+                      title="Preview sound"
+                    >
+                      ▶
+                    </button>
                   </CommandItem>
-                  );
-                  })}
-                  </CommandGroup>
+                );
+              })}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
@@ -662,172 +652,32 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* ADSR Envelope Knobs - hidden on mobile */}
-                          <div className="hidden sm:flex items-center gap-3">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Attack</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #10b981 ${envelope.attack * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(envelope.attack * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0.01"
-                    max="1"
-                    step="0.01"
-                    value={envelope.attack}
-                    onChange={(e) => handleEnvelopeChange('attack', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Sustain</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #10b981 ${envelope.sustain * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(envelope.sustain * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={envelope.sustain}
-                    onChange={(e) => handleEnvelopeChange('sustain', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Release</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #10b981 ${envelope.release * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(envelope.release * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0.05"
-                    max="2"
-                    step="0.01"
-                    value={envelope.release}
-                    onChange={(e) => handleEnvelopeChange('release', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-          </div>
-
-          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
-
-          {/* Effect Knobs - hidden on mobile */}
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Reverb</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #f59e0b ${effects.reverb * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(effects.reverb * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={effects.reverb}
-                    onChange={(e) => handleEffectChange('reverb', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Delay</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #f59e0b ${effects.delay * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(effects.delay * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={effects.delay}
-                    onChange={(e) => handleEffectChange('delay', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-white/50 uppercase">Chorus</span>
-              <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-slate-600 relative flex items-center justify-center cursor-pointer"
-                style={{
-                  background: `conic-gradient(from 225deg, #f59e0b ${effects.chorus * 270}deg, #334155 0deg)`
-                }}>
-
-                <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-                  <span className="text-[8px] text-white/70">{Math.round(effects.chorus * 100)}</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={effects.chorus}
-                    onChange={(e) => handleEffectChange('chorus', parseFloat(e.target.value))}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-
-              </div>
-            </div>
-          </div>
-
-          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
-
           <div className="flex items-center gap-1 sm:gap-2">
-                            <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowWaveEditor(!showWaveEditor)}
-                            className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
-
-                              <Waves className="w-3.5 h-3.5 mr-1" />
-                              Instrument Editor
-                            </Button>
             <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowKeys(!showKeys)}
-                className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
-
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowWaveEditor(!showWaveEditor)}
+              className={`h-7 px-2 text-xs ${showWaveEditor ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
+              <Waves className="w-3.5 h-3.5 mr-1" />
+              Instrument Editor
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeys(!showKeys)}
+              className={`h-7 px-2 text-xs ${showKeys ? 'bg-amber-500/20 text-amber-400' : 'text-white/60 hover:text-white hover:bg-slate-700'}`}>
               <Keyboard className="w-3.5 h-3.5 mr-1" />
               Keys
             </Button>
           </div>
-          </div>
-          </div>
+        </div>
+      </div>
 
-          <div className="overflow-x-auto pb-1">
+      <div className="overflow-x-auto pb-1">
         <div className="inline-flex items-center gap-3">
           <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
-          {(() => {
+            {(() => {
               const keys = [];
               let whiteKeyIndex = 0;
 
@@ -844,7 +694,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       height: 75,
                       backgroundColor: '#D0D0D0'
                     }} />
-
                 );
               });
 
@@ -861,7 +710,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       height: 45,
                       backgroundColor: '#3A3A3A'
                     }} />
-
                 );
               });
 
@@ -886,12 +734,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                       height: 75,
                       backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5'
                     }}>
-
-                  {showKeys && getKeyLabel(note, 0) &&
-                    <span className="text-[8px] font-bold text-slate-500 mb-0.5">{getKeyLabel(note, 0)}</span>
+                    {showKeys && getKeyLabel(note, 0) &&
+                      <span className="text-[8px] font-bold text-slate-500 mb-0.5">{getKeyLabel(note, 0)}</span>
                     }
-                  {note === 'A' && <span className="text-[8px] text-slate-400">A0</span>}
-                </div>
+                    {note === 'A' && <span className="text-[8px] text-slate-400">A0</span>}
+                  </div>
                 );
                 whiteKeyIndex++;
               });
@@ -913,7 +760,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     height: 45,
                     backgroundColor: a0SharpPressed ? '#D4A574' : a0SharpActive !== -1 ? VOICE_COLORS[a0SharpActive] : '#1E293B'
                   }} />
-
               );
 
               // Full octaves 1-7
@@ -940,12 +786,11 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         height: 75,
                         backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#F5F5F5'
                       }}>
-
-                    {showKeys && keyLabel &&
-                      <span className="text-[8px] font-bold text-slate-500 mb-0.5">{keyLabel}</span>
+                      {showKeys && keyLabel &&
+                        <span className="text-[8px] font-bold text-slate-500 mb-0.5">{keyLabel}</span>
                       }
-                    {key.note === 'C' && <span className="text-[8px] text-slate-400">C{octave}</span>}
-                  </div>
+                      {key.note === 'C' && <span className="text-[8px] text-slate-400">C{octave}</span>}
+                    </div>
                   );
                   whiteKeyIndex++;
                 });
@@ -971,11 +816,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         height: 45,
                         backgroundColor: isPressed ? '#D4A574' : isActive ? VOICE_COLORS[voiceIndex] : '#1E293B'
                       }}>
-
-                    {showKeys && blackKeyLabel &&
-                      <span className="text-[7px] font-bold text-white/70">{blackKeyLabel}</span>
+                      {showKeys && blackKeyLabel &&
+                        <span className="text-[7px] font-bold text-white/70">{blackKeyLabel}</span>
                       }
-                  </div>
+                    </div>
                   );
                 });
               }
@@ -997,9 +841,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                     height: 75,
                     backgroundColor: c8Pressed ? '#D4A574' : c8Active !== -1 ? VOICE_COLORS[c8Active] : '#F5F5F5'
                   }}>
-
-                <span className="text-[8px] text-slate-400">C8</span>
-              </div>
+                  <span className="text-[8px] text-slate-400">C8</span>
+                </div>
               );
               whiteKeyIndex++;
 
@@ -1025,7 +868,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         height: 45,
                         backgroundColor: '#3A3A3A'
                       }} />
-
                   );
                 } else {
                   // White key
@@ -1039,7 +881,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
                         height: 75,
                         backgroundColor: '#D0D0D0'
                       }} />
-
                   );
                   whiteKeyIndex++;
                 }
@@ -1047,98 +888,96 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
 
               return keys;
             })()}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Wave Editor Modal */}
-              <Dialog 
-                open={showWaveEditor} 
-                onOpenChange={(open) => {
-                  console.log('[PianoKeyboard] Dialog onOpenChange:', open);
-                  setShowWaveEditor(open);
+      <Dialog 
+        open={showWaveEditor} 
+        onOpenChange={(open) => {
+          console.log('[PianoKeyboard] Dialog onOpenChange:', open);
+          setShowWaveEditor(open);
+        }}
+        modal={true}
+      >
+        <DialogContent 
+          className="bg-slate-900 border-slate-700 max-w-4xl h-[92vh] overflow-y-auto p-6 z-[100000] [&>button]:text-white [&>button]:hover:text-white/80" 
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          aria-describedby="wave-editor-description"
+        >
+          <DialogHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
+              <Button
+                onClick={async () => {
+                  if (isCreatingInstrumentRef.current) return;
+                  isCreatingInstrumentRef.current = true;
+                  try {
+                    const newIndex = customInstruments.length;
+                    const nextNumber = newIndex + 1;
+                    const newInstrument = { 
+                      name: `Custom ${nextNumber}`,
+                      oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
+                      envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
+                      effects: [{ type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }],
+                      eq: [
+                        { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
+                        { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
+                        { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
+                      ]
+                    };
+                    await onSaveInstrument(newInstrument, -1);
+                    // Select the newly created instrument after save completes
+                    onInstrumentChange(`custom_${newIndex}`);
+                  } finally {
+                    setTimeout(() => {
+                      isCreatingInstrumentRef.current = false;
+                    }, 500);
+                  }
                 }}
-                modal={true}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium"
               >
-                <DialogContent 
-                  className="bg-slate-900 border-slate-700 max-w-4xl h-[92vh] overflow-y-auto p-6 z-[100000] [&>button]:text-white [&>button]:hover:text-white/80" 
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                  aria-describedby="wave-editor-description"
-                >
-                  <DialogHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <DialogTitle className="text-white text-lg">Instrument Editor</DialogTitle>
-                      <Button
-                        onClick={async () => {
-                          if (isCreatingInstrumentRef.current) return;
-                          isCreatingInstrumentRef.current = true;
-                          try {
-                            const newIndex = customInstruments.length;
-                            const nextNumber = newIndex + 1;
-                            const newInstrument = { 
-                              name: `Custom ${nextNumber}`,
-                              oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1, phase: 0 }],
-                              envelope: { attack: 0.02, decay: 0.1, sustain: 0.7, release: 0.3 },
-                              effects: [{ type: 'filter', config: { filterType: 'lowpass', frequency: 2000, Q: 1 } }],
-                              eq: [
-                                { frequency: 60, gain: 0, Q: 1, type: 'lowshelf' },
-                                { frequency: 250, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 1000, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 4000, gain: 0, Q: 1, type: 'peaking' },
-                                { frequency: 12000, gain: 0, Q: 1, type: 'highshelf' }
-                              ]
-                            };
-                            await onSaveInstrument(newInstrument, -1);
-                            // Select the newly created instrument after save completes
-                            onInstrumentChange(`custom_${newIndex}`);
-                          } finally {
-                            setTimeout(() => {
-                              isCreatingInstrumentRef.current = false;
-                            }, 500);
-                          }
-                        }}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs font-medium"
-                      >
-                        <Plus className="w-3.5 h-3.5 mr-1.5" />
-                        New
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          if (instrument.startsWith('custom_')) {
-                            const index = parseInt(instrument.split('_')[1]);
-                            const customConfig = customInstruments[index];
-                            if (customConfig && confirm(`Delete "${customConfig.name}"?`)) {
-                              onDeleteInstrument(index);
-                            }
-                          }
-                        }}
-                        size="sm"
-                        disabled={!instrument.startsWith('custom_')}
-                        className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 disabled:opacity-20 disabled:cursor-not-allowed"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                    <p id="wave-editor-description" className="sr-only">
-                      Create and edit custom instruments with oscillators, filters, and effects
-                    </p>
-                  </DialogHeader>
-                  <WaveEditor
-                  customInstruments={customInstruments}
-                  onSaveInstrument={onSaveInstrument}
-                  onDeleteInstrument={onDeleteInstrument}
-                  onInstrumentChange={onInstrumentChange}
-                  onVoiceInstrumentChange={onVoiceInstrumentChange}
-                  onClose={() => setShowWaveEditor(false)}
-                  currentInstrument={instrument}
-                  currentInstrumentConfig={getCustomConfig()}
-                  presetLibrary={PRESET_LIBRARY}
-                  onNew={() => {}} />
-
-                </DialogContent>
-              </Dialog>
+                <Plus className="w-3.5 h-3.5 mr-1.5" />
+                New
+              </Button>
+              <Button
+                onClick={() => {
+                  if (instrument.startsWith('custom_')) {
+                    const index = parseInt(instrument.split('_')[1]);
+                    const customConfig = customInstruments[index];
+                    if (customConfig && confirm(`Delete "${customConfig.name}"?`)) {
+                      onDeleteInstrument(index);
+                    }
+                  }
+                }}
+                size="sm"
+                disabled={!instrument.startsWith('custom_')}
+                className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 disabled:opacity-20 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            <p id="wave-editor-description" className="sr-only">
+              Create and edit custom instruments with oscillators, filters, and effects
+            </p>
+          </DialogHeader>
+          <WaveEditor
+            customInstruments={customInstruments}
+            onSaveInstrument={onSaveInstrument}
+            onDeleteInstrument={onDeleteInstrument}
+            onInstrumentChange={onInstrumentChange}
+            onVoiceInstrumentChange={onVoiceInstrumentChange}
+            onClose={() => setShowWaveEditor(false)}
+            currentInstrument={instrument}
+            currentInstrumentConfig={getCustomConfig()}
+            presetLibrary={PRESET_LIBRARY}
+            onNew={() => {}} />
+        </DialogContent>
+      </Dialog>
     </div>);
-
 }
