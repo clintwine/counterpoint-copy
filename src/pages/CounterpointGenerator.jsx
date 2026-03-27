@@ -25,6 +25,7 @@ import GenerationSettings from '@/components/counterpoint/GenerationSettings';
 import UnsavedChangesDialog from '@/components/counterpoint/UnsavedChangesDialog';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
 import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument } from '@/components/counterpoint/audioEngine';
+import { PRESET_LIBRARY_CONFIGS } from '@/components/counterpoint/presetLibrary';
 
 const DEFAULT_VOICES = [
   { name: 'Cantus Firmus', enabled: true, lowRange: 'C4', highRange: 'C5', volume: 80 },
@@ -192,56 +193,27 @@ export default function CounterpointGenerator() {
     setLocalInstruments(loadLocalInstruments());
   }, []);
 
-  // Merge local and database instruments
-  const savedInstruments = [...localInstruments, ...dbInstruments];
+  // Merge local, preset, and database instruments (Death Metal Guitar is now in presets)
+  const presetInstruments = PRESET_LIBRARY_CONFIGS.filter(p => p.name === 'Death Metal Guitar').map((p, i) => ({ ...p, id: `preset_death_metal`, isPreset: true }));
+  const savedInstruments = [...localInstruments, ...presetInstruments, ...dbInstruments];
 
   // Sync merged instruments to state
   useEffect(() => {
     setCustomInstruments(savedInstruments);
   }, [savedInstruments.length]);
 
-  // Add death metal guitar preset on first load (only once) and clean up duplicates
-  const deathMetalAddedRef = useRef(false);
+  // Clean up legacy local Death Metal Guitar (now in preset library)
+  const deathMetalCleanupRef = useRef(false);
   useEffect(() => {
-    if (deathMetalAddedRef.current) return;
-    deathMetalAddedRef.current = true;
+    if (deathMetalCleanupRef.current) return;
+    deathMetalCleanupRef.current = true;
     
-    // Load local instruments and clean up duplicates
+    // Remove Death Metal Guitar from local storage (now in preset library)
     const localInsts = loadLocalInstruments();
-    const deathMetalInstruments = localInsts.filter(i => i.name === 'Death Metal Guitar');
-    
-    if (deathMetalInstruments.length > 1) {
-      // Remove all death metal guitars and keep only one
-      const cleanedInstruments = localInsts.filter(i => i.name !== 'Death Metal Guitar');
-      cleanedInstruments.push(deathMetalInstruments[0]); // Keep the first one
-      localStorage.setItem('counterpoint-local-instruments', JSON.stringify(cleanedInstruments));
-      setLocalInstruments(cleanedInstruments);
-    } else if (deathMetalInstruments.length === 0) {
-      // Add it if it doesn't exist
-      const deathMetalGuitar = {
-        name: 'Death Metal Guitar',
-        oscillators: [
-          { waveform: 'sawtooth', detune: -12, gain: 0.8, harmonic: 1, phase: 0 },
-          { waveform: 'square', detune: 8, gain: 0.7, harmonic: 1, phase: 45 },
-          { waveform: 'sawtooth', detune: -5, gain: 0.6, harmonic: 2, phase: 90 },
-          { waveform: 'square', detune: 15, gain: 0.5, harmonic: 1, phase: 180 }
-        ],
-        envelope: { attack: 0.002, decay: 0.12, sustain: 0.65, release: 0.2 },
-        effects: [
-          { type: 'filter', config: { filterType: 'lowpass', frequency: 4200, Q: 2.8 } }
-        ],
-        eq: [
-          { frequency: 60, gain: 8, Q: 1.2, type: 'lowshelf' },
-          { frequency: 250, gain: -6, Q: 2, type: 'peaking' },
-          { frequency: 1000, gain: -8, Q: 2.5, type: 'peaking' },
-          { frequency: 4000, gain: 10, Q: 1.5, type: 'peaking' },
-          { frequency: 12000, gain: 5, Q: 1, type: 'highshelf' }
-        ],
-        distortion: 85,
-        bitcrush: 3,
-        volume: 1.0
-      };
-      saveInstrumentLocally(deathMetalGuitar);
+    const cleaned = localInsts.filter(i => i.name !== 'Death Metal Guitar');
+    if (cleaned.length !== localInsts.length) {
+      localStorage.setItem('counterpoint-local-instruments', JSON.stringify(cleaned));
+      setLocalInstruments(cleaned);
     }
   }, []);
 
