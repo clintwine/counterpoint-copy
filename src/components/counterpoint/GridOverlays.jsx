@@ -111,7 +111,7 @@ export default function GridOverlays({
         {/* Line */}
         <div style={{
           width: Math.max(2, 3 * zoom),
-          height: pitches.length * CELL_HEIGHT,
+          height: (pitches.length * CELL_HEIGHT) + 32,
           backgroundColor: '#ef4444',
           boxShadow: '0 0 8px rgba(239,68,68,0.6)',
           flexShrink: 0,
@@ -156,11 +156,11 @@ export default function GridOverlays({
                 )}
 
                 {/* Playhead triangle marker - fixed at header top */}
-      <div
-        className="fixed cursor-ew-resize"
-        style={{
-          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - scrollLeft}px`,
-          top: `${headerRect.top}px`,
+                <div
+                className="fixed cursor-ew-resize"
+                style={{
+                left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - scrollLeft}px`,
+                top: `${gridRect.top}px`,
           width: 0,
           height: 0,
           pointerEvents: 'auto',
