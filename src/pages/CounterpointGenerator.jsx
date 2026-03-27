@@ -181,10 +181,17 @@ export default function CounterpointGenerator() {
   });
 
   // Fetch custom instruments from database
-  const { data: dbInstruments = [] } = useQuery({
-    queryKey: ['custom-instruments'],
-    queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
-  });
+   const { data: dbInstruments = [] } = useQuery({
+     queryKey: ['custom-instruments'],
+     queryFn: () => base44.entities.CustomInstrument.list('-created_date'),
+   });
+
+  // Sync envelope to audio engine when it changes
+  useEffect(() => {
+   import('@/components/counterpoint/audioEngine').then(({ setEnvelope }) => {
+     setEnvelope(envelope);
+   });
+  }, [envelope]);
 
   // Load local instruments
   const [localInstruments, setLocalInstruments] = useState([]);
