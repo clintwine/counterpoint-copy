@@ -700,9 +700,7 @@ export default function NoteGrid({
       };
 
   const handlePointerMove = (e) => {
-                if (dragState || resizeState || marquee || isPainting) {
-                  e.preventDefault?.();
-                }
+                if (dragState || resizeState) e.stopPropagation?.();
                 const coords = e.clientX !== undefined ? e : getEventCoords(e);
 
                 // Handle piano key dragging - early return for performance
@@ -882,8 +880,8 @@ export default function NoteGrid({
       // Auto-scroll when dragging near edges
                   if (gridRef.current && dragState.isDragging) {
                     const rect = gridRef.current.getBoundingClientRect();
-                    const edgeThreshold = 60;
-                    const scrollSpeed = 15;
+                    const edgeThreshold = 30;
+                    const scrollSpeed = 12;
 
                     // Horizontal scrolling
                     if (coords.clientX > rect.right - edgeThreshold) {
@@ -895,7 +893,7 @@ export default function NoteGrid({
                     // Vertical scrolling
                     if (coords.clientY > rect.bottom - edgeThreshold) {
                       gridRef.current.scrollTop += scrollSpeed;
-                    } else if (coords.clientY < rect.top + edgeThreshold + 28) {
+                    } else if (coords.clientY < rect.top + edgeThreshold) {
                       gridRef.current.scrollTop -= scrollSpeed;
                     }
                   }
