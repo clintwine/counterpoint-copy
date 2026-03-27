@@ -1274,12 +1274,15 @@ export default function CounterpointGenerator() {
       setIsPlaying(false);
     } else {
       console.log('[Playback] handlePlayPause - STARTING playback');
-      // When starting playback, jump to loop start if set
+      // Always clear played notes to prevent stale state
+      playedNotesRef.current.clear();
+      // When starting playback, jump to loop start if set, otherwise keep current position
       if (loopStart !== null) {
         setCurrentBeat(loopStart);
         setPlayheadPosition(loopStart);
         lastPlayheadRef.current = loopStart;
-        playedNotesRef.current.clear();
+      } else {
+        lastPlayheadRef.current = playheadPosition;
       }
       console.log('[Playback] setIsPlaying(true) - called from handlePlayPause');
       setIsPlaying(true);
@@ -1636,7 +1639,7 @@ export default function CounterpointGenerator() {
                                />
             </div>
 
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative z-10">
             <PianoSection
               showPiano={showPiano} setShowPiano={setShowPiano}
               showPianoPanel={showPianoPanel} pianoPopout={pianoPopout} setPianoPopout={setPianoPopout}
