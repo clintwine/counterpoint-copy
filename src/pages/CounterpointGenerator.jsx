@@ -1521,7 +1521,7 @@ export default function CounterpointGenerator() {
         </motion.header>
 
         {/* Main Content - Full width now, AI panel is overlay */}
-        <div className="flex flex-col flex-1 min-h-0 gap-2">
+        <div className="flex flex-col flex-1 min-h-0">
 
           {/* Main Area - Score & Playback - Full width */}
           <motion.main 
