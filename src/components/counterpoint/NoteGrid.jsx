@@ -1019,10 +1019,6 @@ export default function NoteGrid({
       } else if (!dragState.isDragging || (pitchDelta === 0 && beatDelta === 0)) {
         // Simple click without drag - update selection now
         if (shouldUpdateSelection) {
-          const clickedNote = cantusFirmus.find(n => getNoteKey(n.pitch, n.beat) === targetKey);
-          if (clickedNote) {
-            onLoopChange?.(Math.floor(clickedNote.beat), Math.ceil(clickedNote.beat + (clickedNote.duration || DEFAULT_DURATION)));
-          }
           if (!shiftKey) {
             setSelectedNotes(new Set([targetKey]));
           } else {
