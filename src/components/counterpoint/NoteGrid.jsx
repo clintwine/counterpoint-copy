@@ -1448,7 +1448,7 @@ export default function NoteGrid({
       {/* Grid container with fixed headers and scrollable content */}
       <div className="flex flex-col flex-1 overflow-hidden mx-1">
         {/* Fixed Beat Header (measures) */}
-        <div className="flex flex-shrink-0" ref={headerRef}>
+        <div className="flex flex-shrink-0 relative z-10" ref={headerRef}>
           <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#3a3a3a' }} />
           <div 
             className="flex-1 overflow-x-hidden"

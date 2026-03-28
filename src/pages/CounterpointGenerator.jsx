@@ -1497,7 +1497,7 @@ export default function CounterpointGenerator() {
 
       <div className="relative z-10 flex flex-col flex-1 min-h-0 w-full overflow-x-hidden">
         {/* Header */}
-                  <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-1">
+                  <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <ProjectDialogs
             loadDialogOpen={loadDialogOpen} setLoadDialogOpen={setLoadDialogOpen}
             savedProjects={savedProjects} handleLoadProject={handleLoadProject} deleteProjectMutation={deleteProjectMutation} handleNewProject={handleNewProject}
