@@ -20,48 +20,7 @@ import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
 import { useAudioVisualizer } from './useAudioVisualizer';
 
-// Full 88-key piano range: A0 to C8
-const NOTE_NAMES_CHROMATIC = ['B', 'A#', 'A', 'G#', 'G', 'F#', 'F', 'E', 'D#', 'D', 'C#', 'C'];
-
-// Pre-generate all 88 pitches (static)
-const ALL_PITCHES = (() => {
-  const p = ['C8'];
-  for (let octave = 7; octave >= 1; octave--) {
-    NOTE_NAMES_CHROMATIC.forEach(note => p.push(`${note}${octave}`));
-  }
-  p.push('B0', 'A#0', 'A0');
-  return p;
-})();
-
-const TIME_SIGNATURES = [
-  { value: '4/4', label: '4/4', beatsPerMeasure: 16 },
-  { value: '3/4', label: '3/4', beatsPerMeasure: 12 },
-  { value: '2/4', label: '2/4', beatsPerMeasure: 8 },
-  { value: '6/8', label: '6/8', beatsPerMeasure: 12 },
-  { value: '2/2', label: '2/2', beatsPerMeasure: 8 },
-];
-
-const NOTE_COLORS = {
-  0: '#D4AF37',
-  1: '#5F9EA0',
-  2: '#9370DB',
-  3: '#CD853F',
-};
-
-const getVelocityColor = (velocity) => {
-  const v = Math.max(0, Math.min(1, velocity));
-  if (v < 0.4) { const t = v / 0.4; return `rgb(${Math.round(0)}, ${Math.round(100 + t * 155)}, ${Math.round(255 - t * 55)})`; }
-  else if (v < 0.7) { const t = (v - 0.4) / 0.3; return `rgb(${Math.round(t * 255)}, 255, ${Math.round(200 - t * 200)})`; }
-  else { const t = (v - 0.7) / 0.3; return `rgb(255, ${Math.round(255 - t * 255)}, 0)`; }
-};
-
-const BASE_CELL_WIDTH = 48;
-const BASE_CELL_HEIGHT = 28;
-const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 2;
-const ZOOM_STEP = 0.1;
-const MIN_DURATION = 0.125;
-const DEFAULT_DURATION = 1;
+import { TIME_SIGNATURES, NOTE_COLORS, getVelocityColor, BASE_CELL_WIDTH, BASE_CELL_HEIGHT, MIN_ZOOM, MAX_ZOOM, ZOOM_STEP, MIN_DURATION, DEFAULT_DURATION, ALL_PITCHES } from './gridConstants';
 
 import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import InstrumentSelect from './InstrumentSelectComponent';
@@ -214,6 +173,7 @@ export default function NoteGrid({
   const [hoveredCell, setHoveredCell] = useState(null); // Track hovered cell for piano highlighting
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const autoScrollRef = useRef(null);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
@@ -879,25 +839,43 @@ export default function NoteGrid({
         }
       }
 
-      // Auto-scroll when dragging near edges
+      // Smooth RAF-based auto-scroll when dragging near edges
                   if (gridRef.current && dragState.isDragging) {
                     const rect = gridRef.current.getBoundingClientRect();
-                    const edgeThreshold = 30;
-                    const scrollSpeed = 12;
+                    const edgeThreshold = 60;
+                    const maxSpeed = 18;
+                    let vx = 0, vy = 0;
+                    if (coords.clientX > rect.right - edgeThreshold)
+                      vx = maxSpeed * Math.min(1, (coords.clientX - (rect.right - edgeThreshold)) / edgeThreshold);
+                    else if (coords.clientX < rect.left + edgeThreshold + 56)
+                      vx = -maxSpeed * Math.min(1, ((rect.left + edgeThreshold + 56) - coords.clientX) / edgeThreshold);
+                    if (coords.clientY > rect.bottom - edgeThreshold)
+                      vy = maxSpeed * Math.min(1, (coords.clientY - (rect.bottom - edgeThreshold)) / edgeThreshold);
+                    else if (coords.clientY < rect.top + edgeThreshold)
+                      vy = -maxSpeed * Math.min(1, ((rect.top + edgeThreshold) - coords.clientY) / edgeThreshold);
 
-                    // Horizontal scrolling
-                    if (coords.clientX > rect.right - edgeThreshold) {
-                      gridRef.current.scrollLeft += scrollSpeed;
-                    } else if (coords.clientX < rect.left + edgeThreshold + 56) {
-                      gridRef.current.scrollLeft -= scrollSpeed;
+                    if (vx !== 0 || vy !== 0) {
+                      if (!autoScrollRef.current) {
+                        const loop = () => {
+                          if (!autoScrollRef.current) return;
+                          if (gridRef.current) {
+                            gridRef.current.scrollLeft += autoScrollRef.current.vx;
+                            gridRef.current.scrollTop += autoScrollRef.current.vy;
+                          }
+                          autoScrollRef.current.raf = requestAnimationFrame(loop);
+                        };
+                        autoScrollRef.current = { vx, vy, raf: requestAnimationFrame(loop) };
+                      } else {
+                        autoScrollRef.current.vx = vx;
+                        autoScrollRef.current.vy = vy;
+                      }
+                    } else if (autoScrollRef.current) {
+                      cancelAnimationFrame(autoScrollRef.current.raf);
+                      autoScrollRef.current = null;
                     }
-
-                    // Vertical scrolling
-                    if (coords.clientY > rect.bottom - edgeThreshold) {
-                      gridRef.current.scrollTop += scrollSpeed;
-                    } else if (coords.clientY < rect.top + edgeThreshold) {
-                      gridRef.current.scrollTop -= scrollSpeed;
-                    }
+                  } else if (autoScrollRef.current) {
+                    cancelAnimationFrame(autoScrollRef.current.raf);
+                    autoScrollRef.current = null;
                   }
 
       setDragState(prev => ({
@@ -910,6 +888,12 @@ export default function NoteGrid({
   };
 
   const handlePointerUp = (e) => {
+        // Stop smooth auto-scroll
+        if (autoScrollRef.current) {
+          cancelAnimationFrame(autoScrollRef.current.raf);
+          autoScrollRef.current = null;
+        }
+
         // Clear pending note on mouseup
         setPendingNote(null);
 
