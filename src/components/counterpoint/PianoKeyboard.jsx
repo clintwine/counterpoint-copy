@@ -375,11 +375,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       const oscObj = playNoteSustain(pitch, envelope.sustain, 0, instrument, envelope.attack);
       activeOscillators.current[pitch] = oscObj;
     }
-    setPressedNotes((prev) => {
-      const next = new Set([...prev, pitch]);
-      onPressedNotesChange?.(next);
-      return next;
-    });
+    setPressedNotes((prev) => new Set([...prev, pitch]));
+    onPressedNotesChange?.(new Set([...activeOscillators.current ? Object.keys(activeOscillators.current) : [], pitch]));
 
     // Notify parent about note press for recording
     onNotePress?.(pitch);
@@ -396,9 +393,10 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       setPressedNotes((prev) => {
         const next = new Set(prev);
         next.delete(pitch);
-        onPressedNotesChange?.(next);
         return next;
       });
+      const remaining = new Set(Object.keys(activeOscillators.current));
+      onPressedNotesChange?.(remaining);
       
       // Notify parent about note release for recording
       onNoteRelease?.(pitch);
