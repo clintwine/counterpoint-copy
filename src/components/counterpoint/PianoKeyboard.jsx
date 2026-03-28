@@ -823,7 +823,7 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           </div>
           </div>
 
-          <div className="overflow-x-auto pb-0">
+          <div className="overflow-x-auto">
         <div className="inline-flex items-center gap-3">
           <div className="relative" style={{ width: totalWidth + whiteKeyWidth * 3, height: 80 }}>
             {/* Generate all 88 keys - A0 to C8 */}
