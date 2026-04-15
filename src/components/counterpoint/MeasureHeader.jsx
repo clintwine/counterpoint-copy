@@ -1,7 +1,7 @@
-// MeasureHeader v4
+// MeasureHeader v6 - rebuilt clean, no cmdk dependency
 import React, { useRef } from 'react';
 
-export default function MeasureHeader({
+function MeasureHeader({
   measureIndex,
   measureStartBeat,
   beatsPerMeasure,
@@ -18,7 +18,7 @@ export default function MeasureHeader({
   gridRef,
 }) {
   const mouseDownPos = useRef(null);
-  const isDragging = useRef(false);
+  const isDraggingRef = useRef(false);
 
   const getBeatFromClientX = (clientX) => {
     if (!gridRef?.current) return null;
@@ -28,19 +28,18 @@ export default function MeasureHeader({
     return Math.max(0, Math.floor(x / CELL_WIDTH));
   };
 
-  const handleMeasureMouseDown = (e) => {
+  const handleMouseDown = (e) => {
     e.stopPropagation();
-    isDragging.current = false;
+    isDraggingRef.current = false;
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
 
     const startBeat = getBeatFromClientX(e.clientX);
     if (startBeat === null) return;
 
-    const handleMouseMove = (moveEvent) => {
+    const onMove = (moveEvent) => {
       const dx = Math.abs(moveEvent.clientX - mouseDownPos.current.x);
-      if (dx > 5) isDragging.current = true;
-
-      if (isDragging.current) {
+      if (dx > 5) isDraggingRef.current = true;
+      if (isDraggingRef.current) {
         const moveBeat = getBeatFromClientX(moveEvent.clientX);
         if (moveBeat !== null) {
           const start = Math.min(startBeat, moveBeat);
@@ -50,11 +49,11 @@ export default function MeasureHeader({
       }
     };
 
-    const handleMouseUp = (upEvent) => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    const onUp = (upEvent) => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
 
-      if (!isDragging.current) {
+      if (!isDraggingRef.current) {
         const measureStart = measureStartBeat;
         const measureEnd = measureStartBeat + beatsPerMeasure;
         const clickedBeat = getBeatFromClientX(upEvent.clientX);
@@ -79,26 +78,30 @@ export default function MeasureHeader({
           setSelectedNotes(measureKeys);
         }
       }
-      isDragging.current = false;
+      isDraggingRef.current = false;
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   };
+
+  const beatItems = Array.from({ length: beatsPerMeasure }, (_, beatIndex) => {
+    const beat = measureStartBeat + beatIndex;
+    const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+    return { beatIndex, beat, inLoop };
+  });
 
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
-      onMouseDown={handleMeasureMouseDown}
+      onMouseDown={handleMouseDown}
     >
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
       </span>
 
-      {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
-        const beat = measureStartBeat + beatIndex;
-        const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
+      {beatItems.map(({ beatIndex, inLoop }) => {
         if (!inLoop) return null;
         return (
           <div
@@ -130,9 +133,9 @@ export default function MeasureHeader({
         </>
       )}
 
-      {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => (
+      {beatItems.map(({ beatIndex }) => (
         <div
-          key={beatIndex}
+          key={`tick-${beatIndex}`}
           className="absolute top-0 pointer-events-none z-10"
           style={{
             left: `${beatIndex * CELL_WIDTH - 0.5}px`,
@@ -142,15 +145,13 @@ export default function MeasureHeader({
           }}
         />
       ))}
+
       <div
         className="absolute top-0 pointer-events-none z-10"
-        style={{
-          right: '-1px',
-          width: '1px',
-          height: '12px',
-          backgroundColor: 'rgba(255, 255, 255, 0.3)'
-        }}
+        style={{ right: '-1px', width: '1px', height: '12px', backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
       />
     </div>
   );
 }
+
+export default MeasureHeader;
