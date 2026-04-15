@@ -14,7 +14,7 @@ import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNot
 import ScoreMinimap from './ScoreMinimap';
 import NoteControls from './NoteControls';
 import GridOverlays from './GridOverlays';
-import MeasureHeader from './MeasureHeader';
+import MeasureHeader from './MeasureHeader.jsx';
 import Scrubber from './Scrubber';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
