@@ -7,7 +7,8 @@ import { initAudio, playNote } from './audioEngine';
 
 export default function InstrumentSelect({ value, onChange, instruments, onCreateNew }) {
   const [open, setOpen] = React.useState(false);
-  const selected = instruments.find(i => i.value === value);
+  const validInstruments = instruments.filter(Boolean);
+  const selected = validInstruments.find(i => i.value === value);
   
   const handlePreview = (instrumentValue, e) => {
     e.stopPropagation();
@@ -50,7 +51,7 @@ export default function InstrumentSelect({ value, onChange, instruments, onCreat
                 )}
               </CommandEmpty>
               <CommandGroup>
-                {instruments.map(inst => (
+                {validInstruments.map(inst => (
                   <CommandItem
                     key={inst.value}
                     value={inst.label}
