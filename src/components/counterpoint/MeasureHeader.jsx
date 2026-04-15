@@ -1,4 +1,5 @@
-import React, { useRef, useCallback } from 'react';
+// MeasureHeader v3
+import React, { useRef } from 'react';
 
 export default function MeasureHeader({
   measureIndex,
@@ -18,8 +19,6 @@ export default function MeasureHeader({
 }) {
   const mouseDownPos = useRef(null);
   const isDragging = useRef(false);
-
-
 
   const getBeatFromClientX = (clientX) => {
     if (!gridRef?.current) return null;
@@ -56,28 +55,26 @@ export default function MeasureHeader({
       document.removeEventListener('mouseup', handleMouseUp);
 
       if (!isDragging.current) {
-        // It was a click — handle toggle
         const measureStart = measureStartBeat;
         const measureEnd = measureStartBeat + beatsPerMeasure;
         const clickedBeat = getBeatFromClientX(upEvent.clientX);
         const isClickInLoop = loopStart !== null && loopEnd !== null && clickedBeat >= loopStart && clickedBeat < loopEnd;
 
         if (isClickInLoop) {
-          // Clicking within existing loop — deselect it
           onLoopChange?.(null, null);
           setSelectedNotes(new Set());
         } else if (upEvent.shiftKey && loopStart !== null && loopEnd !== null) {
           const newStart = Math.min(loopStart, measureStart);
           const newEnd = Math.max(loopEnd, measureEnd);
           onLoopChange?.(newStart, newEnd);
-          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          const measureNotes = (cantusFirmus || []).filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
           if (measureNotes.length > 0) {
             const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
             setSelectedNotes(prev => new Set([...prev, ...measureKeys]));
           }
         } else {
           onLoopChange?.(measureStart, measureEnd);
-          const measureNotes = cantusFirmus.filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
+          const measureNotes = (cantusFirmus || []).filter(n => Math.floor(n.beat / beatsPerMeasure) === measureIndex);
           const measureKeys = new Set(measureNotes.map(n => getNoteKey(n.pitch, n.beat)));
           setSelectedNotes(measureKeys);
         }
@@ -89,16 +86,12 @@ export default function MeasureHeader({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  // click logic is handled inside handleMeasureMouseDown
-
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-start pl-2 text-sm font-semibold relative overflow-visible ${measureIndex > 0 ? 'border-l-2 border-l-slate-600' : ''}`}
       style={{ width: CELL_WIDTH * beatsPerMeasure, backgroundColor: '#3a3a3a', position: 'relative' }}
       onMouseDown={handleMeasureMouseDown}
     >
-
-
       <span className="text-white font-bold pointer-events-none relative z-10">
         {measureIndex + 1}
       </span>
@@ -106,13 +99,11 @@ export default function MeasureHeader({
       {Array.from({ length: beatsPerMeasure }).map((_, beatIndex) => {
         const beat = measureStartBeat + beatIndex;
         const inLoop = loopStart !== null && loopEnd !== null && beat >= loopStart && beat < loopEnd;
-        const isLoopStart = loopStart !== null && beat === Math.floor(loopStart);
-        const isLoopEnd = loopEnd !== null && beat === Math.floor(loopEnd) - 1;
         if (!inLoop) return null;
         return (
           <div
             key={`bg-${beatIndex}`}
-            className={`absolute top-0 bottom-0 pointer-events-none ${isLoopStart || isLoopEnd ? 'hover:cursor-col-resize' : ''}`}
+            className="absolute top-0 bottom-0 pointer-events-none"
             style={{
               left: `${beatIndex * CELL_WIDTH}px`,
               width: `${CELL_WIDTH}px`,

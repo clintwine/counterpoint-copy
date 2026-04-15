@@ -105,8 +105,8 @@ export default function NoteControls({ selectedNotes, cantusFirmus, getNoteKey, 
                   playPreview(firstSelected, { bendStart: b.start, bendEnd: b.end });
                 }}>
                 <span>{b.label}</span>
-                <button onClick={(e) => { e.stopPropagation(); playPreview(firstSelected, { bendStart: b.start, bendEnd: b.end }); }}
-                  className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity">▶</button>
+                <span role="button" onClick={(e) => { e.stopPropagation(); playPreview(firstSelected, { bendStart: b.start, bendEnd: b.end }); }}
+                  className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity cursor-pointer">▶</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -139,14 +139,14 @@ export default function NoteControls({ selectedNotes, cantusFirmus, getNoteKey, 
                   }
                 }}>
                 <div><div className="font-medium">{s.label}</div><div className="text-[10px] text-white/50">{s.desc}</div></div>
-                <button onClick={(e) => { e.stopPropagation();
+                <span role="button" onClick={(e) => { e.stopPropagation();
                   if (firstSelected) {
                     initAudio(); const instrument = voices[0]?.instrument || 'organ'; const customConfig = getInstrumentConfig(instrument);
                     const sixteenthNoteDuration = (60 / tempo) / 4; const actualDuration = (firstSelected.duration || 1) * sixteenthNoteDuration;
                     if (customConfig) { playNoteWithCustomInstrument(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, customConfig, s.value, tempo, 0); }
                     else { import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => { playNoteWithArticulation(firstSelected.pitch, actualDuration, firstSelected.velocity ?? 0.7, 0, instrument, s.value, tempo, 0); }); }
                   }}}
-                  className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity">▶</button>
+                  className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-slate-700 transition-opacity cursor-pointer">▶</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
