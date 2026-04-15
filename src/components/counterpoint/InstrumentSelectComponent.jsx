@@ -61,13 +61,14 @@ export default function InstrumentSelect({ value, onChange, instruments, onCreat
                     className={`text-white text-xs cursor-pointer flex items-center justify-between group ${inst.value === value ? 'bg-slate-700' : ''}`}
                   >
                     <span>{inst.label}</span>
-                    <button
+                    <span
+                      role="button"
                       onClick={(e) => handlePreview(inst.value, e)}
-                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 px-2 py-1 rounded hover:bg-slate-700 transition-opacity text-sm"
+                      className="opacity-0 group-hover:opacity-100 text-amber-400 hover:text-amber-300 px-2 py-1 rounded hover:bg-slate-700 transition-opacity text-sm cursor-pointer"
                       title="Preview sound"
                     >
                       ▶ Play
-                    </button>
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>
