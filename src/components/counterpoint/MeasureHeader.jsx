@@ -19,6 +19,8 @@ export default function MeasureHeader({
   const mouseDownPos = useRef(null);
   const isDragging = useRef(false);
 
+  if (!beatsPerMeasure) return null;
+
 
 
   const getBeatFromClientX = (clientX) => {
