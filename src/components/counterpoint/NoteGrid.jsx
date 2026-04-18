@@ -401,31 +401,35 @@ export default function NoteGrid({
 
   // Play note sound when adding
   const playNoteSound = useCallback(async (pitch, note = null) => {
-    await initAudio();
-    const instrument = voices[activeVoice]?.instrument || 'organ';
-    const customConfig = getInstrumentConfig(instrument);
-    
-    const hasBend = note?.bendStart !== undefined || note?.bendEnd !== undefined;
-    const pitchBend = hasBend ? {
-      start: note.bendStart ?? 0,
-      end: note.bendEnd ?? 0,
-      startTime: note.bendStartTime ?? 0,
-      endTime: note.bendEndTime ?? 1
-    } : 0;
-    // Calculate actual duration based on note duration and tempo
-    const sixteenthNoteDuration = (60 / tempo) / 4;
-    const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
-    const velocity = note?.velocity ?? 0.7;
-    
-    // Use custom instrument if available
-    if (customConfig) {
-      await playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig, note?.articulation || 'normal', tempo, pitchBend);
-    } else if (note?.articulation && note.articulation !== 'normal') {
-      // Use articulation if present
-      const { playNoteWithArticulation } = await import('@/components/counterpoint/audioEngine');
-      playNoteWithArticulation(pitch, actualDuration, velocity, 0, instrument, note.articulation, tempo, pitchBend);
-    } else {
-      playNote(pitch, actualDuration, velocity, 0, instrument, pitchBend);
+    try {
+      await initAudio();
+      const instrument = voices[activeVoice]?.instrument || 'organ';
+      const customConfig = getInstrumentConfig(instrument);
+      
+      const hasBend = note?.bendStart !== undefined || note?.bendEnd !== undefined;
+      const pitchBend = hasBend ? {
+        start: note.bendStart ?? 0,
+        end: note.bendEnd ?? 0,
+        startTime: note.bendStartTime ?? 0,
+        endTime: note.bendEndTime ?? 1
+      } : 0;
+      // Calculate actual duration based on note duration and tempo
+      const sixteenthNoteDuration = (60 / tempo) / 4;
+      const actualDuration = note?.duration ? (note.duration * sixteenthNoteDuration) : (hasBend ? 1.5 : 0.3);
+      const velocity = note?.velocity ?? 0.7;
+      
+      // Use custom instrument if available
+      if (customConfig) {
+        await playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig, note?.articulation || 'normal', tempo, pitchBend);
+      } else if (note?.articulation && note.articulation !== 'normal') {
+        // Use articulation if present
+        const { playNoteWithArticulation } = await import('@/components/counterpoint/audioEngine');
+        playNoteWithArticulation(pitch, actualDuration, velocity, 0, instrument, note.articulation, tempo, pitchBend);
+      } else {
+        playNote(pitch, actualDuration, velocity, 0, instrument, pitchBend);
+      }
+    } catch (error) {
+      console.error('Error playing note:', error);
     }
   }, [voices, activeVoice, tempo, customInstruments, getInstrumentConfig]);
 
