@@ -137,8 +137,6 @@ export default function GridOverlays({
         style={{
           left: 0,
           top: `${headerRect.top}px`,
-          height: `${gridRect.bottom - headerRect.top}px`,
-          overflow: 'hidden',
           transform: `translateX(${initialX}px)`,
           willChange: 'transform',
           zIndex: 5,
@@ -146,6 +144,7 @@ export default function GridOverlays({
           flexDirection: 'column',
           alignItems: 'center',
           width: 0,
+          clipPath: `inset(0 0 0 0)`,
         }}
         {...scrubHandlers}
       >
@@ -158,10 +157,10 @@ export default function GridOverlays({
           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
           flexShrink: 0,
         }} />
-        {/* Line */}
+        {/* Line — clamped to grid bottom */}
         <div style={{
           width: Math.max(2, 2 * zoom),
-          height: pitches.length * CELL_HEIGHT,
+          height: Math.max(0, gridRect.bottom - headerRect.top - Math.max(10, 12 * zoom)),
           backgroundColor: '#ef4444',
           boxShadow: '0 0 8px rgba(239,68,68,0.6)',
           flexShrink: 0,
