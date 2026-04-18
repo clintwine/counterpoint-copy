@@ -85,9 +85,50 @@ export default function GridOverlays({
       e.stopPropagation();
       e.preventDefault();
       setIsScrubbing(true);
+      let autoScrollRaf = null;
+      let lastClientX = e.clientX;
+
+      const stopAutoScroll = () => {
+        if (autoScrollRaf) { cancelAnimationFrame(autoScrollRaf); autoScrollRaf = null; }
+      };
+
+      const startAutoScroll = (speed) => {
+        stopAutoScroll();
+        const loop = () => {
+          if (!gridRef.current) return;
+          gridRef.current.scrollLeft += speed;
+          // After scrolling, recompute beat and seek
+          const rect = gridRef.current.getBoundingClientRect();
+          const x = lastClientX - rect.left - 56 + gridRef.current.scrollLeft;
+          let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
+          if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
+          setScrubPosition(beat);
+          onSeek && onSeek(beat);
+          autoScrollRaf = requestAnimationFrame(loop);
+        };
+        autoScrollRaf = requestAnimationFrame(loop);
+      };
+
       const onMove = (moveEvent) => {
         if (!gridRef.current) return;
+        lastClientX = moveEvent.clientX;
         const rect = gridRef.current.getBoundingClientRect();
+        const edgeThreshold = 80;
+        const maxSpeed = 20;
+
+        // Check if near left/right edge to auto-scroll
+        if (moveEvent.clientX > rect.right - edgeThreshold) {
+          const speed = maxSpeed * Math.min(1, (moveEvent.clientX - (rect.right - edgeThreshold)) / edgeThreshold);
+          startAutoScroll(speed);
+          return; // auto-scroll loop handles seeking
+        } else if (moveEvent.clientX < rect.left + edgeThreshold + 56) {
+          const speed = -maxSpeed * Math.min(1, ((rect.left + edgeThreshold + 56) - moveEvent.clientX) / edgeThreshold);
+          startAutoScroll(speed);
+          return;
+        } else {
+          stopAutoScroll();
+        }
+
         const x = moveEvent.clientX - rect.left - 56 + gridRef.current.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
@@ -95,6 +136,7 @@ export default function GridOverlays({
         onSeek && onSeek(beat);
       };
       const onUp = () => {
+        stopAutoScroll();
         setIsScrubbing(false);
         setScrubPosition(null);
         document.removeEventListener('mousemove', onMove);
