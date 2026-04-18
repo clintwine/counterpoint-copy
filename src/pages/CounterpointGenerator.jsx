@@ -1277,6 +1277,10 @@ export default function CounterpointGenerator() {
       setIsPlaying(false);
     } else {
       console.log('[Playback] handlePlayPause - STARTING playback');
+      // Ensure audio context is ready
+      import('@/components/counterpoint/audioEngine').then(({ initAudio }) => {
+        initAudio();
+      });
       // Always clear played notes to prevent stale state
       playedNotesRef.current.clear();
       // When starting playback, jump to loop start if set, otherwise keep current position
