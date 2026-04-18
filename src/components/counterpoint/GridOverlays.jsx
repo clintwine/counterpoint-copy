@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 
 export default function GridOverlays({
   marquee,
@@ -24,11 +24,11 @@ export default function GridOverlays({
   setScrubPosition,
   headerRef
 }) {
-  // Stable cached rects - only update on resize, not every render
+  const playheadRef = useRef(null);
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
-  const playheadRef = useRef(null);
 
+  // Cache rects for drag ghost positioning (only needs resize updates)
   useLayoutEffect(() => {
     const update = () => {
       if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
@@ -37,22 +37,19 @@ export default function GridOverlays({
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, []); // Only on mount + resize
+  }, []);
 
-  // Move playhead via direct DOM manipulation to avoid React re-render jitter
-  // Read scrollLeft directly from DOM to stay in sync with scroll position
+  // Update playhead position directly in DOM — no React state, no scroll math needed
+  // The playhead is position:absolute inside the scrollable content div, so it scrolls naturally
   useLayoutEffect(() => {
-    if (!playheadRef.current || !gridRectRef.current || !gridRef?.current) return;
-    const gridRect = gridRectRef.current;
-    const scrollLeft = gridRef.current.scrollLeft;
-    const x = gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - scrollLeft - 1;
-    playheadRef.current.style.transform = `translateX(${x}px)`;
-  }, [smoothPlayhead, CELL_WIDTH, viewportState.scrollLeft]);
+    if (!playheadRef.current) return;
+    playheadRef.current.style.left = `${smoothPlayhead * CELL_WIDTH}px`;
+  }, [smoothPlayhead, CELL_WIDTH]);
 
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
-  const headerRect = headerRectRef.current || gridRect;
   const scrollLeft = gridRef.current.scrollLeft;
+  const scrollTop = gridRef.current.scrollTop;
 
   const makeScrubHandlers = () => ({
     onMouseDown: (e) => {
@@ -105,39 +102,22 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Playhead line + triangle - moved via direct DOM ref to avoid jitter */}
+      {/* Playhead — absolute inside scrollable content, scrolls naturally with grid */}
       <div
         ref={playheadRef}
-        className="fixed cursor-ew-resize"
+        className="absolute top-0 pointer-events-auto cursor-ew-resize"
         style={{
-          left: 0,
-          top: `${headerRect.top}px`,
-          transform: `translateX(${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - (gridRef.current?.scrollLeft ?? viewportState.scrollLeft) - 1}px)`,
-          willChange: 'transform',
-          pointerEvents: 'auto',
-          zIndex: 5,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-        {...scrubHandlers}
-      >
-        <div style={{
-          width: 0, height: 0,
-          borderLeft: `${Math.max(10, 12 * zoom)}px solid transparent`,
-          borderRight: `${Math.max(10, 12 * zoom)}px solid transparent`,
-          borderTop: `${Math.max(12, 14 * zoom)}px solid #ef4444`,
-          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-          flexShrink: 0,
-        }} />
-        <div style={{
-          width: Math.max(2, 3 * zoom),
+          left: `${smoothPlayhead * CELL_WIDTH}px`,
+          width: `${Math.max(2, 3 * zoom)}px`,
           height: pitches.length * CELL_HEIGHT,
           backgroundColor: '#ef4444',
           boxShadow: '0 0 8px rgba(239,68,68,0.6)',
-          flexShrink: 0,
-        }} />
-      </div>
+          zIndex: 10,
+          transform: 'translateX(-50%)',
+          willChange: 'left',
+        }}
+        {...scrubHandlers}
+      />
 
       {/* Drag ghost notes */}
       {dragState?.isDragging && originalDragNotes && originalDragNotes.map((note, idx) => {
@@ -146,7 +126,6 @@ export default function GridOverlays({
         if (newPitchIdx < 0 || newPitchIdx >= pitches.length) return null;
         const duration = note.duration || DEFAULT_DURATION;
         const noteWidth = duration * CELL_WIDTH - 4;
-        const scrollTop = gridRef.current.scrollTop;
         return (
           <div
             key={`ghost-${idx}`}
