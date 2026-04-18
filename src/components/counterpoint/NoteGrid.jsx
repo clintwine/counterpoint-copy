@@ -1412,6 +1412,16 @@ export default function NoteGrid({
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
 
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setZoom(1); setZoomY(1); }}
+            className="h-7 px-2 text-white/50 hover:text-white hover:bg-slate-700 text-[10px] font-mono"
+            title="Reset zoom (double-click sliders or press `)"
+          >
+            1:1
+          </Button>
+
           <div className="w-px h-4 bg-slate-600 mx-1" />
 
           <span className="text-white/50 text-[10px] uppercase">H</span>
