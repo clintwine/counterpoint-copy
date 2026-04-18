@@ -186,14 +186,9 @@ export default function NoteGrid({
 
   // Detect window size changes (including fullscreen)
   useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-      console.log('[NoteGrid] Window height:', window.innerHeight);
-    };
-
+    const handleResize = () => setWindowHeight(window.innerHeight);
     window.addEventListener('resize', handleResize);
-    handleResize(); // Check initial
-    
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
@@ -298,12 +293,6 @@ export default function NoteGrid({
         }
       }
     }, [smoothPlayhead, CELL_WIDTH, isScrubbing, isPlaying]);
-
-  const getNotesAtBeat = (voiceIndex, beat) => {
-    const voice = voices[voiceIndex];
-    if (!voice || !voice.notes) return [];
-    return voice.notes.filter(n => n.beat === beat);
-  };
 
   const saveToHistory = useCallback((notes) => {
     const newHistory = history.slice(0, historyIndex + 1);
@@ -489,6 +478,37 @@ export default function NoteGrid({
     onNotesUpdate(uniqueNotes);
   }, [selectedNotes, cantusFirmus, onNotesUpdate, saveToHistory, quantizeGrid, getNoteKey]);
 
+  // Document-level marquee tracking so selection continues outside the grid
+  useEffect(() => {
+    if (!marquee) return;
+    const onMove = (e) => {
+      setMarquee(prev => prev ? { ...prev, endX: e.clientX, endY: e.clientY } : prev);
+      if (gridRef.current) {
+        const rect = gridRef.current.getBoundingClientRect();
+        const edgeThreshold = 60, maxSpeed = 14;
+        let vx = 0, vy = 0;
+        if (e.clientX > rect.right - edgeThreshold) vx = maxSpeed * Math.min(1, (e.clientX - (rect.right - edgeThreshold)) / edgeThreshold);
+        else if (e.clientX < rect.left + edgeThreshold + 56) vx = -maxSpeed * Math.min(1, ((rect.left + edgeThreshold + 56) - e.clientX) / edgeThreshold);
+        if (e.clientY > rect.bottom - edgeThreshold) vy = maxSpeed * Math.min(1, (e.clientY - (rect.bottom - edgeThreshold)) / edgeThreshold);
+        else if (e.clientY < rect.top + edgeThreshold) vy = -maxSpeed * Math.min(1, ((rect.top + edgeThreshold) - e.clientY) / edgeThreshold);
+        if (vx !== 0 || vy !== 0) {
+          if (!autoScrollRef.current) {
+            const loop = () => { if (!autoScrollRef.current) return; if (gridRef.current) { gridRef.current.scrollLeft += autoScrollRef.current.vx; gridRef.current.scrollTop += autoScrollRef.current.vy; } autoScrollRef.current.raf = requestAnimationFrame(loop); };
+            autoScrollRef.current = { vx, vy, raf: requestAnimationFrame(loop) };
+          } else { autoScrollRef.current.vx = vx; autoScrollRef.current.vy = vy; }
+        } else if (autoScrollRef.current) { cancelAnimationFrame(autoScrollRef.current.raf); autoScrollRef.current = null; }
+      }
+    };
+    const onUp = () => handlePointerUp({});
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if (autoScrollRef.current) { cancelAnimationFrame(autoScrollRef.current.raf); autoScrollRef.current = null; }
+    };
+  }, [marquee]);
+
   // Global mouse up to stop piano note
   useEffect(() => {
     const handleGlobalMouseUp = () => {
@@ -555,18 +575,6 @@ export default function NoteGrid({
     }
     return null;
   }
-
-  // Check if clicking on the edges of a note (for resizing)
-  const isOnNoteEdge = (e, note) => {
-    if (!note) return false;
-    const rect = e.target.getBoundingClientRect();
-    const noteWidth = (note.duration || DEFAULT_DURATION) * CELL_WIDTH;
-    const clickX = e.clientX - rect.left;
-    return { 
-      right: clickX > noteWidth - 10,
-      left: clickX < 10
-    };
-  };
 
   const getEventCoords = (e) => {
         if (e.touches && e.touches.length > 0) {
@@ -701,11 +709,7 @@ export default function NoteGrid({
                 const cell = getCellFromPosition(coords.clientX, coords.clientY);
                 setHoveredCell(cell);
 
-                // Clear pending note if we start moving with dragState
-                if (dragState && pendingNote) {
-                  console.log('[NoteGrid] Clearing pendingNote because drag began');
-                  setPendingNote(null);
-                }
+                if (dragState && pendingNote) setPendingNote(null);
 
                 // Handle painting in draw mode (only if paintMode is enabled)
                 if (isPainting && tool === 'draw' && paintMode) {
@@ -743,9 +747,6 @@ export default function NoteGrid({
       // Handle note duration resize (left or right edge)
               const deltaX = coords.clientX - resizeState.startX;
       const deltaDuration = deltaX / CELL_WIDTH;
-
-      // Build a map of original note keys to identify which notes to resize
-      const originalKeys = new Set(resizeState.startNotes.map(s => `${s.pitch}-${s.beat}`));
 
       // Update note durations in real-time (group resize if multiple selected)
       const newNotes = cantusFirmus.map(n => {
@@ -1620,7 +1621,8 @@ export default function NoteGrid({
           }}
           onMouseLeave={(e) => {
             setHoveredCell(null);
-            handlePointerUp(e);
+            // Don't end marquee on mouse leave - document listener handles it
+            if (!marquee) handlePointerUp(e);
           }}
           onTouchMove={(e) => { 
             if (e.touches.length === 2) {
