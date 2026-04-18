@@ -1094,6 +1094,7 @@ export default function NoteGrid({
                 size="sm"
                 className="h-8 px-3 text-white hover:text-white hover:bg-slate-700/50 gap-2"
                 onClick={() => setTimeout(() => gridRef.current?.focus(), 0)}
+                onKeyDown={(e) => { if (e.key === ' ') e.preventDefault(); }}
               >
                 <Menu className="w-4 h-4" />
                 <span className="font-semibold text-sm">{projectName || 'File'}</span>
