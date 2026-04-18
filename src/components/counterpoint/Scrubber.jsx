@@ -22,8 +22,9 @@ export default function Scrubber({ smoothPlayhead, totalBeats, CELL_WIDTH, onSee
 
   return (
     <div
-      className="relative h-2 cursor-pointer select-none"
-      style={{ width: `${totalBeats * CELL_WIDTH}px`, backgroundColor: '#2B2B2B' }}
+      className="relative cursor-pointer select-none"
+      style={{ height: '22px', width: `${totalBeats * CELL_WIDTH}px`, backgroundColor: '#2B2B2B' }}
+
       onMouseDown={handleMouseDown}
     >
       {/* No playhead here - rendered by GridOverlays */}
