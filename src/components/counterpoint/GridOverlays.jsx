@@ -108,16 +108,35 @@ export default function GridOverlays({
         className="absolute top-0 pointer-events-auto cursor-ew-resize"
         style={{
           left: `${smoothPlayhead * CELL_WIDTH}px`,
-          width: `${Math.max(2, 3 * zoom)}px`,
+          width: 0,
           height: pitches.length * CELL_HEIGHT,
-          backgroundColor: '#ef4444',
-          boxShadow: '0 0 8px rgba(239,68,68,0.6)',
           zIndex: 10,
           transform: 'translateX(-50%)',
           willChange: 'left',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
         {...scrubHandlers}
-      />
+      >
+        {/* Triangle indicator at top */}
+        <div style={{
+          width: 0, height: 0,
+          borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
+          borderRight: `${Math.max(8, 10 * zoom)}px solid transparent`,
+          borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`,
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+          flexShrink: 0,
+          marginTop: '-1px',
+        }} />
+        {/* Vertical line */}
+        <div style={{
+          width: Math.max(2, 2 * zoom),
+          flex: 1,
+          backgroundColor: '#ef4444',
+          boxShadow: '0 0 6px rgba(239,68,68,0.6)',
+        }} />
+      </div>
 
       {/* Drag ghost notes */}
       {dragState?.isDragging && originalDragNotes && originalDragNotes.map((note, idx) => {
