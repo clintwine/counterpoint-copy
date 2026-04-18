@@ -24,7 +24,7 @@ import CantusFirmusEditor from '@/components/counterpoint/CantusFirmusEditor';
 import GenerationSettings from '@/components/counterpoint/GenerationSettings';
 import UnsavedChangesDialog from '@/components/counterpoint/UnsavedChangesDialog';
 import { generateCounterpoint, validateCounterpoint } from '@/components/counterpoint/counterpointEngine';
-import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument } from '@/components/counterpoint/audioEngine';
+import { initAudio, playNote, stopAllNotes, playMetronomeClick, setMasterVolume as setAudioMasterVolume, playNoteWithCustomInstrument, cleanupAudio } from '@/components/counterpoint/audioEngine';
 import { PRESET_LIBRARY_CONFIGS } from '@/components/counterpoint/presetLibrary';
 
 const DEFAULT_VOICES = [
@@ -601,6 +601,9 @@ export default function CounterpointGenerator() {
       return;
     }
     
+    // Clean up all audio (timeouts, nodes, etc.)
+    cleanupAudio();
+    
     // Load voices and ensure each has an instrument
     const loadedVoices = project.voices || DEFAULT_VOICES;
     const voicesWithInstruments = loadedVoices.map((v, idx) => ({
@@ -671,12 +674,14 @@ export default function CounterpointGenerator() {
       return;
     }
     
+    // Clean up all audio (timeouts, nodes, etc.)
+    cleanupAudio();
+    
     // Stop any preview
     if (previewTimeoutRef.current) {
       previewTimeoutRef.current.forEach(id => clearTimeout(id));
       previewTimeoutRef.current = null;
     }
-    stopAllNotes();
     setPreviewingSongId(null);
     
     // Load voices and ensure each has an instrument

@@ -504,10 +504,11 @@ export async function playNoteWithCustomInstrument(pitch, duration, volume, cust
         const upperNote = getNextScaleNote(pitch);
         
         for (let i = 0; i < numTrillNotes; i++) {
-          setTimeout(() => {
+          const id = setTimeout(() => {
             const notePitch = i % 2 === 0 ? pitch : upperNote;
             playSingleCustomNote(notePitch, trillSpeed * 0.9, volume * 0.8, customConfig, pitchBend);
           }, i * trillSpeed * 1000);
+          pendingTimeouts.add(id);
         }
         return null;
         
@@ -1340,6 +1341,9 @@ export function playChord(pitches, duration = 0.5, volumes = []) {
   });
 }
 
+// Track pending timeouts to clean up on stop
+let pendingTimeouts = new Set();
+
 export function stopAllNotes() {
   if (audioContext) {
     const now = Math.max(0.01, audioContext.currentTime + 0.01);
@@ -1348,12 +1352,17 @@ export function stopAllNotes() {
     masterGain.gain.cancelScheduledValues(now);
     masterGain.gain.setValueAtTime(masterGain.gain.value, now);
     masterGain.gain.exponentialRampToValueAtTime(0.001, fadeEndTime);
-    setTimeout(() => {
-      if (masterGain && audioContext) {
-        const resetTime = Math.max(0.01, audioContext.currentTime);
-        masterGain.gain.setValueAtTime(0.4, resetTime);
-      }
-    }, 100);
+  }
+}
+
+export function cleanupAudio() {
+  if (audioContext) {
+    stopAllNotes();
+    // Clear all pending timeouts (articulations, previews, etc.)
+    pendingTimeouts.forEach(id => clearTimeout(id));
+    pendingTimeouts.clear();
+    // Reset active oscillator count
+    activeOscillatorCount = 0;
   }
 }
 
