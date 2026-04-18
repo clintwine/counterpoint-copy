@@ -179,6 +179,7 @@ export default function NoteGrid({
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
   const lastPianoPitchRef = useRef(null);
+  const scrollUpdateRef = useRef(null); // RAF batch updates for scroll state
 
   // Use pre-generated pitches (must be before useEffects that use it)
   const pitches = ALL_PITCHES;
@@ -1599,11 +1600,18 @@ export default function NoteGrid({
           }}
           onScroll={(e) => {
             const newScrollLeft = e.target.scrollLeft;
-            setViewportState(prev => ({ ...prev, scrollLeft: newScrollLeft, scrollTop: e.target.scrollTop }));
-            // Sync header immediately without conditions
+            const newScrollTop = e.target.scrollTop;
+            
+            // Immediate DOM sync (no re-render wait)
             if (headerScrollRef.current) {
               headerScrollRef.current.scrollLeft = newScrollLeft;
             }
+            
+            // Batch state update in RAF to avoid render thrashing
+            if (scrollUpdateRef.current) cancelAnimationFrame(scrollUpdateRef.current);
+            scrollUpdateRef.current = requestAnimationFrame(() => {
+              setViewportState(prev => ({ ...prev, scrollLeft: newScrollLeft, scrollTop: newScrollTop }));
+            });
           }}
           onMouseMove={handlePointerMove}
           onMouseUp={(e) => {
