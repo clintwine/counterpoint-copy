@@ -1486,6 +1486,7 @@ export default function NoteGrid({
             ref={headerScrollRef}
             style={{ backgroundColor: '#3a3a3a' }}
             onScroll={(e) => {
+              e.currentTarget.scrollLeft = e.currentTarget.scrollLeft; // Prevent momentum
               if (gridRef.current) {
                 gridRef.current.scrollLeft = e.currentTarget.scrollLeft;
               }
@@ -1597,9 +1598,11 @@ export default function NoteGrid({
             backgroundColor: '#232323'
           }}
           onScroll={(e) => {
-            setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
+            const newScrollLeft = e.target.scrollLeft;
+            setViewportState(prev => ({ ...prev, scrollLeft: newScrollLeft, scrollTop: e.target.scrollTop }));
+            // Sync header immediately without conditions
             if (headerScrollRef.current) {
-              headerScrollRef.current.scrollLeft = e.target.scrollLeft;
+              headerScrollRef.current.scrollLeft = newScrollLeft;
             }
           }}
           onMouseMove={handlePointerMove}
