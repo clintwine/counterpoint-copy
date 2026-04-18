@@ -157,10 +157,19 @@ export async function initAudio() {
       chorusGain.connect(compressor);
     }
   }
+  
   // Resume context if suspended (browser autoplay policy)
   if (audioContext.state === 'suspended') {
     audioContext.resume();
   }
+  
+  // Reset master gain in case it was faded out from previous playback stop
+  if (masterGain) {
+    const now = Math.max(0.01, audioContext.currentTime + 0.01);
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(0.25, now);
+  }
+  
   return audioContext;
 }
 
