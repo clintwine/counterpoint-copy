@@ -691,6 +691,9 @@ export default function CounterpointGenerator() {
       return;
     }
     
+    // Ensure audio is initialized for loaded song
+    ensureAudio();
+    
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
     
