@@ -419,12 +419,11 @@ export default function NoteGrid({
     
     // Use custom instrument if available
     if (customConfig) {
-      playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig, note?.articulation || 'normal', tempo, pitchBend);
+      await playNoteWithCustomInstrument(pitch, actualDuration, velocity, customConfig, note?.articulation || 'normal', tempo, pitchBend);
     } else if (note?.articulation && note.articulation !== 'normal') {
       // Use articulation if present
-      import('@/components/counterpoint/audioEngine').then(({ playNoteWithArticulation }) => {
-        playNoteWithArticulation(pitch, actualDuration, velocity, 0, instrument, note.articulation, tempo, pitchBend);
-      });
+      const { playNoteWithArticulation } = await import('@/components/counterpoint/audioEngine');
+      playNoteWithArticulation(pitch, actualDuration, velocity, 0, instrument, note.articulation, tempo, pitchBend);
     } else {
       playNote(pitch, actualDuration, velocity, 0, instrument, pitchBend);
     }
