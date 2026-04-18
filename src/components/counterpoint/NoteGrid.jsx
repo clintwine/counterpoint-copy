@@ -1415,9 +1415,8 @@ export default function NoteGrid({
             variant="ghost"
             size="sm"
             onClick={() => setZoom(1)}
-            disabled={zoom === 1}
-            className="h-7 px-1.5 text-[10px] text-white/50 hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-20"
-            title="Reset width zoom"
+            className={`h-7 px-1.5 text-[10px] hover:text-white hover:bg-slate-700 border border-slate-600 ${zoom === 1 ? 'text-white/25 cursor-default' : 'text-amber-400'}`}
+            title="Reset width zoom to 1x"
           >1:1</Button>
 
           <div className="w-px h-4 bg-slate-600 mx-1" />
@@ -1455,9 +1454,8 @@ export default function NoteGrid({
             variant="ghost"
             size="sm"
             onClick={() => setZoomY(1)}
-            disabled={zoomY === 1}
-            className="h-7 px-1.5 text-[10px] text-white/50 hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-20"
-            title="Reset height zoom"
+            className={`h-7 px-1.5 text-[10px] hover:text-white hover:bg-slate-700 border border-slate-600 ${zoomY === 1 ? 'text-white/25 cursor-default' : 'text-amber-400'}`}
+            title="Reset height zoom to 1x"
           >1:1</Button>
         </div>
       </div>
