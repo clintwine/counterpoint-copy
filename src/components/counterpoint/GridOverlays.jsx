@@ -28,7 +28,7 @@ export default function GridOverlays({
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
 
-  // Cache rects for drag ghost positioning (only needs resize updates)
+  // Cache rects — refresh on resize
   useLayoutEffect(() => {
     const update = () => {
       if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
@@ -39,17 +39,23 @@ export default function GridOverlays({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Update playhead position directly in DOM — no React state, no scroll math needed
-  // The playhead is position:absolute inside the scrollable content div, so it scrolls naturally
+  // Move playhead via direct DOM write — reads scrollLeft from DOM to stay in sync without React state lag
   useLayoutEffect(() => {
-    if (!playheadRef.current) return;
-    playheadRef.current.style.left = `${smoothPlayhead * CELL_WIDTH}px`;
-  }, [smoothPlayhead, CELL_WIDTH]);
+    if (!playheadRef.current || !gridRef?.current) return;
+    const rect = gridRectRef.current || gridRef.current.getBoundingClientRect();
+    const x = rect.left + 56 + smoothPlayhead * CELL_WIDTH - gridRef.current.scrollLeft;
+    playheadRef.current.style.transform = `translateX(${x}px)`;
+  }, [smoothPlayhead, CELL_WIDTH, viewportState.scrollLeft]);
 
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
+  const headerRect = headerRectRef.current || gridRect;
   const scrollLeft = gridRef.current.scrollLeft;
   const scrollTop = gridRef.current.scrollTop;
+
+  // The content area starts at gridRect.left + 56 (after pitch labels)
+  // So: beat pixel position relative to viewport = gridRect.left + 56 + beat * CELL_WIDTH - scrollLeft
+  const contentLeft = gridRect.left + 56;
 
   const makeScrubHandlers = () => ({
     onMouseDown: (e) => {
@@ -58,8 +64,8 @@ export default function GridOverlays({
       setIsScrubbing(true);
       const onMove = (moveEvent) => {
         if (!gridRef.current) return;
-        const r = gridRef.current.getBoundingClientRect();
-        const x = moveEvent.clientX - r.left - 56 + gridRef.current.scrollLeft;
+        const rect = gridRef.current.getBoundingClientRect();
+        const x = moveEvent.clientX - rect.left - 56 + gridRef.current.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
         setScrubPosition(beat);
@@ -71,6 +77,8 @@ export default function GridOverlays({
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
       };
+      // Seek on initial click too
+      onMove(e);
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     },
@@ -80,8 +88,8 @@ export default function GridOverlays({
       setIsScrubbing(true);
       const onMove = (moveEvent) => {
         if (!gridRef.current || !moveEvent.touches[0]) return;
-        const r = gridRef.current.getBoundingClientRect();
-        const x = moveEvent.touches[0].clientX - r.left - 56 + gridRef.current.scrollLeft;
+        const rect = gridRef.current.getBoundingClientRect();
+        const x = moveEvent.touches[0].clientX - rect.left - 56 + gridRef.current.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
         setScrubPosition(beat);
@@ -100,26 +108,33 @@ export default function GridOverlays({
 
   const scrubHandlers = makeScrubHandlers();
 
+  // Initial transform for SSR/first render
+  const initialX = contentLeft + smoothPlayhead * CELL_WIDTH - scrollLeft;
+
   return (
     <>
-      {/* Playhead — absolute inside scrollable content, scrolls naturally with grid */}
+      {/*
+        Playhead — fixed positioning so it doesn't scroll vertically.
+        Horizontal position is set via transform on the left:0 anchor.
+        Direct DOM writes via useLayoutEffect keep it jitter-free.
+      */}
       <div
         ref={playheadRef}
-        className="absolute top-0 pointer-events-auto cursor-ew-resize"
+        className="fixed top-0 pointer-events-auto cursor-ew-resize"
         style={{
-          left: `${smoothPlayhead * CELL_WIDTH}px`,
-          width: 0,
-          height: pitches.length * CELL_HEIGHT,
-          zIndex: 10,
-          transform: 'translateX(-50%)',
-          willChange: 'left',
+          left: 0,
+          top: `${headerRect.top}px`,
+          transform: `translateX(${initialX}px)`,
+          willChange: 'transform',
+          zIndex: 40,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          width: 0,
         }}
         {...scrubHandlers}
       >
-        {/* Triangle indicator at top */}
+        {/* Triangle */}
         <div style={{
           width: 0, height: 0,
           borderLeft: `${Math.max(8, 10 * zoom)}px solid transparent`,
@@ -127,14 +142,14 @@ export default function GridOverlays({
           borderTop: `${Math.max(10, 12 * zoom)}px solid #ef4444`,
           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
           flexShrink: 0,
-          marginTop: '-1px',
         }} />
-        {/* Vertical line */}
+        {/* Line — tall enough to cover full grid height */}
         <div style={{
           width: Math.max(2, 2 * zoom),
-          flex: 1,
+          height: pitches.length * CELL_HEIGHT,
           backgroundColor: '#ef4444',
-          boxShadow: '0 0 6px rgba(239,68,68,0.6)',
+          boxShadow: '0 0 8px rgba(239,68,68,0.6)',
+          flexShrink: 0,
         }} />
       </div>
 
@@ -150,7 +165,7 @@ export default function GridOverlays({
             key={`ghost-${idx}`}
             className="fixed rounded flex items-center justify-start pl-1 shadow-xl pointer-events-none"
             style={{
-              left: `${gridRect.left + 56 + newBeat * CELL_WIDTH - scrollLeft + 2}px`,
+              left: `${contentLeft + newBeat * CELL_WIDTH - scrollLeft + 2}px`,
               top: `${gridRect.top + newPitchIdx * CELL_HEIGHT - scrollTop + 2}px`,
               width: noteWidth,
               height: CELL_HEIGHT - 4,
