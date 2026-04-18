@@ -691,9 +691,6 @@ export default function CounterpointGenerator() {
       return;
     }
     
-    // Ensure audio is initialized for loaded song
-    ensureAudio();
-    
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
     
@@ -703,6 +700,9 @@ export default function CounterpointGenerator() {
       previewTimeoutRef.current = null;
     }
     setPreviewingSongId(null);
+    
+    // Reinitialize audio after cleanup
+    ensureAudio();
     
     // Load voices and ensure each has an instrument
     const loadedVoices = song.voices || DEFAULT_VOICES;
