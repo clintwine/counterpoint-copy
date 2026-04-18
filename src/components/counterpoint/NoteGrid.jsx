@@ -1597,7 +1597,7 @@ export default function NoteGrid({
           }}
           onScroll={(e) => {
             setViewportState(prev => ({ ...prev, scrollLeft: e.target.scrollLeft, scrollTop: e.target.scrollTop }));
-            if (headerScrollRef.current) {
+            if (headerScrollRef.current && Math.abs(headerScrollRef.current.scrollLeft - e.target.scrollLeft) > 0.5) {
               headerScrollRef.current.scrollLeft = e.target.scrollLeft;
             }
           }}
