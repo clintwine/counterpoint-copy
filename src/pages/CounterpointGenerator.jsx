@@ -363,23 +363,7 @@ export default function CounterpointGenerator() {
           // Spacebar for play/pause
           if (e.key === ' ') {
             e.preventDefault();
-            console.log('[Keyboard] Spacebar pressed - toggling playback');
-            console.trace();
-            if (isPlaying) {
-              console.log('[Keyboard] setIsPlaying(false) - stopping via spacebar');
-              stopAllNotes();
-              setIsPlaying(false);
-            } else {
-              console.log('[Keyboard] setIsPlaying(true) - starting via spacebar');
-              // When starting playback, jump to loop start if set
-              if (loopStart !== null) {
-                setCurrentBeat(loopStart);
-                setPlayheadPosition(loopStart);
-                lastPlayheadRef.current = loopStart;
-                playedNotesRef.current.clear();
-              }
-              setIsPlaying(true);
-            }
+            handlePlayPause();
           }
 
           // Cmd/Ctrl + S for save project
@@ -427,7 +411,7 @@ export default function CounterpointGenerator() {
            };
            window.addEventListener('keydown', handleKeyDown);
            return () => window.removeEventListener('keydown', handleKeyDown);
-           }, [currentUser, currentProjectId, projectName, handleSaveProject, currentBeat, settings]);
+           }, [currentUser, currentProjectId, projectName, handleSaveProject, currentBeat, settings, handlePlayPause]);
 
   // Get current user
   useEffect(() => {
@@ -1270,29 +1254,20 @@ export default function CounterpointGenerator() {
     }
   }, [playheadPosition, isPlaying, allNotes, tempo, voices, metronomeEnabled, settings.timeSignature, customInstruments]);
 
-  const handlePlayPause = () => {
-    ensureAudio();
+  const handlePlayPause = useCallback(() => {
     if (isPlaying) {
-      console.log('[Playback] handlePlayPause - STOPPING playback');
-      console.trace();
       stopAllNotes();
-      console.log('[Playback] setIsPlaying(false) - called from handlePlayPause');
       setIsPlaying(false);
     } else {
-      console.log('[Playback] handlePlayPause - STARTING playback');
-      // Ensure audio context is ready and resumed
-      import('@/components/counterpoint/audioEngine').then(({ initAudio, getAudioContext, setMasterVolume }) => {
-        initAudio();
-        const audioCtx = getAudioContext();
-        if (audioCtx && audioCtx.state === 'suspended') {
-          audioCtx.resume().catch(() => {});
-        }
-        // Reset master volume to ensure audio is audible
-        setMasterVolume(0.25);
-      });
-      // Always clear played notes to prevent stale state
+      // Synchronously init and resume audio context (required for user gesture)
+      initAudio().then((ctx) => {
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+        setAudioMasterVolume(0.25);
+      }).catch(() => {});
+      
+      // Clear played notes
       playedNotesRef.current.clear();
-      // When starting playback, jump to loop start if set, otherwise keep current position
+      // Jump to loop start or stay at current position
       if (loopStart !== null) {
         setCurrentBeat(loopStart);
         setPlayheadPosition(loopStart);
@@ -1300,10 +1275,9 @@ export default function CounterpointGenerator() {
       } else {
         lastPlayheadRef.current = playheadPosition;
       }
-      console.log('[Playback] setIsPlaying(true) - called from handlePlayPause');
       setIsPlaying(true);
     }
-  };
+  }, [isPlaying, loopStart, playheadPosition]);
 
   const handleReset = () => {
     setCurrentBeat(0);
