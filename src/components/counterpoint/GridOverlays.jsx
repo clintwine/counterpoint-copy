@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useLayoutEffect } from 'react';
 
 export default function GridOverlays({
   marquee,
@@ -24,30 +24,28 @@ export default function GridOverlays({
   setScrubPosition,
   headerRef
 }) {
-  // Cache grid/header rects to avoid jitter from repeated getBoundingClientRect calls
+  // Stable cached rects - only update on resize, not every render
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
-  const [, forceUpdate] = useState(0);
+  const playheadRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update = () => {
-      if (gridRef?.current) {
-        gridRectRef.current = gridRef.current.getBoundingClientRect();
-      }
-      if (headerRef?.current) {
-        headerRectRef.current = headerRef.current.getBoundingClientRect();
-      }
+      if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
+      if (headerRef?.current) headerRectRef.current = headerRef.current.getBoundingClientRect();
     };
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, [gridRef, headerRef]);
+  }, []); // Only on mount + resize
 
-  // Update rects when layout changes (scroll, zoom etc.)
-  useEffect(() => {
-    if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
-    if (headerRef?.current) headerRectRef.current = headerRef.current.getBoundingClientRect();
-  });
+  // Move playhead via direct DOM manipulation to avoid React re-render jitter
+  useLayoutEffect(() => {
+    if (!playheadRef.current || !gridRectRef.current) return;
+    const gridRect = gridRectRef.current;
+    const x = gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft - 1;
+    playheadRef.current.style.transform = `translateX(${x}px)`;
+  }, [smoothPlayhead, CELL_WIDTH, viewportState.scrollLeft]);
 
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
@@ -105,8 +103,9 @@ export default function GridOverlays({
 
   return (
     <>
-      {/* Playhead line + triangle */}
+      {/* Playhead line + triangle - moved via direct DOM ref to avoid jitter */}
       <div
+        ref={playheadRef}
         className="fixed cursor-ew-resize"
         style={{
           left: 0,

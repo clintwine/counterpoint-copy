@@ -26,11 +26,7 @@ export default function Scrubber({ smoothPlayhead, totalBeats, CELL_WIDTH, onSee
       style={{ width: `${totalBeats * CELL_WIDTH}px`, backgroundColor: '#2B2B2B' }}
       onMouseDown={handleMouseDown}
     >
-      {/* Playhead indicator */}
-      <div
-        className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none"
-        style={{ left: `${smoothPlayhead * CELL_WIDTH}px`, transform: 'translateX(-50%)' }}
-      />
+      {/* No playhead here - rendered by GridOverlays */}
     </div>
   );
 }
