@@ -941,36 +941,31 @@ export default function NoteGrid({
         setSelectedNotes(new Set());
         onLoopChange?.(null, null);
       } else {
-        // Calculate selected notes from marquee
-        const startCell = getCellFromPosition(marquee.startX, marquee.startY);
-        const endCell = getCellFromPosition(marquee.endX, marquee.endY);
-        
-        if (startCell && endCell) {
-          const minBeat = Math.min(startCell.beat, endCell.beat);
-          const maxBeat = Math.max(startCell.beat, endCell.beat);
-          const minPitchIdx = Math.min(startCell.pitchIndex, endCell.pitchIndex);
-          const maxPitchIdx = Math.max(startCell.pitchIndex, endCell.pitchIndex);
-          
+        // Convert marquee screen coords to grid space accounting for current scroll
+        const gridRect = gridRef.current?.getBoundingClientRect();
+        if (gridRect) {
+          const scrollLeft = gridRef.current?.scrollLeft || 0;
+          const scrollTop = gridRef.current?.scrollTop || 0;
+          const minScreenX = Math.min(marquee.startX, marquee.endX);
+          const maxScreenX = Math.max(marquee.startX, marquee.endX);
+          const minScreenY = Math.min(marquee.startY, marquee.endY);
+          const maxScreenY = Math.max(marquee.startY, marquee.endY);
+          const gridMinBeat = (minScreenX - gridRect.left - 56 + scrollLeft) / CELL_WIDTH;
+          const gridMaxBeat = (maxScreenX - gridRect.left - 56 + scrollLeft) / CELL_WIDTH;
+          const gridMinPitch = (minScreenY - gridRect.top - 28 + scrollTop) / CELL_HEIGHT;
+          const gridMaxPitch = (maxScreenY - gridRect.top - 28 + scrollTop) / CELL_HEIGHT;
           const newSelected = new Set();
           const selectedNotesList = [];
           cantusFirmus.forEach(note => {
             const pitchIdx = pitches.indexOf(note.pitch);
-            const duration = note.duration || DEFAULT_DURATION;
-            const noteEndBeat = note.beat + duration;
-            
-            // Select note if it overlaps with marquee
-            const overlapsHorizontally = noteEndBeat > minBeat && note.beat < maxBeat;
-            const overlapsVertically = pitchIdx >= minPitchIdx && pitchIdx <= maxPitchIdx;
-            
-            if (overlapsHorizontally && overlapsVertically) {
+            const noteEndBeat = note.beat + (note.duration || DEFAULT_DURATION);
+            if (noteEndBeat > gridMinBeat && note.beat < gridMaxBeat && pitchIdx >= Math.floor(gridMinPitch) && pitchIdx <= Math.ceil(gridMaxPitch)) {
               newSelected.add(getNoteKey(note.pitch, note.beat));
               selectedNotesList.push(note);
             }
           });
           if (selectedNotesList.length > 0) {
-            const selMinBeat = Math.floor(Math.min(...selectedNotesList.map(n => n.beat)));
-            const selMaxBeat = Math.ceil(Math.max(...selectedNotesList.map(n => n.beat + (n.duration || DEFAULT_DURATION))));
-            onLoopChange?.(selMinBeat, selMaxBeat);
+            onLoopChange?.(Math.floor(Math.min(...selectedNotesList.map(n => n.beat))), Math.ceil(Math.max(...selectedNotesList.map(n => n.beat + (n.duration || DEFAULT_DURATION)))));
           } else {
             onLoopChange?.(null, null);
           }
