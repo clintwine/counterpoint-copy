@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useEffect } from 'react';
 
 export default function GridOverlays({
   marquee,
@@ -27,6 +27,9 @@ export default function GridOverlays({
   const playheadRef = useRef(null);
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
+  // Keep a stable ref to the latest smoothPlayhead value so the scroll handler can use it
+  const smoothPlayheadRef = useRef(smoothPlayhead);
+  const cellWidthRef = useRef(CELL_WIDTH);
 
   // Cache rects — refresh on resize
   useLayoutEffect(() => {
@@ -39,22 +42,34 @@ export default function GridOverlays({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Move playhead via direct DOM write — reads scrollLeft from DOM to stay in sync without React state lag
-  useLayoutEffect(() => {
-    if (!playheadRef.current || !gridRef?.current) return;
-    const rect = gridRectRef.current || gridRef.current.getBoundingClientRect();
-    const x = rect.left + 56 + smoothPlayhead * CELL_WIDTH - gridRef.current.scrollLeft;
+  // Helper: compute and apply playhead X position directly to the DOM
+  const applyPlayheadPosition = () => {
+    if (!playheadRef.current || !gridRef?.current || !gridRectRef.current) return;
+    const x = gridRectRef.current.left + 56 + smoothPlayheadRef.current * cellWidthRef.current - gridRef.current.scrollLeft;
     playheadRef.current.style.transform = `translateX(${x}px)`;
-  }, [smoothPlayhead, CELL_WIDTH, viewportState.scrollLeft]);
+  };
+
+  // Keep refs in sync with latest props
+  useLayoutEffect(() => {
+    smoothPlayheadRef.current = smoothPlayhead;
+    cellWidthRef.current = CELL_WIDTH;
+    applyPlayheadPosition();
+  }, [smoothPlayhead, CELL_WIDTH]);
+
+  // Subscribe to grid scroll events directly — no React state involved, zero jitter
+  useEffect(() => {
+    const grid = gridRef?.current;
+    if (!grid) return;
+    const onScroll = () => applyPlayheadPosition();
+    grid.addEventListener('scroll', onScroll, { passive: true });
+    return () => grid.removeEventListener('scroll', onScroll);
+  }, [gridRef?.current]); // re-subscribe if gridRef changes
 
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
   const headerRect = headerRectRef.current || gridRect;
   const scrollLeft = gridRef.current.scrollLeft;
   const scrollTop = gridRef.current.scrollTop;
-
-  // The content area starts at gridRect.left + 56 (after pitch labels)
-  // So: beat pixel position relative to viewport = gridRect.left + 56 + beat * CELL_WIDTH - scrollLeft
   const contentLeft = gridRect.left + 56;
 
   const makeScrubHandlers = () => ({
@@ -77,7 +92,6 @@ export default function GridOverlays({
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
       };
-      // Seek on initial click too
       onMove(e);
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
@@ -107,26 +121,25 @@ export default function GridOverlays({
   });
 
   const scrubHandlers = makeScrubHandlers();
-
-  // Initial transform for SSR/first render
   const initialX = contentLeft + smoothPlayhead * CELL_WIDTH - scrollLeft;
 
   return (
     <>
       {/*
-        Playhead — fixed positioning so it doesn't scroll vertically.
-        Horizontal position is set via transform on the left:0 anchor.
-        Direct DOM writes via useLayoutEffect keep it jitter-free.
+        Playhead — fixed so it doesn't scroll vertically.
+        Position is driven entirely by direct DOM writes (never by React re-renders),
+        keeping it perfectly in sync with no jitter.
+        zIndex is kept low so it sits behind the sticky pitch-label column.
       */}
       <div
         ref={playheadRef}
-        className="fixed top-0 pointer-events-auto cursor-ew-resize"
+        className="fixed pointer-events-auto cursor-ew-resize"
         style={{
           left: 0,
           top: `${headerRect.top}px`,
           transform: `translateX(${initialX}px)`,
           willChange: 'transform',
-          zIndex: 40,
+          zIndex: 5,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -143,7 +156,7 @@ export default function GridOverlays({
           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
           flexShrink: 0,
         }} />
-        {/* Line — tall enough to cover full grid height */}
+        {/* Line */}
         <div style={{
           width: Math.max(2, 2 * zoom),
           height: pitches.length * CELL_HEIGHT,
