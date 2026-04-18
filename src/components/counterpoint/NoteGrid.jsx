@@ -632,7 +632,7 @@ export default function NoteGrid({
                 }
                 
                 // Play the note with proper duration for feedback
-                playNoteSound(pitch);
+                await playNoteSound(pitch);
               }
 
               // Clear selection and loop
@@ -695,9 +695,9 @@ export default function NoteGrid({
                         const customConfig = getInstrumentConfig(pianoInstrument);
                         
                         if (customConfig) {
-                          playNoteWithCustomInstrument(newPitch, 2, 0.7, customConfig);
+                          await playNoteWithCustomInstrument(newPitch, 2, 0.7, customConfig);
                         } else {
-                          pianoSustainRef.current = playNoteSustain(newPitch, 0.7, 0, pianoInstrument);
+                          pianoSustainRef.current = await playNoteSustain(newPitch, 0.7, 0, pianoInstrument);
                         }
                       }
                     }
@@ -736,7 +736,7 @@ export default function NoteGrid({
                   }
                   
                   // Play the note with proper duration for feedback
-                  initAudio();
+                  await initAudio();
                   const instrument = voices[activeVoice]?.instrument || 'organ';
                   playNote(cell.pitch, 0.5, 0.7, 0, instrument);
                 }
@@ -1709,7 +1709,7 @@ export default function NoteGrid({
                   if (customConfig) {
                     await playNoteWithCustomInstrument(pitch, 2, 0.7, customConfig);
                   } else {
-                    pianoSustainRef.current = playNoteSustain(pitch, 0.7, 0, pianoInstrument);
+                    pianoSustainRef.current = await playNoteSustain(pitch, 0.7, 0, pianoInstrument);
                   }
                 };
                 
