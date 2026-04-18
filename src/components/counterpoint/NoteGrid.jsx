@@ -504,7 +504,7 @@ export default function NoteGrid({
   }, []); // No dependencies - use refs for current values
 
   // Keyboard shortcuts (extracted to hook)
-  useNoteGridKeyboard({ deleteSelected, copySelected, paste, selectAll, undo, redo, quantize, onSeek, loopStart, loopEnd, isLooping, setSelectedNotes, setMarquee, selectedNotes, cantusFirmus, getNoteKey, pitches, totalBeats, saveToHistory, onNotesUpdate });
+  useNoteGridKeyboard({ deleteSelected, copySelected, paste, selectAll, undo, redo, quantize, onSeek, loopStart, loopEnd, isLooping, setSelectedNotes, setMarquee, selectedNotes, cantusFirmus, getNoteKey, pitches, totalBeats, saveToHistory, onNotesUpdate, setZoom, MIN_ZOOM, MAX_ZOOM, ZOOM_STEP });
 
   // Tool shortcut keys (v/m/b)
   useEffect(() => {

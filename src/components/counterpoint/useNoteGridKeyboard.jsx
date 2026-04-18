@@ -23,6 +23,10 @@ export function useNoteGridKeyboard({
   totalBeats,
   saveToHistory,
   onNotesUpdate,
+  setZoom,
+  MIN_ZOOM,
+  MAX_ZOOM,
+  ZOOM_STEP,
 }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -211,24 +215,32 @@ export function useNoteGridKeyboard({
         setSelectedNotes(newSelectedKeys);
         saveToHistory(newNotes);
         onNotesUpdate(newNotes);
-      } else if ((e.key === '+' || e.key === '=') && selectedNotes.size > 0) {
+      } else if (e.key === '+' || e.key === '=') {
         e.preventDefault();
-        const newNotes = cantusFirmus.map(n => {
-          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-            return { ...n, velocity: Math.min(1, Math.round(((n.velocity ?? 0.8) + 0.04) * 100) / 100) };
-          }
-          return n;
-        });
-        onNotesUpdate(newNotes);
-      } else if (e.key === '-' && selectedNotes.size > 0) {
+        if (selectedNotes.size > 0) {
+          const newNotes = cantusFirmus.map(n => {
+            if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+              return { ...n, velocity: Math.min(1, Math.round(((n.velocity ?? 0.8) + 0.04) * 100) / 100) };
+            }
+            return n;
+          });
+          onNotesUpdate(newNotes);
+        } else if (setZoom) {
+          setZoom(z => Math.min(MAX_ZOOM, Math.round((z + ZOOM_STEP) * 100) / 100));
+        }
+      } else if (e.key === '-') {
         e.preventDefault();
-        const newNotes = cantusFirmus.map(n => {
-          if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
-            return { ...n, velocity: Math.max(0.04, Math.round(((n.velocity ?? 0.8) - 0.04) * 100) / 100) };
-          }
-          return n;
-        });
-        onNotesUpdate(newNotes);
+        if (selectedNotes.size > 0) {
+          const newNotes = cantusFirmus.map(n => {
+            if (selectedNotes.has(getNoteKey(n.pitch, n.beat))) {
+              return { ...n, velocity: Math.max(0.04, Math.round(((n.velocity ?? 0.8) - 0.04) * 100) / 100) };
+            }
+            return n;
+          });
+          onNotesUpdate(newNotes);
+        } else if (setZoom) {
+          setZoom(z => Math.max(MIN_ZOOM, Math.round((z - ZOOM_STEP) * 100) / 100));
+        }
       } else if (e.key === 'Enter') {
         e.preventDefault();
         const seekTo = (loopStart !== null && isLooping) ? loopStart : 0;
