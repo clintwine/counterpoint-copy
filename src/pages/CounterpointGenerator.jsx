@@ -414,11 +414,15 @@ export default function CounterpointGenerator() {
              const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
              const totalBeats = settings.measures * beatsPerMeasure;
              const increment = e.shiftKey ? 4 : 1;
-             handleSeek(Math.min(totalBeats - 1, currentBeat + increment));
+             const newBeat = Math.min(totalBeats - 1, currentBeat + increment);
+             handleSeek(newBeat);
+             scrollToBeatRef.current?.(newBeat);
            } else if (e.key === 'ArrowLeft') {
              e.preventDefault();
              const increment = e.shiftKey ? 4 : 1;
-             handleSeek(Math.max(0, currentBeat - increment));
+             const newBeat = Math.max(0, currentBeat - increment);
+             handleSeek(newBeat);
+             scrollToBeatRef.current?.(newBeat);
            }
            };
            window.addEventListener('keydown', handleKeyDown);
