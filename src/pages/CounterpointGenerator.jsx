@@ -701,8 +701,8 @@ export default function CounterpointGenerator() {
     }
     setPreviewingSongId(null);
     
-    // Reinitialize audio after cleanup
-    ensureAudio();
+    // Reinitialize audio with fresh context
+    initAudio().catch(() => {});
     
     // Load voices and ensure each has an instrument
     const loadedVoices = song.voices || DEFAULT_VOICES;

@@ -1602,16 +1602,11 @@ export default function NoteGrid({
             const newScrollLeft = e.target.scrollLeft;
             const newScrollTop = e.target.scrollTop;
             
-            // Immediate DOM sync (no re-render wait)
+            // Direct immediate sync without batching
+            setViewportState(prev => ({ ...prev, scrollLeft: newScrollLeft, scrollTop: newScrollTop }));
             if (headerScrollRef.current) {
               headerScrollRef.current.scrollLeft = newScrollLeft;
             }
-            
-            // Batch state update in RAF to avoid render thrashing
-            if (scrollUpdateRef.current) cancelAnimationFrame(scrollUpdateRef.current);
-            scrollUpdateRef.current = requestAnimationFrame(() => {
-              setViewportState(prev => ({ ...prev, scrollLeft: newScrollLeft, scrollTop: newScrollTop }));
-            });
           }}
           onMouseMove={handlePointerMove}
           onMouseUp={(e) => {
