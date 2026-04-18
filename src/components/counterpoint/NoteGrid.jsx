@@ -1557,7 +1557,7 @@ export default function NoteGrid({
           <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
           <div 
             className="flex-1 overflow-hidden"
-            style={{ backgroundColor: '#2B2B2B' }}
+            style={{ backgroundColor: '#cb6c6cff' }}
           >
             <Scrubber 
               smoothPlayhead={smoothPlayhead}
