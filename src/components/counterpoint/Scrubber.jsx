@@ -6,7 +6,7 @@ export default function Scrubber({ smoothPlayhead, totalBeats, CELL_WIDTH, onSee
     const seek = (moveEvent) => {
       if (!gridRef?.current) return;
       const rect = gridRef.current.getBoundingClientRect();
-      const x = moveEvent.clientX - rect.left - 56 + gridRef.current.scrollLeft;
+      const x = moveEvent.clientX - rect.left + gridRef.current.scrollLeft;
       const beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
       onSeek && onSeek(beat);
     };
