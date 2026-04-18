@@ -159,7 +159,7 @@ export default function GridOverlays({
         {/* Line */}
         <div style={{
           width: Math.max(2, 2 * zoom),
-          height: gridRef?.current ? gridRef.current.clientHeight : pitches.length * CELL_HEIGHT,
+          height: gridRef?.current ? gridRef.current.clientHeight + 64 : pitches.length * CELL_HEIGHT,
           backgroundColor: '#ef4444',
           boxShadow: '0 0 8px rgba(239,68,68,0.6)',
           flexShrink: 0,
