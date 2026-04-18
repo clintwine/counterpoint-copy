@@ -1442,12 +1442,32 @@ export default function CounterpointGenerator() {
         const midiTempo = midi.header.tempos.length > 0 ? midi.header.tempos[0].bpm : 120;
         const midiBPM = Math.round(midiTempo);
         
+        // Enharmonic flat-to-sharp map for normalization
+        const flatToSharp = {
+          'Db': 'C#', 'Eb': 'D#', 'Fb': 'E', 'Gb': 'F#',
+          'Ab': 'G#', 'Bb': 'A#', 'Cb': 'B'
+        };
+        const normalizePitch = (name) => {
+          // name is like "C4", "Db3", "A#5", "C-1" etc.
+          const match = name.match(/^([A-G]b?)(-?\d+)$/);
+          if (!match) return name;
+          let [, note, octave] = match;
+          const oct = parseInt(octave);
+          // Map flat to sharp
+          if (flatToSharp[note]) note = flatToSharp[note];
+          // Clamp to supported range (C0–B8)
+          if (oct < 0 || oct > 8) return null;
+          return `${note}${oct}`;
+        };
+
         // Get all notes from all tracks, sorted by time
         const allNotes = [];
         midi.tracks.forEach(track => {
           track.notes.forEach(note => {
+            const normalizedPitch = normalizePitch(note.name);
+            if (!normalizedPitch) return; // skip out-of-range notes
             allNotes.push({
-              pitch: note.name,
+              pitch: normalizedPitch,
               time: note.time,
               duration: note.duration,
               velocity: note.velocity

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 export default function GridOverlays({
   marquee,
@@ -24,9 +24,34 @@ export default function GridOverlays({
   setScrubPosition,
   headerRef
 }) {
+  // Cache grid/header rects to avoid jitter from repeated getBoundingClientRect calls
+  const gridRectRef = useRef(null);
+  const headerRectRef = useRef(null);
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      if (gridRef?.current) {
+        gridRectRef.current = gridRef.current.getBoundingClientRect();
+      }
+      if (headerRef?.current) {
+        headerRectRef.current = headerRef.current.getBoundingClientRect();
+      }
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [gridRef, headerRef]);
+
+  // Update rects when layout changes (scroll, zoom etc.)
+  useEffect(() => {
+    if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
+    if (headerRef?.current) headerRectRef.current = headerRef.current.getBoundingClientRect();
+  });
+
   if (!gridRef?.current) return null;
-  const gridRect = gridRef.current.getBoundingClientRect();
-  const headerRect = headerRef?.current?.getBoundingClientRect() || gridRect;
+  const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
+  const headerRect = headerRectRef.current || gridRect;
   const scrollLeft = gridRef.current.scrollLeft;
 
   const makeScrubHandlers = () => ({
@@ -84,9 +109,10 @@ export default function GridOverlays({
       <div
         className="fixed cursor-ew-resize"
         style={{
-          left: `${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft}px`,
+          left: 0,
           top: `${headerRect.top}px`,
-          transform: 'translateX(-50%)',
+          transform: `translateX(${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft - 1}px)`,
+          willChange: 'transform',
           pointerEvents: 'auto',
           zIndex: 5,
           display: 'flex',
