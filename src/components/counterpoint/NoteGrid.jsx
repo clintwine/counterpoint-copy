@@ -1061,32 +1061,8 @@ export default function NoteGrid({
           <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full flex flex-col h-full">
             {/* Main Toolbar */}
           <div className="flex items-center justify-between px-2 sm:px-5 py-1 sm:py-1.5 border-b border-[#3A3A3A] overflow-x-auto gap-2 flex-shrink-0">
-            {/* Left: User Avatar + File Menu */}
+            {/* Left: File Menu */}
             <div className="flex items-center gap-2">
-              {/* User avatar */}
-              {currentUser && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button 
-                      className="flex items-center justify-center w-8 h-8 rounded-full bg-[#D4AF37] text-[#1E1E1E] font-semibold text-xs border-2 border-[#3A3A3A] hover:bg-[#E5BF47] transition-colors cursor-pointer" 
-                      title={currentUser.email}
-                    >
-                      {getInitials(currentUser.email)}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A]">
-                    <DropdownMenuItem disabled className="text-white/50 text-xs cursor-default">
-                      {currentUser.email}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-                    <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -1179,11 +1155,35 @@ export default function NoteGrid({
           </div>
 
           {/* Center: Transport controls */}
-          <div className="flex-1 flex items-center justify-center">
-            {playbackControls}
-          </div>
-        
-          <div className="w-8" />
+           <div className="flex-1 flex items-center justify-center">
+             {playbackControls}
+           </div>
+
+           {/* Right: User Avatar */}
+           <div className="flex items-center gap-2 flex-shrink-0">
+             {currentUser && (
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                   <button 
+                     className="flex items-center justify-center w-8 h-8 rounded-full bg-[#D4AF37] text-[#1E1E1E] font-semibold text-xs border-2 border-[#3A3A3A] hover:bg-[#E5BF47] transition-colors cursor-pointer" 
+                     title={currentUser.email}
+                   >
+                     {getInitials(currentUser.email)}
+                   </button>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuContent align="end" className="bg-[#1E1E1E] border-[#3A3A3A]">
+                   <DropdownMenuItem disabled className="text-white/50 text-xs cursor-default">
+                     {currentUser.email}
+                   </DropdownMenuItem>
+                   <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+                   <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
+                     <LogOut className="w-4 h-4 mr-2" />
+                     Logout
+                   </DropdownMenuItem>
+                 </DropdownMenuContent>
+               </DropdownMenu>
+             )}
+           </div>
         </div>
 
       {/* Secondary Toolbar - Tool Controls */}
