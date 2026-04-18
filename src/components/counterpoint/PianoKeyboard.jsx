@@ -667,6 +667,27 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
     <div className="bg-[#2D2D2D] rounded-xl p-2 sm:p-3 border border-[#3A3A3A] max-w-full overflow-hidden">
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Reset Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
+              setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+              setEffectLevel('reverb', 0.3);
+              setEffectLevel('delay', 0);
+              setEffectLevel('chorus', 0);
+              setGlobalEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+            }}
+            className="h-7 px-2 text-xs text-white/60 hover:text-white hover:bg-slate-700 border border-slate-600 hidden sm:flex"
+            title="Reset effects and envelope"
+          >
+            <RefreshCw className="w-3.5 h-3.5 mr-1" />
+            Reset
+          </Button>
+
+          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
+
           {/* ADSR Envelope Knobs - hidden on mobile */}
                           <div className="hidden sm:flex items-center gap-3">
             <div className="flex flex-col items-center gap-0.5">
@@ -733,25 +754,6 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
               </div>
             </div>
           </div>
-
-          <div className="w-px h-8 bg-slate-600 hidden sm:block" />
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
-              setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
-              setEffectLevel('reverb', 0.3);
-              setEffectLevel('delay', 0);
-              setEffectLevel('chorus', 0);
-              setGlobalEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
-            }}
-            className="h-7 px-2 text-xs text-white/60 hover:text-white hover:bg-slate-700 border border-slate-600"
-            title="Reset effects and envelope"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-          </Button>
 
           {/* Effect Knobs - hidden on mobile */}
           <div className="hidden sm:flex items-center gap-3">
