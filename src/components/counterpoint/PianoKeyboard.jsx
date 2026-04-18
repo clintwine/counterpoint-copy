@@ -448,6 +448,9 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       if (e.repeat) return;
       // Don't trigger piano for modifier key combinations (undo/redo/copy/paste etc)
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Don't trigger piano for editor shortcut keys that conflict with grid operations
+      const EDITOR_SHORTCUTS = new Set(['q', 'v', 'm', 'b', ' ']);
+      if (EDITOR_SHORTCUTS.has(e.key.toLowerCase())) return;
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
         e.preventDefault();
@@ -459,6 +462,8 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
       // Don't trigger piano when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const EDITOR_SHORTCUTS = new Set(['q', 'v', 'm', 'b', ' ']);
+      if (EDITOR_SHORTCUTS.has(e.key.toLowerCase())) return;
       const pitch = KEY_MAP[e.key.toLowerCase()];
       if (pitch) {
         e.preventDefault();
