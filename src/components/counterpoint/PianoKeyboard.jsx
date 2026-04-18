@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { Keyboard, Guitar, Volume2, Waves, ChevronDown, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
 import { initAudio, playNoteSustain, stopNoteSustain, playNote, setEffectLevel, getEffectLevels, setEnvelope as setGlobalEnvelope, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
 import WaveEditor from './WaveEditor';
@@ -735,6 +735,23 @@ export default function PianoKeyboard({ activeNotes = [], instrument = 'organ', 
           </div>
 
           <div className="w-px h-8 bg-slate-600 hidden sm:block" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setEffects({ reverb: 0.3, delay: 0, chorus: 0 });
+              setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+              setEffectLevel('reverb', 0.3);
+              setEffectLevel('delay', 0);
+              setEffectLevel('chorus', 0);
+              setGlobalEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
+            }}
+            className="h-7 px-2 text-xs text-white/60 hover:text-white hover:bg-slate-700 border border-slate-600"
+            title="Reset effects and envelope"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </Button>
 
           {/* Effect Knobs - hidden on mobile */}
           <div className="hidden sm:flex items-center gap-3">
