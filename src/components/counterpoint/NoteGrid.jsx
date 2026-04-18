@@ -1411,6 +1411,14 @@ export default function NoteGrid({
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoom(1)}
+            disabled={zoom === 1}
+            className="h-7 px-1.5 text-[10px] text-white/50 hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-20"
+            title="Reset width zoom"
+          >1:1</Button>
 
           <div className="w-px h-4 bg-slate-600 mx-1" />
 
@@ -1443,6 +1451,14 @@ export default function NoteGrid({
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoomY(1)}
+            disabled={zoomY === 1}
+            className="h-7 px-1.5 text-[10px] text-white/50 hover:text-white hover:bg-slate-700 border border-slate-600 disabled:opacity-20"
+            title="Reset height zoom"
+          >1:1</Button>
         </div>
       </div>
 
