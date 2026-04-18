@@ -355,63 +355,7 @@ export default function CounterpointGenerator() {
     }
   }, [currentProjectId, projectName, settings, tempo, cantusFirmus, generatedVoices, voices, effects, envelope, saveProjectMutation, saveAsMode, customInstruments]);
 
-  // Global keyboard handlers for play/pause and save
-      useEffect(() => {
-        const handleKeyDown = (e) => {
-          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-          // Spacebar for play/pause
-          if (e.key === ' ') {
-            e.preventDefault();
-            handlePlayPause();
-          }
-
-          // Cmd/Ctrl + S for save project
-          if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.shiftKey) {
-            e.preventDefault();
-            setSaveAsMode(false);
-            // If existing project, save directly without dialog
-            if (currentProjectId && projectName.trim()) {
-              handleSaveProject(true);
-            } else {
-              setSaveDialogOpen(true);
-            }
-          }
-
-          // Cmd/Ctrl + Shift + S for save as
-           if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
-             e.preventDefault();
-             // If admin, show menu to choose between save as project or song
-             if (currentUser?.role === 'admin') {
-               // For now, default to save as project (could add a modal to choose)
-               setSaveAsMode(true);
-               setSaveDialogOpen(true);
-             } else {
-               setSaveAsMode(true);
-               setSaveDialogOpen(true);
-             }
-           }
-
-           // Arrow keys for playhead movement
-           if (e.key === 'ArrowRight') {
-             e.preventDefault();
-             const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
-             const totalBeats = settings.measures * beatsPerMeasure;
-             const increment = e.shiftKey ? 4 : 1;
-             const newBeat = Math.min(totalBeats - 1, currentBeat + increment);
-             handleSeek(newBeat);
-             scrollToBeatRef.current?.(newBeat);
-           } else if (e.key === 'ArrowLeft') {
-             e.preventDefault();
-             const increment = e.shiftKey ? 4 : 1;
-             const newBeat = Math.max(0, currentBeat - increment);
-             handleSeek(newBeat);
-             scrollToBeatRef.current?.(newBeat);
-           }
-           };
-           window.addEventListener('keydown', handleKeyDown);
-           return () => window.removeEventListener('keydown', handleKeyDown);
-           }, [currentUser, currentProjectId, projectName, handleSaveProject, currentBeat, settings, handlePlayPause]);
 
   // Get current user
   useEffect(() => {
@@ -1278,6 +1222,57 @@ export default function CounterpointGenerator() {
       setIsPlaying(true);
     }
   }, [isPlaying, loopStart, playheadPosition]);
+
+  // Global keyboard handlers for play/pause and save
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      // Spacebar for play/pause
+      if (e.key === ' ') {
+        e.preventDefault();
+        handlePlayPause();
+      }
+
+      // Cmd/Ctrl + S for save project
+      if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.shiftKey) {
+        e.preventDefault();
+        setSaveAsMode(false);
+        // If existing project, save directly without dialog
+        if (currentProjectId && projectName.trim()) {
+          handleSaveProject(true);
+        } else {
+          setSaveDialogOpen(true);
+        }
+      }
+
+      // Cmd/Ctrl + Shift + S for save as
+       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
+         e.preventDefault();
+         setSaveAsMode(true);
+         setSaveDialogOpen(true);
+       }
+
+       // Arrow keys for playhead movement
+       if (e.key === 'ArrowRight') {
+         e.preventDefault();
+         const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+         const totalBeats = settings.measures * beatsPerMeasure;
+         const increment = e.shiftKey ? 4 : 1;
+         const newBeat = Math.min(totalBeats - 1, currentBeat + increment);
+         handleSeek(newBeat);
+         scrollToBeatRef.current?.(newBeat);
+       } else if (e.key === 'ArrowLeft') {
+         e.preventDefault();
+         const increment = e.shiftKey ? 4 : 1;
+         const newBeat = Math.max(0, currentBeat - increment);
+         handleSeek(newBeat);
+         scrollToBeatRef.current?.(newBeat);
+       }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentUser, currentProjectId, projectName, handleSaveProject, currentBeat, settings, handlePlayPause]);
 
   const handleReset = () => {
     setCurrentBeat(0);
