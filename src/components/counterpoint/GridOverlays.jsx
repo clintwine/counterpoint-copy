@@ -137,6 +137,8 @@ export default function GridOverlays({
         style={{
           left: 0,
           top: `${headerRect.top}px`,
+          height: `${gridRect.bottom - headerRect.top}px`,
+          overflow: 'hidden',
           transform: `translateX(${initialX}px)`,
           willChange: 'transform',
           zIndex: 5,
