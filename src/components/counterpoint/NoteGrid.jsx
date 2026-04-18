@@ -1445,6 +1445,23 @@ export default function NoteGrid({
         </div>
       </div>
 
+        {/* Fixed Scrubber */}
+        <div className="flex flex-shrink-0">
+          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#b7b0b0ff' }} />
+          <div 
+            className="flex-1 overflow-hidden"
+            style={{ backgroundColor: '#cb6c6cff' }}
+          >
+            <Scrubber 
+              smoothPlayhead={smoothPlayhead}
+              totalBeats={totalBeats}
+              CELL_WIDTH={CELL_WIDTH}
+              onSeek={onSeek}
+              gridRef={gridRef}
+            />
+          </div>
+        </div>
+
       {/* Grid container with fixed headers and scrollable content */}
       <div className="flex flex-col flex-1 overflow-hidden mx-1">
         {/* Fixed Beat Header (measures) */}
@@ -1552,22 +1569,7 @@ export default function NoteGrid({
           </div>
         </div>
 
-        {/* Fixed Scrubber */}
-        <div className="flex flex-shrink-0">
-          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
-          <div 
-            className="flex-1 overflow-hidden"
-            style={{ backgroundColor: '#cb6c6cff' }}
-          >
-            <Scrubber 
-              smoothPlayhead={smoothPlayhead}
-              totalBeats={totalBeats}
-              CELL_WIDTH={CELL_WIDTH}
-              onSeek={onSeek}
-              gridRef={gridRef}
-            />
-          </div>
-        </div>
+      
 
         {/* Scrollable Grid Content */}
         <div 
