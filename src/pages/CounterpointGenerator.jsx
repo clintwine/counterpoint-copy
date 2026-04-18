@@ -395,22 +395,35 @@ export default function CounterpointGenerator() {
           }
 
           // Cmd/Ctrl + Shift + S for save as
-          if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
-            e.preventDefault();
-            // If admin, show menu to choose between save as project or song
-            if (currentUser?.role === 'admin') {
-              // For now, default to save as project (could add a modal to choose)
-              setSaveAsMode(true);
-              setSaveDialogOpen(true);
-            } else {
-              setSaveAsMode(true);
-              setSaveDialogOpen(true);
-            }
-          }
-          };
-          window.addEventListener('keydown', handleKeyDown);
-          return () => window.removeEventListener('keydown', handleKeyDown);
-          }, [currentUser, currentProjectId, projectName, handleSaveProject]);
+           if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
+             e.preventDefault();
+             // If admin, show menu to choose between save as project or song
+             if (currentUser?.role === 'admin') {
+               // For now, default to save as project (could add a modal to choose)
+               setSaveAsMode(true);
+               setSaveDialogOpen(true);
+             } else {
+               setSaveAsMode(true);
+               setSaveDialogOpen(true);
+             }
+           }
+
+           // Arrow keys for playhead movement
+           if (e.key === 'ArrowRight') {
+             e.preventDefault();
+             const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
+             const totalBeats = settings.measures * beatsPerMeasure;
+             const increment = e.shiftKey ? 4 : 1;
+             handleSeek(Math.min(totalBeats - 1, currentBeat + increment));
+           } else if (e.key === 'ArrowLeft') {
+             e.preventDefault();
+             const increment = e.shiftKey ? 4 : 1;
+             handleSeek(Math.max(0, currentBeat - increment));
+           }
+           };
+           window.addEventListener('keydown', handleKeyDown);
+           return () => window.removeEventListener('keydown', handleKeyDown);
+           }, [currentUser, currentProjectId, projectName, handleSaveProject, currentBeat, settings]);
 
   // Get current user
   useEffect(() => {

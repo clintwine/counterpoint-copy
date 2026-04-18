@@ -121,6 +121,10 @@ export default function GridOverlays({
         const beatThreshold = 4; // beats from edge before scrolling kicks in
         const maxSpeed = 16;
 
+        // Always seek to beat (keep playhead locked to mouse)
+        setScrubPosition(beat);
+        onSeek && onSeek(beat);
+
         if (beat > visibleEndBeat - beatThreshold) {
           // Near right edge — scroll right proportionally
           const overflow = beat - (visibleEndBeat - beatThreshold);
@@ -133,9 +137,6 @@ export default function GridOverlays({
           if (!autoScrollRaf) autoScrollRaf = requestAnimationFrame(autoScrollLoop);
         } else {
           stopAutoScroll();
-          // Normal seek — no edge pressure
-          setScrubPosition(beat);
-          onSeek && onSeek(beat);
         }
       };
       const onUp = () => {
