@@ -21,16 +21,12 @@ export default function Scrubber({ smoothPlayhead, totalBeats, CELL_WIDTH, onSee
   };
 
   return (
-    <div className="bg-[hsl(var(--chart-3))] relative h-2 cursor-pointer select-none"
-
-    style={{ width: `${totalBeats * CELL_WIDTH}px`, backgroundColor: '#2B2B2B' }}
-    onMouseDown={handleMouseDown}>
-      
-      {/* Playhead indicator */}
-      <div
-        className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none"
-        style={{ left: `${smoothPlayhead * CELL_WIDTH}px`, transform: 'translateX(-50%)' }} />
-      
-    </div>);
-
+    <div
+      className="relative h-2 cursor-pointer select-none"
+      style={{ width: `${totalBeats * CELL_WIDTH}px`, backgroundColor: '#2B2B2B' }}
+      onMouseDown={handleMouseDown}
+    >
+      {/* No playhead here - rendered by GridOverlays */}
+    </div>
+  );
 }

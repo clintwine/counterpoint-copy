@@ -59,7 +59,7 @@ export default function GridOverlays({
       const onMove = (moveEvent) => {
         if (!gridRef.current) return;
         const r = gridRef.current.getBoundingClientRect();
-        const x = moveEvent.clientX - r.left + gridRef.current.scrollLeft;
+        const x = moveEvent.clientX - r.left - 56 + gridRef.current.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
         setScrubPosition(beat);
@@ -81,7 +81,7 @@ export default function GridOverlays({
       const onMove = (moveEvent) => {
         if (!gridRef.current || !moveEvent.touches[0]) return;
         const r = gridRef.current.getBoundingClientRect();
-        const x = moveEvent.touches[0].clientX - r.left + gridRef.current.scrollLeft;
+        const x = moveEvent.touches[0].clientX - r.left - 56 + gridRef.current.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
         setScrubPosition(beat);
