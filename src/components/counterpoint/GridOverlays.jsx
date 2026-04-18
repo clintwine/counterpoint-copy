@@ -22,11 +22,13 @@ export default function GridOverlays({
   totalBeats,
   setIsScrubbing,
   setScrubPosition,
-  headerRef
+  headerRef,
+  scrubberRef
 }) {
   const playheadRef = useRef(null);
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
+  const scrubberRectRef = useRef(null);
   // Keep a stable ref to the latest smoothPlayhead value so the scroll handler can use it
   const smoothPlayheadRef = useRef(smoothPlayhead);
   const cellWidthRef = useRef(CELL_WIDTH);
@@ -36,6 +38,7 @@ export default function GridOverlays({
     const update = () => {
       if (gridRef?.current) gridRectRef.current = gridRef.current.getBoundingClientRect();
       if (headerRef?.current) headerRectRef.current = headerRef.current.getBoundingClientRect();
+      if (scrubberRef?.current) scrubberRectRef.current = scrubberRef.current.getBoundingClientRect();
     };
     update();
     window.addEventListener('resize', update);
@@ -68,6 +71,7 @@ export default function GridOverlays({
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
   const headerRect = headerRectRef.current || gridRect;
+  const scrubberRect = scrubberRectRef.current || (scrubberRef?.current ? scrubberRef.current.getBoundingClientRect() : headerRect);
   const scrollLeft = gridRef.current.scrollLeft;
   const scrollTop = gridRef.current.scrollTop;
   const contentLeft = gridRect.left + 56;
@@ -136,7 +140,7 @@ export default function GridOverlays({
         className="fixed pointer-events-auto cursor-ew-resize"
         style={{
           left: 0,
-          top: `${headerRect.top}px`,
+          top: `${scrubberRect.top}px`,
           transform: `translateX(${initialX}px)`,
           willChange: 'transform',
           zIndex: 5,

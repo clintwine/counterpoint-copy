@@ -79,6 +79,7 @@ export default function NoteGrid({
   const gridRef = useRef(null);
   const headerScrollRef = useRef(null);
   const headerRef = useRef(null);
+  const scrubberRef = useRef(null);
   const containerRef = useRef(null);
   const timeSigConfig = TIME_SIGNATURES.find(t => t.value === timeSignature) || TIME_SIGNATURES[0];
   const beatsPerMeasure = timeSigConfig.beatsPerMeasure;
@@ -1446,11 +1447,11 @@ export default function NoteGrid({
       </div>
 
         {/* Fixed Scrubber */}
-        <div className="flex flex-shrink-0">
-          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#rgb(43, 43, 43)' }} />
+        <div className="flex flex-shrink-0" ref={scrubberRef}>
+          <div className="flex-shrink-0" style={{ width: '56px', backgroundColor: '#2B2B2B' }} />
           <div 
             className="flex-1 overflow-hidden"
-            style={{ backgroundColor: '#cb6c6cff' }}
+            style={{ backgroundColor: '#2B2B2B' }}
           >
             <Scrubber 
               smoothPlayhead={smoothPlayhead}
@@ -1894,6 +1895,7 @@ export default function NoteGrid({
                 totalBeats={totalBeats}
                 setIsScrubbing={setIsScrubbing}
                 setScrubPosition={setScrubPosition}
+                scrubberRef={scrubberRef}
               />
             </div>
           </div>
