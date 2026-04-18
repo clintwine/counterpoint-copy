@@ -40,10 +40,12 @@ export default function GridOverlays({
   }, []); // Only on mount + resize
 
   // Move playhead via direct DOM manipulation to avoid React re-render jitter
+  // Read scrollLeft directly from DOM to stay in sync with scroll position
   useLayoutEffect(() => {
-    if (!playheadRef.current || !gridRectRef.current) return;
+    if (!playheadRef.current || !gridRectRef.current || !gridRef?.current) return;
     const gridRect = gridRectRef.current;
-    const x = gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft - 1;
+    const scrollLeft = gridRef.current.scrollLeft;
+    const x = gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - scrollLeft - 1;
     playheadRef.current.style.transform = `translateX(${x}px)`;
   }, [smoothPlayhead, CELL_WIDTH, viewportState.scrollLeft]);
 
@@ -110,7 +112,7 @@ export default function GridOverlays({
         style={{
           left: 0,
           top: `${headerRect.top}px`,
-          transform: `translateX(${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - viewportState.scrollLeft - 1}px)`,
+          transform: `translateX(${gridRect.left + 56 + smoothPlayhead * CELL_WIDTH - (gridRef.current?.scrollLeft ?? viewportState.scrollLeft) - 1}px)`,
           willChange: 'transform',
           pointerEvents: 'auto',
           zIndex: 5,
