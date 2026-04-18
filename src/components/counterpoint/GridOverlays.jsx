@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useEffect } from 'react';
+import React, { useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 
 export default function GridOverlays({
   marquee,
@@ -29,9 +29,9 @@ export default function GridOverlays({
   const gridRectRef = useRef(null);
   const headerRectRef = useRef(null);
   const scrubberRectRef = useRef(null);
-  // Keep a stable ref to the latest smoothPlayhead value so the scroll handler can use it
   const smoothPlayheadRef = useRef(smoothPlayhead);
   const cellWidthRef = useRef(CELL_WIDTH);
+  const rafRef = useRef(null);
 
   // Cache rects — refresh on resize
   useLayoutEffect(() => {
@@ -45,28 +45,32 @@ export default function GridOverlays({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Helper: compute and apply playhead X position directly to the DOM
-  const applyPlayheadPosition = () => {
-    if (!playheadRef.current || !gridRef?.current || !gridRectRef.current) return;
-    const x = gridRectRef.current.left + 56 + smoothPlayheadRef.current * cellWidthRef.current - gridRef.current.scrollLeft;
-    playheadRef.current.style.transform = `translateX(${x}px)`;
-  };
+  // Schedule a single rAF to apply the playhead position — deduplicates scroll + prop updates
+  const schedulePlayheadUpdate = useCallback(() => {
+    if (rafRef.current) return; // already scheduled
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (!playheadRef.current || !gridRef?.current || !gridRectRef.current) return;
+      const x = gridRectRef.current.left + 56 + smoothPlayheadRef.current * cellWidthRef.current - gridRef.current.scrollLeft;
+      playheadRef.current.style.transform = `translateX(${x}px)`;
+    });
+  }, []);
 
-  // Keep refs in sync with latest props
+  // Keep refs in sync with latest props and schedule update
   useLayoutEffect(() => {
     smoothPlayheadRef.current = smoothPlayhead;
     cellWidthRef.current = CELL_WIDTH;
-    applyPlayheadPosition();
+    schedulePlayheadUpdate();
   }, [smoothPlayhead, CELL_WIDTH]);
 
-  // Subscribe to grid scroll events directly — no React state involved, zero jitter
+  // Subscribe to grid scroll events — schedule via rAF to coalesce with prop updates
   useEffect(() => {
     const grid = gridRef?.current;
     if (!grid) return;
-    const onScroll = () => applyPlayheadPosition();
+    const onScroll = () => schedulePlayheadUpdate();
     grid.addEventListener('scroll', onScroll, { passive: true });
     return () => grid.removeEventListener('scroll', onScroll);
-  }, [gridRef?.current]); // re-subscribe if gridRef changes
+  }, [gridRef?.current, schedulePlayheadUpdate]);
 
   if (!gridRef?.current) return null;
   const gridRect = gridRectRef.current || gridRef.current.getBoundingClientRect();
