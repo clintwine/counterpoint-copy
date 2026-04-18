@@ -1280,9 +1280,15 @@ export default function CounterpointGenerator() {
       setIsPlaying(false);
     } else {
       console.log('[Playback] handlePlayPause - STARTING playback');
-      // Ensure audio context is ready
-      import('@/components/counterpoint/audioEngine').then(({ initAudio }) => {
+      // Ensure audio context is ready and resumed
+      import('@/components/counterpoint/audioEngine').then(({ initAudio, getAudioContext, setMasterVolume }) => {
         initAudio();
+        const audioCtx = getAudioContext();
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        // Reset master volume to ensure audio is audible
+        setMasterVolume(0.25);
       });
       // Always clear played notes to prevent stale state
       playedNotesRef.current.clear();
