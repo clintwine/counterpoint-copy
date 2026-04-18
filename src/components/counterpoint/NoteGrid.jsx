@@ -679,7 +679,7 @@ export default function NoteGrid({
                   if (gridRef.current) {
                     const gridRect = gridRef.current.getBoundingClientRect();
                     const scrollTop = gridRef.current.scrollTop;
-                    const y = coords.clientY - gridRect.top - 28 + scrollTop;
+                    const y = coords.clientY - gridRect.top + scrollTop;
                     const pitchIndex = Math.floor(y / CELL_HEIGHT);
                     
                     if (pitchIndex >= 0 && pitchIndex < pitches.length) {
@@ -952,8 +952,8 @@ export default function NoteGrid({
           const maxScreenY = Math.max(marquee.startY, marquee.endY);
           const gridMinBeat = (minScreenX - gridRect.left - 56 + scrollLeft) / CELL_WIDTH;
           const gridMaxBeat = (maxScreenX - gridRect.left - 56 + scrollLeft) / CELL_WIDTH;
-          const gridMinPitch = (minScreenY - gridRect.top - 28 + scrollTop) / CELL_HEIGHT;
-          const gridMaxPitch = (maxScreenY - gridRect.top - 28 + scrollTop) / CELL_HEIGHT;
+          const gridMinPitch = (minScreenY - gridRect.top + scrollTop) / CELL_HEIGHT;
+          const gridMaxPitch = (maxScreenY - gridRect.top + scrollTop) / CELL_HEIGHT;
           const newSelected = new Set();
           const selectedNotesList = [];
           cantusFirmus.forEach(note => {
@@ -1616,8 +1616,8 @@ export default function NoteGrid({
           }}
           onMouseLeave={(e) => {
             setHoveredCell(null);
-            // Don't end marquee on mouse leave - document listener handles it
-            if (!marquee) handlePointerUp(e);
+            // Only end interaction on leave if not in marquee/drag/resize (those use document listeners)
+            if (!marquee && !dragState && !resizeState) handlePointerUp(e);
           }}
           onTouchMove={(e) => { 
             if (e.touches.length === 2) {
