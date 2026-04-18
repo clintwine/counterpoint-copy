@@ -506,10 +506,15 @@ export default function NoteGrid({
   // Keyboard shortcuts (extracted to hook)
   useNoteGridKeyboard({ deleteSelected, copySelected, paste, selectAll, undo, redo, quantize, onSeek, loopStart, loopEnd, isLooping, setSelectedNotes, setMarquee, selectedNotes, cantusFirmus, getNoteKey, pitches, totalBeats, saveToHistory, onNotesUpdate, setZoom, MIN_ZOOM, MAX_ZOOM, ZOOM_STEP });
 
-  // Tool shortcut keys (v/m/b)
+  // Tool shortcut keys (v/m/b) and prevent space from triggering buttons
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      // Prevent space bar from triggering focused buttons
+      if (e.key === ' ' && (e.target.tagName === 'BUTTON' || e.target.closest('button'))) {
+        e.preventDefault();
+        return;
+      }
       if (e.key === 'v' && !e.metaKey && !e.ctrlKey) setTool('select');
       else if (e.key === 'm') setTool('marquee');
       else if (e.key === 'b') setTool('draw');
