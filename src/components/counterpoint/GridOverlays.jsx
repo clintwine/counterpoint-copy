@@ -86,54 +86,57 @@ export default function GridOverlays({
       e.preventDefault();
       setIsScrubbing(true);
       let autoScrollRaf = null;
-      let lastClientX = e.clientX;
+      let scrollSpeed = 0;
 
       const stopAutoScroll = () => {
+        scrollSpeed = 0;
         if (autoScrollRaf) { cancelAnimationFrame(autoScrollRaf); autoScrollRaf = null; }
       };
 
-      const startAutoScroll = (speed) => {
-        stopAutoScroll();
-        const loop = () => {
-          if (!gridRef.current) return;
-          gridRef.current.scrollLeft += speed;
-          // After scrolling, recompute beat and seek
-          const rect = gridRef.current.getBoundingClientRect();
-          const x = lastClientX - rect.left - 56 + gridRef.current.scrollLeft;
-          let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
-          if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
-          setScrubPosition(beat);
-          onSeek && onSeek(beat);
-          autoScrollRaf = requestAnimationFrame(loop);
-        };
-        autoScrollRaf = requestAnimationFrame(loop);
+      // Auto-scroll loop: runs independently, scrolls grid and updates seek
+      const autoScrollLoop = () => {
+        if (!gridRef.current || scrollSpeed === 0) { autoScrollRaf = null; return; }
+        gridRef.current.scrollLeft += scrollSpeed;
+        // Recompute current beat from the playhead's content position
+        const currentBeatPos = smoothPlayheadRef.current;
+        const newBeat = Math.max(0, Math.min(totalBeats - 1, currentBeatPos + scrollSpeed / CELL_WIDTH));
+        setScrubPosition(newBeat);
+        onSeek && onSeek(newBeat);
+        autoScrollRaf = requestAnimationFrame(autoScrollLoop);
       };
 
       const onMove = (moveEvent) => {
         if (!gridRef.current) return;
-        lastClientX = moveEvent.clientX;
-        const rect = gridRef.current.getBoundingClientRect();
-        const edgeThreshold = 80;
-        const maxSpeed = 20;
+        const grid = gridRef.current;
 
-        // Check if near left/right edge to auto-scroll
-        if (moveEvent.clientX > rect.right - edgeThreshold) {
-          const speed = maxSpeed * Math.min(1, (moveEvent.clientX - (rect.right - edgeThreshold)) / edgeThreshold);
-          startAutoScroll(speed);
-          return; // auto-scroll loop handles seeking
-        } else if (moveEvent.clientX < rect.left + edgeThreshold + 56) {
-          const speed = -maxSpeed * Math.min(1, ((rect.left + edgeThreshold + 56) - moveEvent.clientX) / edgeThreshold);
-          startAutoScroll(speed);
-          return;
-        } else {
-          stopAutoScroll();
-        }
-
-        const x = moveEvent.clientX - rect.left - 56 + gridRef.current.scrollLeft;
+        // Compute which beat the cursor maps to in content space
+        const rect = grid.getBoundingClientRect();
+        const x = moveEvent.clientX - rect.left - 56 + grid.scrollLeft;
         let beat = Math.max(0, Math.min(totalBeats - 1, x / CELL_WIDTH));
         if (snapToGrid) beat = Math.round(beat / quantizeGrid) * quantizeGrid;
-        setScrubPosition(beat);
-        onSeek && onSeek(beat);
+
+        // Compute visible beat range
+        const visibleStartBeat = grid.scrollLeft / CELL_WIDTH;
+        const visibleEndBeat = (grid.scrollLeft + grid.clientWidth - 56) / CELL_WIDTH;
+        const beatThreshold = 4; // beats from edge before scrolling kicks in
+        const maxSpeed = 16;
+
+        if (beat > visibleEndBeat - beatThreshold) {
+          // Near right edge — scroll right proportionally
+          const overflow = beat - (visibleEndBeat - beatThreshold);
+          scrollSpeed = Math.min(maxSpeed, overflow * CELL_WIDTH * 0.1);
+          if (!autoScrollRaf) autoScrollRaf = requestAnimationFrame(autoScrollLoop);
+        } else if (beat < visibleStartBeat + beatThreshold) {
+          // Near left edge — scroll left proportionally
+          const overflow = (visibleStartBeat + beatThreshold) - beat;
+          scrollSpeed = -Math.min(maxSpeed, overflow * CELL_WIDTH * 0.1);
+          if (!autoScrollRaf) autoScrollRaf = requestAnimationFrame(autoScrollLoop);
+        } else {
+          stopAutoScroll();
+          // Normal seek — no edge pressure
+          setScrubPosition(beat);
+          onSeek && onSeek(beat);
+        }
       };
       const onUp = () => {
         stopAutoScroll();
