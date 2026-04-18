@@ -175,6 +175,7 @@ export default function NoteGrid({
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const autoScrollRef = useRef(null);
+  const handlePointerUpRef = useRef(null); // Always-current ref to handlePointerUp
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const pianoSustainRef = useRef(null); // Track sustained piano note
   const [isDraggingPiano, setIsDraggingPiano] = useState(false);
@@ -499,7 +500,7 @@ export default function NoteGrid({
         } else if (autoScrollRef.current) { cancelAnimationFrame(autoScrollRef.current.raf); autoScrollRef.current = null; }
       }
     };
-    const onUp = () => handlePointerUp({});
+    const onUp = () => handlePointerUpRef.current?.({});
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
     return () => {
@@ -1047,6 +1048,9 @@ export default function NoteGrid({
   };
 
   const dragOffset = getDragOffset();
+
+  // Keep ref always pointing to latest handlePointerUp (avoids stale closure in document listeners)
+  handlePointerUpRef.current = handlePointerUp;
 
   const getInitials = (email) => {
     if (!email) return '?';
