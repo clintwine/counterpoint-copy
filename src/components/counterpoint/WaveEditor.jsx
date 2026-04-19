@@ -934,8 +934,7 @@ export default function WaveEditor({
 
   // Update live preview sound when instrument changes
   useEffect(() => {
-    if (livePreview && !isDraggingTimbre && !isPlaying) {
-      // Play preview on each change with animation (but not while dragging or already playing)
+    if (livePreview && !isPlaying) {
       const timeoutId = setTimeout(() => {
         setIsPlaying(true);
         playPreviewForInstrument(instrument, () => {
@@ -945,7 +944,7 @@ export default function WaveEditor({
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isDraggingTimbre, isPlaying]);
+  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isPlaying]);
 
   return (
     <div className="space-y-4">
