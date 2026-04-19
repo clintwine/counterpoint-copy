@@ -217,226 +217,324 @@ export function getAnalyser() {
 const INSTRUMENT_CONFIGS = {
   organ: {
     oscillators: [
-      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },      // 8' (fundamental)
-      { waveform: 'sine', detune: 0, gain: 0.95, harmonic: 2 },     // 4' (octave) - brighter
-      { waveform: 'sine', detune: -2, gain: 0.8, harmonic: 3 },     // 2 2/3' (twelfth) - more present
-      { waveform: 'sine', detune: 0, gain: 0.75, harmonic: 4 },     // 2' (fifteenth) - more edge
-      { waveform: 'sine', detune: 2, gain: 0.65, harmonic: 5 },     // 1 3/5' (seventeenth) - bite
-      { waveform: 'sine', detune: -1, gain: 0.55, harmonic: 6 },    // 1 1/3' (nineteenth)
-      { waveform: 'sine', detune: 1, gain: 0.45, harmonic: 8 },     // 1' (twenty-second) - sparkle
-      { waveform: 'square', detune: -3, gain: 0.15, harmonic: 1 }   // Aggressive edge
+      { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.9, harmonic: 2 },
+      { waveform: 'sine', detune: -2, gain: 0.75, harmonic: 3 },
+      { waveform: 'sine', detune: 0, gain: 0.7, harmonic: 4 },
+      { waveform: 'sine', detune: 2, gain: 0.6, harmonic: 5 },
+      { waveform: 'sine', detune: -1, gain: 0.5, harmonic: 6 },
+      { waveform: 'sine', detune: 1, gain: 0.4, harmonic: 8 },
+      { waveform: 'square', detune: -3, gain: 0.12, harmonic: 1 }
     ],
     attack: 0.005,
     filterFreq: 6000,
     filterQ: 2.5,
-    distortion: 3
+    distortion: 3,
+    reverbAmount: 0.15
   },
   distortion: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.8, 0.6, 0.4],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -5, gain: 0.7, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.7, harmonic: 1 },
+      { waveform: 'square', detune: 0, gain: 0.4, harmonic: 2 }
+    ],
     attack: 0.005,
     filterFreq: 4000,
-    filterQ: 2,
-    distortion: 50
+    filterQ: 3,
+    distortion: 60,
+    reverbAmount: 0.1
   },
   clean: {
-    waveform: 'triangle',
-    harmonics: [1, 0.3, 0.1],
+    oscillators: [
+      { waveform: 'triangle', detune: -3, gain: 0.6, harmonic: 1 },
+      { waveform: 'triangle', detune: 3, gain: 0.6, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.3, harmonic: 2 }
+    ],
     attack: 0.01,
-    filterFreq: 3000,
-    filterQ: 0.5,
-    distortion: 0
+    filterFreq: 4000,
+    filterQ: 0.7,
+    distortion: 0,
+    reverbAmount: 0.1
   },
   bass: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.5],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.9, harmonic: 1 },
+      { waveform: 'square', detune: -7, gain: 0.5, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.6, harmonic: 2 }
+    ],
     attack: 0.01,
-    filterFreq: 800,
-    filterQ: 2,
-    distortion: 10
+    filterFreq: 900,
+    filterQ: 3,
+    distortion: 12,
+    reverbAmount: 0.05
   },
   strings: {
     oscillators: [
-      { waveform: 'sawtooth', detune: -5, gain: 0.5, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 5, gain: 0.5, harmonic: 1 },
-      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2 },
-      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 3 }
+      { waveform: 'sawtooth', detune: -8, gain: 0.55, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 8, gain: 0.55, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -3, gain: 0.35, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.25, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.15, harmonic: 3 }
     ],
-    attack: 0.2,
-    filterFreq: 3200,
+    attack: 0.18,
+    filterFreq: 3400,
     filterQ: 1.2,
-    distortion: 0
+    distortion: 0,
+    reverbAmount: 0.3
   },
   flute: {
-    waveform: 'sine',
-    harmonics: [1, 0.4, 0.2, 0.1, 0.05],
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.9, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.35, harmonic: 2 },
+      { waveform: 'triangle', detune: 2, gain: 0.15, harmonic: 3 },
+      { waveform: 'sine', detune: -1, gain: 0.08, harmonic: 4 }
+    ],
     attack: 0.08,
-    filterFreq: 4200,
-    filterQ: 0.4,
-    distortion: 0
+    filterFreq: 5000,
+    filterQ: 0.5,
+    distortion: 0,
+    reverbAmount: 0.2
   },
   synth: {
-    waveform: 'square',
-    harmonics: [1, 0.5, 0.25],
+    oscillators: [
+      { waveform: 'sawtooth', detune: -7, gain: 0.6, harmonic: 1 },
+      { waveform: 'square', detune: 7, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.4, harmonic: 2 }
+    ],
     attack: 0.01,
-    filterFreq: 3000,
-    filterQ: 3,
-    distortion: 5
+    filterFreq: 3500,
+    filterQ: 4,
+    distortion: 8,
+    reverbAmount: 0.12
   },
   harpsichord: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.7, 0.4, 0.2],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 1.0, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.7, harmonic: 2 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.4, harmonic: 3 },
+      { waveform: 'triangle', detune: 2, gain: 0.2, harmonic: 4 }
+    ],
     attack: 0.001,
-    filterFreq: 4000,
+    filterFreq: 5500,
     filterQ: 1.5,
-    distortion: 0
+    distortion: 0,
+    reverbAmount: 0.12
   },
   piano: {
     oscillators: [
       { waveform: 'triangle', detune: 0, gain: 1.0, harmonic: 1 },
-      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 2 },
-      { waveform: 'triangle', detune: -1, gain: 0.5, harmonic: 3 },
-      { waveform: 'sine', detune: 1, gain: 0.3, harmonic: 4 }
+      { waveform: 'sine', detune: -1, gain: 0.75, harmonic: 2 },
+      { waveform: 'triangle', detune: 1, gain: 0.45, harmonic: 3 },
+      { waveform: 'sine', detune: 0, gain: 0.25, harmonic: 4 },
+      { waveform: 'sine', detune: 0, gain: 0.12, harmonic: 5 }
     ],
     attack: 0.003,
-    filterFreq: 4500,
+    filterFreq: 5000,
     filterQ: 0.8,
-    distortion: 2
+    distortion: 1,
+    reverbAmount: 0.18
   },
   electric: {
-    waveform: 'square',
-    harmonics: [1, 0.6, 0.4],
+    oscillators: [
+      { waveform: 'square', detune: -5, gain: 0.6, harmonic: 1 },
+      { waveform: 'square', detune: 5, gain: 0.6, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.35, harmonic: 2 }
+    ],
     attack: 0.01,
-    filterFreq: 2500,
-    filterQ: 2,
-    distortion: 15
+    filterFreq: 2800,
+    filterQ: 2.5,
+    distortion: 20,
+    reverbAmount: 0.15
   },
   bells: {
-    waveform: 'sine',
-    harmonics: [1, 0.6, 0.9, 0.4, 0.25, 0.1],
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.7, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.55, harmonic: 2.756 },  // bell partial
+      { waveform: 'sine', detune: 0, gain: 0.35, harmonic: 5.404 },  // bell partial
+      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 8.933 },
+      { waveform: 'sine', detune: 5, gain: 0.1, harmonic: 13.46 }
+    ],
     attack: 0.001,
-    filterFreq: 5000,
-    filterQ: 2,
-    distortion: 0
+    filterFreq: 8000,
+    filterQ: 1,
+    distortion: 0,
+    reverbAmount: 0.35
   },
   brass: {
     oscillators: [
-      { waveform: 'sawtooth', detune: 0, gain: 0.8, harmonic: 1 },
-      { waveform: 'square', detune: -4, gain: 0.5, harmonic: 2 },
-      { waveform: 'sawtooth', detune: 4, gain: 0.6, harmonic: 3 }
+      { waveform: 'sawtooth', detune: 0, gain: 0.85, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -5, gain: 0.6, harmonic: 2 },
+      { waveform: 'square', detune: 5, gain: 0.45, harmonic: 3 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.3, harmonic: 4 }
     ],
     attack: 0.05,
-    filterFreq: 3000,
-    filterQ: 3,
-    distortion: 8
+    filterFreq: 4000,
+    filterQ: 4,
+    distortion: 10,
+    reverbAmount: 0.2
   },
   clarinet: {
-    waveform: 'square',
-    harmonics: [1, 0, 0.3, 0, 0.1],
+    oscillators: [
+      { waveform: 'square', detune: 0, gain: 0.8, harmonic: 1 },
+      { waveform: 'square', detune: 0, gain: 0.25, harmonic: 3 },
+      { waveform: 'sine', detune: 3, gain: 0.1, harmonic: 5 }
+    ],
     attack: 0.04,
-    filterFreq: 2800,
-    filterQ: 1,
-    distortion: 0
+    filterFreq: 3200,
+    filterQ: 1.2,
+    distortion: 0,
+    reverbAmount: 0.15
   },
   pad: {
     oscillators: [
-      { waveform: 'sawtooth', detune: -10, gain: 0.5, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 10, gain: 0.5, harmonic: 1 },
-      { waveform: 'triangle', detune: 0, gain: 0.4, harmonic: 2 }
+      { waveform: 'sawtooth', detune: -12, gain: 0.45, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -5, gain: 0.45, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.45, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 12, gain: 0.45, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.3, harmonic: 2 }
     ],
-    attack: 0.4,
-    filterFreq: 1500,
-    filterQ: 0.3,
-    distortion: 0
+    attack: 0.45,
+    filterFreq: 1800,
+    filterQ: 0.4,
+    distortion: 0,
+    reverbAmount: 0.5
   },
   pluck: {
-    waveform: 'triangle',
-    harmonics: [1, 0.4, 0.15],
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.85, harmonic: 1 },
+      { waveform: 'square', detune: 0, gain: 0.25, harmonic: 2 },
+      { waveform: 'sine', detune: 5, gain: 0.1, harmonic: 3 }
+    ],
     attack: 0.001,
-    filterFreq: 3500,
+    filterFreq: 4000,
     filterQ: 2,
-    distortion: 0
+    distortion: 0,
+    reverbAmount: 0.1
   },
   celeste: {
-    waveform: 'sine',
-    harmonics: [1, 0.8, 0.5, 0.3, 0.2],
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.8, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.6, harmonic: 2 },
+      { waveform: 'triangle', detune: 3, gain: 0.4, harmonic: 3 },
+      { waveform: 'sine', detune: -2, gain: 0.25, harmonic: 4 }
+    ],
     attack: 0.002,
-    filterFreq: 6000,
-    filterQ: 1,
-    distortion: 0
+    filterFreq: 7000,
+    filterQ: 0.8,
+    distortion: 0,
+    reverbAmount: 0.25
   },
   trumpet: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.95, 0.85, 0.7, 0.6, 0.45, 0.3],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.9, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -3, gain: 0.8, harmonic: 2 },
+      { waveform: 'sawtooth', detune: 3, gain: 0.65, harmonic: 3 },
+      { waveform: 'square', detune: 0, gain: 0.5, harmonic: 4 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.35, harmonic: 5 }
+    ],
     attack: 0.04,
-    filterFreq: 4500,
-    filterQ: 5,
-    distortion: 18
+    filterFreq: 5000,
+    filterQ: 6,
+    distortion: 22,
+    reverbAmount: 0.18
   },
   saxophone: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.6, 0.4, 0.3, 0.2, 0.1],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.8, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -4, gain: 0.55, harmonic: 2 },
+      { waveform: 'sawtooth', detune: 4, gain: 0.4, harmonic: 3 },
+      { waveform: 'square', detune: 0, gain: 0.25, harmonic: 4 }
+    ],
     attack: 0.06,
-    filterFreq: 2500,
-    filterQ: 2,
-    distortion: 5
+    filterFreq: 3000,
+    filterQ: 2.5,
+    distortion: 8,
+    reverbAmount: 0.15
   },
   vibraphone: {
-    waveform: 'sine',
-    harmonics: [1, 0.7, 0.5, 0.3, 0.2, 0.15],
+    oscillators: [
+      { waveform: 'sine', detune: 0, gain: 0.85, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.6, harmonic: 2 },
+      { waveform: 'triangle', detune: 2, gain: 0.35, harmonic: 3 },
+      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 4 }
+    ],
     attack: 0.002,
-    filterFreq: 5500,
+    filterFreq: 7000,
     filterQ: 1.5,
-    distortion: 0
+    distortion: 0,
+    reverbAmount: 0.3
   },
   marimba: {
-    waveform: 'triangle',
-    harmonics: [1, 0.5, 0.3, 0.15],
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.9, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.45, harmonic: 3 },
+      { waveform: 'sine', detune: 0, gain: 0.2, harmonic: 4.07 }, // marimba partial
+      { waveform: 'sine', detune: 5, gain: 0.1, harmonic: 7 }
+    ],
     attack: 0.001,
-    filterFreq: 2000,
-    filterQ: 1,
-    distortion: 0
+    filterFreq: 3000,
+    filterQ: 0.8,
+    distortion: 0,
+    reverbAmount: 0.2
   },
   choir: {
     oscillators: [
-      { waveform: 'sawtooth', detune: -7, gain: 0.4, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 0, gain: 0.4, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 7, gain: 0.4, harmonic: 1 },
-      { waveform: 'sine', detune: 0, gain: 0.3, harmonic: 2 }
+      { waveform: 'sawtooth', detune: -10, gain: 0.4, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -4, gain: 0.45, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.5, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 4, gain: 0.45, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 10, gain: 0.4, harmonic: 1 },
+      { waveform: 'sine', detune: 0, gain: 0.3, harmonic: 2 },
+      { waveform: 'triangle', detune: 0, gain: 0.15, harmonic: 3 }
     ],
-    attack: 0.25,
-    filterFreq: 2200,
-    filterQ: 0.7,
-    distortion: 0
+    attack: 0.28,
+    filterFreq: 2800,
+    filterQ: 0.8,
+    distortion: 0,
+    reverbAmount: 0.45
   },
   oboe: {
-    waveform: 'sawtooth',
-    harmonics: [1, 0.7, 0.5, 0.3, 0.2],
+    oscillators: [
+      { waveform: 'sawtooth', detune: 0, gain: 0.75, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -3, gain: 0.55, harmonic: 2 },
+      { waveform: 'square', detune: 3, gain: 0.4, harmonic: 3 },
+      { waveform: 'sawtooth', detune: 0, gain: 0.25, harmonic: 4 },
+      { waveform: 'sine', detune: 0, gain: 0.12, harmonic: 5 }
+    ],
     attack: 0.08,
-    filterFreq: 3200,
-    filterQ: 2,
-    distortion: 2
+    filterFreq: 4000,
+    filterQ: 2.5,
+    distortion: 3,
+    reverbAmount: 0.15
   },
   cello: {
     oscillators: [
-      { waveform: 'sawtooth', detune: -3, gain: 0.6, harmonic: 1 },
-      { waveform: 'sawtooth', detune: 3, gain: 0.6, harmonic: 1 },
+      { waveform: 'sawtooth', detune: -5, gain: 0.65, harmonic: 1 },
+      { waveform: 'sawtooth', detune: 5, gain: 0.65, harmonic: 1 },
       { waveform: 'triangle', detune: 0, gain: 0.4, harmonic: 2 },
-      { waveform: 'sine', detune: 0, gain: 0.25, harmonic: 3 }
+      { waveform: 'sawtooth', detune: 0, gain: 0.25, harmonic: 3 },
+      { waveform: 'sine', detune: 0, gain: 0.15, harmonic: 4 }
     ],
     attack: 0.15,
-    filterFreq: 1800,
-    filterQ: 1.5,
-    distortion: 1
+    filterFreq: 2500,
+    filterQ: 1.8,
+    distortion: 2,
+    reverbAmount: 0.28
   },
   harp: {
-    waveform: 'triangle',
-    harmonics: [1, 0.8, 0.6, 0.4, 0.25, 0.15, 0.08],
+    oscillators: [
+      { waveform: 'triangle', detune: 0, gain: 0.9, harmonic: 1 },
+      { waveform: 'triangle', detune: 0, gain: 0.7, harmonic: 2 },
+      { waveform: 'sine', detune: 0, gain: 0.5, harmonic: 3 },
+      { waveform: 'sine', detune: 3, gain: 0.3, harmonic: 4 },
+      { waveform: 'sine', detune: -2, gain: 0.18, harmonic: 5 },
+      { waveform: 'sine', detune: 0, gain: 0.1, harmonic: 6 }
+    ],
     attack: 0.001,
-    filterFreq: 5500,
-    filterQ: 1.5,
-    distortion: 0
+    filterFreq: 6500,
+    filterQ: 1.2,
+    distortion: 0,
+    reverbAmount: 0.22
   },
   electricGuitar: {
     oscillators: [
@@ -447,7 +545,8 @@ const INSTRUMENT_CONFIGS = {
     attack: 0.005,
     filterFreq: 3500,
     filterQ: 1.8,
-    distortion: 5
+    distortion: 5,
+    reverbAmount: 0.12
   },
   sonicBassResonant: {
     oscillators: [
@@ -458,7 +557,8 @@ const INSTRUMENT_CONFIGS = {
     attack: 0.005,
     filterFreq: 3400,
     filterQ: 8,
-    distortion: 0
+    distortion: 0,
+    reverbAmount: 0.08
   }
 };
 
@@ -707,8 +807,8 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig, pitch
     lfoNode.stop(now + duration + envelope.release);
   }
 
-  // Create oscillators from custom config (limit to first 3 for performance)
-  const maxOscs = Math.min(3, oscConfigs.length);
+  // Create oscillators from custom config (limit to first 6 for balance of quality and performance)
+  const maxOscs = Math.min(6, oscConfigs.length);
   oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
     // Ensure oscConfig has all required properties with defaults
     const safeConfig = {
@@ -819,6 +919,35 @@ async function playSingleCustomNote(pitch, duration, volume, customConfig, pitch
 
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
+
+  // Apply per-instrument effects: reverb, delay, chorus
+  const reverbEffect = effects?.find(e => e.type === 'reverb');
+  if (reverbEffect && reverbNode) {
+    const mix = reverbEffect.config?.mix ?? 0.3;
+    const reverbSend = audioContext.createGain();
+    reverbSend.gain.value = mix;
+    gainNode.connect(reverbSend);
+    reverbSend.connect(reverbNode);
+  }
+
+  const delayEffect = effects?.find(e => e.type === 'delay');
+  if (delayEffect && delayNode) {
+    const delayMix = delayEffect.config?.mix ?? 0.25;
+    delayNode.delayTime.value = delayEffect.config?.time ?? 0.25;
+    const delaySend = audioContext.createGain();
+    delaySend.gain.value = delayMix;
+    gainNode.connect(delaySend);
+    delaySend.connect(delayNode);
+  }
+
+  const chorusEffect = effects?.find(e => e.type === 'chorus');
+  if (chorusEffect && chorusNode) {
+    const chorusMix = chorusEffect.config?.depth ?? 0.3;
+    const chorusSend = audioContext.createGain();
+    chorusSend.gain.value = chorusMix;
+    gainNode.connect(chorusSend);
+    chorusSend.connect(chorusNode);
+  }
 
   const stopTime = Math.max(now + 0.01, now + totalDuration);
   oscillators.forEach(osc => {
@@ -1097,7 +1226,7 @@ function playSingleNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, ins
   
   if (config.oscillators) {
     // New sophisticated multi-oscillator format
-    const maxOscs = Math.min(4, config.oscillators.length);
+    const maxOscs = Math.min(6, config.oscillators.length);
     config.oscillators.slice(0, maxOscs).forEach((oscConfig) => {
       const osc = audioContext.createOscillator();
       osc.type = oscConfig?.waveform || 'sine';
@@ -1205,6 +1334,14 @@ function playSingleNote(pitch, duration = 0.5, volume = 0.8, voiceIndex = 0, ins
   
   outputNode.connect(gainNode);
   gainNode.connect(masterGain);
+
+  // Apply per-instrument reverb send if configured
+  if (config.reverbAmount > 0 && reverbNode && reverbGain) {
+    const instReverbSend = audioContext.createGain();
+    instReverbSend.gain.value = config.reverbAmount;
+    gainNode.connect(instReverbSend);
+    instReverbSend.connect(reverbNode);
+  }
   
   const stopTime = Math.max(now + 0.01, now + totalDuration);
   activeOscillatorCount += oscillators.length;
