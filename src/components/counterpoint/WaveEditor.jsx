@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Square, Save, Trash2, Plus, RefreshCw, FileText, MoreVertical, Edit2 } from 'lucide-react';
+import { Play, Square, Save, Trash2, Plus, RefreshCw, Edit2 } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
@@ -12,8 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronDown } from 'lucide-react';
 import { initAudio, getAudioContext, playNoteWithCustomInstrument, getAnalyser } from './audioEngine';
+import OscillatorsTab from './waveEditor/OscillatorsTab';
 
-const WAVEFORMS = ['sine', 'square', 'sawtooth', 'triangle'];
 
 const DEFAULT_INSTRUMENT = {
   name: 'Custom 1',
@@ -256,7 +256,7 @@ export default function WaveEditor({
   const [instrument, setInstrument] = useState(() => ({ ...DEFAULT_INSTRUMENT, eq: [...DEFAULT_INSTRUMENT.eq] }));
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingBuiltin, setEditingBuiltin] = useState(null);
-  const [isDraggingTimbre, setIsDraggingTimbre] = useState(false);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -729,35 +729,6 @@ export default function WaveEditor({
     setPreviewingPreset(index);
     playPreviewForInstrument(preset, () => setPreviewingPreset(null));
   }, [previewingPreset, playPreviewForInstrument]);
-
-  const updateOscillator = (index, key, value) => {
-    const newOscs = [...instrument.oscillators];
-    // Ensure oscillator always has all required properties
-    newOscs[index] = { 
-      waveform: newOscs[index]?.waveform || 'sine', 
-      detune: newOscs[index]?.detune ?? 0, 
-      gain: newOscs[index]?.gain ?? 0.5, 
-      harmonic: newOscs[index]?.harmonic ?? 1, 
-      phase: newOscs[index]?.phase ?? 0,
-      [key]: value 
-    };
-    setInstrument({ ...instrument, oscillators: newOscs });
-  };
-
-  const addOscillator = () => {
-    if (instrument.oscillators.length >= 4) return;
-    const newOsc = { waveform: 'sine', detune: 0, gain: 0.5, harmonic: 1, phase: 0 };
-    setInstrument({
-      ...instrument,
-      oscillators: [...instrument.oscillators, newOsc]
-    });
-  };
-
-  const removeOscillator = (index) => {
-    if (instrument.oscillators.length <= 1) return;
-    const newOscs = instrument.oscillators.filter((_, i) => i !== index);
-    setInstrument({ ...instrument, oscillators: newOscs });
-  };
 
   const handleSave = () => {
     // Ensure instrument has all required fields before saving
@@ -1335,122 +1306,8 @@ export default function WaveEditor({
         </TabsList>
 
         <TabsContent value="oscillators" className="mt-0 min-h-[280px]">
-          <div className="space-y-2.5">
-            <Label className="text-white/70 text-sm uppercase tracking-wider">Oscillators</Label>
-            <div className="grid grid-cols-4 gap-3">
-              {/* Existing oscillators */}
-              {instrument.oscillators.map((osc, i) => (
-                <div key={i} className="bg-slate-700/50 rounded p-3 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/60 text-sm font-medium">Oscillator {i + 1}</span>
-                    {instrument.oscillators.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOscillator(i)}
-                        className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    )}
-                  </div>
-                  <Select value={osc.waveform} onValueChange={(v) => updateOscillator(i, 'waveform', v)}>
-                    <SelectTrigger className="h-9 bg-slate-700 border-slate-600 text-white text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 z-[200000]">
-                      {WAVEFORMS.map(w => (
-                        <SelectItem key={w} value={w} className="text-white text-sm capitalize">{w}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="space-y-1">
-                    <span className="text-white/40 text-xs">Timbre</span>
-                    <div 
-                      className="relative h-24 bg-slate-800 border border-slate-600 rounded cursor-crosshair select-none"
-                      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setIsDraggingTimbre(true);
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const updateTimbre = (clientX, clientY) => {
-                          const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                          const y = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
-                          // X axis: phase (0 to 360 degrees) - affects timbre without changing pitch
-                          const phase = x * 360;
-                          // Y axis: detune (-50 to 50 cents) - fine pitch adjustment
-                          const detune = (y - 0.5) * 100;
-
-                          // Update both values together
-                          const newOscs = [...instrument.oscillators];
-                          newOscs[i] = { ...newOscs[i], phase, detune };
-                          setInstrument({ ...instrument, oscillators: newOscs });
-                        };
-
-                        updateTimbre(e.clientX, e.clientY);
-
-                        const handleMove = (e) => updateTimbre(e.clientX, e.clientY);
-                        const handleUp = () => {
-                          setIsDraggingTimbre(false);
-                          document.removeEventListener('mousemove', handleMove);
-                          document.removeEventListener('mouseup', handleUp);
-                        };
-
-                        document.addEventListener('mousemove', handleMove);
-                        document.addEventListener('mouseup', handleUp);
-                      }}
-                    >
-                      {/* Corner labels */}
-                      <span className="absolute top-1 left-1 text-[9px] text-white/30">Soft</span>
-                      <span className="absolute top-1 right-1 text-[9px] text-white/30">Bright</span>
-                      <span className="absolute bottom-1 left-1 text-[9px] text-white/30">Warm</span>
-                      <span className="absolute bottom-1 right-1 text-[9px] text-white/30">Metallic</span>
-
-                      {/* Draggable dot */}
-                      <div 
-                        className="absolute w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-lg pointer-events-none"
-                        style={{
-                          left: `${((osc.phase || 0) / 360) * 100}%`,
-                          top: `${(1 - ((osc.detune || 0) / 100 + 0.5)) * 100}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/40 text-xs">Gain</span>
-                      <span className="text-white/60 text-xs">{Math.round(osc.gain * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[osc.gain]}
-                      onValueChange={([v]) => updateOscillator(i, 'gain', v)}
-                      min={0}
-                      max={1}
-                      step={0.01}
-                      className="w-full"
-                    />
-                  </div>
-
-                </div>
-                ))}
-
-                {/* Empty slots for remaining oscillators */}
-                {[...Array(4 - instrument.oscillators.length)].map((_, i) => (
-                <button
-                  key={`empty-${i}`}
-                  onClick={addOscillator}
-                  className="bg-slate-700/30 border-2 border-dashed border-slate-600 rounded p-3 flex items-center justify-center min-h-[200px] hover:border-amber-500/50 hover:bg-slate-700/40 transition-colors group"
-                >
-                  <div className="flex flex-col items-center gap-2 text-white/40 group-hover:text-amber-400/70">
-                    <Plus className="w-6 h-6" />
-                    <span className="text-xs">Add Oscillator</span>
-                  </div>
-                </button>
-                ))}
-                </div>
-                </div>
-                </TabsContent>
+          <OscillatorsTab instrument={instrument} setInstrument={setInstrument} />
+        </TabsContent>
 
         <TabsContent value="processing" className="mt-0 min-h-[280px]">
           <div className="space-y-2.5">
