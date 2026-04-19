@@ -39,6 +39,7 @@ export default function Admin() {
   // Users table state
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
+  const [userSubFilter, setUserSubFilter] = useState('all');
   const [userSort, setUserSort] = useState({ key: 'created_date', dir: 'desc' });
 
   // Activity table state
@@ -153,10 +154,11 @@ export default function Admin() {
       const q = userSearch.toLowerCase();
       const matchSearch = !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
       const matchRole = userRoleFilter === 'all' || (u.role || 'user') === userRoleFilter;
-      return matchSearch && matchRole;
+      const matchSub = userSubFilter === 'all' || (u.subscription || 'free') === userSubFilter;
+      return matchSearch && matchRole && matchSub;
     });
     return applySort(list, userSort.key, userSort.dir);
-  }, [usersEnriched, userSearch, userRoleFilter, userSort]);
+  }, [usersEnriched, userSearch, userRoleFilter, userSubFilter, userSort]);
 
   const allActivity = useMemo(() => [
     ...projects.map(p => ({ type: 'project', name: p.name || 'Untitled', user: p.created_by || '—', created: p.created_date, updated: p.updated_date || p.created_date })),
@@ -206,9 +208,10 @@ export default function Admin() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: 'Total Users', value: users.length, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+            { label: 'Paid Users', value: users.filter(u => u.subscription === 'paid').length, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
             { label: 'Public Songs', value: songs.length, icon: Music, color: 'text-green-400', bg: 'bg-green-500/10' },
             { label: 'Projects Saved', value: projects.length, icon: FileMusic, color: 'text-amber-400', bg: 'bg-amber-500/10' },
             { label: 'Custom Instruments', value: instruments.length, icon: Activity, color: 'text-purple-400', bg: 'bg-purple-500/10' },
@@ -349,6 +352,16 @@ export default function Admin() {
                       <SelectItem value="user" className="text-white text-xs">User</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Select value={userSubFilter} onValueChange={setUserSubFilter}>
+                    <SelectTrigger className="h-8 w-32 bg-slate-700 border-slate-600 text-white text-xs">
+                      <SelectValue placeholder="Plan" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white text-xs">All Plans</SelectItem>
+                      <SelectItem value="paid" className="text-white text-xs">Paid</SelectItem>
+                      <SelectItem value="free" className="text-white text-xs">Free</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <span className="text-slate-500 text-xs">{filteredUsers.length} results</span>
                 </div>
               </CardHeader>
@@ -359,6 +372,7 @@ export default function Admin() {
                       <tr className="border-b border-slate-700">
                         <SortableTh col="full_name" label="User" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
                         <SortableTh col="role" label="Role" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
+                        <SortableTh col="subscription" label="Plan" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
                         <SortableTh col="projectCount" label="Projects" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
                         <SortableTh col="instrumentCount" label="Instruments" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
                         <SortableTh col="lastActivity" label="Last Activity" sortKey={userSort.key} sortDir={userSort.dir} onSort={col => toggleSort(userSort, col, setUserSort)} />
@@ -377,6 +391,11 @@ export default function Admin() {
                               {u.role || 'user'}
                             </Badge>
                           </td>
+                          <td className="px-4 py-3">
+                            <Badge className={u.subscription === 'paid' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-700/50 text-slate-400 border-slate-600'}>
+                              {u.subscription === 'paid' ? '✦ Paid' : 'Free'}
+                            </Badge>
+                          </td>
                           <td className="px-4 py-3 text-slate-300">{u.projectCount}</td>
                           <td className="px-4 py-3 text-slate-300">{u.instrumentCount}</td>
                           <td className="px-4 py-3 text-slate-400 text-xs">{fmtDate(u.lastActivity)}</td>
@@ -384,7 +403,7 @@ export default function Admin() {
                         </tr>
                       ))}
                       {filteredUsers.length === 0 && (
-                        <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">No users match your filters.</td></tr>
+                        <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">No users match your filters.</td></tr>
                       )}
                     </tbody>
                   </table>
