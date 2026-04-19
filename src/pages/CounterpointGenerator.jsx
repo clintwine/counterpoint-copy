@@ -1100,6 +1100,34 @@ export default function CounterpointGenerator() {
       return null;
     };
 
+    // Arpeggio pattern definitions (mirrors NoteControls)
+    const ARPEGGIO_PATTERNS = {
+      up_maj:      { intervals: [0, 4, 7] },
+      up_min:      { intervals: [0, 3, 7] },
+      up_dom7:     { intervals: [0, 4, 7, 10] },
+      up_maj7:     { intervals: [0, 4, 7, 11] },
+      up_oct:      { intervals: [0, 7, 12] },
+      down_maj:    { intervals: [7, 4, 0] },
+      down_min:    { intervals: [7, 3, 0] },
+      updown_maj:  { intervals: [0, 7, 4, 0] },
+      updown_oct:  { intervals: [0, 12, 7, 0] },
+      strum_maj:   { intervals: [0, 4, 7],  strum: true },
+      strum_min:   { intervals: [0, 3, 7],  strum: true },
+    };
+
+    const ALL_NOTES_CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const shiftPitch = (pitch, semitones) => {
+      const match = pitch.match(/^([A-G]#?)(\d+)$/);
+      if (!match) return null;
+      const [, note, oct] = match;
+      const idx = ALL_NOTES_CHROMATIC.indexOf(note);
+      const total = idx + parseInt(oct) * 12 + semitones;
+      const newNote = ALL_NOTES_CHROMATIC[((total % 12) + 12) % 12];
+      const newOct = Math.floor(total / 12);
+      if (newOct < 0 || newOct > 8) return null;
+      return `${newNote}${newOct}`;
+    };
+
     // Find and play all notes between last and current position
     allNotes.forEach(({ note, voiceIndex }) => {
       const noteKey = `${voiceIndex}-${note.pitch}-${note.beat}`;
@@ -1119,6 +1147,30 @@ export default function CounterpointGenerator() {
         
         // Check if using custom instrument
         const customConfig = getCustomConfig(instrument);
+
+        // Handle arpeggio
+        const arpeggioKey = note.arpeggio;
+        const arpeggioPattern = arpeggioKey ? ARPEGGIO_PATTERNS[arpeggioKey] : null;
+        if (arpeggioPattern) {
+          const { intervals, strum } = arpeggioPattern;
+          const stepDur = strum ? 0.04 : Math.min(actualDuration / intervals.length, 0.35);
+          intervals.forEach((semis, i) => {
+            const shiftedPitch = shiftPitch(note.pitch, semis);
+            if (!shiftedPitch) return;
+            const delayMs = strum ? i * 40 : i * stepDur * 1000;
+            const noteDur = strum ? actualDuration : stepDur * 0.85;
+            setTimeout(() => {
+              if (customConfig) {
+                import('@/components/counterpoint/audioEngine').then(({ playNoteWithCustomInstrument }) => {
+                  playNoteWithCustomInstrument(shiftedPitch, noteDur, Math.min(1, velocity * 1.2), customConfig, 'normal', tempo, 0);
+                });
+              } else {
+                playNote(shiftedPitch, noteDur, volume * Math.min(1, velocity * 1.2), voiceIndex, instrument, 0);
+              }
+            }, delayMs);
+          });
+          return; // skip normal note playback
+        }
         
         let pitchBend = 0;
         if (note.bendStart !== undefined || note.bendEnd !== undefined) {
