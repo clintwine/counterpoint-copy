@@ -6,6 +6,15 @@ export default function RecentProjectsMenu({ onLoadRecent }) {
   
   if (recent.length === 0) return null;
 
+  const handleLoad = (p) => {
+    if (onLoadRecent) {
+      onLoadRecent(p);
+    } else if (window.__loadRecentProject) {
+      window.__loadRecentProject(p);
+    }
+    setTimeout(() => document.activeElement?.blur(), 0);
+  };
+
   return (
     <>
       <DropdownMenuSeparator className="bg-[#3A3A3A]" />
@@ -13,11 +22,7 @@ export default function RecentProjectsMenu({ onLoadRecent }) {
       {recent.map(p => (
         <DropdownMenuItem 
           key={p.id} 
-          onClick={() => { 
-            if (window.__loadRecentProject) window.__loadRecentProject(p);
-            else window.location.reload();
-            setTimeout(() => document.activeElement?.blur(), 0);
-          }} 
+          onClick={() => handleLoad(p)}
           className="text-white/75 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white text-xs py-1.5"
         >
           <FolderOpen className="w-3 h-3 mr-2 flex-shrink-0 opacity-50" />

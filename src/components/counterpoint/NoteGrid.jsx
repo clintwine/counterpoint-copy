@@ -1089,7 +1089,7 @@ export default function NoteGrid({
               <DropdownMenuItem onClick={() => { onLoadProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <FolderOpen className="w-4 h-4 mr-2" />Browse All Projects
               </DropdownMenuItem>
-              <RecentProjectsMenu />
+              <RecentProjectsMenu onLoadRecent={onLoadProject} />
               <DropdownMenuItem onClick={() => { onSaveProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Save className="w-4 h-4 mr-2" />Save Project<span className="ml-auto text-xs text-white/40">⌘S</span>
               </DropdownMenuItem>
