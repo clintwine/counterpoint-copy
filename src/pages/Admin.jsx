@@ -70,41 +70,30 @@ export default function Admin() {
     setLoading(false);
   };
 
-  if (loading) return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#1E1E1E]">
-      <div className="w-8 h-8 border-4 border-slate-600 border-t-amber-400 rounded-full animate-spin" />
-    </div>
-  );
+  // --- Derived data (always computed, before any early returns) ---
+  const projectsPerUser = useMemo(() => {
+    const map = {};
+    projects.forEach(p => { const e = p.created_by || 'Unknown'; map[e] = (map[e] || 0) + 1; });
+    return map;
+  }, [projects]);
 
-  if (!currentUser || currentUser.role !== 'admin') return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#1E1E1E]">
-      <div className="text-center">
-        <div className="text-6xl mb-4">🔒</div>
-        <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-        <p className="text-slate-400">This page is only available to administrators.</p>
-      </div>
-    </div>
-  );
+  const instrumentsPerUser = useMemo(() => {
+    const map = {};
+    instruments.forEach(i => { const e = i.created_by || 'Unknown'; map[e] = (map[e] || 0) + 1; });
+    return map;
+  }, [instruments]);
 
-  // --- Derived data ---
-  const projectsPerUser = {};
-  projects.forEach(p => { const e = p.created_by || 'Unknown'; projectsPerUser[e] = (projectsPerUser[e] || 0) + 1; });
+  const lastActivityPerUser = useMemo(() => {
+    const map = {};
+    [...projects, ...songs].forEach(item => {
+      const e = item.created_by;
+      if (!e) return;
+      const d = item.updated_date || item.created_date;
+      if (!map[e] || new Date(d) > new Date(map[e])) map[e] = d;
+    });
+    return map;
+  }, [projects, songs]);
 
-  const instrumentsPerUser = {};
-  instruments.forEach(i => { const e = i.created_by || 'Unknown'; instrumentsPerUser[e] = (instrumentsPerUser[e] || 0) + 1; });
-
-  // Last activity per user (most recent project/song updated_date)
-  const lastActivityPerUser = {};
-  [...projects, ...songs].forEach(item => {
-    const e = item.created_by;
-    if (!e) return;
-    const d = item.updated_date || item.created_date;
-    if (!lastActivityPerUser[e] || new Date(d) > new Date(lastActivityPerUser[e])) {
-      lastActivityPerUser[e] = d;
-    }
-  });
-
-  // --- Charts data ---
   const now = Date.now();
   const msPerDay = 86400000;
 
@@ -124,27 +113,26 @@ export default function Admin() {
     return Object.entries(buckets).map(([date, count]) => ({ date, count }));
   };
 
-  const userGrowthData = buildDayBuckets(users, 'created_date');
-  const projectActivityData = buildDayBuckets(projects, 'created_date');
+  const userGrowthData = useMemo(() => buildDayBuckets(users, 'created_date'), [users]);
+  const projectActivityData = useMemo(() => buildDayBuckets(projects, 'created_date'), [projects]);
 
-  const topUsers = Object.entries(projectsPerUser).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([email, count]) => ({ email, count }));
+  const topUsers = useMemo(() =>
+    Object.entries(projectsPerUser).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([email, count]) => ({ email, count }))
+  , [projectsPerUser]);
 
-  const speciesData = Object.entries(
-    projects.reduce((acc, p) => { const s = p.settings?.species || 'Unknown'; acc[s] = (acc[s] || 0) + 1; return acc; }, {})
-  ).sort((a, b) => b[1] - a[1]).map(([species, count]) => ({ species, count }));
+  const speciesData = useMemo(() =>
+    Object.entries(projects.reduce((acc, p) => { const s = p.settings?.species || 'Unknown'; acc[s] = (acc[s] || 0) + 1; return acc; }, {}))
+      .sort((a, b) => b[1] - a[1]).map(([species, count]) => ({ species, count }))
+  , [projects]);
 
-  // --- Sorting helpers ---
   const applySort = (arr, key, dir) => {
     return [...arr].sort((a, b) => {
       let va = a[key], vb = b[key];
       if (va == null) va = '';
       if (vb == null) vb = '';
-      // numeric
       if (typeof va === 'number' && typeof vb === 'number') return dir === 'asc' ? va - vb : vb - va;
-      // date strings
       const da = Date.parse(va), db = Date.parse(vb);
       if (!isNaN(da) && !isNaN(db)) return dir === 'asc' ? da - db : db - da;
-      // string
       return dir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
     });
   };
@@ -153,16 +141,15 @@ export default function Admin() {
     setter(prev => ({ key: col, dir: prev.key === col && prev.dir === 'desc' ? 'asc' : 'desc' }));
   };
 
-  // --- Users table ---
-  const usersEnriched = users.map(u => ({
+  const usersEnriched = useMemo(() => users.map(u => ({
     ...u,
     projectCount: projectsPerUser[u.email] || 0,
     instrumentCount: instrumentsPerUser[u.email] || 0,
     lastActivity: lastActivityPerUser[u.email] || null,
-  }));
+  })), [users, projectsPerUser, instrumentsPerUser, lastActivityPerUser]);
 
   const filteredUsers = useMemo(() => {
-    let list = usersEnriched.filter(u => {
+    const list = usersEnriched.filter(u => {
       const q = userSearch.toLowerCase();
       const matchSearch = !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
       const matchRole = userRoleFilter === 'all' || (u.role || 'user') === userRoleFilter;
@@ -171,14 +158,13 @@ export default function Admin() {
     return applySort(list, userSort.key, userSort.dir);
   }, [usersEnriched, userSearch, userRoleFilter, userSort]);
 
-  // --- Activity table ---
-  const allActivity = [
+  const allActivity = useMemo(() => [
     ...projects.map(p => ({ type: 'project', name: p.name || 'Untitled', user: p.created_by || '—', created: p.created_date, updated: p.updated_date || p.created_date })),
     ...songs.map(s => ({ type: 'song', name: s.name || 'Untitled', user: s.created_by || '—', created: s.created_date, updated: s.updated_date || s.created_date })),
-  ];
+  ], [projects, songs]);
 
   const filteredActivity = useMemo(() => {
-    let list = allActivity.filter(item => {
+    const list = allActivity.filter(item => {
       const q = activitySearch.toLowerCase();
       const matchSearch = !q || item.name.toLowerCase().includes(q) || item.user.toLowerCase().includes(q);
       const matchType = activityTypeFilter === 'all' || item.type === activityTypeFilter;
@@ -186,6 +172,22 @@ export default function Admin() {
     });
     return applySort(list, activitySort.key, activitySort.dir);
   }, [allActivity, activitySearch, activityTypeFilter, activitySort]);
+
+  if (loading) return (
+    <div className="fixed inset-0 flex items-center justify-center bg-[#1E1E1E]">
+      <div className="w-8 h-8 border-4 border-slate-600 border-t-amber-400 rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!currentUser || currentUser.role !== 'admin') return (
+    <div className="fixed inset-0 flex items-center justify-center bg-[#1E1E1E]">
+      <div className="text-center">
+        <div className="text-6xl mb-4">🔒</div>
+        <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
+        <p className="text-slate-400">This page is only available to administrators.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1E1E1E] via-[#232323] to-[#1A1A1A] p-6 text-white">
