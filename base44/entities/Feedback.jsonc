@@ -1,0 +1,28 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "The feedback message from the user"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "feature_request",
+        "general",
+        "praise"
+      ],
+      "default": "general",
+      "description": "Category of feedback"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Optional star rating 1-5"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

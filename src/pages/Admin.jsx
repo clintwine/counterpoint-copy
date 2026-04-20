@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Music, Activity, TrendingUp, Clock, BarChart3, FileMusic, Globe, ArrowUp, ArrowDown, ArrowUpDown, Search } from 'lucide-react';
+import { Users, Music, Activity, TrendingUp, Clock, BarChart3, FileMusic, Globe, ArrowUp, ArrowDown, ArrowUpDown, Search, MessageSquare, Star } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts';
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -35,6 +35,7 @@ export default function Admin() {
   const [songs, setSongs] = useState([]);
   const [projects, setProjects] = useState([]);
   const [instruments, setInstruments] = useState([]);
+  const [feedbackList, setFeedbackList] = useState([]);
 
   // Users table state
   const [userSearch, setUserSearch] = useState('');
@@ -57,16 +58,18 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
-      const [usersData, songsData, projectsData, instrumentsData] = await Promise.all([
+      const [usersData, songsData, projectsData, instrumentsData, feedbackData] = await Promise.all([
         base44.entities.User.list('-created_date', 200),
         base44.entities.Song.list('-created_date', 500),
         base44.entities.CounterpointProject.list('-created_date', 500),
         base44.entities.CustomInstrument.list('-created_date', 500),
+        base44.entities.Feedback.list('-created_date', 500),
       ]);
       setUsers(usersData);
       setSongs(songsData);
       setProjects(projectsData);
       setInstruments(instrumentsData);
+      setFeedbackList(feedbackData);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
@@ -235,6 +238,7 @@ export default function Admin() {
             <TabsTrigger value="overview" className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">Overview</TabsTrigger>
             <TabsTrigger value="users" className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">Users ({users.length})</TabsTrigger>
             <TabsTrigger value="activity" className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">Activity ({allActivity.length})</TabsTrigger>
+            <TabsTrigger value="feedback" className="data-[state=active]:bg-amber-500 data-[state=active]:text-slate-900">Feedback ({feedbackList.length})</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -470,6 +474,63 @@ export default function Admin() {
                       ))}
                       {filteredActivity.length === 0 && (
                         <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No activity matches your filters.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Feedback Tab */}
+          <TabsContent value="feedback" className="mt-4">
+            <Card className="bg-slate-800/60 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-amber-400" /> User Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-700">
+                        <th className="text-left text-slate-400 font-medium px-4 py-3">User</th>
+                        <th className="text-left text-slate-400 font-medium px-4 py-3">Category</th>
+                        <th className="text-left text-slate-400 font-medium px-4 py-3">Rating</th>
+                        <th className="text-left text-slate-400 font-medium px-4 py-3">Message</th>
+                        <th className="text-left text-slate-400 font-medium px-4 py-3 whitespace-nowrap">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {feedbackList.map((fb) => (
+                        <tr key={fb.id} className="border-b border-slate-700/50 hover:bg-slate-700/20 transition-colors">
+                          <td className="px-4 py-3 text-slate-400 text-xs">{fb.created_by || '—'}</td>
+                          <td className="px-4 py-3">
+                            <Badge className={{
+                              bug: 'bg-red-500/20 text-red-400 border-red-500/30',
+                              feature_request: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                              praise: 'bg-green-500/20 text-green-400 border-green-500/30',
+                              general: 'bg-slate-700 text-slate-300 border-slate-600',
+                            }[fb.category] || 'bg-slate-700 text-slate-300 border-slate-600'}>
+                              {fb.category?.replace('_', ' ') || 'general'}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3">
+                            {fb.rating ? (
+                              <div className="flex gap-0.5">
+                                {[1,2,3,4,5].map(s => (
+                                  <Star key={s} className={`w-3.5 h-3.5 ${s <= fb.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} />
+                                ))}
+                              </div>
+                            ) : <span className="text-slate-600">—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-white max-w-md">{fb.message}</td>
+                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{fmtDate(fb.created_date)}</td>
+                        </tr>
+                      ))}
+                      {feedbackList.length === 0 && (
+                        <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No feedback yet.</td></tr>
                       )}
                     </tbody>
                   </table>

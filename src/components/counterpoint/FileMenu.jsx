@@ -1,10 +1,11 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { FileText, FolderOpen, Save, Download, Sparkles, Menu, Keyboard, Guitar, FileAudio, FilePlus, Check, Music } from 'lucide-react';
+import { FileText, FolderOpen, Save, Download, Sparkles, Menu, Keyboard, Guitar, FileAudio, FilePlus, Check, Music, MessageSquare } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { renderToWav } from './audioExporter';
 import RecentProjectsMenu from './RecentProjectsMenu';
+import FeedbackDialog from './FeedbackDialog';
 
 export default function FileMenu({
   projectName,
@@ -26,7 +27,9 @@ export default function FileMenu({
   chatbotActive,
   gridRef
 }) {
+  const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -109,7 +112,14 @@ export default function FileMenu({
           AI Composer
           {chatbotActive && <Check className="w-4 h-4 ml-auto text-amber-400" />}
         </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+        <DropdownMenuItem onClick={() => { setFeedbackOpen(true); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Give Feedback
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+    </>
   );
 }
