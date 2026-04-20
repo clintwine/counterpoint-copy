@@ -72,6 +72,8 @@ export default function NoteGrid({
               onAIComposer,
               chatbotActive = false,
               currentUser,
+              effects = {},
+              envelope = {},
             }) {
   const gridRef = useRef(null);
   const headerScrollRef = useRef(null);
@@ -1077,6 +1079,9 @@ export default function NoteGrid({
               chatbotActive={chatbotActive}
               currentUser={currentUser}
               gridRef={gridRef}
+              effects={effects}
+              envelope={envelope}
+              customInstruments={customInstruments}
             />
 
           {/* Center: Transport controls */}

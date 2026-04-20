@@ -1697,6 +1697,8 @@ export default function CounterpointGenerator() {
                                chatbotActive={chatbotActive}
                                projectName={projectName}
                                currentUser={currentUser}
+                               effects={effects}
+                               envelope={envelope}
                                />
             </div>
 

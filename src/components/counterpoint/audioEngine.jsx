@@ -214,7 +214,7 @@ export function getAnalyser() {
 }
 
 // Instrument configurations with sophisticated multi-oscillator layering
-const INSTRUMENT_CONFIGS = {
+export const INSTRUMENT_CONFIGS = {
   organ: {
     oscillators: [
       { waveform: 'sine', detune: 0, gain: 1.0, harmonic: 1 },
@@ -1494,10 +1494,12 @@ export function stopAllNotes() {
   if (audioContext) {
     const now = Math.max(0.01, audioContext.currentTime + 0.01);
     const fadeEndTime = Math.max(now + 0.01, now + 0.05);
-    // Smooth fade out to prevent snapping
+    // Smooth fade out to prevent snapping, then restore volume so next playback isn't silent
     masterGain.gain.cancelScheduledValues(now);
     masterGain.gain.setValueAtTime(masterGain.gain.value, now);
     masterGain.gain.exponentialRampToValueAtTime(0.001, fadeEndTime);
+    // Restore master gain shortly after so next play/preview isn't muted
+    masterGain.gain.setValueAtTime(0.25, fadeEndTime + 0.05);
   }
 }
 

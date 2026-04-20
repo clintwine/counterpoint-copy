@@ -27,7 +27,10 @@ export default function FileMenu({
   onAIComposer,
   chatbotActive,
   currentUser,
-  gridRef
+  gridRef,
+  effects,
+  envelope,
+  customInstruments,
 }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -88,7 +91,8 @@ export default function FileMenu({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={async () => {
           try {
-            const blob = await renderToWav(cantusFirmus, tempo, voices[0]?.instrument || 'organ');
+            const instrument = voices[0]?.instrument || 'organ';
+            const blob = await renderToWav(cantusFirmus, tempo, instrument, { effects, envelope, customInstruments });
             
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -135,6 +139,9 @@ export default function FileMenu({
       tempo={tempo}
       voices={voices}
       projectName={projectName}
+      effects={effects}
+      envelope={envelope}
+      customInstruments={customInstruments}
     />
     </div>
   );
