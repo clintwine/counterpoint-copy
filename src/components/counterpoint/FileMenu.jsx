@@ -43,7 +43,7 @@ export default function FileMenu({
           <span className="font-semibold text-sm">{projectName || 'File'}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A] min-w-[220px] shadow-xl">
+      <DropdownMenuContent align="start" className="bg-[#1E1E1E] border-[#3A3A3A] min-w-[220px] shadow-xl max-h-[80vh] overflow-y-auto">
         <DropdownMenuItem onClick={() => { onNewProject(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
           <FileText className="w-4 h-4 mr-2" />
           New Project
