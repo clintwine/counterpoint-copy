@@ -1599,7 +1599,7 @@ export default function CounterpointGenerator() {
             projectName={projectName} setProjectName={setProjectName} saveProjectMutation={saveProjectMutation} handleSaveProject={handleSaveProject} currentProjectId={currentProjectId}
             saveSongDialogOpen={saveSongDialogOpen} setSaveSongDialogOpen={setSaveSongDialogOpen} handleSaveSong={handleSaveSong} saveSongMutation={saveSongMutation}
             unsavedChangesDialog={unsavedChangesDialog} setUnsavedChangesDialog={setUnsavedChangesDialog} pendingAction={pendingAction} setPendingAction={setPendingAction}
-            hasUnsavedChanges={hasUnsavedChanges} setHasUnsavedChanges={setHasUnsavedChanges} isLoadingProjectRef={isLoadingProjectRef}
+            hasUnsavedChanges={hasUnsavedChanges} setHasUnsavedChanges={setHasUnsavedChanges} isLoadingProjectRef={isLoadingProjectRef} setIsLoadingProject={setIsLoadingProject}
             handleLoadSong={handleLoadSong}
           />
         </motion.header>

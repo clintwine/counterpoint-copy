@@ -30,7 +30,7 @@ export default function ProjectDialogs({
   saveSongDialogOpen, setSaveSongDialogOpen, handleSaveSong, saveSongMutation,
   // Unsaved changes
   unsavedChangesDialog, setUnsavedChangesDialog, pendingAction, setPendingAction,
-  hasUnsavedChanges, setHasUnsavedChanges, isLoadingProjectRef,
+  hasUnsavedChanges, setHasUnsavedChanges, isLoadingProjectRef, setIsLoadingProject,
   handleLoadSong,
 }) {
   return (
@@ -219,6 +219,7 @@ export default function ProjectDialogs({
         pendingAction={pendingAction}
         onSaveAndContinue={async (action) => {
           isLoadingProjectRef.current = true;
+          setIsLoadingProject(true);
           setUnsavedChangesDialog(false);
           setHasUnsavedChanges(false);
           setPendingAction(null);
@@ -236,6 +237,7 @@ export default function ProjectDialogs({
         }}
         onDontSave={(action) => {
           isLoadingProjectRef.current = true;
+          setIsLoadingProject(true);
           setUnsavedChangesDialog(false);
           setHasUnsavedChanges(false);
           setPendingAction(null);
