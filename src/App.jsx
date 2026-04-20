@@ -63,7 +63,6 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/admin" element={<Admin />} />
-      <Route path="/share" element={<Share />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -73,16 +72,21 @@ const AuthenticatedApp = () => {
 function App() {
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
+    <QueryClientProvider client={queryClientInstance}>
+      <Router>
+        <Routes>
+          <Route path="/share" element={<Share />} />
+          <Route path="*" element={
+            <AuthProvider>
+              <NavigationTracker />
+              <AuthenticatedApp />
+            </AuthProvider>
+          } />
+        </Routes>
         <Toaster />
         <VisualEditAgent />
-      </QueryClientProvider>
-    </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   )
 }
 
