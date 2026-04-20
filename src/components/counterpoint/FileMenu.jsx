@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { FileText, FolderOpen, Save, Download, Sparkles, Menu, Keyboard, Guitar, FileAudio, FilePlus, Check, Music, MessageSquare } from 'lucide-react';
+import { FileText, FolderOpen, Save, Download, Sparkles, Menu, Keyboard, Guitar, FileAudio, FilePlus, Check, Music, MessageSquare, Share2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { renderToWav } from './audioExporter';
 import RecentProjectsMenu from './RecentProjectsMenu';
 import FeedbackDialog from './FeedbackDialog';
+import ShareDialog from './ShareDialog';
 
 export default function FileMenu({
   projectName,
@@ -29,6 +30,7 @@ export default function FileMenu({
   gridRef
 }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   return (
     <div className="flex items-center gap-2">
     <DropdownMenu>
@@ -69,6 +71,11 @@ export default function FileMenu({
         <DropdownMenuItem onClick={() => { onBrowseSongs(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
           <Music className="w-4 h-4 mr-2" />
           Browse Songs
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+        <DropdownMenuItem onClick={() => { setShareOpen(true); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300">
+          <Share2 className="w-4 h-4 mr-2" />
+          Share
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-[#3A3A3A]" />
         <DropdownMenuItem onClick={onExportMidi} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
@@ -121,6 +128,14 @@ export default function FileMenu({
       </DropdownMenuContent>
     </DropdownMenu>
     <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+    <ShareDialog
+      open={shareOpen}
+      onClose={() => setShareOpen(false)}
+      cantusFirmus={cantusFirmus}
+      tempo={tempo}
+      voices={voices}
+      projectName={projectName}
+    />
     </div>
   );
 }

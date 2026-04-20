@@ -1,0 +1,26 @@
+{
+  "name": "SharedAudio",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the shared composition"
+    },
+    "audio_url": {
+      "type": "string",
+      "description": "Public URL of the uploaded WAV file"
+    },
+    "instrument": {
+      "type": "string",
+      "description": "Instrument used"
+    },
+    "tempo": {
+      "type": "number",
+      "description": "Tempo in BPM"
+    }
+  },
+  "required": [
+    "title",
+    "audio_url"
+  ]
+}
