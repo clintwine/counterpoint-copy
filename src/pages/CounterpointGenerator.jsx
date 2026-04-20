@@ -546,6 +546,8 @@ export default function CounterpointGenerator() {
       return;
     }
     
+    isLoadingProjectRef.current = true;
+    
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
     
@@ -596,8 +598,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    isLoadingProjectRef.current = true; setHasUnsavedChanges(false); setLoadDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
+    setHasUnsavedChanges(false); setLoadDialogOpen(false);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 300);
   };
 
   // Stop preview when modal closes
@@ -618,6 +620,8 @@ export default function CounterpointGenerator() {
       setUnsavedChangesDialog(true);
       return;
     }
+    
+    isLoadingProjectRef.current = true;
     
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
@@ -692,8 +696,8 @@ export default function CounterpointGenerator() {
     });
     setCustomInstruments(mergedInstruments);
 
-    isLoadingProjectRef.current = true; setHasUnsavedChanges(false); setSongDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
+    setHasUnsavedChanges(false); setSongDialogOpen(false);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 300);
     };
 
   const handlePreviewSong = (song, e) => {
