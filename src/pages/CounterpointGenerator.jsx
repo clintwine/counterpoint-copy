@@ -547,6 +547,7 @@ export default function CounterpointGenerator() {
     }
     
     isLoadingProjectRef.current = true;
+    setIsLoadingProject(true);
     
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
@@ -599,7 +600,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setHasUnsavedChanges(false); setLoadDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 400);
+    setTimeout(() => { isLoadingProjectRef.current = false; setIsLoadingProject(false); }, 400);
   };
 
   // Stop preview when modal closes
@@ -622,6 +623,7 @@ export default function CounterpointGenerator() {
     }
     
     isLoadingProjectRef.current = true;
+    setIsLoadingProject(true);
     
     // Clean up all audio (timeouts, nodes, etc.)
     cleanupAudio();
@@ -697,7 +699,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setHasUnsavedChanges(false); setSongDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 400);
+    setTimeout(() => { isLoadingProjectRef.current = false; setIsLoadingProject(false); }, 400);
     };
 
   const handlePreviewSong = (song, e) => {
@@ -915,11 +917,12 @@ export default function CounterpointGenerator() {
   const handleNewProject = () => {
     if (hasUnsavedChanges) { setPendingAction({ type: 'newProject' }); setUnsavedChangesDialog(true); return; }
     isLoadingProjectRef.current = true;
+    setIsLoadingProject(true);
     setSettings(DEFAULT_SETTINGS); setCantusFirmus([]); setGeneratedVoices([]); setVoices(DEFAULT_VOICES);
     setProjectName(''); setCurrentProjectId(null); setTempo(80);
     setEffects({ reverb: 0.3, delay: 0, chorus: 0 }); setEnvelope({ attack: 0.02, sustain: 0.7, release: 0.3 });
     setHasUnsavedChanges(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 100);
+    setTimeout(() => { isLoadingProjectRef.current = false; setIsLoadingProject(false); }, 400);
   };
 
   // Initialize audio on first interaction
@@ -1406,7 +1409,8 @@ export default function CounterpointGenerator() {
   };
 
   const isLoadingProjectRef = useRef(false);
-  useEffect(() => { if (!isLoadingProjectRef.current && (cantusFirmus.length > 0 || generatedVoices.length > 0)) setHasUnsavedChanges(true); }, [cantusFirmus, generatedVoices, settings]);
+  const [isLoadingProject, setIsLoadingProject] = useState(false);
+  useEffect(() => { if (!isLoadingProject && (cantusFirmus.length > 0 || generatedVoices.length > 0)) setHasUnsavedChanges(true); }, [cantusFirmus, generatedVoices, settings, isLoadingProject]);
 
   // Handle note press during recording
   const handleNotePress = useCallback((pitch) => {
