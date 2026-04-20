@@ -218,6 +218,7 @@ export default function ProjectDialogs({
         onOpenChange={setUnsavedChangesDialog}
         pendingAction={pendingAction}
         onSaveAndContinue={async (action) => {
+          isLoadingProjectRef.current = true;
           setUnsavedChangesDialog(false);
           setHasUnsavedChanges(false);
           setPendingAction(null);
@@ -228,7 +229,10 @@ export default function ProjectDialogs({
               if (action.type === 'loadSong') handleLoadSong(action.data);
               else if (action.type === 'loadProject') handleLoadProject(action.data);
               else if (action.type === 'newProject') handleNewProject();
+              setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
             }, 50);
+          } else {
+            setTimeout(() => { isLoadingProjectRef.current = false; }, 150);
           }
         }}
         onDontSave={(action) => {
