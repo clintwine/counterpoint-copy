@@ -94,6 +94,7 @@ export default function CounterpointGenerator() {
   // Auto-expand and auto-shrink measures functionality
   useEffect(() => {
     window.__loadRecentProject = handleLoadProject;
+    window.__loadRecentSong = handleLoadSong;
     window.expandMeasures = () => { setSettings(prev => ({ ...prev, measures: prev.measures + 5 })); };
     window.autoAdjustMeasures = (notes) => {
       const beatsPerMeasure = getBeatsPerMeasure(settings.timeSignature);
@@ -117,7 +118,7 @@ export default function CounterpointGenerator() {
         return prev;
       });
     };
-    return () => { delete window.expandMeasures; delete window.autoAdjustMeasures; delete window.__loadRecentProject; };
+    return () => { delete window.expandMeasures; delete window.autoAdjustMeasures; delete window.__loadRecentProject; delete window.__loadRecentSong; };
   }, [generatedVoices, settings.timeSignature]);
   
   const queryClient = useQueryClient();
