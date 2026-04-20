@@ -1699,6 +1699,7 @@ export default function CounterpointGenerator() {
                                currentUser={currentUser}
                                effects={effects}
                                envelope={envelope}
+                               generatedVoices={generatedVoices}
                                />
             </div>
 

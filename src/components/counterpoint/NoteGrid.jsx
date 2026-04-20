@@ -74,6 +74,7 @@ export default function NoteGrid({
               currentUser,
               effects = {},
               envelope = {},
+              generatedVoices = [],
             }) {
   const gridRef = useRef(null);
   const headerScrollRef = useRef(null);
@@ -1082,6 +1083,7 @@ export default function NoteGrid({
               effects={effects}
               envelope={envelope}
               customInstruments={customInstruments}
+              generatedVoices={generatedVoices}
             />
 
           {/* Center: Transport controls */}

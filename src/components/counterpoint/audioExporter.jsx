@@ -1,308 +1,284 @@
-import { getCustomInstruments, INSTRUMENT_CONFIGS } from './audioEngine';
+import { INSTRUMENT_CONFIGS } from './audioEngine';
+import { PRESET_LIBRARY_CONFIGS } from './presetLibrary';
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 function noteToFrequency(pitch) {
-  const notes = {
-    'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
-    'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
-  };
-  
-  const match = pitch.match(/([A-G]#?)(\d)/);
+  const match = pitch.match(/^([A-G]#?)(\d+)$/);
   if (!match) return 440;
-  
   const [, note, octave] = match;
-  const noteNumber = notes[note];
-  const midiNote = (parseInt(octave) + 1) * 12 + noteNumber;
-  
-  return 440 * Math.pow(2, (midiNote - 69) / 12);
+  const semitone = NOTE_NAMES.indexOf(note);
+  const midi = (parseInt(octave) + 1) * 12 + semitone;
+  return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-// Fallback instrument configurations (used if INSTRUMENT_CONFIGS not available)
-const defaultInstruments = {
-  organ: {
-    oscillators: [
-      { type: 'sine', detune: 1, gain: 0.6 },
-      { type: 'sine', detune: 2, gain: 0.3 },
-      { type: 'sine', detune: 3, gain: 0.2 }
-    ],
-    filter: null
-  },
-  piano: {
-    oscillators: [
-      { type: 'triangle', detune: 1, gain: 0.7 },
-      { type: 'sine', detune: 2, gain: 0.2 }
-    ],
-    filter: { type: 'lowpass', frequency: 3000, Q: 1 }
-  }
-};
-
-function createReverb(ctx) {
+function createOfflineReverb(ctx) {
   const convolver = ctx.createConvolver();
   const rate = ctx.sampleRate;
-  const length = rate * 2;
+  const length = Math.floor(rate * 1.5);
   const impulse = ctx.createBuffer(2, length, rate);
-  
-  for (let channel = 0; channel < 2; channel++) {
-    const channelData = impulse.getChannelData(channel);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = impulse.getChannelData(ch);
     for (let i = 0; i < length; i++) {
-      channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 3) * 0.4;
     }
   }
   convolver.buffer = impulse;
   return convolver;
 }
 
-function createDelay(ctx) {
+function createOfflineDelay(ctx) {
   const delay = ctx.createDelay(1.0);
-  const feedback = ctx.createGain();
-  const wetGain = ctx.createGain();
-  
   delay.delayTime.value = 0.3;
+  const feedback = ctx.createGain();
   feedback.gain.value = 0.4;
-  wetGain.gain.value = 0.5;
-  
   delay.connect(feedback);
   feedback.connect(delay);
-  delay.connect(wetGain);
-  
-  return { input: delay, output: wetGain };
+  return delay;
 }
 
-// Resolve an instrument name to an oscillator config array for offline rendering
+function createWaveShaper(ctx, amount) {
+  const ws = ctx.createWaveShaper();
+  const n = 44100;
+  const curve = new Float32Array(n);
+  const deg = Math.PI / 180;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+  }
+  ws.curve = curve;
+  ws.oversample = '4x';
+  return ws;
+}
+
+// Resolve instrument name to a full config object matching audioEngine structure
 function resolveInstrumentConfig(instrumentName, customInstrumentsList = []) {
   // Custom instrument by index
   if (instrumentName?.startsWith('custom_')) {
     const idx = parseInt(instrumentName.split('_')[1]);
     const inst = customInstrumentsList[idx];
-    if (inst?.oscillators) {
-      return {
-        oscillators: inst.oscillators.map(o => ({
-          type: o.waveform || o.type || 'sine',
-          detune: o.detune || 0,
-          gain: o.gain ?? 0.5
-        })),
-        filter: inst.filter || null,
-        envelope: inst.envelope || null
-      };
-    }
+    if (inst) return inst; // Return full custom instrument config
   }
 
-  // Preset instrument by index
+  // Preset instrument by index (use PRESET_LIBRARY_CONFIGS for full config)
   if (instrumentName?.startsWith('preset_')) {
-    const PRESET_LIBRARY = [
-      { name: 'Warm Pad', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.5 }, { waveform: 'sawtooth', detune: 7, gain: 0.5 }], envelope: { attack: 0.3, decay: 0.2, sustain: 0.8, release: 0.5 }, filter: { type: 'lowpass', frequency: 1200, Q: 0.5 } },
-      { name: 'Bright Lead', oscillators: [{ waveform: 'sawtooth', detune: 0, gain: 0.7 }, { waveform: 'square', detune: 12, gain: 0.3 }], envelope: { attack: 0.01, decay: 0.1, sustain: 0.6, release: 0.2 }, filter: { type: 'lowpass', frequency: 4000, Q: 2 } },
-      { name: 'Sub Bass', oscillators: [{ waveform: 'sine', detune: 0, gain: 1.0 }], envelope: { attack: 0.01, decay: 0.05, sustain: 0.9, release: 0.1 }, filter: { type: 'lowpass', frequency: 500, Q: 1 } },
-      { name: 'Pluck', oscillators: [{ waveform: 'triangle', detune: 0, gain: 0.8 }, { waveform: 'square', detune: 0, gain: 0.2 }], envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.2 }, filter: { type: 'lowpass', frequency: 3000, Q: 1.5 } },
-      { name: 'Bell', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.6 }, { waveform: 'sine', detune: 700, gain: 0.3 }, { waveform: 'sine', detune: 1200, gain: 0.1 }], envelope: { attack: 0.001, decay: 0.5, sustain: 0.2, release: 0.8 }, filter: { type: 'highpass', frequency: 500, Q: 0.5 } },
-      { name: 'Choir', oscillators: [{ waveform: 'sawtooth', detune: -5, gain: 0.4 }, { waveform: 'sawtooth', detune: 5, gain: 0.4 }, { waveform: 'sine', detune: 0, gain: 0.2 }], envelope: { attack: 0.2, decay: 0.1, sustain: 0.7, release: 0.4 }, filter: { type: 'bandpass', frequency: 1500, Q: 2 } },
-      { name: 'Reese Bass', oscillators: [{ waveform: 'sawtooth', detune: -10, gain: 0.5 }, { waveform: 'sawtooth', detune: 10, gain: 0.5 }], envelope: { attack: 0.02, decay: 0.1, sustain: 0.8, release: 0.15 }, filter: { type: 'lowpass', frequency: 800, Q: 3 } },
-      { name: 'Flutey', oscillators: [{ waveform: 'sine', detune: 0, gain: 0.9 }, { waveform: 'triangle', detune: 0, gain: 0.1 }], envelope: { attack: 0.08, decay: 0.1, sustain: 0.6, release: 0.25 }, filter: { type: 'lowpass', frequency: 3500, Q: 0.3 } }
-    ];
     const idx = parseInt(instrumentName.split('_')[1]);
-    const p = PRESET_LIBRARY[idx];
-    if (p) {
-      return {
-        oscillators: p.oscillators.map(o => ({
-          type: o.waveform || o.type || 'sine',
-          detune: o.detune || 0,
-          gain: o.gain ?? 0.5
-        })),
-        filter: p.filter || null,
-        envelope: p.envelope || null
-      };
-    }
+    const p = PRESET_LIBRARY_CONFIGS[idx];
+    if (p) return p;
   }
 
-  // Try INSTRUMENT_CONFIGS from audioEngine (built-in named instruments)
+  // Built-in named instruments from audioEngine
   if (INSTRUMENT_CONFIGS && INSTRUMENT_CONFIGS[instrumentName]) {
-    const cfg = INSTRUMENT_CONFIGS[instrumentName];
-    return {
-      oscillators: (cfg.oscillators || []).map(o => ({
-        type: o.waveform || o.type || 'sine',
-        detune: o.detune || 0,
-        gain: o.gain ?? 0.5
-      })),
-      filter: cfg.filter || null,
-      envelope: cfg.envelope || null
-    };
+    return INSTRUMENT_CONFIGS[instrumentName];
   }
 
-  // Fallback to hardcoded defaults
-  return defaultInstruments[instrumentName] || defaultInstruments.organ;
+  // Fallback to organ
+  return INSTRUMENT_CONFIGS?.organ || {
+    oscillators: [{ waveform: 'sine', detune: 0, gain: 0.8, harmonic: 1 }],
+    attack: 0.02,
+    filterFreq: 6000,
+    filterQ: 1,
+    distortion: 0,
+    reverbAmount: 0.2
+  };
 }
 
-export async function renderToWav(notes, tempo, instrumentName, { effects, envelope, customInstruments: customInstrumentsList } = {}) {
-  // Filter out any notes with negative beats
-  const validNotes = notes.filter(n => n.beat >= 0);
-  
-  if (validNotes.length === 0) {
-    throw new Error('No valid notes to export');
+// Render a single note to the offline context
+function renderNote(ctx, note, instrument, volume, globalEnvelope, masterGain, reverbNode, reverbGain, delayNode, delayGain, tempo) {
+  const freq = noteToFrequency(note.pitch);
+  const startTime = Math.max(0, note.beat * (60 / tempo) / 4);
+  const noteDuration = Math.max(0.05, (note.duration || 1) * (60 / tempo) / 4);
+  const velocity = (note.velocity ?? 0.8) * volume;
+
+  // Resolve oscillator configs
+  const oscConfigs = instrument.oscillators || [];
+  if (oscConfigs.length === 0) return;
+
+  // Per-instrument envelope (or fall back to global)
+  const attack = instrument.attack ?? globalEnvelope?.attack ?? 0.02;
+  const sustainLevel = globalEnvelope?.sustain ?? 0.7;
+  const release = globalEnvelope?.release ?? 0.3;
+
+  // Build the signal chain: oscillators -> filter -> [distortion] -> gain
+  const gainNode = ctx.createGain();
+  const filterNode = ctx.createBiquadFilter();
+  filterNode.type = 'lowpass';
+  filterNode.frequency.value = instrument.filterFreq || 4000;
+  filterNode.Q.value = instrument.filterQ || 1;
+
+  const maxOscs = Math.min(6, oscConfigs.length);
+  oscConfigs.slice(0, maxOscs).forEach(oscConfig => {
+    const osc = ctx.createOscillator();
+    osc.type = oscConfig.waveform || oscConfig.type || 'sine';
+    osc.frequency.value = freq * (oscConfig.harmonic || 1);
+    osc.detune.value = oscConfig.detune || 0;
+
+    const oscGain = ctx.createGain();
+    oscGain.gain.value = (oscConfig.gain ?? 0.5) * 0.25;
+
+    osc.connect(oscGain);
+    oscGain.connect(filterNode);
+
+    const stopTime = Math.max(startTime + 0.01, startTime + noteDuration + release + 0.1);
+    osc.start(startTime);
+    osc.stop(Math.min(stopTime, ctx.length / ctx.sampleRate - 0.01));
+  });
+
+  // Distortion
+  let outputNode = filterNode;
+  if (instrument.distortion > 0) {
+    const distNode = createWaveShaper(ctx, instrument.distortion);
+    filterNode.connect(distNode);
+    outputNode = distNode;
   }
-  
-  // Calculate duration
-  const maxBeat = Math.max(...validNotes.map(n => n.beat + (n.duration || 1)), 0);
-  const duration = (maxBeat * (60 / tempo) / 4) + 2.5;
-  
+
+  // Envelope
+  const totalDuration = noteDuration + release;
+  const attackEndTime = Math.max(startTime + 0.001, startTime + Math.min(attack, noteDuration * 0.5));
+  const releaseStartTime = Math.max(attackEndTime + 0.001, startTime + noteDuration - Math.min(release, noteDuration * 0.4));
+  const releaseEndTime = Math.max(releaseStartTime + 0.01, startTime + totalDuration);
+
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(velocity * 0.8, attackEndTime);
+  gainNode.gain.setValueAtTime(velocity * 0.8 * sustainLevel, releaseStartTime);
+  gainNode.gain.linearRampToValueAtTime(0, releaseEndTime);
+
+  outputNode.connect(gainNode);
+  gainNode.connect(masterGain);
+
+  // Per-instrument reverb send
+  const instReverbAmount = instrument.reverbAmount ?? 0;
+  if (instReverbAmount > 0 && reverbNode && reverbGain) {
+    const send = ctx.createGain();
+    send.gain.value = instReverbAmount;
+    gainNode.connect(send);
+    send.connect(reverbNode);
+  }
+
+  // Delay send
+  if (delayNode && delayGain && delayGain.gain.value > 0) {
+    const delaySend = ctx.createGain();
+    delaySend.gain.value = 0.3;
+    gainNode.connect(delaySend);
+    delaySend.connect(delayNode);
+  }
+}
+
+/**
+ * Render all voices to a WAV blob, matching live playback as closely as possible.
+ * @param {Array} allVoicesData - Array of { notes, instrument, volume } objects
+ * @param {number} tempo - BPM
+ * @param {string} _primaryInstrument - (unused, kept for compat)
+ * @param {object} options - { effects, envelope, customInstruments }
+ */
+export async function renderToWav(allVoicesData, tempo, _primaryInstrument, { effects, envelope, customInstruments: customInstrumentsList = [] } = {}) {
+  // Flatten all notes to calculate total duration
+  const allNotes = allVoicesData.flatMap(v => (v.notes || []).filter(n => n.beat >= 0));
+  if (allNotes.length === 0) throw new Error('No valid notes to export');
+
+  const maxBeat = Math.max(...allNotes.map(n => n.beat + (n.duration || 1)));
+  const duration = (maxBeat * (60 / tempo) / 4) + 3.0; // extra tail for reverb
+
   const sampleRate = 44100;
-  const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
-  
-  // Resolve instrument config
-  const instrument = resolveInstrumentConfig(instrumentName, customInstrumentsList || []);
+  const offlineCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * duration), sampleRate);
 
-  // Effect levels from session (default to subtle if not provided)
-  const reverbLevel = effects?.reverb ?? 0.3;
-  const delayLevel = effects?.delay ?? 0;
-
-  // Master gain
+  // Master gain (match audioEngine 0.25 * 1.2 for export loudness)
   const masterGain = offlineCtx.createGain();
-  masterGain.gain.value = 1.2;
-  masterGain.connect(offlineCtx.destination);
+  masterGain.gain.value = 1.0;
 
-  // Reverb chain
+  // Compressor (mirrors audioEngine)
+  const compressor = offlineCtx.createDynamicsCompressor();
+  compressor.threshold.value = -30;
+  compressor.knee.value = 40;
+  compressor.ratio.value = 20;
+  compressor.attack.value = 0.001;
+  compressor.release.value = 0.1;
+  masterGain.connect(compressor);
+  compressor.connect(offlineCtx.destination);
+
+  // Global reverb
+  const reverbLevel = effects?.reverb ?? 0.3;
+  let reverbNode = null;
+  let reverbGain = null;
   if (reverbLevel > 0) {
-    const reverb = createReverb(offlineCtx);
-    const reverbGain = offlineCtx.createGain();
+    reverbNode = createOfflineReverb(offlineCtx);
+    reverbGain = offlineCtx.createGain();
     reverbGain.gain.value = reverbLevel * 0.6;
     masterGain.connect(reverbGain);
-    reverbGain.connect(reverb);
-    reverb.connect(offlineCtx.destination);
+    reverbGain.connect(reverbNode);
+    reverbNode.connect(compressor);
   }
-  
-  // Delay chain
+
+  // Global delay
+  const delayLevel = effects?.delay ?? 0;
+  let delayNode = null;
+  let delayGain = null;
   if (delayLevel > 0) {
-    const delayEffect = createDelay(offlineCtx);
-    const delayGain = offlineCtx.createGain();
+    delayNode = createOfflineDelay(offlineCtx);
+    delayGain = offlineCtx.createGain();
     delayGain.gain.value = delayLevel * 0.5;
     masterGain.connect(delayGain);
-    delayGain.connect(delayEffect.input);
-    delayEffect.output.connect(offlineCtx.destination);
+    delayGain.connect(delayNode);
+    delayNode.connect(compressor);
   }
 
-  // Envelope settings
-  const envAttack = envelope?.attack ?? 0.02;
-  const envRelease = envelope?.release ?? 0.1;
-  
-  // Render each note
-  validNotes.forEach(note => {
-    const frequency = noteToFrequency(note.pitch);
-    const startTime = Math.max(0, note.beat * (60 / tempo) / 4);
-    const noteDuration = Math.max(0.05, (note.duration || 1) * (60 / tempo) / 4);
-    const velocity = note.velocity || 0.8;
-    
-    const instEnv = instrument.envelope;
+  // Render each voice
+  for (const voiceData of allVoicesData) {
+    const { notes, instrument: instrumentName, volume = 1 } = voiceData;
+    if (!notes?.length) continue;
 
-    instrument.oscillators.forEach(osc => {
-      const oscillator = offlineCtx.createOscillator();
-      const gainNode = offlineCtx.createGain();
-      
-      // Support both 'type' and 'waveform' keys
-      oscillator.type = osc.type || osc.waveform || 'sine';
+    const instrumentConfig = resolveInstrumentConfig(instrumentName, customInstrumentsList);
 
-      // Detune: if > 24 treat as cents directly, otherwise as semitone multiplier
-      if (osc.detune !== undefined && osc.detune !== 0) {
-        if (Math.abs(osc.detune) > 24) {
-          oscillator.detune.value = osc.detune; // cents
-          oscillator.frequency.value = frequency;
-        } else if (osc.detune < 4) {
-          // Old-style harmonic multiplier (e.g. 1, 2, 3)
-          oscillator.frequency.value = frequency * osc.detune;
-        } else {
-          oscillator.detune.value = osc.detune; // semitones as cents
-          oscillator.frequency.value = frequency;
-        }
-      } else {
-        oscillator.frequency.value = frequency;
-      }
-      
-      // Apply filter if instrument has one
-      let lastNode = gainNode;
-      if (instrument.filter) {
-        const filterNode = offlineCtx.createBiquadFilter();
-        filterNode.type = instrument.filter.type || 'lowpass';
-        filterNode.frequency.value = instrument.filter.frequency || 2000;
-        filterNode.Q.value = instrument.filter.Q || 1;
-        gainNode.connect(filterNode);
-        lastNode = filterNode;
-      }
-      lastNode.connect(masterGain);
-      
-      // Envelope
-      const attack = instEnv?.attack ?? envAttack;
-      const release = instEnv?.release ?? envRelease;
-      const sustainLevel = velocity * (osc.gain ?? 0.5) * 0.5;
-      
-      const attackEndTime = Math.max(0, startTime + Math.min(attack, noteDuration * 0.5));
-      const releaseStartTime = Math.max(attackEndTime, startTime + noteDuration - Math.min(release, noteDuration * 0.4));
-      const releaseEndTime = Math.max(releaseStartTime + 0.01, startTime + noteDuration + Math.min(release, 0.3));
-      
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(sustainLevel, attackEndTime);
-      gainNode.gain.setValueAtTime(sustainLevel, releaseStartTime);
-      gainNode.gain.linearRampToValueAtTime(0, releaseEndTime);
-      
-      oscillator.connect(gainNode);
-      oscillator.start(startTime);
-      oscillator.stop(Math.min(releaseEndTime + 0.1, duration - 0.01));
-    });
-  });
-  
-  // Render
+    for (const note of notes) {
+      if (note.beat < 0) continue;
+      renderNote(offlineCtx, note, instrumentConfig, volume, envelope, masterGain, reverbNode, reverbGain, delayNode, delayGain, tempo);
+    }
+  }
+
   const audioBuffer = await offlineCtx.startRendering();
-  
-  // Convert to WAV
   return audioBufferToWav(audioBuffer);
 }
 
 function audioBufferToWav(buffer) {
   const numChannels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;
-  const format = 1; // PCM
   const bitDepth = 16;
-  
   const bytesPerSample = bitDepth / 8;
   const blockAlign = numChannels * bytesPerSample;
-  
+
   const data = [];
   for (let i = 0; i < buffer.length; i++) {
-    for (let channel = 0; channel < numChannels; channel++) {
-      const sample = buffer.getChannelData(channel)[i];
-      const intSample = Math.max(-1, Math.min(1, sample));
-      data.push(intSample < 0 ? intSample * 0x8000 : intSample * 0x7FFF);
+    for (let ch = 0; ch < numChannels; ch++) {
+      const s = buffer.getChannelData(ch)[i];
+      const clamped = Math.max(-1, Math.min(1, s));
+      data.push(clamped < 0 ? clamped * 0x8000 : clamped * 0x7FFF);
     }
   }
-  
+
   const dataSize = data.length * bytesPerSample;
-  const bufferSize = 44 + dataSize;
-  const arrayBuffer = new ArrayBuffer(bufferSize);
-  const view = new DataView(arrayBuffer);
-  
-  // Write WAV header
-  writeString(view, 0, 'RIFF');
+  const ab = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(ab);
+
+  const ws = (offset, str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+  ws(0, 'RIFF');
   view.setUint32(4, 36 + dataSize, true);
-  writeString(view, 8, 'WAVE');
-  writeString(view, 12, 'fmt ');
+  ws(8, 'WAVE');
+  ws(12, 'fmt ');
   view.setUint32(16, 16, true);
-  view.setUint16(20, format, true);
+  view.setUint16(20, 1, true);
   view.setUint16(22, numChannels, true);
   view.setUint32(24, sampleRate, true);
   view.setUint32(28, sampleRate * blockAlign, true);
   view.setUint16(32, blockAlign, true);
   view.setUint16(34, bitDepth, true);
-  writeString(view, 36, 'data');
+  ws(36, 'data');
   view.setUint32(40, dataSize, true);
-  
-  // Write audio data
+
   let offset = 44;
   for (let i = 0; i < data.length; i++) {
     view.setInt16(offset, data[i], true);
     offset += 2;
   }
-  
-  return new Blob([arrayBuffer], { type: 'audio/wav' });
-}
 
-function writeString(view, offset, string) {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
+  return new Blob([ab], { type: 'audio/wav' });
 }

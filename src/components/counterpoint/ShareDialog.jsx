@@ -8,7 +8,7 @@ import { base44 } from '@/api/base44Client';
 import { renderToWav } from './audioExporter';
 import toast from 'react-hot-toast';
 
-export default function ShareDialog({ open, onClose, cantusFirmus, tempo, voices, projectName, effects, envelope, customInstruments }) {
+export default function ShareDialog({ open, onClose, cantusFirmus, generatedVoices, tempo, voices, projectName, effects, envelope, customInstruments }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [shareUrl, setShareUrl] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -23,8 +23,18 @@ export default function ShareDialog({ open, onClose, cantusFirmus, tempo, voices
     setIsGenerating(true);
     try {
       // Render to WAV blob
+      // Build all-voice data matching the live playback structure
+      const allVoicesData = [
+        { notes: cantusFirmus, instrument: voices?.[0]?.instrument || 'organ', volume: (voices?.[0]?.volume || 80) / 100 },
+        ...(generatedVoices || []).map((v, i) => ({
+          notes: v.notes || [],
+          instrument: voices?.[i + 1]?.instrument || 'organ',
+          volume: (voices?.[i + 1]?.volume || 80) / 100,
+          enabled: voices?.[i + 1]?.enabled !== false
+        })).filter(v => v.enabled !== false)
+      ];
       const instrument = voices?.[0]?.instrument || 'organ';
-      const wavBlob = await renderToWav(cantusFirmus, tempo, instrument, { effects, envelope, customInstruments });
+      const wavBlob = await renderToWav(allVoicesData, tempo, instrument, { effects, envelope, customInstruments });
 
       // Convert blob to base64
       const arrayBuffer = await wavBlob.arrayBuffer();

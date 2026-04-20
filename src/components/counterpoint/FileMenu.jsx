@@ -31,6 +31,7 @@ export default function FileMenu({
   effects,
   envelope,
   customInstruments,
+  generatedVoices,
 }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -136,6 +137,7 @@ export default function FileMenu({
       open={shareOpen}
       onClose={() => setShareOpen(false)}
       cantusFirmus={cantusFirmus}
+      generatedVoices={generatedVoices}
       tempo={tempo}
       voices={voices}
       projectName={projectName}
