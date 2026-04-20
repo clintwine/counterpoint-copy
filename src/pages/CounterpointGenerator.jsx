@@ -1671,8 +1671,8 @@ export default function CounterpointGenerator() {
                                loopStart={loopStart} loopEnd={loopEnd} isLooping={isLooping}
                                onLoopChange={(start, end) => { setLoopStart(start); setLoopEnd(end); }}
                                onVoiceInstrumentChange={(voiceIndex, instrument) => { const newVoices = [...voices]; if (newVoices[0]) { newVoices[0] = { ...newVoices[0], instrument }; setVoices(newVoices); } }}
-                               onTogglePianoPanel={() => setShowPianoPanel(!showPianoPanel)}
-                               showPianoPanel={showPianoPanel && !pianoPopout}
+                               onTogglePianoPanel={() => {}}
+                               showPianoPanel={!pianoPopout}
                                onPopOut={() => setPianoPopout(true)}
                                onNewProject={handleNewProject}
                                onSaveProject={() => { setSaveAsMode(false); if (currentProjectId && projectName.trim()) { handleSaveProject(true); } else { setSaveDialogOpen(true); } }}

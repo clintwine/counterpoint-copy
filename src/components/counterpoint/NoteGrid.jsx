@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu, LogIn, LogOut, MessageSquare } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { initAudio, playNote, getAnalyser, playNoteWithCustomInstrument, playNoteSustain, stopNoteSustain } from './audioEngine';
 import ScoreMinimap from './ScoreMinimap.jsx';
 import NoteControls from './NoteControls.jsx';
@@ -1138,10 +1136,7 @@ export default function NoteGrid({
                 Download as Audio
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-              <DropdownMenuItem onClick={() => { onTogglePianoPanel(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                <Keyboard className="w-4 h-4 mr-2" />
-                {showPianoPanel ? 'Hide Piano' : 'Show Piano'}
-              </DropdownMenuItem>
+
               <DropdownMenuItem onClick={() => { onOpenWaveEditor(); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
                 <Guitar className="w-4 h-4 mr-2" />
                 Create Instrument
@@ -1932,16 +1927,7 @@ export default function NoteGrid({
             instruments={allInstruments}
             onCreateNew={onOpenWaveEditor}
           />
-          <div className="flex items-center gap-2">
-            <Label htmlFor="piano-toggle" className="text-xs text-white/70">Piano</Label>
-            <Switch
-              id="piano-toggle"
-              checked={showPianoPanel}
-              onCheckedChange={onTogglePianoPanel}
-              className="data-[state=checked]:bg-amber-500"
-            />
-          </div>
-          {showPianoPanel && onPopOut && (
+          {onPopOut && (
             <Button
               variant="ghost"
               size="sm"
