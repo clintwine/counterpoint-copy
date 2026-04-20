@@ -599,7 +599,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setHasUnsavedChanges(false); setLoadDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 300);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 400);
   };
 
   // Stop preview when modal closes
@@ -697,7 +697,7 @@ export default function CounterpointGenerator() {
     setCustomInstruments(mergedInstruments);
 
     setHasUnsavedChanges(false); setSongDialogOpen(false);
-    setTimeout(() => { isLoadingProjectRef.current = false; }, 300);
+    setTimeout(() => { isLoadingProjectRef.current = false; }, 400);
     };
 
   const handlePreviewSong = (song, e) => {
