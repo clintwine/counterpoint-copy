@@ -5,7 +5,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu, LogIn, LogOut } from 'lucide-react';
+import { MousePointer2, Square, Trash2, Copy, ClipboardPaste, Undo, Redo, Pencil, FileAudio, ZoomIn, ZoomOut, Guitar, ChevronDown, Keyboard, Grid3x3, MoreVertical, FileText, FolderOpen, Save, Download, Sparkles, RefreshCw, Music, ExternalLink, Volume2, Check, FilePlus, Menu, LogIn, LogOut, MessageSquare } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -24,7 +24,7 @@ import { TIME_SIGNATURES, NOTE_COLORS, getVelocityColor, BASE_CELL_WIDTH, BASE_C
 
 import { PRESET_LIBRARY_CONFIGS, PRESET_LIBRARY } from './presetLibrary';
 import InstrumentSelect from './InstrumentSelectComponent';
-import RecentProjectsMenu from './RecentProjectsMenu';
+import RecentProjectsMenu from './RecentProjectsMenu'; import FeedbackDialog from './FeedbackDialog';
 
 export default function NoteGrid({ 
               voices, 
@@ -1056,11 +1056,8 @@ export default function NoteGrid({
   // Keep ref always pointing to latest handlePointerUp (avoids stale closure in document listeners)
   handlePointerUpRef.current = handlePointerUp;
 
-  const getInitials = (email) => {
-    if (!email) return '?';
-    const name = email.split('@')[0];
-    return name.slice(0, 2).toUpperCase();
-  };
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const getInitials = (email) => { if (!email) return '?'; const name = email.split('@')[0]; return name.slice(0, 2).toUpperCase(); };
 
   return (
           <div className="bg-[#2D2D2D] rounded-xl sm:rounded-2xl border border-[#3A3A3A] w-full overflow-hidden max-w-full flex flex-col h-full">
@@ -1181,17 +1178,16 @@ export default function NoteGrid({
                      {currentUser.email}
                    </DropdownMenuItem>
                    <DropdownMenuSeparator className="bg-[#3A3A3A]" />
-                   <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white">
-                     <LogOut className="w-4 h-4 mr-2" />
-                     Logout
-                   </DropdownMenuItem>
-                 </DropdownMenuContent>
-               </DropdownMenu>
-             )}
-           </div>
-        </div>
-
-      {/* Secondary Toolbar - Tool Controls */}
+                   <DropdownMenuItem onClick={() => { setFeedbackOpen(true); setTimeout(() => document.activeElement?.blur(), 0); }} className="text-amber-400 cursor-pointer hover:bg-[#3A3A3A] hover:text-amber-300 focus:bg-[#3A3A3A] focus:text-amber-300"><MessageSquare className="w-4 h-4 mr-2" />Give Feedback</DropdownMenuItem>
+                   <DropdownMenuSeparator className="bg-[#3A3A3A]" />
+                   <DropdownMenuItem onClick={() => base44.auth.logout()} className="text-white/90 cursor-pointer hover:bg-[#3A3A3A] hover:text-white focus:bg-[#3A3A3A] focus:text-white"><LogOut className="w-4 h-4 mr-2" />Logout</DropdownMenuItem>
+                   </DropdownMenuContent>
+                   </DropdownMenu>
+                   )}
+                   </div>
+                   </div>
+                   <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+                   {/* Secondary Toolbar - Tool Controls */}
       <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525] flex-shrink-0">
         <div className="flex items-center gap-1">
           <Button
