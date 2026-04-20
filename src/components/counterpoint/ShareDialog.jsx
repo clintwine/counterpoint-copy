@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Copy, Check, Loader2 } from 'lucide-react';
+import { Share2, Copy, Check, Loader2, Play, Pause } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { renderToWav } from './audioExporter';
 import toast from 'react-hot-toast';
@@ -13,6 +13,9 @@ export default function ShareDialog({ open, onClose, cantusFirmus, generatedVoic
   const [shareUrl, setShareUrl] = useState(null);
   const [copied, setCopied] = useState(false);
   const [title, setTitle] = useState(projectName || 'My Composition');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [wavBlob, setWavBlob] = useState(null);
+  const audioRef = useRef(null);
 
   const handleShare = async () => {
     if (!cantusFirmus?.length) {
@@ -35,6 +38,7 @@ export default function ShareDialog({ open, onClose, cantusFirmus, generatedVoic
       ];
       const instrument = voices?.[0]?.instrument || 'organ';
       const wavBlob = await renderToWav(allVoicesData, tempo, instrument, { effects, envelope, customInstruments });
+      setWavBlob(wavBlob);
 
       // Convert blob to base64
       const arrayBuffer = await wavBlob.arrayBuffer();
@@ -77,7 +81,21 @@ export default function ShareDialog({ open, onClose, cantusFirmus, generatedVoic
   const handleClose = () => {
     setShareUrl(null);
     setCopied(false);
+    setIsPlaying(false);
+    setWavBlob(null);
+    if (audioRef.current) audioRef.current.pause();
     onClose();
+  };
+
+  const togglePlayPreview = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
   };
 
   return (
@@ -133,6 +151,27 @@ export default function ShareDialog({ open, onClose, cantusFirmus, generatedVoic
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
+
+              {wavBlob && (
+                <>
+                  <audio
+                    ref={audioRef}
+                    src={URL.createObjectURL(wavBlob)}
+                    onEnded={() => setIsPlaying(false)}
+                  />
+                  <Button
+                    onClick={togglePlayPreview}
+                    className="w-full bg-white/10 hover:bg-white/20 text-white text-sm"
+                  >
+                    {isPlaying ? (
+                      <><Pause className="w-4 h-4 mr-2" /> Pause Preview</>
+                    ) : (
+                      <><Play className="w-4 h-4 mr-2" /> Play Preview</>
+                    )}
+                  </Button>
+                </>
+              )}
+
               <Button
                 variant="ghost"
                 onClick={() => setShareUrl(null)}
