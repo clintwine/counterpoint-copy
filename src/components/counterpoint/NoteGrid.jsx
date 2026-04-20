@@ -16,6 +16,7 @@ import GridOverlays from './GridOverlays.jsx';
 import MeasureHeader from './MeasureHeader.jsx';
 import Scrubber from './Scrubber.jsx';
 import FileMenu from './FileMenu';
+import UserAvatar from './UserAvatar';
 import { DEFAULT_INSTRUMENTS } from './instrumentsList';
 import { useNoteGridKeyboard } from './useNoteGridKeyboard';
 import { useAudioVisualizer } from './useAudioVisualizer';
@@ -1082,6 +1083,11 @@ export default function NoteGrid({
            <div className="flex-1 flex items-center justify-center">
              {playbackControls}
            </div>
+
+           {/* Right: User Avatar */}
+           {currentUser && (
+             <UserAvatar currentUser={currentUser} />
+           )}
            </div>
                    {/* Secondary Toolbar - Tool Controls */}
       <div className="flex items-center justify-between px-2 sm:px-5 py-1.5 border-b border-[#3A3A3A]/50 bg-[#252525] flex-shrink-0">
