@@ -142,7 +142,7 @@ export default function Share() {
           </div>
 
           {/* Play button */}
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-6">
             <Button
               onClick={togglePlay}
               className="w-16 h-16 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-lg shadow-amber-500/30"
@@ -151,9 +151,17 @@ export default function Share() {
                 ? <Pause className="w-7 h-7" />
                 : <Play className="w-7 h-7 ml-0.5" />}
             </Button>
+
+            {/* Studio link */}
+            <a
+              href="/"
+              className="text-amber-400 hover:text-amber-300 text-sm font-semibold transition-colors underline underline-offset-2"
+            >
+              Open in Counterpoint Studio
+            </a>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+          </div>
+          </div>
+          </div>
+          );
+          }
