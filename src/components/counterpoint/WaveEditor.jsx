@@ -944,7 +944,7 @@ export default function WaveEditor({
       }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [instrument.envelope.attack, instrument.envelope.decay, instrument.envelope.sustain, instrument.envelope.release, instrument.effects, livePreview, isPlaying]);
+  }, [instrument.oscillators, instrument.envelope, instrument.effects, instrument.eq, instrument.distortion, instrument.bitcrush, instrument.lfo, instrument.filter, livePreview]);
 
   return (
     <div className="space-y-4">
