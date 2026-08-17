@@ -1,0 +1,53 @@
+{
+  "name": "CounterpointProject",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the project"
+    },
+    "settings": {
+      "type": "object",
+      "description": "Generation settings (species, key, mode, measures, etc.)"
+    },
+    "cantusFirmus": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of cantus firmus notes with pitch, beat, and duration"
+    },
+    "generatedVoices": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Array of generated voice objects"
+    },
+    "voices": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Voice configuration (ranges, volumes, enabled state)"
+    },
+    "effects": {
+      "type": "object",
+      "description": "Audio effects settings (reverb, delay, chorus)"
+    },
+    "envelope": {
+      "type": "object",
+      "description": "Global envelope settings (attack, sustain, release)"
+    },
+    "customInstruments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "User-created custom instruments"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "CustomInstrument",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the custom instrument"
+    },
+    "oscillators": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Oscillator configurations"
+    },
+    "envelope": {
+      "type": "object",
+      "description": "ADSR envelope settings"
+    },
+    "filter": {
+      "type": "object",
+      "description": "Filter settings"
+    },
+    "lfo": {
+      "type": "object",
+      "description": "LFO modulation settings"
+    },
+    "distortion": {
+      "type": "number",
+      "description": "Distortion amount"
+    },
+    "bitcrush": {
+      "type": "number",
+      "description": "Bitcrush amount"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

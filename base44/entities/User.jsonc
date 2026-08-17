@@ -20,5 +20,6 @@
       "default": "free",
       "description": "Whether the user has a paid or free subscription"
     }
-  }
+  },
+  "required": []
 }
